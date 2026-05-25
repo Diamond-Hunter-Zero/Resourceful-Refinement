@@ -1,0 +1,66 @@
+{
+  "name": "resourceful_refinement:cave_ore_geyser_template/start_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 3,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:lava_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:crimsite_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:veridium_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:ochrum_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:asurine_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:carbonox_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    }
+  ]
+}

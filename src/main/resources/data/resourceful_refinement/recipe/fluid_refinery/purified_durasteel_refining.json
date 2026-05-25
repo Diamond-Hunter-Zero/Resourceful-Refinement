@@ -1,0 +1,30 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "superheated",
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "item": "minecraft:charcoal"
+    },
+    {
+      "item": "minecraft:blackstone",
+      "count": 2
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:durasteel_alloy",
+      "amount": 100
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_redstone",
+      "amount": 100
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:purified_durasteel",
+      "amount": 125
+    }
+  ]
+}

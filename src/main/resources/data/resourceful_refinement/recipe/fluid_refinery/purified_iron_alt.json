@@ -1,0 +1,27 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "superheated",
+  "processing_time": 200,
+  "ingredients": [
+    {
+      "item": "minecraft:charcoal",
+      "count": 2
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_iron",
+      "amount": 500
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:silica_substrate",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:purified_iron",
+      "amount": 125
+    }
+  ]
+}

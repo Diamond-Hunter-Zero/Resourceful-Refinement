@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 160,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_andesite_blend",
+      "amount": 125
+    }
+  ],
+  "results": [
+    {
+      "id": "create:andesite_alloy",
+      "count": 1
+    }
+  ]
+}

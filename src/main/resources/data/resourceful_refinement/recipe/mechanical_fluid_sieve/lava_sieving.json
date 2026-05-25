@@ -1,0 +1,22 @@
+{
+  "type": "resourceful_refinement:mechanical_fluid_sieve",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:lava",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:lava",
+      "amount": 20
+    },
+    {
+      "id": "minecraft:blackstone",
+      "count": 1,
+      "chance": 0.15
+    }
+  ]
+}

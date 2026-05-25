@@ -1,0 +1,39 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+.eclipse
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+gradle
+
+# other
+eclipse
+run
+.git
+
+# Files from Forge MDK
+forge*changelog.txt
+
+# VS 
+.vscode
+
+# AI Agents
+.cursor
+
+# Mod Content Blacklist
+
+
+

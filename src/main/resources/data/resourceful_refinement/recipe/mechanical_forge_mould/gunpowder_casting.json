@@ -1,0 +1,21 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 80,
+  "ingredients": [
+    {
+      "item": "minecraft:charcoal"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_sparkpowder",
+      "amount": 150
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:gunpowder",
+      "count": 1
+    }
+  ]
+}

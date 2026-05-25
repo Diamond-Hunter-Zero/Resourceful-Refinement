@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=x": { "model": "resourceful_refinement:block/blender_blade", "x": 90, "y": 90 },
+    "axis=y": { "model": "resourceful_refinement:block/blender_blade" },
+    "axis=z": { "model": "resourceful_refinement:block/blender_blade", "x": 90 }
+  }
+}

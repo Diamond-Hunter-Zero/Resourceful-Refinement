@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:coating",
+  "fluid": {
+    "fluid": "resourceful_refinement:molten_asurine",
+    "amount": 1000
+  },
+  "ingredient": {
+    "item": "minecraft:glowstone_dust"
+  },
+  "coating": "Quicksilver",
+  "duration": 100
+}

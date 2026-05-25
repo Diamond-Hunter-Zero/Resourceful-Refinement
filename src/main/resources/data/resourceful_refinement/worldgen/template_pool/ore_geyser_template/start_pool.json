@@ -1,0 +1,106 @@
+{
+  "name": "resourceful_refinement:ore_geyser_template/start_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 8,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:lava_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 8,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:crimsite_geyser",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -2
+      }
+    },
+    {
+      "weight": 8,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:veridium_geyser",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -2
+      }
+    },
+    {
+      "weight": 8,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:ochrum_geyser",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -2
+      }
+    },
+    {
+      "weight": 8,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:asurine_geyser",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -2
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:crimsite_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:veridium_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:ochrum_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:asurine_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    },
+    {
+      "weight": 9,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:carbonox_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    }
+  ]
+}

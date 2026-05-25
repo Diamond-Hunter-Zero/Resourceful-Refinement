@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    " E "
+  ],
+  "key": {
+    "A": {
+      "item": "create:cogwheel"
+    },
+    "B": {
+      "item": "resourceful_refinement:durasteel_ingot"
+    },
+    "C": {
+      "item": "create:copper_casing"
+    },
+    "D": {
+      "item": "resourceful_refinement:durasteel_ingot"
+    },
+    "E": {
+      "item": "minecraft:cauldron"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:mechanical_forge_mould"
+  }
+}

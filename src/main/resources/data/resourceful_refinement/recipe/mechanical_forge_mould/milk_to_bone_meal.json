@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:milk",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:bone_meal",
+      "count": 2
+    }
+  ]
+}

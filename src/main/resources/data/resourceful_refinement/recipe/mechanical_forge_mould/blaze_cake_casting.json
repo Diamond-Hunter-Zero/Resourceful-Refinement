@@ -1,0 +1,21 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 200,
+  "ingredients": [
+    {
+      "item": "create:blaze_cake_base"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_scorchia",
+      "amount": 300
+    }
+  ],
+  "results": [
+    {
+      "id": "create:blaze_cake",
+      "count": 2
+    }
+  ]
+}

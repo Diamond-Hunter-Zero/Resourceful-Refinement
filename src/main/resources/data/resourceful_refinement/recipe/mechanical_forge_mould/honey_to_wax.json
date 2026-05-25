@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "create:honey",
+      "amount": 125
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:honeycomb",
+      "count": 1
+    }
+  ]
+}

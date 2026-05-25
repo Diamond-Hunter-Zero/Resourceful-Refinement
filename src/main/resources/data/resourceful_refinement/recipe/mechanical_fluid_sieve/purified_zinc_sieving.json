@@ -1,0 +1,22 @@
+{
+  "type": "resourceful_refinement:mechanical_fluid_sieve",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:purified_zinc",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:catalysed_zinc",
+      "amount": 25
+    },
+    {
+      "id": "resourceful_refinement:ferrous_crystal",
+      "count": 1,
+      "chance": 0.30
+    }
+  ]
+}

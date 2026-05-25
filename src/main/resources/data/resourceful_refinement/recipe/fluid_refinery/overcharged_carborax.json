@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "item": "minecraft:charcoal"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_carborax",
+      "amount": 250
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_scorchia",
+      "amount": 25
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:overcharged_carborax",
+      "amount": 400
+    }
+  ]
+}

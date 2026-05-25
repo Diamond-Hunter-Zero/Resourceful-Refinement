@@ -1,0 +1,20 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "processing_time": 80,
+  "ingredients": [
+    {
+      "item": "resourceful_refinement:ingot_mould"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_veridium",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:copper_ingot",
+      "count": 1
+    }
+  ]
+}

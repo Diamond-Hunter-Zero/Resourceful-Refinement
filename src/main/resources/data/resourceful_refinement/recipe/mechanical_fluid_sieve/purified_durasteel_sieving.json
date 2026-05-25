@@ -1,0 +1,22 @@
+{
+  "type": "resourceful_refinement:mechanical_fluid_sieve",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:purified_durasteel",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:purified_durasteel",
+      "amount": 40
+    },
+    {
+      "id": "create:zinc_nugget",
+      "count": 1,
+      "chance": 0.60
+    }
+  ]
+}

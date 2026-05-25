@@ -1,0 +1,26 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "heated",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "item": "minecraft:andesite"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_asurine",
+      "amount": 50
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:silica_substrate",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:molten_andesite_blend",
+      "amount": 500
+    }
+  ]
+}

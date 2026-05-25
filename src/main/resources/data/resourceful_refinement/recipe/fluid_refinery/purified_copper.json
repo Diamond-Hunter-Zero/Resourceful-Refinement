@@ -1,0 +1,26 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "superheated",
+  "processing_time": 200,
+  "ingredients": [
+    {
+      "item": "resourceful_refinement:ferrous_crystal"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_copper",
+      "amount": 500
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:purified_zinc",
+      "amount": 75
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:purified_copper",
+      "amount": 750
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "type": "resourceful_refinement:mechanical_fluid_sieve",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:purified_copper",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:catalysed_copper",
+      "amount": 25
+    },
+    {
+      "id": "resourceful_refinement:ferrous_crystal",
+      "count": 1,
+      "chance": 0.20
+    }
+  ]
+}

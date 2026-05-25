@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 80,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_zinc",
+      "amount": 200
+    }
+  ],
+  "results": [
+    {
+      "id": "create:zinc_ingot",
+      "count": 1
+    }
+  ]
+}

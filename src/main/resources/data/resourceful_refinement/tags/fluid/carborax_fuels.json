@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "resourceful_refinement:unrefined_carborax",
+    "resourceful_refinement:catalysed_carborax",
+    "resourceful_refinement:overcharged_carborax",
+    "resourceful_refinement:carborax_diesel"
+  ]
+}

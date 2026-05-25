@@ -1,0 +1,19 @@
+{
+  "type": "resourceful_refinement:fracking_pump",
+  "source_block": "resourceful_refinement:geyser_block",
+  "source_fluid": "resourceful_refinement:molten_asurine",
+  "processing_time": 20,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 200
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:molten_asurine",
+      "amount": 20
+    }
+  ]
+}

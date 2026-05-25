@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "resourceful_refinement:blender_blade",
+    "resourceful_refinement:refinery_access_port",
+    "resourceful_refinement:refinery_proxy",
+    "resourceful_refinement:refinery_kinetic_proxy",
+    "resourceful_refinement:mechanical_sieve",
+    "resourceful_refinement:mechanical_forge_mould",
+    "resourceful_refinement:casting_depot",
+    "resourceful_refinement:fracking_pump_outlet",
+    "resourceful_refinement:fracking_pump_proxy"
+  ]
+}

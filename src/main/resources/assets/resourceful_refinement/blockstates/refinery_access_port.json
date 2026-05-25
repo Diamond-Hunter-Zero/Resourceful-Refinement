@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "assembled=false,facing=north": { "model": "resourceful_refinement:block/refinery_access_port" },
+    "assembled=false,facing=south": { "model": "resourceful_refinement:block/refinery_access_port", "y": 180 },
+    "assembled=false,facing=east": { "model": "resourceful_refinement:block/refinery_access_port", "y": 90 },
+    "assembled=false,facing=west": { "model": "resourceful_refinement:block/refinery_access_port", "y": 270 },
+    "assembled=true,facing=north": { "model": "resourceful_refinement:block/refinery_access_port_assembled"},
+    "assembled=true,facing=south": { "model": "resourceful_refinement:block/refinery_access_port_assembled", "y": 180  },
+    "assembled=true,facing=east": { "model": "resourceful_refinement:block/refinery_access_port_assembled", "y": 90 },
+    "assembled=true,facing=west": { "model": "resourceful_refinement:block/refinery_access_port_assembled", "y": 270 }
+  }
+}

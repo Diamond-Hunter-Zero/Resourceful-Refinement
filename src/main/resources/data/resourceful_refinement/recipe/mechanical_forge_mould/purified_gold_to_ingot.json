@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:purified_gold",
+      "amount": 150
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:gold_ingot",
+      "count": 1
+    }
+  ]
+}

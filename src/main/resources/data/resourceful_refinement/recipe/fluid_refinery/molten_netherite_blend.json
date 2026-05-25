@@ -1,0 +1,29 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "superheated",
+  "processing_time": 120,
+  "ingredients": [
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:ancient_debris"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_scorchia",
+      "amount": 2000
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:durasteel_alloy",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:molten_netherite_blend",
+      "amount": 500
+    }
+  ]
+}

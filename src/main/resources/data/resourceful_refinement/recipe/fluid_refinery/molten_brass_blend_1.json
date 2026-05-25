@@ -1,0 +1,23 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "heated",
+  "processing_time": 80,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_veridium",
+      "amount": 50
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_asurine",
+      "amount": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:molten_brass_blend",
+      "amount": 125
+    }
+  ]
+}

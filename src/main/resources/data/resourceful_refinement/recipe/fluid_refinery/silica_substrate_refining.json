@@ -1,0 +1,24 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "heated",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "item": "minecraft:cobblestone"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:silica_substrate",
+      "amount": 125
+    }
+  ]
+}

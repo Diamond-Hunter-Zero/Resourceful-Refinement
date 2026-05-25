@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    "EFG"
+  ],
+  "key": {
+    "A": {
+      "item": "create:fluid_pipe"
+    },
+    "B": {
+      "item": "create:cogwheel"
+    },
+    "C": {
+      "item": "create:brass_casing"
+    },
+    "D": {
+      "item": "create:cogwheel"
+    },
+    "E": {
+      "item": "resourceful_refinement:durasteel_sheet"
+    },
+    "F": {
+      "item": "create:mechanical_drill"
+    },
+    "G": {
+      "item": "resourceful_refinement:durasteel_sheet"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:fracking_pump_outlet"
+  }
+}

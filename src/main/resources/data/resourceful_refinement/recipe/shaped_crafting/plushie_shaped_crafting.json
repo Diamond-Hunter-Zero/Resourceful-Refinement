@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABC",
+    " D ",
+    "E F"
+  ],
+  "key": {
+    "A": {
+      "tag": "minecraft:wool"
+    },
+    "B": {
+      "item": "minecraft:copper_ingot"
+    },
+    "C": {
+      "tag": "minecraft:wool"
+    },
+    "D": {
+      "item": "create:cogwheel"
+    },
+    "E": {
+      "tag": "minecraft:wool"
+    },
+    "F": {
+      "tag": "minecraft:wool"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:fox_plushie"
+  }
+}

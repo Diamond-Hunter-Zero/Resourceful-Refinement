@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:coating",
+  "fluid": {
+    "fluid": "resourceful_refinement:durasteel_alloy",
+    "amount": 1000
+  },
+  "ingredient": {
+    "item": "resourceful_refinement:durasteel_sheet"
+  },
+  "coating": "Durasteel",
+  "duration": 100
+}

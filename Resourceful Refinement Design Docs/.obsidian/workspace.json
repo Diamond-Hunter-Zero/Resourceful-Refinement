@@ -1,0 +1,338 @@
+{
+  "main": {
+    "id": "464bb69404a56126",
+    "type": "split",
+    "children": [
+      {
+        "id": "1e110b8bfb3956bf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "be0ec5a50167b67e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Mechanical Sieve.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Mechanical Sieve"
+            }
+          },
+          {
+            "id": "5291d6fd2d7424ac",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Forge Mould.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Forge Mould"
+            }
+          },
+          {
+            "id": "8781a9958be2d0a6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Fracking Pump.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Fracking Pump"
+            }
+          },
+          {
+            "id": "4544c341fbc6a2b5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Fluid Properties.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Fluid Properties"
+            }
+          },
+          {
+            "id": "63a5e358946d6aef",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Fluid Processing Recipes.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Fluid Processing Recipes"
+            }
+          },
+          {
+            "id": "2c16aaae0f0c4ddd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Fracking Source Blocks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Fracking Source Blocks"
+            }
+          },
+          {
+            "id": "df46b91c2bd31c42",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Coating.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Coating"
+            }
+          },
+          {
+            "id": "1a8b3c4830d1120a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Hosegun.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Hosegun"
+            }
+          },
+          {
+            "id": "8ccab1d54d17b412",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Gel Splatter.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Gel Splatter"
+            }
+          },
+          {
+            "id": "ebe97c3b7b522c98",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Detailed Fluid Refinery Implementation Plan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Detailed Fluid Refinery Implementation Plan"
+            }
+          }
+        ],
+        "currentTab": 8
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8304c0875bc4408b",
+    "type": "split",
+    "children": [
+      {
+        "id": "cb8675ed7c58c9c6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c712c043c3ecb145",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c2dd33202dfcfa53",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "f485e1e872761803",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "726b9ba427b6c15f",
+    "type": "split",
+    "children": [
+      {
+        "id": "99d703e702c2385a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7687f1e439c025ae",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Primary Design Doc.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Primary Design Doc"
+            }
+          },
+          {
+            "id": "47c4d492bba3c44d",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Primary Design Doc.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Primary Design Doc"
+            }
+          },
+          {
+            "id": "f306117756c1329c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "461e240f5244439c",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "29019d0a5c14d078",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Primary Design Doc.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Primary Design Doc"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-kanban:Create new board": false
+    }
+  },
+  "active": "c712c043c3ecb145",
+  "lastOpenFiles": [
+    "Primary Design Doc.md",
+    "Paint Fluids.md",
+    "Hosegun.md",
+    "Gel Splatter.md",
+    "Coating Variants.md",
+    "Geyser Block.md",
+    "Mechanical Sieve.md",
+    "Coating.md",
+    "Fracking Source Blocks.md",
+    "Fracking Pump.md",
+    "Fluid Processing Recipes.md",
+    "Detailed Fluid Refinery Implementation Plan.md",
+    "Fluid Properties.md",
+    "Fluid Refinery.md",
+    "Fracking Pylon Master Render.png",
+    "Fracking Pylon Master Render 1.png",
+    "Forge Mould.md",
+    "Forge Mould Render.png",
+    "fluid_refinery_implementation_plan_backup.md",
+    "Untitled.base"
+  ]
+}

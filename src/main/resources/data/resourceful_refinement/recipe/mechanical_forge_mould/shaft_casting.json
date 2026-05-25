@@ -1,0 +1,21 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 100,
+  "ingredients": [
+    {
+      "item": "resourceful_refinement:shaft_mould"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_andesite_blend",
+      "amount": 60
+    }
+  ],
+  "results": [
+    {
+      "id": "create:shaft",
+      "count": 4
+    }
+  ]
+}

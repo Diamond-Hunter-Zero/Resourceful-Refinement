@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "casting": true,
+  "processing_time": 80,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:catalysed_redstone",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:redstone",
+      "count": 4
+    }
+  ]
+}

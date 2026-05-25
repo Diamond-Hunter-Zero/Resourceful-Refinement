@@ -1,0 +1,16 @@
+{
+  "values": {
+    "resourceful_refinement:unrefined_carborax_bucket": {
+      "burn_time": 4000
+    },
+    "resourceful_refinement:catalysed_carborax_bucket": {
+      "burn_time": 7200
+    },
+    "resourceful_refinement:overcharged_carborax_bucket": {
+      "burn_time": 12000
+    },
+    "resourceful_refinement:carborax_diesel_bucket": {
+      "burn_time": 4800
+    }
+  }
+}

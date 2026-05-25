@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:coating",
+  "fluid": {
+    "fluid": "resourceful_refinement:catalysed_sparkpowder",
+    "amount": 1000
+  },
+  "ingredient": {
+    "item": "minecraft:chorus_fruit"
+  },
+  "coating": "Uplift",
+  "duration": 100
+}

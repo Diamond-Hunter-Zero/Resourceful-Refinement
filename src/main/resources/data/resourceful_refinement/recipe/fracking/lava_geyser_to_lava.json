@@ -1,0 +1,19 @@
+{
+  "type": "resourceful_refinement:fracking_pump",
+  "source_block": "resourceful_refinement:geyser_block",
+  "source_fluid": "minecraft:lava",
+  "processing_time": 20,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 750
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:lava",
+      "amount": 20
+    }
+  ]
+}

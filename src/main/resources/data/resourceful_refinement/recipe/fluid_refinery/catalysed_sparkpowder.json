@@ -1,0 +1,26 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "heated",
+  "processing_time": 40,
+  "ingredients": [
+    {
+      "item": "resourceful_refinement:flux_dust"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_veridium",
+      "amount": 35
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:molten_ochrum",
+      "amount": 15
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:catalysed_sparkpowder",
+      "amount": 200
+    }
+  ]
+}

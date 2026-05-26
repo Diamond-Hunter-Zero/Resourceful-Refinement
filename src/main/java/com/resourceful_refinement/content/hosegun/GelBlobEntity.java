@@ -275,19 +275,18 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         BlockState currentPlaceState = this.level().getBlockState(placePos);
 
         if (GelSplatterBlocks.is(currentPlaceState)) {
+            BlockState updated = GelSplatterBlocks.withVariantForFluid(currentPlaceState, resolvedFluid);
+            boolean variantChanged = updated.getBlock() != currentPlaceState.getBlock();
+            if (attachmentFace != null) {
+                updated = updated.setValue(GelSplatterBlock.getFaceProperty(attachmentFace), true);
+            }
+            // Repopulate faces before syncing fluid — setFluid may setBlock and notify neighbours.
+            placeGelSplat(placePos, updated);
             BlockEntity be = this.level().getBlockEntity(placePos);
             if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
-                BlockState updated = GelSplatterBlocks.withVariantForFluid(currentPlaceState, resolvedFluid);
-                if (attachmentFace != null) {
-                    updated = updated.setValue(GelSplatterBlock.getFaceProperty(attachmentFace), true);
-                }
-                // Repopulate faces before syncing fluid — setFluid notifies neighbours and can
-                // invalidate multiface placement if it runs before setBlock.
-                placeGelSplat(placePos, updated);
-                if (!splatterBe.getFluid().isSame(resolvedFluid)) {
+                if (variantChanged || !splatterBe.getFluid().isSame(resolvedFluid)) {
                     splatterBe.setFluid(resolvedFluid);
                 }
-
             }
             return;
         }

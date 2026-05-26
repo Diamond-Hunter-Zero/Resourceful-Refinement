@@ -43,21 +43,21 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
         syncToClients();
     }
 
-    /** Sync fluid to clients without replacing block state (avoids resetting multiface collision). */
+    /**
+     * Applies the correct gel splatter block variant for this fluid, bumps {@link GelSplatterBlock#FLUID_UPDATE_INDEX}
+     * for client tint sync, and preserves multiface attachments.
+     */
     private void syncToClients() {
+        BlockState currentState = this.getBlockState();
+        BlockState variantState = GelSplatterBlocks.withVariantForFluid(currentState, this.fluid);
+        int newIndex = (variantState.getValue(GelSplatterBlock.FLUID_UPDATE_INDEX) + 1) % 8;
+        BlockState newState = variantState.setValue(GelSplatterBlock.FLUID_UPDATE_INDEX, newIndex);
 
-            BlockState currentState = this.getBlockState();
-            int newIndex = (currentState.getValue(GelSplatterBlock.FLUID_UPDATE_INDEX) + 1)%8;
-            BlockState newState = currentState.setValue(GelSplatterBlock.FLUID_UPDATE_INDEX, newIndex);
-
-            this.setChanged(); // Marks the chunk dirty on the server for saving
-            if (this.level != null) {
-                this.level.setBlock(this.worldPosition, newState, Block.UPDATE_ALL);
-                // In vanilla, this automatically queues and dispatches the
-                // ClientboundBlockEntityDataPacket to all tracking players.
-                this.level.sendBlockUpdated(this.worldPosition, currentState, newState, Block.UPDATE_ALL);
-            }
-
+        this.setChanged();
+        if (this.level != null) {
+            this.level.setBlock(this.worldPosition, newState, Block.UPDATE_ALL);
+            this.level.sendBlockUpdated(this.worldPosition, currentState, newState, Block.UPDATE_ALL);
+        }
     }
 
     @Override

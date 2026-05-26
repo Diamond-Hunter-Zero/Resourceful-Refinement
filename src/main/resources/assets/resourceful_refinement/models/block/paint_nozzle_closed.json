@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "paint_nozzle",
-		"particle": "paint_nozzle"
+		"0": "resourceful_refinement:block/paint_nozzle",
+		"particle": "resourceful_refinement:block/copper_casing"
 	},
 	"elements": [
 		{

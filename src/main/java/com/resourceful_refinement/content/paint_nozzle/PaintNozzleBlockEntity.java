@@ -121,17 +121,6 @@ public class PaintNozzleBlockEntity extends BlockEntity {
         }
     }
 
-    public void dropContents() {
-        if (level == null || level.isClientSide) {
-            return;
-        }
-        FluidStack fluid = tank.getFluid();
-        if (!fluid.isEmpty()) {
-            Block.popResource(level, worldPosition, fluid.getFluid().getBucket().getDefaultInstance());
-        }
-        tank.setFluid(FluidStack.EMPTY);
-    }
-
     public void invalidateCapabilities() {
         if (level != null) {
             level.invalidateCapabilities(worldPosition);

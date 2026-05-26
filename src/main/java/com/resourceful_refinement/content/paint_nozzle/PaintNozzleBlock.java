@@ -50,6 +50,7 @@ public class PaintNozzleBlock extends DirectionalBlock implements EntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
+        builder.add(FACING);
         builder.add(VALVE_OPEN);
     }
 
@@ -60,12 +61,12 @@ public class PaintNozzleBlock extends DirectionalBlock implements EntityBlock {
 
     /** Pipe connection face (model-local south / back of the nozzle body). */
     public static Direction getPipeFace(BlockState state) {
-        return state.getValue(FACING);
+        return state.getValue(FACING).getOpposite();
     }
 
     /** Direction gel-blobs are fired from the nozzle. */
     public static Direction getSprayDirection(BlockState state) {
-        return state.getValue(FACING).getOpposite();
+        return state.getValue(FACING);
     }
 
     public static boolean isValveOpen(BlockState state) {
@@ -126,17 +127,6 @@ public class PaintNozzleBlock extends DirectionalBlock implements EntityBlock {
         }
 
         return InteractionResult.CONSUME;
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof PaintNozzleBlockEntity nozzle) {
-                nozzle.dropContents();
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override

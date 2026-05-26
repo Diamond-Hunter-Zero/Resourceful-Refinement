@@ -1,9 +1,10 @@
-// 1.21.1	2026-05-22T17:11:31.4223866	Loot Tables
+// 1.21.1	2026-05-26T14:08:31.160699	Loot Tables
 4c54577cad2b54252a0f5905b0d02e2f8a8ed3c1 data/resourceful_refinement/loot_table/blocks/blender_blade.json
 ed093d865227a1bc57ff1e368c6b95eab3b12f13 data/resourceful_refinement/loot_table/blocks/casting_depot.json
 dd7d702ccbc84d2cb18eee4551965015b9d1da54 data/resourceful_refinement/loot_table/blocks/fox_plushie.json
 13df0fd6c2f45f5cbf899d3223174da0c7de1216 data/resourceful_refinement/loot_table/blocks/fracking_pump_outlet.json
 756f873ef087443cdd640cce8c592cbc6f9fb8d0 data/resourceful_refinement/loot_table/blocks/fracking_pump_proxy.json
+9559af59c59ddfe8c207d63bae279127ccb1bdb4 data/resourceful_refinement/loot_table/blocks/gel_splatter.json
 5c6a5f65b25f76bf8607ce4fbeb95f8947378f3b data/resourceful_refinement/loot_table/blocks/geyser_block.json
 fdf3efeaf19c64cc7c7592091c4e0a3bcde5de2a data/resourceful_refinement/loot_table/blocks/mechanical_forge_mould.json
 12bf6d1dfe5e03f39c6b7b7517f446a3117ff327 data/resourceful_refinement/loot_table/blocks/mechanical_sieve.json

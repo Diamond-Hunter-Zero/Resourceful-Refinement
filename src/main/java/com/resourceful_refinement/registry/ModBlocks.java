@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
@@ -76,6 +77,13 @@ public class ModBlocks {
 
     public static final DeferredBlock<PlushieBlock> PLUSHIE = BLOCKS.register("fox_plushie",
             () -> new PlushieBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL)
+                    .noOcclusion()));
+
+    public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER = BLOCKS.register("gel_splatter",
+            () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.DESTROY)
+                    .strength(0.5f)
+                    .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()));
 
     // -------------------------------------------------------------------------

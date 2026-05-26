@@ -1,17 +1,17 @@
 package com.resourceful_refinement.registry;
 
-import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotItemRenderer;
-import com.resourceful_refinement.content.forge_mould.ForgeMouldItemRenderer;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 
@@ -19,6 +19,14 @@ import static com.resourceful_refinement.ResourcefulRefinementMain.MOD_ID;
 
 @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEvents {
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Force blocks to use the Translucent texture blend pass
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER.get(), RenderType.solid());
+        });
+    }
 
     @SubscribeEvent
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
@@ -78,5 +86,33 @@ public class ModClientEvents {
             // Confirms the event should override default vanilla sky fog rendering passes
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.getBlockColors().register((state, level, pos, tintIndex) -> {
+            if (level != null && pos != null) {
+                net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+                if (be instanceof com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity splatterBe) {
+                    net.minecraft.world.level.material.Fluid fluid = splatterBe.getFluid();
+                    if (fluid != net.minecraft.world.level.material.Fluids.EMPTY) {
+                        // Resolve color from custom fluid registry or fallback to custom logic
+                        for (com.resourceful_refinement.registry.FluidEntry entry : ModFluids.ENTRIES) {
+                            if (entry.source.get() == fluid) {
+                                return entry.color;
+                            }
+                        }
+                        // Fallback to standard color maps for water/lava or general dye tints
+                        if (fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_WATER)) {
+                            return 0x3F76E4;
+                        }
+                        if (fluid.isSame(net.minecraft.world.level.material.Fluids.LAVA) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_LAVA)) {
+                            return 0xFF4500;
+                        }
+                    }
+                }
+            }
+            return 0xFFFFFFFF; // Fallback
+        }, ModBlocks.GEL_SPLATTER.get());
     }
 }

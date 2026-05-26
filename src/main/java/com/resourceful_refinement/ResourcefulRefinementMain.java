@@ -31,6 +31,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import com.resourceful_refinement.registry.*;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
+import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
 import org.slf4j.Logger;
 
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
@@ -52,6 +53,7 @@ public class ResourcefulRefinementMain {
 
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -150,6 +152,8 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Hosegun Item Capability ---
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
     }
 
     /**
@@ -162,7 +166,10 @@ public class ResourcefulRefinementMain {
             LOGGER.info("[Resourceful Refinement] Client setup ran successfully!");
             event.enqueueWork(() -> {
                 for (FluidEntry entry : ModFluids.ENTRIES) {
-                    if (entry.group == FluidGroup.RAW || entry.group == FluidGroup.CATALYSED || entry.group == FluidGroup.CARBORAX) {
+                    if (entry.group == FluidGroup.RAW
+                            || entry.group == FluidGroup.CATALYSED
+                            || entry.group == FluidGroup.CARBORAX
+                            || entry.group == FluidGroup.PAINT) {
                         ItemBlockRenderTypes.setRenderLayer(entry.block.get(), RenderType.TRANSLUCENT);
                         ItemBlockRenderTypes.setRenderLayer(entry.source.get(), RenderType.TRANSLUCENT);
                         ItemBlockRenderTypes.setRenderLayer(entry.flowing.get(), RenderType.TRANSLUCENT);
@@ -183,6 +190,9 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
+            
+            // Register Projectile Renderer dynamically
+            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         }
 
         @SubscribeEvent

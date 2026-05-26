@@ -5,7 +5,8 @@ public enum FluidGroup {
     CATALYSED(8, 2000, 1500, 2, 800, "molten_still", "molten_flow"),
     ALLOYED(8, 2000, 2500, 2, 1000, "smooth_liquid_still", "smooth_liquid_flow"),
     PURIFIED(8, 2000, 4000, 1, 1200, "template_fluid_still", "template_fluid_flow"),
-    CARBORAX(0, 900, 1000, 1, 300, "smooth_liquid_still", "smooth_liquid_flow");
+    CARBORAX(0, 900, 1000, 1, 300, "smooth_liquid_still", "smooth_liquid_flow"),
+    PAINT(0, 900, 1000, 2, 300, "smooth_liquid_still", "smooth_liquid_flow");
 
     public final int lightLevel;
     public final int density;

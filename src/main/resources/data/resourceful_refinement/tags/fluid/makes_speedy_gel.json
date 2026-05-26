@@ -1,0 +1,22 @@
+{
+  "values": [
+    "resourceful_refinement:catalysed_iron",
+    "resourceful_refinement:flowing_catalysed_iron",
+    "resourceful_refinement:catalysed_copper",
+    "resourceful_refinement:flowing_catalysed_copper",
+    "resourceful_refinement:catalysed_gold",
+    "resourceful_refinement:flowing_catalysed_gold",
+    "resourceful_refinement:catalysed_zinc",
+    "resourceful_refinement:flowing_catalysed_zinc",
+    "resourceful_refinement:catalysed_redstone",
+    "resourceful_refinement:flowing_catalysed_redstone",
+    "resourceful_refinement:catalysed_sparkpowder",
+    "resourceful_refinement:flowing_catalysed_sparkpowder",
+    "resourceful_refinement:catalysed_carborax",
+    "resourceful_refinement:flowing_catalysed_carborax",
+    {
+      "id": "create:tea",
+      "required": false
+    }
+  ]
+}

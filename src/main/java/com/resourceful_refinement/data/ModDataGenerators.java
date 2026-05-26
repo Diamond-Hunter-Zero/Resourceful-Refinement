@@ -23,6 +23,8 @@ public class ModDataGenerators {
         PackOutput packOutput = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
+        generator.addProvider(event.includeClient(), new ModItemModelProvider(packOutput, event.getExistingFileHelper()));
+
         // Register the loot table builder pass
         generator.addProvider(event.includeServer(), new LootTableProvider(
                 packOutput,

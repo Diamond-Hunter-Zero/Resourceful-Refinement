@@ -47,6 +47,8 @@ public class ModItems {
     public static final DeferredItem<PlushieItem> PLUSHIE_ITEM = ITEMS.register("fox_plushie",
             () -> new PlushieItem(ModBlocks.PLUSHIE.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter", ModBlocks.GEL_SPLATTER);
+
     // -------------------------------------------------------------------------
     // Misc. Items
     // -------------------------------------------------------------------------
@@ -61,6 +63,9 @@ public class ModItems {
             properties -> new MouldItem(properties, INGOT_MOULD_BREAK_CHANCE));
     public static final DeferredItem<MouldItem> SHAFT_MOULD = ITEMS.registerItem("shaft_mould",
             properties -> new MouldItem(properties, SHAFT_MOULD_BREAK_CHANCE));
+
+    public static final DeferredItem<com.resourceful_refinement.content.hosegun.HosegunItem> HOSEGUN = ITEMS.register("hosegun",
+            () -> new com.resourceful_refinement.content.hosegun.HosegunItem(new Item.Properties()));
 
     // -------------------------------------------------------------------------
     // Buckets (Handled by FluidEntry)

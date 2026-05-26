@@ -1,14 +1,17 @@
 package com.resourceful_refinement.content.gel_splatter;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModFluids;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -80,7 +83,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new GelSplatterBlockEntity(pos, state);
+        return new GelSplatterBlockEntity(ModBlockEntities.GEL_SPLATTER_BE.get(), pos, state);
     }
 
     @Override
@@ -89,7 +92,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
         if (level.isClientSide()) return super.getFriction(state, level, pos, entity);
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof GelSplatterBlockEntity splatterBe)) return super.getFriction(state, level, pos, entity);
+        if (!(be instanceof GelSplatterBlockEntityAccess splatterBe)) return super.getFriction(state, level, pos, entity);
         Fluid fluid = splatterBe.getFluid();
         if (fluid == Fluids.EMPTY) return super.getFriction(state, level, pos, entity);
         GelType gelType = GelPropertiesManager.getGelType(fluid);
@@ -104,6 +107,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     }
 
 
+
     // Dynamic Entity collision/movement effects (e.g. bounce, slow, speed effects, damage)
     @Override
     public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
@@ -111,7 +115,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
         if (level.isClientSide) return;
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof GelSplatterBlockEntity splatterBe)) return;
+        if (!(be instanceof GelSplatterBlockEntityAccess splatterBe)) return;
 
         Fluid fluid = splatterBe.getFluid();
         if (fluid == Fluids.EMPTY) return;
@@ -137,13 +141,13 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                     double horizontalSpeed = velocity.horizontalDistance();
 
                     // Only apply slipperiness/acceleration if they are actively moving
-                    if (horizontalSpeed > 0.001) {
+                    if (horizontalSpeed > 0.1) {
                         // Define our caps (Ice default friction calculation reaches equilibrium around 0.25 - 0.35)
                         // 0.6D0 to 0.8D provides a very fast, satisfying sprint/slide without breaking physics
-                        double maxHorizontalSpeed = 1D;
+                        double maxHorizontalSpeed = 0.5D;
 
                         Vec3 newVelocity;
-                        if (horizontalSpeed > maxHorizontalSpeed) {
+                        /*if (horizontalSpeed > maxHorizontalSpeed) {
                             // Keep their Y velocity (falling/jumping) intact but clamp the X and Z direction vectors
                             double ratio = maxHorizontalSpeed / horizontalSpeed;
                             newVelocity = new Vec3(velocity.x * ratio, velocity.y, velocity.z * ratio);
@@ -151,17 +155,22 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                             // Apply a clean 1.08x acceleration multiplier up until the cap is reached
                             newVelocity = new Vec3(velocity.x * 1.375D, velocity.y, velocity.z * 1.375D);
                         }
-
-                        entity.setDeltaMovement(newVelocity);
+                        entity.setDeltaMovement(newVelocity);*/
+                        if (horizontalSpeed < maxHorizontalSpeed)
+                        {
+                            newVelocity = velocity.add(velocity.normalize().scale(0.0375f));
+                            entity.setDeltaMovement(newVelocity);
+                            entity.hurtMarked = true;
+                        }
                     }
                 }
             }
             case GOOEY -> {
                 // Sticky effect: Slow down entity velocity significantly
-                entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.5D, 0.7D, 0.5D));
+                /*entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.5D, 0.7D, 0.5D));
                 if (entity instanceof ServerPlayer serverPlayer) {
                     serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
-                }
+                }*/
             }
             case BOUNCY -> applyBouncyGelEffect(state, level, pos, entity);
             case CURSED -> {
@@ -267,7 +276,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     @Override
     public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof GelSplatterBlockEntity splatterBe) {
+        if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
             Fluid fluid = splatterBe.getFluid();
             GelType type = GelPropertiesManager.getGelType(fluid);
             if (type == GelType.MOLTEN) {
@@ -288,5 +297,32 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     @Override
     protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
         return 1.0F; // Prevents harsh internal shadows on the faces
+    }
+
+
+    // Static helpers
+    public static int RegisterRendererTint(BlockState state, BlockAndTintGetter level, BlockPos pos, int tintIndex) {
+        if (level != null && pos != null) {
+            net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
+                net.minecraft.world.level.material.Fluid fluid = splatterBe.getFluid();
+                if (fluid != net.minecraft.world.level.material.Fluids.EMPTY) {
+                    // Resolve color from custom fluid registry or fallback to custom logic
+                    for (com.resourceful_refinement.registry.FluidEntry entry : ModFluids.ENTRIES) {
+                        if (entry.source.get() == fluid) {
+                            return entry.color;
+                        }
+                    }
+                    // Fallback to standard color maps for water/lava or general dye tints
+                    if (fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_WATER)) {
+                        return 0x3F76E4;
+                    }
+                    if (fluid.isSame(net.minecraft.world.level.material.Fluids.LAVA) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_LAVA)) {
+                        return 0xFF4500;
+                    }
+                }
+            }
+        }
+        return 0xFFFFFFFF; // Fallback
     }
 }

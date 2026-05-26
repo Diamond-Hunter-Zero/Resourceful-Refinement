@@ -1,5 +1,6 @@
 package com.resourceful_refinement.registry;
 
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
@@ -25,6 +26,8 @@ public class ModClientEvents {
         event.enqueueWork(() -> {
             // Force blocks to use the Translucent texture blend pass
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER.get(), RenderType.solid());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_SLIPPERY.get(), RenderType.solid());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_STICKY.get(), RenderType.solid());
         });
     }
 
@@ -90,29 +93,8 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
-        event.getBlockColors().register((state, level, pos, tintIndex) -> {
-            if (level != null && pos != null) {
-                net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
-                if (be instanceof com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity splatterBe) {
-                    net.minecraft.world.level.material.Fluid fluid = splatterBe.getFluid();
-                    if (fluid != net.minecraft.world.level.material.Fluids.EMPTY) {
-                        // Resolve color from custom fluid registry or fallback to custom logic
-                        for (com.resourceful_refinement.registry.FluidEntry entry : ModFluids.ENTRIES) {
-                            if (entry.source.get() == fluid) {
-                                return entry.color;
-                            }
-                        }
-                        // Fallback to standard color maps for water/lava or general dye tints
-                        if (fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_WATER)) {
-                            return 0x3F76E4;
-                        }
-                        if (fluid.isSame(net.minecraft.world.level.material.Fluids.LAVA) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_LAVA)) {
-                            return 0xFF4500;
-                        }
-                    }
-                }
-            }
-            return 0xFFFFFFFF; // Fallback
-        }, ModBlocks.GEL_SPLATTER.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_STICKY.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_SLIPPERY.get());
     }
 }

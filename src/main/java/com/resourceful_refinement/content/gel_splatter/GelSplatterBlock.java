@@ -3,7 +3,6 @@ package com.resourceful_refinement.content.gel_splatter;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
-import com.resourceful_refinement.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -303,26 +302,14 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     // Static helpers
     public static int RegisterRendererTint(BlockState state, BlockAndTintGetter level, BlockPos pos, int tintIndex) {
         if (level != null && pos != null) {
-            net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+            BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
-                net.minecraft.world.level.material.Fluid fluid = splatterBe.getFluid();
-                if (fluid != net.minecraft.world.level.material.Fluids.EMPTY) {
-                    // Resolve color from custom fluid registry or fallback to custom logic
-                    for (com.resourceful_refinement.registry.FluidEntry entry : ModFluids.ENTRIES) {
-                        if (entry.source.get() == fluid) {
-                            return entry.color;
-                        }
-                    }
-                    // Fallback to standard color maps for water/lava or general dye tints
-                    if (fluid.isSame(net.minecraft.world.level.material.Fluids.WATER) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_WATER)) {
-                        return 0x3F76E4;
-                    }
-                    if (fluid.isSame(net.minecraft.world.level.material.Fluids.LAVA) || fluid.isSame(net.minecraft.world.level.material.Fluids.FLOWING_LAVA)) {
-                        return 0xFF4500;
-                    }
+                Fluid fluid = splatterBe.getFluid();
+                if (fluid != Fluids.EMPTY) {
+                    return GelFluidTintColors.getGelTint(fluid);
                 }
             }
         }
-        return 0xFFFFFFFF; // Fallback
+        return 0xFFFFFFFF;
     }
 }

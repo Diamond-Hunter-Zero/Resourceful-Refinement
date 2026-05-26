@@ -1,5 +1,7 @@
 package com.resourceful_refinement.registry;
 
+import com.resourceful_refinement.content.gel_splatter.GelFluidTintColors;
+import com.resourceful_refinement.content.gel_splatter.GelFluidTintColorsClient;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
@@ -24,6 +26,8 @@ public class ModClientEvents {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
+            GelFluidTintColorsClient.install();
+            GelFluidTintColors.clearCompatCache();
             // Force blocks to use the Translucent texture blend pass
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER.get(), RenderType.solid());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_SLIPPERY.get(), RenderType.solid());

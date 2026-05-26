@@ -2,14 +2,22 @@ package com.resourceful_refinement.content.paint_nozzle;
 
 import com.resourceful_refinement.content.hosegun.GelBlobEntity;
 import com.resourceful_refinement.content.hosegun.HosegunItem;
+import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
 import com.resourceful_refinement.registry.ModEntities;
+import com.resourceful_refinement.registry.ModStressValues;
+import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,9 +28,11 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
+import java.util.List;
+
 import static com.resourceful_refinement.content.gel_splatter.GelPropertiesManager.getGelAmmoCost;
 
-public class PaintNozzleBlockEntity extends BlockEntity {
+public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleInformation {
 
     public static final int TANK_CAPACITY = 500;
 
@@ -30,29 +40,8 @@ public class PaintNozzleBlockEntity extends BlockEntity {
 
     public final FluidTank tank = new FluidTank(TANK_CAPACITY, stack -> stack.isEmpty() || stack.getAmount() <= TANK_CAPACITY) {
         @Override
-        public int fill(FluidStack resource, FluidAction action) {
-            if (resource.isEmpty() || isValveOpen()) {
-                return 0;
-            }
-            if (!tank.isEmpty() && !FluidStack.isSameFluidSameComponents(tank.getFluid(), resource)) {
-                return 0;
-            }
-            return super.fill(resource, action);
-        }
-
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return FluidStack.EMPTY;
-        }
-
-        @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
-            return FluidStack.EMPTY;
-        }
-
-        @Override
         protected void onContentsChanged() {
-            setChanged();
+            syncData();
         }
     };
 
@@ -115,15 +104,19 @@ public class PaintNozzleBlockEntity extends BlockEntity {
 
     public void onValveStateChanged(boolean open) {
         sprayTicks = 0;
-        setChanged();
-        if (level != null) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
-        }
+        syncData();
     }
 
     public void invalidateCapabilities() {
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
+        }
+    }
+
+    private void syncData() {
+        setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
 
@@ -144,8 +137,38 @@ public class PaintNozzleBlockEntity extends BlockEntity {
     }
 
     @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
     public void setBlockState(BlockState state) {
         super.setBlockState(state);
         setChanged();
+    }
+
+    @Override
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+
+        tooltip.add(Component.literal("     Paint Nozzle:"));
+        if (isValveOpen())
+            tooltip.add(Component.literal("§a- Valve open -"));
+        else
+            tooltip.add(Component.literal("§c- Valve closed -"));
+
+        FluidStack tankOutputFluid = tank.getFluid();
+        if (tankOutputFluid.isEmpty())
+            tooltip.add(Component.literal("§6Tank: §8empty"));
+        else
+            tooltip.add(Component.literal("§6Tank: §7" + tankOutputFluid.getAmount() + "mb " + tankOutputFluid.getHoverName().getString()));
+
+        return true;
     }
 }

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle" },
+    "facing=north,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed" },
+    "facing=east,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle", "y": 90 },
+    "facing=east,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed", "y": 90 },
+    "facing=south,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle", "y": 180 },
+    "facing=south,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed", "y": 180 },
+    "facing=west,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle", "y": 270 },
+    "facing=west,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed", "y": 270 },
+    "facing=up,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle", "x": 270 },
+    "facing=up,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed", "x": 270 },
+    "facing=down,valve_open=true": { "model": "resourceful_refinement:block/paint_nozzle", "x": 90 },
+    "facing=down,valve_open=false": { "model": "resourceful_refinement:block/paint_nozzle_closed", "x": 90 }
+  }
+}

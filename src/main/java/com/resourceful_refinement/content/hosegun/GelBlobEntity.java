@@ -3,9 +3,9 @@ package com.resourceful_refinement.content.hosegun;
 import com.resourceful_refinement.content.gel_splatter.GelImpactConstants;
 import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
-import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntityAccess;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlocks;
 import com.resourceful_refinement.content.gel_splatter.GelType;
-import com.resourceful_refinement.registry.ModBlocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -198,7 +198,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
         // Try creating/extending Gel Splatters at the impact face and reachable neighbours
         BlockState hitState = this.level().getBlockState(impactPos);
-        boolean hitGelSplatter = hitState.is(ModBlocks.GEL_SPLATTER.get());
+        boolean hitGelSplatter = GelSplatterBlocks.is(hitState);
 
         if (hitGelSplatter) {
             // Multiface gel is not sturdy; seed BFS from the struck splatter so spread still runs
@@ -253,7 +253,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
     }
 
     private boolean isPassableForGelSpread(BlockState state) {
-        return state.isAir() || state.canBeReplaced() || state.is(ModBlocks.GEL_SPLATTER.get());
+        return state.isAir() || state.canBeReplaced() || GelSplatterBlocks.is(state);
     }
 
     private boolean canHostGelSplatter(BlockPos pos) {
@@ -274,10 +274,10 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         Fluid resolvedFluid = GelPropertiesManager.resolveSourceFluid(fluid);
         BlockState currentPlaceState = this.level().getBlockState(placePos);
 
-        if (currentPlaceState.is(ModBlocks.GEL_SPLATTER.get())) {
+        if (GelSplatterBlocks.is(currentPlaceState)) {
             BlockEntity be = this.level().getBlockEntity(placePos);
-            if (be instanceof GelSplatterBlockEntity splatterBe) {
-                BlockState updated = currentPlaceState;
+            if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
+                BlockState updated = GelSplatterBlocks.withVariantForFluid(currentPlaceState, resolvedFluid);
                 if (attachmentFace != null) {
                     updated = updated.setValue(GelSplatterBlock.getFaceProperty(attachmentFace), true);
                 }
@@ -297,13 +297,13 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         }
 
         if (currentPlaceState.isAir() || currentPlaceState.canBeReplaced()) {
-            BlockState newState = ModBlocks.GEL_SPLATTER.get().defaultBlockState();
+            BlockState newState = GelSplatterBlocks.defaultStateForFluid(resolvedFluid);
             if (attachmentFace != null) {
                 newState = newState.setValue(GelSplatterBlock.getFaceProperty(attachmentFace), true);
             }
             placeGelSplat(placePos, newState);
             BlockEntity be = this.level().getBlockEntity(placePos);
-            if (be instanceof GelSplatterBlockEntity splatterBe) {
+            if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
                 splatterBe.setFluid(resolvedFluid);
             }
         }
@@ -333,7 +333,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
             if (!GelImpactConstants.isWithinImpactSphere(center, pos, radius)) {
                 continue;
             }
-            if (this.level().getBlockState(pos).is(ModBlocks.GEL_SPLATTER.get())) {
+            if (GelSplatterBlocks.is(this.level().getBlockState(pos))) {
                 this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             }
         }

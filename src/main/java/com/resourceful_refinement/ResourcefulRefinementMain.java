@@ -10,9 +10,6 @@ import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
-import com.simibubi.create.api.registry.CreateRegistries;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -37,6 +34,7 @@ import org.slf4j.Logger;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.*;
+import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
@@ -148,6 +146,14 @@ public class ResourcefulRefinementMain {
                 return be.outputTank;
             } else if (side == facing.getOpposite()) {
                 return be.inputTank;
+            }
+            return null;
+        });
+
+        // --- Paint Nozzle ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.PAINT_NOZZLE_BE.get(), (be, side) -> {
+            if (side == PaintNozzleBlock.getPipeFace(be.getBlockState())) {
+                return be.tank;
             }
             return null;
         });

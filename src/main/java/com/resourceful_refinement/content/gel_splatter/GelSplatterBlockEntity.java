@@ -12,39 +12,52 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-public class GelSplatterBlockEntity extends BlockEntity {
+public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBlockEntityAccess {
 
     private Fluid fluid = Fluids.EMPTY;
 
     public GelSplatterBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.GEL_SPLATTER_BE.get(), pos, state);
+        this(ModBlockEntities.GEL_SPLATTER_BE.get(), pos, state);
     }
 
+    public GelSplatterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
+    @Override
     public Fluid getFluid() {
         return this.fluid;
     }
 
+    @Override
     public void setFluid(Fluid fluid) {
-        if (fluid != null && fluid != Fluids.EMPTY) {
-            this.fluid = GelPropertiesManager.resolveSourceFluid(fluid);
+        if (fluid == null || fluid == Fluids.EMPTY) {
+            return;
+        }
+        this.fluid = GelPropertiesManager.resolveSourceFluid(fluid);
+        syncToClients();
+    }
+
+    /** Sync fluid to clients without replacing block state (avoids resetting multiface collision). */
+    private void syncToClients() {
 
             BlockState currentState = this.getBlockState();
             int newIndex = (currentState.getValue(GelSplatterBlock.FLUID_UPDATE_INDEX) + 1)%8;
             BlockState newState = currentState.setValue(GelSplatterBlock.FLUID_UPDATE_INDEX, newIndex);
 
             this.setChanged(); // Marks the chunk dirty on the server for saving
-
             if (this.level != null) {
                 this.level.setBlock(this.worldPosition, newState, Block.UPDATE_ALL);
                 // In vanilla, this automatically queues and dispatches the
                 // ClientboundBlockEntityDataPacket to all tracking players.
                 this.level.sendBlockUpdated(this.worldPosition, currentState, newState, Block.UPDATE_ALL);
             }
-        }
+
     }
 
     @Override
@@ -65,14 +78,10 @@ public class GelSplatterBlockEntity extends BlockEntity {
 
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        super.handleUpdateTag(tag, registries); // Applies the new NBT via loadAdditional
-
-        if (this.level != null && this.level.isClientSide) {
-            // 1. Tell NeoForge to invalidate this block's model data cache
-            this.requestModelDataUpdate();
-
-            // 2. Force the vanilla rendering engine to rebuild the chunk geometry with the new tint
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+        super.handleUpdateTag(tag, registries);
+        if (level != null && level.isClientSide) {
+            requestModelDataUpdate();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
         }
     }
 

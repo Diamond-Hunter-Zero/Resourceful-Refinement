@@ -4,6 +4,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
+import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
@@ -53,6 +54,16 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<PlushieBlockEntity>> PLUSHIE_BE = BLOCK_ENTITIES.register("fox_plushie",
             () -> BlockEntityType.Builder.of((pos, state) -> new PlushieBlockEntity(ModBlockEntities.PLUSHIE_BE.get(), pos, state), ModBlocks.PLUSHIE.get()).build(null));
 
-    public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE = BLOCK_ENTITIES.register("gel_splatter",
-            () -> BlockEntityType.Builder.of(com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity::new, ModBlocks.GEL_SPLATTER.get()).build(null));
+    public static final Supplier<BlockEntityType<PaintNozzleBlockEntity>> PAINT_NOZZLE_BE = BLOCK_ENTITIES.register("paint_nozzle",
+            () -> BlockEntityType.Builder.of((pos, state) -> new PaintNozzleBlockEntity(ModBlockEntities.PAINT_NOZZLE_BE.get(), pos, state), ModBlocks.PAINT_NOZZLE.get()).build(null));
+
+    /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */
+    public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE =
+            BLOCK_ENTITIES.register("gel_splatter",
+                    () -> BlockEntityType.Builder.of(
+                            com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity::new,
+                            ModBlocks.GEL_SPLATTER.get(),
+                            ModBlocks.GEL_SPLATTER_SLIPPERY.get(),
+                            ModBlocks.GEL_SPLATTER_STICKY.get()
+                    ).build(null));
 }

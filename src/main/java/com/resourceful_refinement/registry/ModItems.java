@@ -47,7 +47,15 @@ public class ModItems {
     public static final DeferredItem<PlushieItem> PLUSHIE_ITEM = ITEMS.register("fox_plushie",
             () -> new PlushieItem(ModBlocks.PLUSHIE.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> PAINT_NOZZLE_ITEM = ITEMS.registerSimpleBlockItem("paint_nozzle", ModBlocks.PAINT_NOZZLE);
+
+    // -------------------------------------------------------------------------
+    // Gel Items
+    // -------------------------------------------------------------------------
+
     public static final DeferredItem<BlockItem> GEL_SPLATTER_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter", ModBlocks.GEL_SPLATTER);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_STICKY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_sticky", ModBlocks.GEL_SPLATTER_STICKY);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_SLIPPERY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_slippery", ModBlocks.GEL_SPLATTER_SLIPPERY);
 
     // -------------------------------------------------------------------------
     // Misc. Items

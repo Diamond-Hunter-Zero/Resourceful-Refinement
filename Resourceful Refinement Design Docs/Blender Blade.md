@@ -1,4 +1,3 @@
-# Blender Blade
 
 ## Overview
 

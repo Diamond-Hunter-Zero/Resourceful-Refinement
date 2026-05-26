@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
@@ -79,12 +80,42 @@ public class ModBlocks {
             () -> new PlushieBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL)
                     .noOcclusion()));
 
+    public static final DeferredBlock<PaintNozzleBlock> PAINT_NOZZLE = BLOCKS.register("paint_nozzle",
+            () -> new PaintNozzleBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()));
+
+
+    // -------------------------------------------------------------------------
+    // Fluid Gel Blocks
+    // -------------------------------------------------------------------------
+
     public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER = BLOCKS.register("gel_splatter",
             () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
                     .pushReaction(PushReaction.DESTROY)
                     .strength(0.5f)
                     .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()));
+
+    public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_SLIPPERY = BLOCKS.register("gel_splatter_slippery",
+            () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
+                    .friction(0.9f)
+                    .speedFactor(1.2f)
+                    .pushReaction(PushReaction.DESTROY)
+                    .strength(0.5f)
+                    .sound(SoundType.SLIME_BLOCK)
+                    .noOcclusion()));
+
+    public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_STICKY = BLOCKS.register("gel_splatter_sticky",
+            () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
+                    .jumpFactor(0.35f)
+                    .speedFactor(0.75f)
+                    .pushReaction(PushReaction.DESTROY)
+                    .strength(0.5f)
+                    .sound(SoundType.HONEY_BLOCK)
+                    .noOcclusion()));
+
 
     // -------------------------------------------------------------------------
     // Fluid Blocks (Handled by FluidEntry)

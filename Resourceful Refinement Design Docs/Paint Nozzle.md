@@ -9,6 +9,15 @@ Paint Nozzles can be placed in ant of the 6 facing directions, and auto-connect 
 
 Paint Nozzles have two states; Open or Closed. While closed, fluid can flow into the nozzle's internal tank, but no further action occurs. If open, the nozzle drains its internal tank to create gel-blobs at the same rate as a held-down hosegun.
 
+**Flow Speed**
+The Paint Nozzle also has a configurable 'flow speed' variable, which can be in one of 3 states; '*Low*', '*Medium*', or '*High*'. By default, the nozzle uses 'Medium'. The flow speed of a nozzle is a multiplication factor which is applied to the speed of gel-blobs produced by the nozzle. To change a nozzle's flow speed, the user can right-click with a Create wrench, cycling through all speeds.
+
+| **Speed** | **Factor** |
+| --------- | ---------- |
+| Low       | 0.45       |
+| Medium    | 0.75       |
+| High      | 1.2        |
+
 
 #### **Rendering**
 Players can right-click a Paint Nozzle to toggle it between 'Open' and 'Closed' states. Doing so updates an internal NBT flag, as well as a blockstate property called "valve_open", which in turn updates the block model used for the nozzle.

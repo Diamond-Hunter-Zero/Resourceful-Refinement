@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "create:andesite_alloy"
+    },
+    {
+      "item": "minecraft:iron_bars"
+    },
+    {
+      "item": "create:fluid_pipe"
+    }
+  ],
+  "result": {
+    "id": "resourceful_refinement:paint_nozzle"
+  }
+}

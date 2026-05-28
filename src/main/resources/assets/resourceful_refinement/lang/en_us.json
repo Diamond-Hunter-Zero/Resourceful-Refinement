@@ -228,5 +228,24 @@
   "resourceful_refinement.ponder.blender_blades.text_3": "However, they also have a secondary purpose...",
   "resourceful_refinement.ponder.blender_blades.text_4": "Entities caught in a blender blade will rotate with it until they're flung out",
   "resourceful_refinement.ponder.blender_blades.text_5": "The higher the RPM, the stronger the pull",
-  "resourceful_refinement.ponder.blender_blades.text_6": "Mobs and players will continuously take damage while being stirred in a blender blade!"
+  "resourceful_refinement.ponder.blender_blades.text_6": "Mobs and players will continuously take damage while being stirred in a blender blade!",
+
+  "block.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id": "Tracking ID",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id_label": "Gel tracking label (shared across stations):",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id_hint": "e.g. Team Red",
+  "gui.resourceful_refinement.fluid_refill_station.save": "Save",
+  "gui.resourceful_refinement.fluid_refill_station.clear": "Clear",
+  "tooltip.resourceful_refinement.hosegun.empty": "Empty",
+  "tooltip.resourceful_refinement.hosegun.tracking_id": "Tracking: %s",
+  "tooltip.resourceful_refinement.hosegun.tracking_id_unbound": "Tracking: unbound",
+  "message.resourceful_refinement.refill_station.no_tracking_id": "This station has no Tracking ID. Set one first (empty-hand use).",
+  "message.resourceful_refinement.refill_station.hosegun_bound": "Hosegun bound to \"%s\".",
+  "message.resourceful_refinement.refill_station.hosegun_unbound": "Hosegun unbound from \"%s\".",
+  "resourceful_refinement.display_source.fluid_refill_station": "Fluid Refill Station",
+  "block.resourceful_refinement.paint_nozzle": "Paint Nozzle",
+  "paint_nozzle.flow_speed.low": "Low",
+  "paint_nozzle.flow_speed.medium": "Medium",
+  "paint_nozzle.flow_speed.high": "High"
 }

@@ -15,11 +15,16 @@ public final class HosegunFluidColors {
         return getTint(stack.getFluid());
     }
 
+    /**
+     * Opaque ARGB for {@link net.minecraft.client.model.geom.ModelPart} vertex tinting.
+     * Registry fluid colours use reduced alpha (e.g. {@code 0xFA}) for tanks/particles; item cubes need {@code 0xFF}.
+     */
     public static int getTint(Fluid fluid) {
         int tint = GelFluidTintColors.getGelTint(fluid);
-        if ((tint >>> 24) == 0) {
-            return tint | 0xFF000000;
+        int rgb = tint & 0x00FFFFFF;
+        if (rgb == 0) {
+            return 0xFFFFFFFF;
         }
-        return tint;
+        return 0xFF000000 | rgb;
     }
 }

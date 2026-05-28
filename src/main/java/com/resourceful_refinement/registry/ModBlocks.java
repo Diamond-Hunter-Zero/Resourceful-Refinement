@@ -8,6 +8,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
 import com.resourceful_refinement.content.refinery.RefineryProxyBlock;
@@ -86,6 +87,12 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .noOcclusion()));
 
+    public static final DeferredBlock<FluidRefillStationBlock> FLUID_REFILL_STATION = BLOCKS.register("fluid_refill_station",
+            () -> new FluidRefillStationBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
 
     // -------------------------------------------------------------------------
     // Fluid Gel Blocks

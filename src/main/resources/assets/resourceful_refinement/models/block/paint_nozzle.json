@@ -2,6 +2,7 @@
 	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
+    "render_type": "minecraft:cutout",
 	"textures": {
 		"0": "resourceful_refinement:block/paint_nozzle",
 		"particle": "resourceful_refinement:block/copper_casing"

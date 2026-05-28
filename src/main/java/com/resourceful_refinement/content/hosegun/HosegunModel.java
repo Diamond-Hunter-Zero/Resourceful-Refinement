@@ -17,11 +17,11 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
  */
 public class HosegunModel {
 
-    /** Full depth of the tank segment along local Z (model units, 1/16 m per unit). */
-    public static final float TANK_DEPTH = 9.0F;
+    /** Scaling factor for fluid boxes as stored fluid amount changes. */
+    public static final float TANK_FILL_SCALE = 0.666F;
 
     /** Local Z of the rear of the tank; fluid scale is anchored here so the forward end shrinks. */
-    public static final float TANK_BACK_Z = 4.5F;
+    public static final float TANK_BACK_Z = 0.225F;
 
     private final ModelPart handle;
     private final ModelPart paintCylinderRight;
@@ -38,13 +38,13 @@ public class HosegunModel {
                 .texOffs(48, 51).addBox(-4.0F, -1.0F, -1.0F, 1.0F, 1.0F, 7.0F, new CubeDeformation(0.0F))
                 .texOffs(21, 53).addBox(3.0F, -1.0F, -1.0F, 1.0F, 1.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 19.0F, 5.0F, 0.2618F, 0.0F, 0.0F));
 
+        PartDefinition paint_fill = partdefinition.addOrReplaceChild("paint_fill", CubeListBuilder.create().texOffs(0, 55).addBox(-1.25F, -1.25F, -0.05F, 2.5F, 2.5F, 8.5F, new CubeDeformation(0.0F)), PartPose.offset(4.0F, 21.5F, 2.3F));
+
         PartDefinition Paint_Cylinder = partdefinition.addOrReplaceChild("Paint_Cylinder", CubeListBuilder.create().texOffs(29, 16).addBox(-1.5F, -1.5F, -4.5F, 3.0F, 3.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(4.0F, 21.5F, 6.5F, -0.1745F, 0.0F, 0.0F));
 
-        PartDefinition paint_fill = Paint_Cylinder.addOrReplaceChild("paint_fill", CubeListBuilder.create().texOffs(0, 31).addBox(-1.5F, -1.0F, -8.5F, 2.5F, 2.5F, 8.5F, new CubeDeformation(0.0F)), PartPose.offset(0.25F, -0.25F, 4.25F));
+        PartDefinition paint_fill2 = partdefinition.addOrReplaceChild("paint_fill2", CubeListBuilder.create().texOffs(0, 55).mirror().addBox(-9.25F, -1.25F, -0.05F, 2.5F, 2.5F, 8.5F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(4.0F, 21.5F, 2.3F));
 
         PartDefinition Paint_Cylinder2 = partdefinition.addOrReplaceChild("Paint_Cylinder2", CubeListBuilder.create().texOffs(29, 16).mirror().addBox(-1.5F, -1.5F, -4.5F, 3.0F, 3.0F, 9.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-4.0F, 21.5F, 6.5F, -0.1745F, 0.0F, 0.0F));
-
-        PartDefinition paint_fill2 = Paint_Cylinder2.addOrReplaceChild("paint_fill2", CubeListBuilder.create().texOffs(0, 31).mirror().addBox(-1.0F, -1.0F, -8.5F, 2.5F, 2.5F, 8.5F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-0.25F, -0.25F, 4.25F));
 
         PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(48, 42).addBox(-3.0F, -6.0F, -9.0F, 6.0F, 6.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 44).addBox(-2.0F, -5.0F, -7.0F, 4.0F, 4.0F, 6.0F, new CubeDeformation(0.0F))
@@ -61,8 +61,8 @@ public class HosegunModel {
         this.handle = root.getChild("Handle");
         this.paintCylinderRight = root.getChild("Paint_Cylinder");
         this.paintCylinderLeft = root.getChild("Paint_Cylinder2");
-        this.paintFillRight = root.getChild("Paint_Cylinder").getChild("paint_fill");
-        this.paintFillLeft = root.getChild("Paint_Cylinder2").getChild("paint_fill2");
+        this.paintFillRight = root.getChild("paint_fill");
+        this.paintFillLeft = root.getChild("paint_fill2");
         this.mainBody = root.getChild("bb_main");
     }
 
@@ -92,21 +92,11 @@ public class HosegunModel {
             int tintArgb
     ) {
         poseStack.pushPose();
-        tankPart.translateAndRotate(poseStack);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-10.0F));
 
-        if (isleft)
-        {
-            poseStack.translate(0.0F, -0.075F, TANK_BACK_Z / 16.0F + 0.375F);
-            poseStack.scale(1.0F, 1.0F, fillRatio);
-            poseStack.translate(-0.235F, 1.385F, -TANK_BACK_Z / 16.0F + 0F);
-        }
-        else
-        {
-            poseStack.translate(0.0F, -0.075F, TANK_BACK_Z / 16.0F + 0.375F);
-            poseStack.scale(1.0F, 1.0F, fillRatio);
-            poseStack.translate(0.235F, 1.385F, -TANK_BACK_Z / 16.0F + 0F);
-        }
+        poseStack.mulPose(Axis.XP.rotationDegrees(-10));
+
+        poseStack.translate(0, -0.085F, TANK_BACK_Z + (1f - fillRatio)*TANK_FILL_SCALE);
+        poseStack.scale(1.0F, 1.0F, fillRatio);
 
         tankPart.render(poseStack, buffer, light, overlay, tintArgb);
         poseStack.popPose();

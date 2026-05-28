@@ -7,6 +7,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
 import net.minecraft.world.item.BlockItem;
@@ -48,6 +49,9 @@ public class ModItems {
             () -> new PlushieItem(ModBlocks.PLUSHIE.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> PAINT_NOZZLE_ITEM = ITEMS.registerSimpleBlockItem("paint_nozzle", ModBlocks.PAINT_NOZZLE);
+
+    public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
+            () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
 
     // -------------------------------------------------------------------------
     // Gel Items

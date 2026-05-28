@@ -10,7 +10,9 @@
     "StructurePoolElementMixin",
     "JigsawPlacementMixin"
   ],
-  "client": [],
+  "client": [
+    "client.LocalPlayerMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

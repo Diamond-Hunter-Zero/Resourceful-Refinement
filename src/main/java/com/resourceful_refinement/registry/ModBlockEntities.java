@@ -13,6 +13,7 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEnti
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -56,6 +57,12 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<PaintNozzleBlockEntity>> PAINT_NOZZLE_BE = BLOCK_ENTITIES.register("paint_nozzle",
             () -> BlockEntityType.Builder.of((pos, state) -> new PaintNozzleBlockEntity(ModBlockEntities.PAINT_NOZZLE_BE.get(), pos, state), ModBlocks.PAINT_NOZZLE.get()).build(null));
+
+    public static final Supplier<BlockEntityType<FluidRefillStationBlockEntity>> FLUID_REFILL_STATION_BE = BLOCK_ENTITIES.register("fluid_refill_station",
+            () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new FluidRefillStationBlockEntity(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), pos, state),
+                    ModBlocks.FLUID_REFILL_STATION.get()
+            ).build(null));
 
     /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */
     public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE =

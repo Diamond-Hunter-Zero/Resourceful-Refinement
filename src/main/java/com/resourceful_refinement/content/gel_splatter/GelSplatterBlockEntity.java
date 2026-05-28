@@ -1,5 +1,7 @@
 package com.resourceful_refinement.content.gel_splatter;
 
+import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -9,7 +11,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.material.Fluids;
 public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBlockEntityAccess {
 
     private Fluid fluid = Fluids.EMPTY;
+    private String trackingId = "";
 
     public GelSplatterBlockEntity(BlockPos pos, BlockState state) {
         this(ModBlockEntities.GEL_SPLATTER_BE.get(), pos, state);
@@ -32,6 +34,37 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
     @Override
     public Fluid getFluid() {
         return this.fluid;
+    }
+
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public boolean hasTrackingId() {
+        return trackingId != null && !trackingId.isEmpty();
+    }
+
+    /**
+     * Tags this splatter for gel minigame tracking (from a bound hosegun). Server only.
+     */
+    public void applyTrackingId(String id) {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+        String sanitised = FluidRefillStationBlockEntity.sanitiseTrackingId(id);
+        if (sanitised.isEmpty()) {
+            return;
+        }
+        if (sanitised.equals(trackingId)) {
+            GelTrackingService.onSplatterAdded((ServerLevel) level, worldPosition, sanitised);
+            return;
+        }
+        if (hasTrackingId()) {
+            GelTrackingService.onSplatterRemoved(level, worldPosition);
+        }
+        trackingId = sanitised;
+        setChanged();
+        GelTrackingService.onSplatterAdded((ServerLevel) level, worldPosition, sanitised);
     }
 
     @Override
@@ -61,9 +94,28 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
     }
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level instanceof ServerLevel server && hasTrackingId()) {
+            GelTrackingService.onSplatterAdded(server, worldPosition, trackingId);
+        }
+    }
+
+    @Override
+    public void setRemoved() {
+        if (level != null && !level.isClientSide && hasTrackingId()) {
+            GelTrackingService.onSplatterRemoved(level, worldPosition);
+        }
+        super.setRemoved();
+    }
+
+    @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putString("Fluid", BuiltInRegistries.FLUID.getKey(fluid).toString());
+        if (hasTrackingId()) {
+            tag.putString("TrackingId", trackingId);
+        }
     }
 
     @Override
@@ -74,6 +126,7 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
             Fluid loaded = BuiltInRegistries.FLUID.get(id);
             this.fluid = loaded != Fluids.EMPTY ? GelPropertiesManager.resolveSourceFluid(loaded) : Fluids.EMPTY;
         }
+        trackingId = tag.contains("TrackingId") ? tag.getString("TrackingId") : "";
     }
 
     @Override

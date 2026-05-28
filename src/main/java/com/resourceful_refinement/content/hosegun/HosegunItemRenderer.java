@@ -65,7 +65,7 @@ public class HosegunItemRenderer extends BlockEntityWithoutLevelRenderer {
         model.renderBody(poseStack, cutout, packedLight, packedOverlay);
 
         if (fillRatio > 0.0F) {
-            var fluidBuffer = bufferSource.getBuffer(RenderType.entityTranslucentCull(TEXTURE));
+            var fluidBuffer = bufferSource.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
             model.renderFluidTanks(poseStack, fluidBuffer, packedLight, OverlayTexture.NO_OVERLAY, fillRatio, fluidTint);
         }
 
@@ -83,7 +83,7 @@ public class HosegunItemRenderer extends BlockEntityWithoutLevelRenderer {
                 poseStack.translate(-0.5F, -0.5F, -0.5F);
             }
             case GROUND -> {
-                poseStack.translate(0.7F, 0.5F, 0.5F);
+                poseStack.translate(0.7F, 0.5F, 0.375F);
                 poseStack.scale(0.3F, 0.3F, 0.3F);
                 poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
                 poseStack.translate(-0.5F, -0.5F, -0.5F);

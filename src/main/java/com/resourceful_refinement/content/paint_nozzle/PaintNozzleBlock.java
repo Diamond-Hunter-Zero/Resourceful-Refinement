@@ -2,12 +2,16 @@ package com.resourceful_refinement.content.paint_nozzle;
 
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.simibubi.create.AllItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -28,12 +32,12 @@ public class PaintNozzleBlock extends DirectionalBlock implements EntityBlock {
     public static final MapCodec<PaintNozzleBlock> CODEC = simpleCodec(PaintNozzleBlock::new);
     public static final BooleanProperty VALVE_OPEN = BooleanProperty.create("valve_open");
 
-    private static final VoxelShape NORTH_AABB = Block.box(0, 5, 5, 16, 11, 11);
-    private static final VoxelShape EAST_AABB = Block.box(5, 5, 0, 11, 11, 16);
-    private static final VoxelShape UP_AABB = Block.box(5, 0, 5, 11, 16, 11);
-    private static final VoxelShape SOUTH_AABB = Block.box(0, 5, 5, 16, 11, 11);
-    private static final VoxelShape WEST_AABB = Block.box(5, 5, 0, 11, 11, 16);
-    private static final VoxelShape DOWN_AABB = Block.box(5, 5, 0, 11, 11, 16);
+    private static final VoxelShape NORTH_AABB = Block.box(3, 3, 3, 13, 13, 16);
+    private static final VoxelShape EAST_AABB = Block.box(0, 3, 3, 13, 13, 13);
+    private static final VoxelShape UP_AABB = Block.box(3, 0, 3, 13, 13, 13);
+    private static final VoxelShape SOUTH_AABB = Block.box(3, 3, 0, 13, 13, 13);
+    private static final VoxelShape WEST_AABB = Block.box(3, 3, 3, 16, 13, 13);
+    private static final VoxelShape DOWN_AABB = Block.box(3, 3, 3, 13, 16, 13);
 
     public PaintNozzleBlock(Properties properties) {
         super(properties);
@@ -127,6 +131,25 @@ public class PaintNozzleBlock extends DirectionalBlock implements EntityBlock {
         }
 
         return InteractionResult.CONSUME;
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!stack.is(AllItems.WRENCH.get())) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof PaintNozzleBlockEntity nozzle)) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        if (!level.isClientSide) {
+            nozzle.cycleFlowSpeed();
+            level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.35F, 1.4F + level.random.nextFloat() * 0.15F);
+        }
+
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

@@ -78,3 +78,6 @@ Gel Splatters are multi-face blocks created when gel-blobs impact solid blocks. 
 
 **Paint Nozzle**
 A directional pipe block, which sprays gel-blobs while open.
+
+**Fluid Refill Station**
+A directional fluid tank block, which allows players to quickly refill fluid storing items such as Hoseguns. Can also be paired with Hoseguns and Display Links to track linked gel splatter blocks for minigames.

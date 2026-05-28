@@ -2,12 +2,8 @@ package com.resourceful_refinement.content.paint_nozzle;
 
 import com.resourceful_refinement.content.hosegun.GelBlobEntity;
 import com.resourceful_refinement.content.hosegun.HosegunItem;
-import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
 import com.resourceful_refinement.registry.ModEntities;
-import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -17,9 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,6 +31,7 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
     public static final int TANK_CAPACITY = 500;
 
     private int sprayTicks;
+    private PaintNozzleFlowSpeed flowSpeed = PaintNozzleFlowSpeed.DEFAULT;
 
     public final FluidTank tank = new FluidTank(TANK_CAPACITY, stack -> stack.isEmpty() || stack.getAmount() <= TANK_CAPACITY) {
         @Override
@@ -47,6 +42,16 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
 
     public PaintNozzleBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    public PaintNozzleFlowSpeed getFlowSpeed() {
+        return flowSpeed;
+    }
+
+    public PaintNozzleFlowSpeed cycleFlowSpeed() {
+        flowSpeed = flowSpeed.next();
+        syncData();
+        return flowSpeed;
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, PaintNozzleBlockEntity be) {
@@ -82,7 +87,7 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
         Vec3 spawn = Vec3.atCenterOf(worldPosition)
                 .add(Vec3.atLowerCornerOf(sprayDir.getNormal()).scale(0.55D));
 
-        float velocity = 1.6F * HosegunItem.GEL_BLOB_VELOCITY_FACTOR;
+        float velocity = 1.6F * HosegunItem.GEL_BLOB_VELOCITY_FACTOR * flowSpeed.getVelocityFactor();
         GelBlobEntity projectile = new GelBlobEntity(ModEntities.GEL_BLOB.get(), spawn.x, spawn.y, spawn.z, level);
         projectile.setFluid(tank.getFluid().getFluid());
         projectile.shoot(
@@ -125,6 +130,7 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
         super.saveAdditional(tag, registries);
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putInt("SprayTicks", sprayTicks);
+        tag.putInt("FlowSpeed", flowSpeed.ordinal());
     }
 
     @Override
@@ -134,6 +140,9 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
             tank.readFromNBT(registries, tag.getCompound("Tank"));
         }
         sprayTicks = tag.getInt("SprayTicks");
+        if (tag.contains("FlowSpeed")) {
+            flowSpeed = PaintNozzleFlowSpeed.fromOrdinal(tag.getInt("FlowSpeed"));
+        }
     }
 
     @Override
@@ -162,6 +171,8 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
             tooltip.add(Component.literal("§a- Valve open -"));
         else
             tooltip.add(Component.literal("§c- Valve closed -"));
+
+        tooltip.add(Component.literal("§6Flow speed: §7").append(flowSpeed.displayName()));
 
         FluidStack tankOutputFluid = tank.getFluid();
         if (tankOutputFluid.isEmpty())

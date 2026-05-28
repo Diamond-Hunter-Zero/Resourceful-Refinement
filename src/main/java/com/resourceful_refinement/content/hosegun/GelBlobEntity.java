@@ -3,9 +3,12 @@ package com.resourceful_refinement.content.hosegun;
 import com.resourceful_refinement.content.gel_splatter.GelImpactConstants;
 import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntityAccess;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlocks;
+import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.gel_splatter.GelType;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,12 +22,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -48,6 +51,7 @@ import java.util.Set;
 public class GelBlobEntity extends ThrowableItemProjectile {
 
     private static final EntityDataAccessor<String> FLUID_ID = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> TRACKING_ID = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.STRING);
 
     private static final Map<Fluid, DyeColor> PAINT_FLUID_COLORS = new HashMap<>();
 
@@ -100,6 +104,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder); // Let parent register its data (e.g. item slot, ID 8)
         builder.define(FLUID_ID, "minecraft:empty");
+        builder.define(TRACKING_ID, "");
     }
 
     public void setFluid(Fluid fluid) {
@@ -110,10 +115,26 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         return BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.entityData.get(FLUID_ID)));
     }
 
+    public void setTrackingId(String trackingId) {
+        this.entityData.set(TRACKING_ID, FluidRefillStationBlockEntity.sanitiseTrackingId(trackingId));
+    }
+
+    public String getTrackingId() {
+        return this.entityData.get(TRACKING_ID);
+    }
+
+    public boolean hasTrackingId() {
+        String id = getTrackingId();
+        return id != null && !id.isEmpty();
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putString("Fluid", this.entityData.get(FLUID_ID));
+        if (hasTrackingId()) {
+            tag.putString("TrackingId", getTrackingId());
+        }
     }
 
     @Override
@@ -121,6 +142,9 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         super.readAdditionalSaveData(tag);
         if (tag.contains("Fluid")) {
             this.entityData.set(FLUID_ID, tag.getString("Fluid"));
+        }
+        if (tag.contains("TrackingId")) {
+            setTrackingId(tag.getString("TrackingId"));
         }
     }
 
@@ -288,6 +312,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                     splatterBe.setFluid(resolvedFluid);
                 }
             }
+            tagSplatterTracking(placePos);
             return;
         }
 
@@ -305,6 +330,17 @@ public class GelBlobEntity extends ThrowableItemProjectile {
             if (be instanceof GelSplatterBlockEntityAccess splatterBe) {
                 splatterBe.setFluid(resolvedFluid);
             }
+            tagSplatterTracking(placePos);
+        }
+    }
+
+    private void tagSplatterTracking(BlockPos placePos) {
+        if (!hasTrackingId()) {
+            return;
+        }
+        BlockEntity be = this.level().getBlockEntity(placePos);
+        if (be instanceof GelSplatterBlockEntity splatter) {
+            splatter.applyTrackingId(getTrackingId());
         }
     }
 
@@ -333,6 +369,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                 continue;
             }
             if (GelSplatterBlocks.is(this.level().getBlockState(pos))) {
+                GelTrackingService.onSplatterRemoved(this.level(), pos);
                 this.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             }
         }

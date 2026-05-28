@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BC ",
+    " D "
+  ],
+  "key": {
+    "A": {
+      "item": "create:fluid_pipe"
+    },
+    "B": {
+      "item": "resourceful_refinement:durasteel_ingot"
+    },
+    "C": {
+      "item": "create:fluid_tank"
+    },
+    "D": {
+      "item": "create:brass_casing"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:fluid_refill_station",
+    "count": 2
+  }
+}

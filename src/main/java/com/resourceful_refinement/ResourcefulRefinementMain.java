@@ -24,6 +24,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import com.resourceful_refinement.registry.*;
@@ -35,6 +36,11 @@ import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.*;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
+import com.resourceful_refinement.network.ModNetworking;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
@@ -48,6 +54,7 @@ public class ResourcefulRefinementMain {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(ModNetworking::registerPayloadHandlers);
 
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
@@ -158,6 +165,14 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Fluid Refill Station ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FLUID_REFILL_STATION_BE.get(), (be, side) -> {
+            if (!FluidRefillStationBlock.isPipeFace(be.getBlockState(), side)) {
+                return null;
+            }
+            return be.tank;
+        });
+
         // --- Hosegun Item Capability ---
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
     }
@@ -185,6 +200,11 @@ public class ResourcefulRefinementMain {
         }
 
         @SubscribeEvent
+        public static void registerMenuScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
+        }
+
+        @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.BLENDER_BLADE.get(), BlenderBladeRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_KINETIC_PROXY.get(), RefineryKineticProxyRenderer::new);
@@ -196,7 +216,8 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
-            
+            event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         }
@@ -239,6 +260,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.TOP, FrackingPumpTopModel::createBodyLayer);
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
+            event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
         }
     }
 

@@ -1,58 +1,101 @@
 package com.resourceful_refinement.content.refill_station;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.resourceful_refinement.network.SetRefillStationTrackingIdPayload;
+import com.resourceful_refinement.registry.ModBlocks;
+import dev.engine_room.flywheel.lib.transform.TransformStack;
+import net.createmod.catnip.gui.AbstractSimiScreen;
+import net.createmod.catnip.gui.element.GuiGameElement;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
-public class FluidRefillStationScreen extends AbstractContainerScreen<FluidRefillStationMenu> {
+/**
+ * Create-style configuration screen: blurred world background, custom panel texture, and block preview.
+ */
+public class FluidRefillStationScreen extends AbstractSimiScreen implements MenuAccess<FluidRefillStationMenu> {
 
+    private static final int TITLE_COLOR = 0x592424;
+    private static final int LABEL_COLOR = 0xB8B8B8;
+    private static final int FOOTER_HINT_COLOR = 0x6E6E6E;
+
+    private static final int INPUT_X = 16;
+    private static final int INPUT_Y = 47;
+    private static final int INPUT_WIDTH = RefillStationGuiTextures.PANEL_WIDTH - 32;
+    private static final int INPUT_HEIGHT = 18;
+
+    private final FluidRefillStationMenu menu;
     private EditBox trackingIdField;
 
     public FluidRefillStationScreen(FluidRefillStationMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = 176;
-        this.imageHeight = 92;
+        super(title);
+        this.menu = menu;
+    }
+
+    @Override
+    public FluidRefillStationMenu getMenu() {
+        return menu;
     }
 
     @Override
     protected void init() {
+        setWindowSize(RefillStationGuiTextures.PANEL_WIDTH, RefillStationGuiTextures.PANEL_HEIGHT);
+        setWindowOffset(-20, 0);
         super.init();
-        int fieldX = leftPos + 8;
-        int fieldY = topPos + 32;
 
-        trackingIdField = new EditBox(font, fieldX, fieldY, 160, 18, Component.translatable("gui.resourceful_refinement.fluid_refill_station.tracking_id"));
+        int fieldX = guiLeft + INPUT_X;
+        int fieldY = guiTop + INPUT_Y;
+
+        trackingIdField = new EditBox(font, fieldX, fieldY, INPUT_WIDTH, INPUT_HEIGHT, Component.empty());
         trackingIdField.setMaxLength(FluidRefillStationBlockEntity.MAX_TRACKING_ID_LENGTH);
         trackingIdField.setValue(menu.getInitialTrackingId());
         trackingIdField.setHint(Component.translatable("gui.resourceful_refinement.fluid_refill_station.tracking_id_hint"));
+        trackingIdField.setBordered(false);
+        trackingIdField.setTextColor(0xFFFFFF);
+        trackingIdField.setTextColorUneditable(0xFFFFFF);
         addRenderableWidget(trackingIdField);
         setInitialFocus(trackingIdField);
 
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.resourceful_refinement.fluid_refill_station.save"),
-                        button -> saveAndClose())
-                .bounds(leftPos + 8, topPos + 58, 78, 20)
-                .build());
+        addRenderableWidget(new RefillStationHoverButton(
+                guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 33,
+                guiTop + 4,
+                RefillStationGuiTextures.HOVER_CLOSE,
+                this::onClose));
 
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.resourceful_refinement.fluid_refill_station.clear"),
-                        button -> trackingIdField.setValue(""))
-                .bounds(leftPos + 90, topPos + 58, 78, 20)
-                .build());
+        addRenderableWidget(new RefillStationHoverButton(
+                guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 59,
+                guiTop + RefillStationGuiTextures.PANEL_HEIGHT - 24,
+                RefillStationGuiTextures.HOVER_CLEAR,
+                () -> trackingIdField.setValue("")));
+
+        addRenderableWidget(new RefillStationHoverButton(
+                guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 33,
+                guiTop + RefillStationGuiTextures.PANEL_HEIGHT - 24,
+                RefillStationGuiTextures.HOVER_SAVE,
+                this::saveAndClose));
     }
 
     private void saveAndClose() {
         PacketDistributor.sendToServer(new SetRefillStationTrackingIdPayload(menu.getBlockPos(), trackingIdField.getValue()));
+        onClose();
+    }
+
+    @Override
+    public void onClose() {
         if (minecraft != null && minecraft.player != null) {
             minecraft.player.closeContainer();
         }
+        super.onClose();
     }
 
     @Override
@@ -68,7 +111,6 @@ public class FluidRefillStationScreen extends AbstractContainerScreen<FluidRefil
             return true;
         }
 
-        // AbstractContainerScreen routes inventory / other menu keys to closeContainer + other screens.
         if (isBlockedMenuHotkey(key)) {
             return true;
         }
@@ -89,10 +131,6 @@ public class FluidRefillStationScreen extends AbstractContainerScreen<FluidRefil
         return false;
     }
 
-    /**
-     * Hotkeys that would close this screen or open another GUI (handled by {@link AbstractContainerScreen}
-     * or global keybinds). Escape is handled separately above.
-     */
     private boolean isBlockedMenuHotkey(InputConstants.Key key) {
         return matchesKey(minecraft.options.keyInventory, key)
                 || matchesKey(minecraft.options.keyAdvancements, key)
@@ -112,28 +150,43 @@ public class FluidRefillStationScreen extends AbstractContainerScreen<FluidRefil
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xF0101010);
-        graphics.fill(leftPos + 1, topPos + 1, leftPos + imageWidth - 1, topPos + imageHeight - 1, 0xFF2B2B2B);
+    protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        int x = guiLeft;
+        int y = guiTop;
+
+        RefillStationGuiTextures.PANEL.render(graphics, x, y);
+
+        graphics.drawString(font, title, x + 8, y + 4, TITLE_COLOR, false);
+
+        Component label = Component.translatable("gui.resourceful_refinement.fluid_refill_station.tracking_id_label");
+        graphics.drawString(font, label, x + 12, y + 29, LABEL_COLOR, false);
+
+        Component footerHint = Component.translatable("gui.resourceful_refinement.fluid_refill_station.footer_hint");
+        graphics.drawString(font, footerHint, x + 8, y + RefillStationGuiTextures.PANEL_HEIGHT - 24, FOOTER_HINT_COLOR, false);
+
+        Component footerHint2 = Component.translatable("gui.resourceful_refinement.fluid_refill_station.footer_hint2");
+        graphics.drawString(font, footerHint2, x + 8, y + RefillStationGuiTextures.PANEL_HEIGHT - 14, FOOTER_HINT_COLOR, false);
+
+
+        renderBlockPreview(graphics, x, y);
     }
 
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        trackingIdField.render(graphics, mouseX, mouseY, partialTick);
-    }
+    private void renderBlockPreview(GuiGraphics graphics, int guiX, int guiY) {
+        BlockPos pos = menu.getBlockPos();
+        Level level = minecraft.level;
+        if (level == null) {
+            return;
+        }
 
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, 8, 8, 0xE0E0E0, false);
-        graphics.drawString(font,
-                Component.translatable("gui.resourceful_refinement.fluid_refill_station.tracking_id_label"),
-                8, 22, 0xA0A0A0, false);
-    }
+        RenderSystem.enableDepthTest();
 
-    @Override
-    protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        // No item slots
+        var pose = graphics.pose();
+        pose.pushPose();
+        TransformStack.of(pose)
+                .pushPose()
+                .translate((guiX + RefillStationGuiTextures.PANEL_WIDTH + 4), (guiY + RefillStationGuiTextures.PANEL_HEIGHT-34), 5)
+                .scale(2.5f);
+        GuiGameElement.of(ModBlocks.FLUID_REFILL_STATION).render(graphics);
+        pose.popPose();
     }
 }

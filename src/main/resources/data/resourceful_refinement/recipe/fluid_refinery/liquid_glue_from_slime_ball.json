@@ -1,0 +1,21 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "none",
+  "processing_time": 100,
+  "ingredients": [
+    {
+      "item": "minecraft:slime_ball"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_glue",
+      "amount": 250
+    }
+  ]
+}

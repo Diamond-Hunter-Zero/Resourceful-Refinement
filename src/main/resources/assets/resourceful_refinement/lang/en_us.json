@@ -9,6 +9,12 @@
   "block.resourceful_refinement.fracking_pump_outlet": "Fracking Pylon Outlet",
   "block.resourceful_refinement.geyser_block": "Geyser Block",
   "block.resourceful_refinement.fox_plushie": "Trinket Plushie",
+  "block.resourceful_refinement.paint_nozzle": "Paint Nozzle",
+  "block.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "block.resourceful_refinement.gel_splatter": "Gel Splatter",
+  "block.resourceful_refinement.gel_splatter_sticky": "Sticky Gel Splatter",
+  "block.resourceful_refinement.gel_splatter_slippery": "Slippery Gel Splatter",
 
   "fluid_type.resourceful_refinement.molten_crimsite": "Molten Crimsite",
   "block.resourceful_refinement.molten_crimsite": "Molten Crimsite",
@@ -106,16 +112,21 @@
   "block.resourceful_refinement.carborax_diesel": "Carborax Diesel",
   "item.resourceful_refinement.carborax_diesel_bucket": "Carborax Diesel Bucket",
 
+  "fluid_type.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
+  "block.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
+  "item.resourceful_refinement.catalysed_sparkpowder_bucket": "Catalysed Sparkpowder Bucket",
+
+  "fluid_type.resourceful_refinement.liquid_glue": "Liquid Glue",
+  "block.resourceful_refinement.liquid_glue": "Liquid Glue",
+  "item.resourceful_refinement.liquid_glue_bucket": "Liquid Glue",
+
   "item.resourceful_refinement.ferrous_crystal": "Ferrous Crystal",
   "item.resourceful_refinement.flux_dust": "Flux Dust",
   "item.resourceful_refinement.durasteel_ingot": "Durasteel Ingot",
   "item.resourceful_refinement.durasteel_sheet": "Durasteel Sheet",
   "item.resourceful_refinement.ingot_mould": "Ingot Mould",
   "item.resourceful_refinement.shaft_mould": "Shaft Mould",
-
-  "fluid_type.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
-  "block.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
-  "item.resourceful_refinement.catalysed_sparkpowder_bucket": "Catalysed Sparkpowder Bucket",
+  "item.resourceful_refinement.hosegun": "Hosegun",
 
   "resourceful_refinement.ponder.tag.resourceful_refinement": "Resourceful Refinement Processing",
   "resourceful_refinement.ponder.tag.resourceful_refinement.description": "Components which allow for advanced processing of raw resources through fluids",
@@ -230,10 +241,10 @@
   "resourceful_refinement.ponder.blender_blades.text_5": "The higher the RPM, the stronger the pull",
   "resourceful_refinement.ponder.blender_blades.text_6": "Mobs and players will continuously take damage while being stirred in a blender blade!",
 
-  "block.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
-  "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
   "gui.resourceful_refinement.fluid_refill_station.tracking_id": "Tracking ID",
-  "gui.resourceful_refinement.fluid_refill_station.tracking_id_label": "Gel tracking label (shared across stations):",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id_label": "Tracking ID:",
+  "gui.resourceful_refinement.fluid_refill_station.footer_hint": "Press to confirm",
+  "gui.resourceful_refinement.fluid_refill_station.footer_hint2": "Tracking ID",
   "gui.resourceful_refinement.fluid_refill_station.tracking_id_hint": "e.g. Team Red",
   "gui.resourceful_refinement.fluid_refill_station.save": "Save",
   "gui.resourceful_refinement.fluid_refill_station.clear": "Clear",
@@ -244,7 +255,7 @@
   "message.resourceful_refinement.refill_station.hosegun_bound": "Hosegun bound to \"%s\".",
   "message.resourceful_refinement.refill_station.hosegun_unbound": "Hosegun unbound from \"%s\".",
   "resourceful_refinement.display_source.fluid_refill_station": "Fluid Refill Station",
-  "block.resourceful_refinement.paint_nozzle": "Paint Nozzle",
+
   "paint_nozzle.flow_speed.low": "Low",
   "paint_nozzle.flow_speed.medium": "Medium",
   "paint_nozzle.flow_speed.high": "High"

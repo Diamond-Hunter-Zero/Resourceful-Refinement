@@ -55,6 +55,9 @@ public class ModFluids {
     public static final FluidEntry OVERCHARGED_CARBORAX = register("overcharged_carborax", 0x461B66, FluidGroup.CARBORAX);
     public static final FluidEntry CARBORAX_DIESEL = register("carborax_diesel", 0x7868A60, FluidGroup.CARBORAX);
 
+    // Misc Fluids
+    public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
+
     // Paint Fluids (v0.2)
     public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);
     public static final FluidEntry ORANGE_PAINT = register("orange_paint", 0xF9801D, FluidGroup.PAINT);

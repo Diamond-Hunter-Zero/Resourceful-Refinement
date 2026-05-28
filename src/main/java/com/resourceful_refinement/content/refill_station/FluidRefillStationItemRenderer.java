@@ -61,10 +61,14 @@ public class FluidRefillStationItemRenderer extends BlockEntityWithoutLevelRende
     private static void applyDisplayTransform(ItemDisplayContext context, PoseStack poseStack) {
         switch (context) {
             case GUI -> {
-                poseStack.translate(0.5F, 0.95F, 0.5F);
-                poseStack.scale(0.55F, -0.55F, -0.55F);
-                poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
-                poseStack.mulPose(Axis.XP.rotationDegrees(25.0F));
+                poseStack.translate(0.94, 0.24, 0.5);
+                poseStack.scale(0.62f, 0.62f, 0.62f);
+
+                // Standard item orientation
+                poseStack.mulPose(Axis.YP.rotationDegrees(223f));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(-22f));
+                poseStack.mulPose(Axis.XP.rotationDegrees(-22f));
+
             }
             case GROUND -> {
                 poseStack.translate(0.5F, 0.85F, 0.5F);

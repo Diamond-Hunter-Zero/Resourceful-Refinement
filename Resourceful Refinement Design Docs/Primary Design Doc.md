@@ -84,3 +84,6 @@ A directional fluid tank block, which allows players to quickly refill fluid sto
 
 **Liquid Glue**
 A fluid form of glue, replacing slime-balls and honey in some recipes.
+
+**Plunger**
+A thrown trident-like weapon, which can be used to right-click on fluid containing blocks to empty their fluid tanks.

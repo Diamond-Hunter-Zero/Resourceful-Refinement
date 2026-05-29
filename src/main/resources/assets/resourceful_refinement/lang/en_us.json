@@ -191,6 +191,8 @@
   "item.resourceful_refinement.ingot_mould": "Ingot Mould",
   "item.resourceful_refinement.shaft_mould": "Shaft Mould",
   "item.resourceful_refinement.hosegun": "Hosegun",
+  "item.resourceful_refinement.plunger": "Plunger",
+  "tooltip.resourceful_refinement.plunger": "Right-click fluid tanks to empty them",
 
   "resourceful_refinement.ponder.tag.resourceful_refinement": "Resourceful Refinement Processing",
   "resourceful_refinement.ponder.tag.resourceful_refinement.description": "Components which allow for advanced processing of raw resources through fluids",
@@ -314,6 +316,7 @@
   "gui.resourceful_refinement.fluid_refill_station.clear": "Clear",
   "gui.resourceful_refinement.fluid_refill_station.browse_ids": "Browse tracking IDs",
   "gui.resourceful_refinement.fluid_refill_station.no_tracking_ids": "No tracking IDs in this world",
+
   "tooltip.resourceful_refinement.hosegun.empty": "Empty",
   "tooltip.resourceful_refinement.hosegun.tracking_id": "Tracking: %s",
   "tooltip.resourceful_refinement.hosegun.tracking_id_unbound": "Tracking: unbound",
@@ -321,6 +324,10 @@
   "message.resourceful_refinement.refill_station.hosegun_bound": "Hosegun bound to \"%s\".",
   "message.resourceful_refinement.refill_station.hosegun_unbound": "Hosegun unbound from \"%s\".",
   "resourceful_refinement.display_source.fluid_refill_station": "Fluid Refill Station",
+
+  "death.attack.molten_gel_damage": "%1$s discovered the lava was floor.",
+  "death.attack.molten_gel_damage.player": "%1$s was incinerated by %2$s using spicy gel.",
+  "death.attack.molten_gel_damage.item": "%1$s was incinerated by %2$s's molten %3$s.",
 
   "paint_nozzle.flow_speed.low": "Low",
   "paint_nozzle.flow_speed.medium": "Medium",

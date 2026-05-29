@@ -9,6 +9,7 @@ import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
+import com.resourceful_refinement.content.fluids.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -78,6 +79,9 @@ public class ModItems {
 
     public static final DeferredItem<com.resourceful_refinement.content.hosegun.HosegunItem> HOSEGUN = ITEMS.register("hosegun",
             () -> new com.resourceful_refinement.content.hosegun.HosegunItem(new Item.Properties()));
+
+    public static final DeferredItem<PlungerItem> PLUNGER = ITEMS.register("plunger",
+            () -> new PlungerItem(PlungerItem.createProperties()));
 
     // -------------------------------------------------------------------------
     // Buckets (Handled by FluidEntry)

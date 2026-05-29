@@ -9,6 +9,7 @@ import com.resourceful_refinement.content.gel_splatter.GelSplatterBlocks;
 import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.gel_splatter.GelType;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
+import com.resourceful_refinement.registry.ModDamageTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -209,8 +210,8 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
         switch (type) {
             case MOLTEN -> {
-                entity.hurt(this.level().damageSources().thrown(this, this.getOwner()), 4.0F);
-                entity.igniteForSeconds(4);
+                entity.hurt(ModDamageTypes.moltenGel(this.level(), this, this.getOwner()), 2.0F);
+                //entity.igniteForSeconds(4);
             }
             case BOUNCY -> {
                 if (entity instanceof LivingEntity living) {

@@ -1,0 +1,6 @@
+{
+  "message_id": "molten_gel_damage",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "effects": "hurt"
+}

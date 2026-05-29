@@ -3,6 +3,7 @@ package com.resourceful_refinement.content.gel_splatter;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModDamageTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -167,7 +168,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
         switch (gelType) {
             case MOLTEN -> {
                 if (entity instanceof LivingEntity living) {
-                    living.hurt(level.damageSources().lava(), 2.0F);
+                    living.hurt(ModDamageTypes.moltenGel(level), 2.0F);
                 }
                 //entity.igniteForSeconds(3);
             }

@@ -220,6 +220,7 @@ public class ResourcefulRefinementMain {
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+            event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), com.resourceful_refinement.content.fluids.ThrownPlungerRenderer::new);
         }
 
         @SubscribeEvent

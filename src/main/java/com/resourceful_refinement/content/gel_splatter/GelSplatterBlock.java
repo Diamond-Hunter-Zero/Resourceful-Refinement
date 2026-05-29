@@ -1,10 +1,11 @@
 package com.resourceful_refinement.content.gel_splatter;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -52,13 +53,15 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     /** How close the entity's feet must be to a gel surface to count as contact. */
     private static final double SURFACE_CONTACT_TOLERANCE = 0.15D;
 
-    /** Cap bounce speed so repeated {@code entityInside} ticks cannot escalate height. */
+    /** Cap bounce height so repeated landings cannot escalate without limit. */
     private static final double MAX_BOUNCE_SPEED = 0.55D;
 
     private static final double BOUNCE_DAMPING = 0.8D;
 
     /** Minimum downward speed before a bounce triggers (ignores gravity micro-jitter while standing). */
-    private static final double MIN_FALL_SPEED = 0.15D;
+    private static final double MIN_FALL_SPEED = 0.08D;
+
+    private static final String BOUNCED_THIS_TICK_KEY = "resourceful_refinement_bounced_tick";
 
     public GelSplatterBlock(Properties properties) {
         super(properties);
@@ -138,13 +141,159 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
         if (fluid == Fluids.EMPTY) return super.getFriction(state, level, pos, entity);
         GelType gelType = GelPropertiesManager.getGelType(fluid);
 
-        // Make the block slippery if SPEEDY gel
+        // Slippery surfaces — preserve horizontal momentum while contacting the gel
         if (gelType == GelType.SPEEDY) {
             return 0.96f;
         }
+        if (gelType == GelType.BOUNCY) {
+            return 0.925f;
+        }
 
-        // Default behavior for other times
         return super.getFriction(state, level, pos, entity);
+    }
+
+    @Override
+    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
+        if (isBouncyGel(level, pos) && state.getBlock() instanceof GelSplatterBlock gelBlock
+                && gelBlock.isContactingBouncyFloor(state, level, pos, entity)) {
+            gelBlock.tryBounceEntity(level, pos, state, entity);
+            return;
+        }
+        super.fallOn(level, state, pos, entity, fallDistance);
+    }
+
+    /**
+     * Bouncy gel inverts vertical motion on landing (like slime blocks) without touching horizontal speed.
+     * Thin multiface gels rarely receive {@code updateEntityAfterFallOn} — vanilla attributes movement to the
+     * block below the 1-pixel slab — so {@link #entityInside} is the primary bounce path.
+     */
+    @Override
+    public void updateEntityAfterFallOn(BlockGetter level, Entity entity) {
+        if (tryBounceEntityOnGel(level, entity)) {
+            return;
+        }
+        super.updateEntityAfterFallOn(level, entity);
+    }
+
+    private static boolean isBouncyGel(BlockGetter level, BlockPos pos) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof GelSplatterBlockEntityAccess splatterBe)) {
+            return false;
+        }
+        Fluid fluid = splatterBe.getFluid();
+        return fluid != Fluids.EMPTY && GelPropertiesManager.getGelType(fluid) == GelType.BOUNCY;
+    }
+
+    /** Attempt bounce on any bouncy gel surface the entity is intersecting (floor gel in neighbouring cells included). */
+    static boolean tryBounceEntityOnGel(BlockGetter level, Entity entity) {
+        AABB box = entity.getBoundingBox();
+        BlockPos min = BlockPos.containing(box.minX, box.minY, box.minZ);
+        BlockPos max = BlockPos.containing(box.maxX, box.maxY, box.maxZ);
+
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            if (!isBouncyGel(level, pos)) {
+                continue;
+            }
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof GelSplatterBlock gelBlock
+                    && gelBlock.isContactingBouncyFloor(state, level, pos, entity)
+                    && gelBlock.tryBounceEntity(level instanceof Level l ? l : null, pos, state, entity)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** @return {@code true} if a bounce was applied this call */
+    boolean tryBounceEntity(@Nullable Level level, BlockPos pos, BlockState state, Entity entity) {
+        if (!applyBounce(entity)) {
+            return false;
+        }
+        if (level instanceof ServerLevel server && pos != null && state != null) {
+            Fluid fluid = Fluids.EMPTY;
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof GelSplatterBlockEntityAccess splatter) {
+                fluid = splatter.getFluid();
+            }
+            double impactY = findBouncyContactSurfaceY(state, level, pos, entity).orElse(entity.getY());
+            BouncyGelEffects.spawn(server, entity.getX(), impactY, entity.getZ(), fluid);
+        }
+        return true;
+    }
+
+    private static boolean applyBounce(Entity entity) {
+        if (entity.isSuppressingBounce()) {
+            return false;
+        }
+        if (entity instanceof Player player && player.isCrouching()) {
+            return false;
+        }
+
+        CompoundTag data = entity.getPersistentData();
+        if (data.getInt(BOUNCED_THIS_TICK_KEY) == entity.tickCount) {
+            return false;
+        }
+
+        Vec3 velocity = entity.getDeltaMovement();
+        if (velocity.y >= -MIN_FALL_SPEED) {
+            return false;
+        }
+
+        Vec3 horizontal = BouncyGelMomentumHelper.resolveHorizontalForBounce(entity, velocity);
+        double damping = entity instanceof LivingEntity ? BOUNCE_DAMPING : BOUNCE_DAMPING * 0.8D;
+        double bounceY = Math.min(-velocity.y * damping, MAX_BOUNCE_SPEED);
+        Vec3 bounced = new Vec3(horizontal.x, bounceY, horizontal.z);
+
+        data.putInt(BOUNCED_THIS_TICK_KEY, entity.tickCount);
+        entity.setOnGround(false);
+        entity.setDeltaMovement(bounced);
+        entity.fallDistance = 0;
+        entity.hasImpulse = true;
+        entity.hurtMarked = true;
+
+        if (entity instanceof ServerPlayer serverPlayer) {
+            serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
+        }
+        return true;
+    }
+
+    private boolean isContactingBouncyFloor(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
+        return findBouncyContactSurfaceY(state, level, pos, entity).isPresent();
+    }
+
+    /**
+     * Highest walkable gel surface the entity is landing on (DOWN-face floor gel or UP-face on block top).
+     */
+    private OptionalDouble findBouncyContactSurfaceY(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
+        VoxelShape shape = state.getShape(level, pos, CollisionContext.of(entity));
+        if (shape.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+
+        double entityBottom = entity.getBoundingBox().minY;
+        double bestSurface = Double.NEGATIVE_INFINITY;
+        boolean found = false;
+
+        for (AABB localBox : shape.toAabbs()) {
+            AABB worldBox = localBox.move(pos);
+            double top = worldBox.maxY;
+            double height = top - worldBox.minY;
+
+            // Skip tall wall patches; only horizontal walkable slabs bounce
+            if (height > GEL_FACE_THICKNESS * 3.0D) {
+                continue;
+            }
+
+            if (entityBottom + SURFACE_CONTACT_TOLERANCE >= top
+                    && entityBottom - SURFACE_CONTACT_TOLERANCE <= top + 0.25D) {
+                if (top > bestSurface) {
+                    bestSurface = top;
+                    found = true;
+                }
+            }
+        }
+
+        return found ? OptionalDouble.of(bestSurface) : OptionalDouble.empty();
     }
 
 
@@ -208,12 +357,13 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
             }
             case GOOEY -> {
                 // Sticky effect: Slow down entity velocity significantly
-                /*entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.5D, 0.7D, 0.5D));
-                if (entity instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
-                }*/
+                /*entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.5D, 0.7D, 0.5D));*/
             }
-            case BOUNCY -> applyBouncyGelEffect(state, level, pos, entity);
+            case BOUNCY -> {
+                if (isContactingBouncyFloor(state, level, pos, entity)) {
+                    tryBounceEntity(level, pos, state, entity);
+                }
+            }
             case CURSED -> {
                 if (entity instanceof LivingEntity living) {
                     living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, false));
@@ -226,91 +376,6 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                 }
             }
         }
-    }
-
-    /**
-     * Bounce only when feet touch the thin gel geometry, not when the entity merely enters the block space.
-     */
-    private void applyBouncyGelEffect(BlockState state, Level level, BlockPos pos, Entity entity) {
-        Vec3 velocity = entity.getDeltaMovement();
-
-        if (velocity.y >= 0.0D || velocity.y > -MIN_FALL_SPEED) {
-            return;
-        }
-        // Standing on gel applies tiny downward deltas each tick; require an actual fall.
-        if (entity.fallDistance < 0.15F) {
-            return;
-        }
-
-        OptionalDouble surfaceY = findBouncyContactSurfaceY(state, level, pos, entity);
-        if (surfaceY.isEmpty()) {
-            return;
-        }
-
-        double entityBottom = entity.getBoundingBox().minY;
-        double surface = surfaceY.getAsDouble();
-        if (entityBottom + SURFACE_CONTACT_TOLERANCE < surface
-                || entityBottom - SURFACE_CONTACT_TOLERANCE > surface + 0.25D) {
-            return;
-        }
-
-        double bounceY = Math.min(Math.abs(velocity.y) * BOUNCE_DAMPING, MAX_BOUNCE_SPEED);
-        if (bounceY < MIN_FALL_SPEED * BOUNCE_DAMPING) {
-            return;
-        }
-
-        if (entityBottom < surface - 0.005D) {
-            entity.setPos(entity.getX(), surface + 0.003D, entity.getZ());
-        }
-
-        if (entity instanceof ServerPlayer serverPlayer) {
-
-            if (serverPlayer.isCrouching()) return;
-
-            entity.setDeltaMovement(velocity.x, bounceY, velocity.z);
-            entity.fallDistance = 0;
-            serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
-            return;
-        }
-
-        entity.setDeltaMovement(velocity.x, bounceY, velocity.z);
-        entity.fallDistance = 0;
-    }
-
-    /**
-     * Highest walkable gel surface the entity is landing on (DOWN-face floor gel or UP-face on block top).
-     */
-    private OptionalDouble findBouncyContactSurfaceY(BlockState state, Level level, BlockPos pos, Entity entity) {
-        VoxelShape shape = state.getShape(level, pos, CollisionContext.of(entity));
-        if (shape.isEmpty()) {
-            return OptionalDouble.empty();
-        }
-
-        double entityBottom = entity.getBoundingBox().minY;
-        double bestSurface = Double.NEGATIVE_INFINITY;
-        boolean found = false;
-
-        for (AABB localBox : shape.toAabbs()) {
-            AABB worldBox = localBox.move(pos);
-            double top = worldBox.maxY;
-            double height = top - worldBox.minY;
-
-            // Skip tall wall patches; only horizontal walkable slabs bounce
-            if (height > GEL_FACE_THICKNESS * 3.0D) {
-                continue;
-            }
-
-            // Accept feet on the slab top, or slightly above while intersecting the block on impact
-            if (entityBottom + SURFACE_CONTACT_TOLERANCE >= top
-                    && entityBottom - SURFACE_CONTACT_TOLERANCE <= top + 0.25D) {
-                if (top > bestSurface) {
-                    bestSurface = top;
-                    found = true;
-                }
-            }
-        }
-
-        return found ? OptionalDouble.of(bestSurface) : OptionalDouble.empty();
     }
 
     // Optional: Make it emit light like glow lichen (e.g., if Molten, Speedy, or Overcharged Carborax is active)

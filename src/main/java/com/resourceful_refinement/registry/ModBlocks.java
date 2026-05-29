@@ -103,7 +103,8 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .strength(0.5f)
                     .sound(SoundType.SLIME_BLOCK)
-                    .noOcclusion()));
+                    .noOcclusion()
+                    .noLootTable()));
 
     public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_SLIPPERY = BLOCKS.register("gel_splatter_slippery",
             () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
@@ -112,7 +113,8 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .strength(0.5f)
                     .sound(SoundType.SLIME_BLOCK)
-                    .noOcclusion()));
+                    .noOcclusion()
+                    .noLootTable()));
 
     public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_STICKY = BLOCKS.register("gel_splatter_sticky",
             () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
@@ -121,7 +123,8 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .strength(0.5f)
                     .sound(SoundType.HONEY_BLOCK)
-                    .noOcclusion()));
+                    .noOcclusion()
+                    .noLootTable()));
 
 
     // -------------------------------------------------------------------------

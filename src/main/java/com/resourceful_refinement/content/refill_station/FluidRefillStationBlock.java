@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -35,6 +37,7 @@ public class FluidRefillStationBlock extends HorizontalDirectionalBlock implemen
 
     public static final MapCodec<FluidRefillStationBlock> CODEC = simpleCodec(FluidRefillStationBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
     /** Interaction outline (BER handles visuals). */
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
@@ -44,7 +47,9 @@ public class FluidRefillStationBlock extends HorizontalDirectionalBlock implemen
 
     public FluidRefillStationBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
+        registerDefaultState(defaultBlockState()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(POWERED, false));
     }
 
     @Override
@@ -54,7 +59,7 @@ public class FluidRefillStationBlock extends HorizontalDirectionalBlock implemen
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, POWERED);
     }
 
     @Override

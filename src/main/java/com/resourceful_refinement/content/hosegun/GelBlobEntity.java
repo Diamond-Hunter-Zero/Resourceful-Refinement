@@ -18,12 +18,11 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.DyeColor;
@@ -40,6 +39,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -50,8 +50,10 @@ import java.util.Set;
 
 public class GelBlobEntity extends ThrowableItemProjectile {
 
-    private static final EntityDataAccessor<String> FLUID_ID = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<CompoundTag> FLUID_DATA = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.COMPOUND_TAG);
     private static final EntityDataAccessor<String> TRACKING_ID = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.STRING);
+
+    private FluidStack fluidStack = FluidStack.EMPTY;
 
     private static final Map<Fluid, DyeColor> PAINT_FLUID_COLORS = new HashMap<>();
 
@@ -103,16 +105,50 @@ public class GelBlobEntity extends ThrowableItemProjectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder); // Let parent register its data (e.g. item slot, ID 8)
-        builder.define(FLUID_ID, "minecraft:empty");
+        builder.define(FLUID_DATA, new CompoundTag());
         builder.define(TRACKING_ID, "");
     }
 
+    public void setFluidStack(FluidStack stack) {
+        this.fluidStack = stack == null || stack.isEmpty() ? FluidStack.EMPTY : stack.copy();
+        syncFluidToEntityData();
+    }
+
     public void setFluid(Fluid fluid) {
-        this.entityData.set(FLUID_ID, BuiltInRegistries.FLUID.getKey(fluid).toString());
+        setFluidStack(new FluidStack(fluid, 1000));
+    }
+
+    public FluidStack getFluidStack() {
+        return fluidStack;
     }
 
     public Fluid getFluid() {
-        return BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.entityData.get(FLUID_ID)));
+        return fluidStack.getFluid();
+    }
+
+    private void syncFluidToEntityData() {
+        CompoundTag tag = new CompoundTag();
+        if (!fluidStack.isEmpty() && level() != null) {
+            tag = (CompoundTag) fluidStack.save(level().registryAccess());
+        }
+        this.entityData.set(FLUID_DATA, tag);
+    }
+
+    private void readFluidFromEntityData() {
+        CompoundTag tag = this.entityData.get(FLUID_DATA);
+        if (tag == null || tag.isEmpty() || level() == null) {
+            fluidStack = FluidStack.EMPTY;
+            return;
+        }
+        fluidStack = FluidStack.parseOptional(level().registryAccess(), tag);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (FLUID_DATA.equals(key)) {
+            readFluidFromEntityData();
+        }
     }
 
     public void setTrackingId(String trackingId) {
@@ -131,7 +167,9 @@ public class GelBlobEntity extends ThrowableItemProjectile {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putString("Fluid", this.entityData.get(FLUID_ID));
+        if (!fluidStack.isEmpty() && level() != null) {
+            tag.put("FluidStack", (CompoundTag) fluidStack.save(level().registryAccess()));
+        }
         if (hasTrackingId()) {
             tag.putString("TrackingId", getTrackingId());
         }
@@ -140,8 +178,11 @@ public class GelBlobEntity extends ThrowableItemProjectile {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("Fluid")) {
-            this.entityData.set(FLUID_ID, tag.getString("Fluid"));
+        if (tag.contains("FluidStack") && level() != null) {
+            setFluidStack(FluidStack.parseOptional(level().registryAccess(), tag.getCompound("FluidStack")));
+        } else if (tag.contains("Fluid")) {
+            ResourceLocation fluidId = ResourceLocation.parse(tag.getString("Fluid"));
+            setFluid(BuiltInRegistries.FLUID.get(fluidId));
         }
         if (tag.contains("TrackingId")) {
             setTrackingId(tag.getString("TrackingId"));
@@ -162,7 +203,8 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         if (this.level().isClientSide) return;
 
         Entity entity = result.getEntity();
-        Fluid fluid = getFluid();
+        FluidStack fluidStack = getFluidStack();
+        Fluid fluid = fluidStack.getFluid();
         GelType type = GelPropertiesManager.getGelType(fluid);
 
         switch (type) {
@@ -177,16 +219,13 @@ public class GelBlobEntity extends ThrowableItemProjectile {
             }
             case PAINT -> {
                 DyeColor color = PAINT_FLUID_COLORS.get(fluid);
-                if (color != null) {
-                    if (entity instanceof Sheep sheep) {
-                        sheep.setColor(color);
-                    }
+                if (color != null && entity instanceof LivingEntity living && level() instanceof ServerLevel server) {
+                    PaintGelCollarHelper.tryDyeEntity(server, living, color);
                 }
             }
             case POTION -> {
-                // Apply standard splash potion style impact if custom potion fluids exist
-                if (entity instanceof LivingEntity living) {
-                    living.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.POISON, 100, 0));
+                if (entity instanceof LivingEntity living && level() instanceof ServerLevel server) {
+                    PotionGelImpactHandler.handleEntityImpact(server, living, this.position(), fluidStack, getOwner());
                 }
             }
         }
@@ -197,13 +236,22 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         super.onHitBlock(result);
         if (this.level().isClientSide) return;
 
-        Fluid fluid = getFluid();
+        FluidStack fluidStack = getFluidStack();
+        Fluid fluid = fluidStack.getFluid();
         GelType type = GelPropertiesManager.getGelType(fluid);
         BlockPos impactPos = result.getBlockPos();
         Direction face = result.getDirection();
         BlockPos placePos = impactPos.relative(face);
+        Vec3 impactLocation = result.getLocation();
 
-        spawnImpactSplash(result.getLocation(), fluid, type);
+        spawnImpactSplash(impactLocation, fluid, type);
+
+        if (type == GelType.POTION) {
+            if (level() instanceof ServerLevel server) {
+                PotionGelImpactHandler.handleBlockImpact(server, impactLocation, fluidStack, getOwner());
+            }
+            return;
+        }
 
         if (type == GelType.CLEANSE) {
             // Water/Cleanse: Clear gel splatters within a 3-block radius

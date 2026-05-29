@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.content.gel_splatter.GelFluidTintColors;
 import com.resourceful_refinement.content.gel_splatter.GelFluidTintColorsClient;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
@@ -100,5 +101,16 @@ public class ModClientEvents {
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_STICKY.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_SLIPPERY.get());
+    }
+
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        int defaultTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid());
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_ITEM.get(),
+                ModItems.GEL_SPLATTER_STICKY_ITEM.get(),
+                ModItems.GEL_SPLATTER_SLIPPERY_ITEM.get()
+        );
     }
 }

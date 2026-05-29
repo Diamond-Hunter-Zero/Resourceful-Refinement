@@ -3,14 +3,17 @@ package com.resourceful_refinement.content.gel_splatter;
 import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,7 +23,12 @@ import net.minecraft.world.level.material.Fluids;
 
 public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBlockEntityAccess {
 
-    private Fluid fluid = Fluids.EMPTY;
+    /** Default gel fluid when none is stored (molten andesite blend). */
+    public static Fluid getDefaultFluid() {
+        return ModFluids.MOLTEN_ANDESITE_BLEND.source.get();
+    }
+
+    private Fluid fluid = getDefaultFluid();
     private String trackingId = "";
 
     public GelSplatterBlockEntity(BlockPos pos, BlockState state) {
@@ -67,6 +75,27 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
         GelTrackingService.onSplatterAdded((ServerLevel) level, worldPosition, sanitised);
     }
 
+    /**
+     * Creative-only: swap this splatter's fluid (and block variant when needed) without re-adding tracking.
+     */
+    public void creativeRetextureWithFluid(Fluid fluid) {
+        if (level == null || level.isClientSide || fluid == null || fluid == Fluids.EMPTY) {
+            return;
+        }
+        clearTracking();
+        setFluid(fluid);
+    }
+
+    /** Removes this splatter from gel minigame tracking. Server only. */
+    public void clearTracking() {
+        if (level == null || level.isClientSide || !hasTrackingId()) {
+            return;
+        }
+        GelTrackingService.onSplatterRemoved(level, worldPosition);
+        trackingId = "";
+        setChanged();
+    }
+
     @Override
     public void setFluid(Fluid fluid) {
         if (fluid == null || fluid == Fluids.EMPTY) {
@@ -81,21 +110,56 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
      * for client tint sync, and preserves multiface attachments.
      */
     private void syncToClients() {
-        BlockState currentState = this.getBlockState();
+        BlockState currentState = getBlockState();
         BlockState variantState = GelSplatterBlocks.withVariantForFluid(currentState, this.fluid);
         int newIndex = (variantState.getValue(GelSplatterBlock.FLUID_UPDATE_INDEX) + 1) % 8;
         BlockState newState = variantState.setValue(GelSplatterBlock.FLUID_UPDATE_INDEX, newIndex);
 
-        this.setChanged();
-        if (this.level != null) {
-            this.level.setBlock(this.worldPosition, newState, Block.UPDATE_ALL);
-            this.level.sendBlockUpdated(this.worldPosition, currentState, newState, Block.UPDATE_ALL);
+        setChanged();
+
+        if (level == null || level.isClientSide) {
+            return;
         }
+
+        GelSplatterBlockEntity syncTarget = this;
+        if (!newState.equals(currentState)) {
+            level.setBlock(worldPosition, newState, Block.UPDATE_ALL);
+            BlockEntity blockEntity = level.getBlockEntity(worldPosition);
+            if (blockEntity instanceof GelSplatterBlockEntity splatter) {
+                splatter.fluid = this.fluid;
+                splatter.trackingId = this.trackingId;
+                splatter.setChanged();
+                syncTarget = splatter;
+            }
+        }
+
+        dispatchBlockEntitySync(syncTarget, currentState, level.getBlockState(worldPosition));
+    }
+
+    /** Pushes BE NBT to watching clients after block state changes (setBlock can reset client-side fluid). */
+    private void dispatchBlockEntitySync(GelSplatterBlockEntity splatter, BlockState oldState, BlockState newState) {
+        if (!(level instanceof ServerLevel server)) {
+            return;
+        }
+
+        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(splatter);
+        ChunkPos chunkPos = new ChunkPos(splatter.getBlockPos());
+        for (ServerPlayer player : server.getChunkSource().chunkMap.getPlayers(chunkPos, false)) {
+            player.connection.send(packet);
+        }
+
+        server.sendBlockUpdated(splatter.getBlockPos(), oldState, newState, Block.UPDATE_CLIENTS);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
+        if (level != null && !level.isClientSide) {
+            if (fluid == null || fluid == Fluids.EMPTY) {
+                fluid = getDefaultFluid();
+                syncToClients();
+            }
+        }
         if (level instanceof ServerLevel server && hasTrackingId()) {
             GelTrackingService.onSplatterAdded(server, worldPosition, trackingId);
         }
@@ -124,17 +188,30 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
         if (tag.contains("Fluid")) {
             ResourceLocation id = ResourceLocation.parse(tag.getString("Fluid"));
             Fluid loaded = BuiltInRegistries.FLUID.get(id);
-            this.fluid = loaded != Fluids.EMPTY ? GelPropertiesManager.resolveSourceFluid(loaded) : Fluids.EMPTY;
+            this.fluid = loaded != Fluids.EMPTY ? GelPropertiesManager.resolveSourceFluid(loaded) : getDefaultFluid();
+        } else {
+            this.fluid = getDefaultFluid();
         }
         trackingId = tag.contains("TrackingId") ? tag.getString("TrackingId") : "";
     }
 
     @Override
+    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
+        super.onDataPacket(connection, packet, registries);
+        refreshClientAppearance();
+    }
+
+    @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.handleUpdateTag(tag, registries);
+        refreshClientAppearance();
+    }
+
+    private void refreshClientAppearance() {
         if (level != null && level.isClientSide) {
             requestModelDataUpdate();
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+            BlockState state = getBlockState();
+            level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_ALL_IMMEDIATE);
         }
     }
 

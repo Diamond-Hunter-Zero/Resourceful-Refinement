@@ -8,7 +8,9 @@
     "ItemStackMixin",
     "SinglePoolElementAccessor",
     "StructurePoolElementMixin",
-    "JigsawPlacementMixin"
+    "JigsawPlacementMixin",
+    "WolfCollarInvoker",
+    "CatCollarInvoker"
   ],
   "client": [
     "client.LocalPlayerMixin"

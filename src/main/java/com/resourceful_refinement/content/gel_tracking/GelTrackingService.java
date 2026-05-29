@@ -8,6 +8,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 public final class GelTrackingService {
@@ -26,6 +27,10 @@ public final class GelTrackingService {
             return 0;
         }
         return getGelCount(station.getLevel(), station.getTrackingId());
+    }
+
+    public static List<String> getAllTrackingIds(ServerLevel level) {
+        return GelTrackingSavedData.get(level).getAllTrackingIds();
     }
 
     public static Set<BlockPos> getSplatterPositions(ServerLevel level, String trackingId) {

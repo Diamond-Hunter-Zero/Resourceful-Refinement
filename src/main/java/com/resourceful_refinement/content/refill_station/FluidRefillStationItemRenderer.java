@@ -81,13 +81,13 @@ public class FluidRefillStationItemRenderer extends BlockEntityWithoutLevelRende
             }
             case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> {
                 float side = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND ? -1.0F : 1.0F;
-                poseStack.translate(0.5F, 0.9F, 0.5F);
+                poseStack.translate(0.725F, 0.775F, 0.5F);
                 poseStack.scale(0.4F * side, -0.4F, -0.4F);
-                poseStack.mulPose(Axis.YP.rotationDegrees(200.0F));
-                poseStack.mulPose(Axis.XP.rotationDegrees(-10.0F));
+                poseStack.mulPose(Axis.YP.rotationDegrees(220.0F));
+                poseStack.mulPose(Axis.XP.rotationDegrees(-7.5F));
             }
             case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> {
-                poseStack.translate(0.5F, 0.75F, 0.65F);
+                poseStack.translate(0.2F, 0.75F, 0.57F);
                 poseStack.scale(0.4F, -0.4F, -0.4F);
                 poseStack.mulPose(Axis.XP.rotationDegrees(75.0F));
                 poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));

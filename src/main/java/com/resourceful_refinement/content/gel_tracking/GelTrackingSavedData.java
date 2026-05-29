@@ -17,8 +17,10 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
@@ -116,6 +118,15 @@ public class GelTrackingSavedData extends SavedData {
     public int getGelCount(String trackingId) {
         TrackingIdStats stats = statsById.get(trackingId);
         return stats == null ? 0 : stats.gelBlockCount;
+    }
+
+    public List<String> getAllTrackingIds() {
+        if (statsById.isEmpty()) {
+            return List.of();
+        }
+        List<String> ids = new ArrayList<>(statsById.keySet());
+        ids.sort(String.CASE_INSENSITIVE_ORDER);
+        return Collections.unmodifiableList(ids);
     }
 
     public Set<BlockPos> getSplatterPositions(String trackingId) {

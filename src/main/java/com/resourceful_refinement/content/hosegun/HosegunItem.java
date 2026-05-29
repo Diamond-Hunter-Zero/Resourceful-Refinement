@@ -1,12 +1,14 @@
 package com.resourceful_refinement.content.hosegun;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationInteractions;
 import com.resourceful_refinement.registry.ModDataComponents;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.UseAnim;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -29,6 +31,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -136,7 +139,7 @@ public class HosegunItem extends Item {
                             muzzle.x, muzzle.y, muzzle.z,
                             level
                     );
-                    projectile.setFluid(contained.getFluid());
+                    projectile.setFluidStack(contained.copy());
                     HosegunTracking.getTrackingId(stack).ifPresent(projectile::setTrackingId);
                     projectile.setOwner(player);
                     projectile.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity, HOSEGUN_INNACURACY);
@@ -156,6 +159,15 @@ public class HosegunItem extends Item {
     }
 
     @Override
+    public Component getName(ItemStack stack) {
+        FluidStack fluid = new HosegunFluidHandler(stack).getFluid();
+        if (fluid.isEmpty()) {
+            return super.getName(stack);
+        }
+        return Component.translatable("item.resourceful_refinement.hosegun").append( " [§3" + fluid.getHoverName().getString() + "§f]");
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         HosegunFluidHandler fluidHandler = new HosegunFluidHandler(stack);
@@ -163,8 +175,7 @@ public class HosegunItem extends Item {
         if (fluid.isEmpty()) {
             tooltip.add(Component.translatable("tooltip.resourceful_refinement.hosegun.empty").withColor(0x7F7F7F));
         } else {
-            String fluidName = fluid.getHoverName().getString();
-            tooltip.add(Component.literal(fluidName + ": " + fluid.getAmount() + " / " + CAPACITY + " mB").withColor(0x3AB3DA));
+            FluidGelTooltipHelper.addItemFluidLines(tooltip, fluid, CAPACITY, 0x3AB3DA);
         }
 
         HosegunTracking.getTrackingId(stack).ifPresentOrElse(

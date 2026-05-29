@@ -17,7 +17,7 @@ public class GelPropertiesManager {
 
     private static final Map<Fluid, GelType> FLUID_TO_GEL = new HashMap<>();
     public static final int GEL_AMMO_COST = 5;
-    public static final int POTION_AMMO_COST = 200;
+    public static final int POTION_AMMO_COST = 125;
 
     static {
         FLUID_TO_GEL.put(Fluids.WATER, GelType.CLEANSE);

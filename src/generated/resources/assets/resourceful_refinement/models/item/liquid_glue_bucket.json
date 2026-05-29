@@ -1,3 +1,7 @@
 {
-  "parent": "resourceful_refinement:item/paint_fluid_bucket"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/bucket",
+    "layer1": "resourceful_refinement:item/bucket_content"
+  }
 }

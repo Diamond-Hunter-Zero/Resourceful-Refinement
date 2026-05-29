@@ -24,6 +24,8 @@ public class FluidRefillStationRenderer extends SafeBlockEntityRenderer<FluidRef
 
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             ResourcefulRefinementMain.MOD_ID, "textures/block/fluid_refill_station.png");
+    public static final ResourceLocation ACTIVATED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            ResourcefulRefinementMain.MOD_ID, "textures/block/fluid_refill_station_activated.png");
 
     /** Interior tank bounds in block-space units (inside the casing). */
     private static final float INNER_MIN = 2.5F / 16F;
@@ -43,8 +45,9 @@ public class FluidRefillStationRenderer extends SafeBlockEntityRenderer<FluidRef
             int light, int overlay) {
         BlockState state = be.getBlockState();
         Direction facing = state.getValue(FACING);
+        ResourceLocation casingTexture = state.getValue(FluidRefillStationBlock.POWERED) ? ACTIVATED_TEXTURE : TEXTURE;
 
-        VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(TEXTURE));
+        VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(casingTexture));
 
         ms.pushPose();
         ms.translate(0.5, 1.5, 0.5);

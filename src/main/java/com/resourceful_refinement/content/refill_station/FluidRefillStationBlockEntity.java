@@ -1,11 +1,14 @@
 package com.resourceful_refinement.content.refill_station;
 
+import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
 import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -66,6 +69,7 @@ public class FluidRefillStationBlockEntity extends BlockEntity implements MenuPr
         super.onLoad();
         if (level != null && !level.isClientSide) {
             wasRedstonePowered = level.hasNeighborSignal(worldPosition);
+            syncPoweredBlockState(wasRedstonePowered);
         }
         if (level instanceof ServerLevel server && hasTrackingId()) {
             GelTrackingService.onStationLoaded(server, worldPosition, trackingId);
@@ -118,6 +122,11 @@ public class FluidRefillStationBlockEntity extends BlockEntity implements MenuPr
         return new FluidRefillStationMenu(containerId, inventory, this);
     }
 
+    @Override
+    public void writeClientSideData(AbstractContainerMenu menu, RegistryFriendlyByteBuf buf) {
+        FluidRefillStationMenu.writeClientSideData(buf, this);
+    }
+
     public boolean hasTrackingId() {
         return trackingId != null && !trackingId.isEmpty();
     }
@@ -141,7 +150,19 @@ public class FluidRefillStationBlockEntity extends BlockEntity implements MenuPr
                 server.playSound(null, worldPosition, SoundEvents.CONDUIT_DEACTIVATE, SoundSource.BLOCKS, 0.85F, 1.0F);
             }
         }
+        syncPoweredBlockState(powered);
         wasRedstonePowered = powered;
+    }
+
+    private void syncPoweredBlockState(boolean powered) {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+        BlockState state = getBlockState();
+        if (state.getValue(FluidRefillStationBlock.POWERED) == powered) {
+            return;
+        }
+        level.setBlock(worldPosition, state.setValue(FluidRefillStationBlock.POWERED, powered), Block.UPDATE_CLIENTS);
     }
 
     protected void syncToClient() {
@@ -192,9 +213,9 @@ public class FluidRefillStationBlockEntity extends BlockEntity implements MenuPr
         FluidStack tankOutputFluid = tank.getFluid();
         if (tankOutputFluid.isEmpty())
             tooltip.add(Component.literal("§6Tank: §8empty"));
-        else
-            tooltip.add(Component.literal("§6Tank: §7" + tankOutputFluid.getAmount() + "mb " + tankOutputFluid.getHoverName().getString()));
-
+        else 
+            FluidGelTooltipHelper.addGoggleFluidLines(tooltip, tankOutputFluid, true);
+        
         return true;
     }
 

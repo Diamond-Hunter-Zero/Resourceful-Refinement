@@ -118,7 +118,71 @@
 
   "fluid_type.resourceful_refinement.liquid_glue": "Liquid Glue",
   "block.resourceful_refinement.liquid_glue": "Liquid Glue",
-  "item.resourceful_refinement.liquid_glue_bucket": "Liquid Glue",
+  "item.resourceful_refinement.liquid_glue_bucket": "Liquid Glue Bucket",
+
+  "fluid_type.resourceful_refinement.white_paint": "White Paint",
+  "block.resourceful_refinement.white_paint": "White Paint",
+  "item.resourceful_refinement.white_paint_bucket": "White Paint Bucket",
+
+  "fluid_type.resourceful_refinement.orange_paint": "Orange Paint",
+  "block.resourceful_refinement.orange_paint": "Orange Paint",
+  "item.resourceful_refinement.orange_paint_bucket": "Orange Paint Bucket",
+
+  "fluid_type.resourceful_refinement.magenta_paint": "Magenta Paint",
+  "block.resourceful_refinement.magenta_paint": "Magenta Paint",
+  "item.resourceful_refinement.magenta_paint_bucket": "Magenta Paint Bucket",
+
+  "fluid_type.resourceful_refinement.light_blue_paint": "Light Blue Paint",
+  "block.resourceful_refinement.light_blue_paint": "Light Blue Paint",
+  "item.resourceful_refinement.light_blue_paint_bucket": "Light Blue Paint Bucket",
+
+  "fluid_type.resourceful_refinement.yellow_paint": "Yellow Paint",
+  "block.resourceful_refinement.yellow_paint": "Yellow Paint",
+  "item.resourceful_refinement.yellow_paint_bucket": "Yellow Paint Bucket",
+
+  "fluid_type.resourceful_refinement.lime_paint": "Lime Paint",
+  "block.resourceful_refinement.lime_paint": "Lime Paint",
+  "item.resourceful_refinement.lime_paint_bucket": "Lime Paint Bucket",
+
+  "fluid_type.resourceful_refinement.pink_paint": "Pink Paint",
+  "block.resourceful_refinement.pink_paint": "Pink Paint",
+  "item.resourceful_refinement.pink_paint_bucket": "Pink Paint Bucket",
+
+  "fluid_type.resourceful_refinement.gray_paint": "Gray Paint",
+  "block.resourceful_refinement.gray_paint": "Gray Paint",
+  "item.resourceful_refinement.gray_paint_bucket": "Gray Paint Bucket",
+
+  "fluid_type.resourceful_refinement.light_gray_paint": "Light Gray Paint",
+  "block.resourceful_refinement.light_gray_paint": "Light Gray Paint",
+  "item.resourceful_refinement.light_gray_paint_bucket": "Light Gray Paint Bucket",
+
+  "fluid_type.resourceful_refinement.cyan_paint": "Cyan Paint",
+  "block.resourceful_refinement.cyan_paint": "Cyan Paint",
+  "item.resourceful_refinement.cyan_paint_bucket": "Cyan Paint Bucket",
+
+  "fluid_type.resourceful_refinement.purple_paint": "Purple Paint",
+  "block.resourceful_refinement.purple_paint": "Purple Paint",
+  "item.resourceful_refinement.purple_paint_bucket": "Purple Paint Bucket",
+
+  "fluid_type.resourceful_refinement.blue_paint": "Blue Paint",
+  "block.resourceful_refinement.blue_paint": "Blue Paint",
+  "item.resourceful_refinement.blue_paint_bucket": "Blue Paint Bucket",
+
+  "fluid_type.resourceful_refinement.brown_paint": "Brown Paint",
+  "block.resourceful_refinement.brown_paint": "Brown Paint",
+  "item.resourceful_refinement.brown_paint_bucket": "Brown Paint Bucket",
+
+  "fluid_type.resourceful_refinement.green_paint": "Green Paint",
+  "block.resourceful_refinement.green_paint": "Green Paint",
+  "item.resourceful_refinement.green_paint_bucket": "Green Paint Bucket",
+
+  "fluid_type.resourceful_refinement.red_paint": "Red Paint",
+  "block.resourceful_refinement.red_paint": "Red Paint",
+  "item.resourceful_refinement.red_paint_bucket": "Red Paint Bucket",
+
+  "fluid_type.resourceful_refinement.black_paint": "Black Paint",
+  "block.resourceful_refinement.black_paint": "Black Paint",
+  "item.resourceful_refinement.black_paint_bucket": "Black Paint Bucket",
 
   "item.resourceful_refinement.ferrous_crystal": "Ferrous Crystal",
   "item.resourceful_refinement.flux_dust": "Flux Dust",
@@ -248,6 +312,8 @@
   "gui.resourceful_refinement.fluid_refill_station.tracking_id_hint": "e.g. Team Red",
   "gui.resourceful_refinement.fluid_refill_station.save": "Save",
   "gui.resourceful_refinement.fluid_refill_station.clear": "Clear",
+  "gui.resourceful_refinement.fluid_refill_station.browse_ids": "Browse tracking IDs",
+  "gui.resourceful_refinement.fluid_refill_station.no_tracking_ids": "No tracking IDs in this world",
   "tooltip.resourceful_refinement.hosegun.empty": "Empty",
   "tooltip.resourceful_refinement.hosegun.tracking_id": "Tracking: %s",
   "tooltip.resourceful_refinement.hosegun.tracking_id_unbound": "Tracking: unbound",

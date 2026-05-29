@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.resourceful_refinement.network.SetRefillStationTrackingIdPayload;
 import com.resourceful_refinement.registry.ModBlocks;
+import com.simibubi.create.foundation.gui.AllIcons;
+import com.simibubi.create.foundation.gui.widget.IconButton;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.createmod.catnip.gui.element.GuiGameElement;
@@ -15,7 +17,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
@@ -33,9 +34,14 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
     private static final int INPUT_Y = 47;
     private static final int INPUT_WIDTH = RefillStationGuiTextures.PANEL_WIDTH - 32;
     private static final int INPUT_HEIGHT = 18;
+    private static final int BROWSE_BUTTON_SIZE = 18;
+    private static final int FIELD_WIDTH = INPUT_WIDTH - BROWSE_BUTTON_SIZE - 22;
+    private static final int PICKER_VISIBLE_ROWS = 4;
 
     private final FluidRefillStationMenu menu;
     private EditBox trackingIdField;
+    private IconButton browseButton;
+    private TrackingIdPickerList trackingIdPicker;
 
     public FluidRefillStationScreen(FluidRefillStationMenu menu, Inventory inventory, Component title) {
         super(title);
@@ -56,7 +62,7 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
         int fieldX = guiLeft + INPUT_X;
         int fieldY = guiTop + INPUT_Y;
 
-        trackingIdField = new EditBox(font, fieldX, fieldY, INPUT_WIDTH, INPUT_HEIGHT, Component.empty());
+        trackingIdField = new EditBox(font, fieldX, fieldY, FIELD_WIDTH, INPUT_HEIGHT, Component.empty());
         trackingIdField.setMaxLength(FluidRefillStationBlockEntity.MAX_TRACKING_ID_LENGTH);
         trackingIdField.setValue(menu.getInitialTrackingId());
         trackingIdField.setHint(Component.translatable("gui.resourceful_refinement.fluid_refill_station.tracking_id_hint"));
@@ -65,6 +71,22 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
         trackingIdField.setTextColorUneditable(0xFFFFFF);
         addRenderableWidget(trackingIdField);
         setInitialFocus(trackingIdField);
+
+        browseButton = new IconButton(fieldX + FIELD_WIDTH + 19, fieldY - 4, AllIcons.I_VIEW_SCHEDULE);
+        browseButton.withCallback(this::toggleTrackingIdPicker);
+        browseButton.setToolTip(Component.translatable("gui.resourceful_refinement.fluid_refill_station.browse_ids"));
+        addRenderableWidget(browseButton);
+
+        Component emptyLabel = Component.translatable("gui.resourceful_refinement.fluid_refill_station.no_tracking_ids");
+        trackingIdPicker = new TrackingIdPickerList(
+                fieldX - 5,
+                fieldY + INPUT_HEIGHT - 4,
+                INPUT_WIDTH - 20,
+                PICKER_VISIBLE_ROWS,
+                menu.getKnownTrackingIds(),
+                emptyLabel
+        ).calling(this::applyTrackingIdSelection);
+        addRenderableWidget(trackingIdPicker);
 
         addRenderableWidget(new RefillStationHoverButton(
                 guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 33,
@@ -85,6 +107,24 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
                 this::saveAndClose));
     }
 
+    private void toggleTrackingIdPicker() {
+        trackingIdPicker.toggleOpen();
+    }
+
+    private void applyTrackingIdSelection(String trackingId) {
+        trackingIdField.setValue(trackingId);
+        trackingIdField.setCursorPosition(trackingId.length());
+        trackingIdField.setHighlightPos(0);
+        trackingIdPicker.setOpen(false);
+        setFocused(trackingIdField);
+    }
+
+    private void closeTrackingIdPickerIfOpen() {
+        if (trackingIdPicker != null && trackingIdPicker.isOpen()) {
+            trackingIdPicker.setOpen(false);
+        }
+    }
+
     private void saveAndClose() {
         PacketDistributor.sendToServer(new SetRefillStationTrackingIdPayload(menu.getBlockPos(), trackingIdField.getValue()));
         onClose();
@@ -99,6 +139,18 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (trackingIdPicker != null && trackingIdPicker.isOpen()) {
+            boolean overPicker = trackingIdPicker.isMouseOver(mouseX, mouseY);
+            boolean overBrowse = browseButton != null && browseButton.isMouseOver(mouseX, mouseY);
+            if (!overPicker && !overBrowse) {
+                closeTrackingIdPickerIfOpen();
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (minecraft == null) {
             return false;
@@ -107,6 +159,10 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
         InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
 
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (trackingIdPicker != null && trackingIdPicker.isOpen()) {
+                closeTrackingIdPickerIfOpen();
+                return true;
+            }
             onClose();
             return true;
         }
@@ -166,7 +222,6 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
 
         Component footerHint2 = Component.translatable("gui.resourceful_refinement.fluid_refill_station.footer_hint2");
         graphics.drawString(font, footerHint2, x + 8, y + RefillStationGuiTextures.PANEL_HEIGHT - 14, FOOTER_HINT_COLOR, false);
-
 
         renderBlockPreview(graphics, x, y);
     }

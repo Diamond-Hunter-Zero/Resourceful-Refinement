@@ -323,8 +323,8 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
             if (!coating.getItemIngredient().isEmpty()) {
                 int requiredItems = coating.getIngredients().size();
                 ItemStack itemInSlot = inputInv.getStackInSlot(0);
-                boolean isIngotMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
-                boolean isShaftMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
+                boolean isIngotMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
+                boolean isShaftMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
 
                 // Moulds have a low chance to be consumed; other items are always consumed
                 if ((!isIngotMould && !isShaftMould)
@@ -350,8 +350,8 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
             int requiredItems = recipe.getIngredients().size();
             if (requiredItems > 0) {
                 ItemStack itemInSlot = inputInv.getStackInSlot(0);
-                boolean isIngotMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
-                boolean isShaftMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
+                boolean isIngotMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
+                boolean isShaftMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
 
                 // Moulds have a low chance to be consumed; other items are always consumed
                 if ((!isIngotMould && !isShaftMould)

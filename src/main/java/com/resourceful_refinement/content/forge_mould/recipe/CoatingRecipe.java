@@ -8,6 +8,7 @@ import com.resourceful_refinement.content.coating.CoatingType;
 import com.resourceful_refinement.registry.ModDataComponents;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.DiggerItem;
@@ -47,9 +48,12 @@ public class CoatingRecipe implements Recipe<MechanicalForgeMouldRecipeInput> {
         // Check if tool is valid (DiggerItem, SwordItem, TridentItem)
         if (!(tool.getItem() instanceof DiggerItem) && !(tool.getItem() instanceof SwordItem) && !(tool.getItem() instanceof TridentItem)) return false;
 
-        // Check coating compatibility
+        // Coating compatibility: reject mismatched types, or same type already at full integrity
         CoatingData data = tool.get(ModDataComponents.COATING_DATA.get());
-        if (data != null && data.type() != coatingType) return false;
+        if (data != null) {
+            if (data.type() != coatingType) return false;
+            if (data.integrity() >= coatingType.getMaxDurability()) return false;
+        }
 
         return true;
     }
@@ -96,6 +100,15 @@ public class CoatingRecipe implements Recipe<MechanicalForgeMouldRecipeInput> {
 
     public Ingredient getItemIngredient() {
         return itemIngredient;
+    }
+
+    @Override
+    public NonNullList<Ingredient> getIngredients() {
+        NonNullList<Ingredient> ingredients = NonNullList.create();
+        if (!itemIngredient.isEmpty()) {
+            ingredients.add(itemIngredient);
+        }
+        return ingredients;
     }
 
     public static class Serializer implements RecipeSerializer<CoatingRecipe> {

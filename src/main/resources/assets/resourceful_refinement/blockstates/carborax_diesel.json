@@ -1,5 +1,5 @@
-﻿{
+{
   "variants": {
-    "": { "model": "resourceful_refinement:block/carborax_diesel" }
+    "": { "model": "resourceful_refinement:block/fluids/carborax_diesel" }
   }
 }

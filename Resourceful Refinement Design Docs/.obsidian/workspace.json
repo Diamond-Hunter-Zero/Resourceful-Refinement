@@ -181,12 +181,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Plunger.md",
+                "file": "Primary Design Doc.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Plunger"
+              "title": "Primary Design Doc"
             }
           },
           {
@@ -371,9 +371,11 @@
   "active": "30bab38bdd3eb544",
   "lastOpenFiles": [
     "Paint Nozzle.md",
+    "Paint Recipes.md",
+    "Hosegun.md",
+    "Gel Splatter.md",
     "Plunger.md",
     "Primary Design Doc.md",
-    "Paint Recipes.md",
     "Fluid Refill Station.md",
     "Geyser Block.md",
     "Fracking Source Blocks.md",
@@ -381,11 +383,9 @@
     "Fracking Pump.md",
     "Forge Mould Render.png",
     "Fluid Refinery.md",
-    "Gel Splatter.md",
     "Fluid Properties.md",
     "Blender Blade.md",
     "Paint Fluids.md",
-    "Hosegun.md",
     "Coating Variants.md",
     "Mechanical Sieve.md",
     "Coating.md",

@@ -82,7 +82,7 @@ public class FluidRefillStationRenderer extends SafeBlockEntityRenderer<FluidRef
 
         ms.pushPose();
 
-        renderFluidBox(ms, buffer.getBuffer(RenderType.cutout()),
+        renderFluidBox(ms, buffer.getBuffer(RenderType.translucent()),
                 INNER_MIN, INNER_MIN_HEIGHT, INNER_MIN,
                 INNER_MAX, fillHeight, INNER_MAX,
                 color, light, sprite);

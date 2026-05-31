@@ -52,8 +52,9 @@ public class FluidEntry {
         source = ModFluids.FLUIDS.register(name, () -> new GeneralizedFlowingFluid.Source(properties.get(), group.dropRate));
         flowing = ModFluids.FLUIDS.register("flowing_" + name, () -> new GeneralizedFlowingFluid.Flowing(properties.get(), group.dropRate));
 
-        // Register Block
-        block = ModBlocks.BLOCKS.register(name, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+        // Register Block (path matches assets/blockstates/<group>/<name>.json)
+        String blockId = group == FluidGroup.PAINT ? "paint/" + name : name;
+        block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
 
         // Register Bucket
         bucket = ModItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));

@@ -10,6 +10,9 @@ import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.gel_splatter.GelType;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import com.resourceful_refinement.registry.ModDamageTypes;
+import com.simibubi.create.AllBlocks;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,6 +44,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -238,9 +242,14 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         if (this.level().isClientSide) return;
 
         FluidStack fluidStack = getFluidStack();
+        BlockPos impactPos = result.getBlockPos();
+
+        if (tryTransferFluidToCreateItemDrain(impactPos, fluidStack)) {
+            return;
+        }
+
         Fluid fluid = fluidStack.getFluid();
         GelType type = GelPropertiesManager.getGelType(fluid);
-        BlockPos impactPos = result.getBlockPos();
         Direction face = result.getDirection();
         BlockPos placePos = impactPos.relative(face);
         Vec3 impactLocation = result.getLocation();
@@ -285,6 +294,42 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                 attemptGelSplatterAt(candidate, candidate.equals(placePos) ? attachmentFace : null, fluid);
             }
         }
+    }
+
+    /**
+     * Deposits this blob's fluid into a Create item drain when the tank is empty, or already holds a
+     * compatible fluid with spare capacity. Returns {@code true} when fluid was accepted and normal
+     * block-hit effects should be skipped.
+     */
+    private boolean tryTransferFluidToCreateItemDrain(BlockPos impactPos, FluidStack fluidStack) {
+        if (fluidStack.isEmpty() || !AllBlocks.ITEM_DRAIN.has(this.level().getBlockState(impactPos))) {
+            return false;
+        }
+
+        SmartFluidTankBehaviour tankBehaviour = BlockEntityBehaviour.get(
+                this.level(), impactPos, SmartFluidTankBehaviour.TYPE);
+        if (tankBehaviour == null) {
+            return false;
+        }
+
+        var tank = tankBehaviour.getPrimaryHandler();
+        FluidStack stored = tank.getFluid();
+        if (!stored.isEmpty() && !FluidStack.isSameFluidSameComponents(stored, fluidStack)) {
+            return false;
+        }
+
+        FluidStack toFill = fluidStack.copy();
+        toFill.setAmount(GelPropertiesManager.getGelAmmoCost(fluidStack.getFluid()));
+        int accepted = tank.fill(toFill, IFluidHandler.FluidAction.SIMULATE);
+        if (accepted <= 0) {
+            return false;
+        }
+
+        toFill.setAmount(accepted);
+        tankBehaviour.allowInsertion();
+        tankBehaviour.getPrimaryHandler().fill(toFill, IFluidHandler.FluidAction.EXECUTE);
+        tankBehaviour.forbidInsertion();
+        return true;
     }
 
     /** Passable positions within {@link GelImpactConstants#IMPACT_RADIUS_SMALL} of {@code start}. */

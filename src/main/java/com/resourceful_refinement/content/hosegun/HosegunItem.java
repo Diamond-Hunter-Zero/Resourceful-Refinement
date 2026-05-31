@@ -139,7 +139,9 @@ public class HosegunItem extends Item {
                             muzzle.x, muzzle.y, muzzle.z,
                             level
                     );
-                    projectile.setFluidStack(contained.copy());
+                    FluidStack blobFluid = contained.copy();
+                    blobFluid.setAmount(getGelAmmoCost(contained.getFluid()));
+                    projectile.setFluidStack(blobFluid);
                     HosegunTracking.getTrackingId(stack).ifPresent(projectile::setTrackingId);
                     projectile.setOwner(player);
                     projectile.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity, HOSEGUN_INNACURACY);

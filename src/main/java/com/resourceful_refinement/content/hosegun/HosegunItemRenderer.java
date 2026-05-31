@@ -89,8 +89,8 @@ public class HosegunItemRenderer extends BlockEntityWithoutLevelRenderer {
                 poseStack.translate(-0.5F, -0.5F, -0.5F);
             }
             case FIXED -> {
-                poseStack.translate(0.85F, 0.7F, 0.2F);
-                poseStack.scale(0.5F, 0.5F, 0.5F);
+                poseStack.translate(1.1F, 0.8F, -0.05F);
+                poseStack.scale(0.9F, 0.9F, 0.9F);
                 poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
                 poseStack.translate(-0.5F, -0.5F, -0.5F);
             }

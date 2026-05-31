@@ -89,7 +89,9 @@ public class PaintNozzleBlockEntity extends BlockEntity implements IHaveGoggleIn
 
         float velocity = 1.6F * HosegunItem.GEL_BLOB_VELOCITY_FACTOR * flowSpeed.getVelocityFactor();
         GelBlobEntity projectile = new GelBlobEntity(ModEntities.GEL_BLOB.get(), spawn.x, spawn.y, spawn.z, level);
-        projectile.setFluidStack(tank.getFluid().copy());
+        FluidStack blobFluid = tank.getFluid().copy();
+        blobFluid.setAmount(getGelAmmoCost(blobFluid.getFluid()));
+        projectile.setFluidStack(blobFluid);
         projectile.shoot(
                 sprayDir.getStepX(),
                 sprayDir.getStepY(),

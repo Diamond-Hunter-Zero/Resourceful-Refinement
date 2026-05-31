@@ -25,7 +25,7 @@ public class FluidRefillStationDisplaySource extends SingleLineDisplaySource {
 
         FluidStack fluid = station.tank.getFluid();
         if (fluid.isEmpty()) {
-            return Component.literal("0mb");
+            return Component.literal("empty");
         }
 
         return Component.literal(fluid.getAmount() + "mb ")

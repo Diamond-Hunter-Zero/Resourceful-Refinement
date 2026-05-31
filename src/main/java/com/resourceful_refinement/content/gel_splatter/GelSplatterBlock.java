@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModDamageTypes;
+import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -63,21 +65,52 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
 
     public GelSplatterBlock(Properties properties) {
         super(properties);
-
-        // Set the default state
-        BlockState defaultState = this.stateDefinition.any()
-                .setValue(FLUID_UPDATE_INDEX, 0);
-
-        this.registerDefaultState(defaultState);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        // Register the property to the block state definition *before* super initializes it
-        builder.add(FLUID_UPDATE_INDEX);
         super.createBlockStateDefinition(builder);
+        builder.add(FLUID_UPDATE_INDEX);
     }
 
+    @Override
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockState placement = super.getStateForPlacement(context);
+        if (placement != null) {
+            return placement;
+        }
+
+        BlockPos pos = context.getClickedPos();
+        BlockGetter level = context.getLevel();
+        BlockState existing = level.getBlockState(pos);
+
+        if (existing.is(this)) {
+            Direction face = context.getClickedFace();
+            if (isValidStateForPlacement(level, existing, pos, face)) {
+                return existing.setValue(getFaceProperty(face), true);
+            }
+            return null;
+        }
+
+        if (!existing.canBeReplaced(context)) {
+            return null;
+        }
+
+        BlockState base = defaultBlockState();
+        Direction supportFace = context.getClickedFace().getOpposite();
+        if (isValidStateForPlacement(level, base, pos, supportFace)) {
+            return base.setValue(getFaceProperty(supportFace), true);
+        }
+
+        for (Direction direction : Direction.values()) {
+            if (isValidStateForPlacement(level, base, pos, direction)) {
+                return base.setValue(getFaceProperty(direction), true);
+            }
+        }
+
+        return null;
+    }
 
     @Override
     protected MapCodec<? extends MultifaceBlock> codec() {
@@ -173,7 +206,11 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                 //entity.igniteForSeconds(3);
             }
             case SPEEDY -> {
-                if (entity instanceof LivingEntity living) {
+                if (entity instanceof ServerPlayer playerEntity)
+                {
+                    playerEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 10, 4, true, false));
+                }
+                else if (entity instanceof LivingEntity living) {
                     living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 10, 2, true, false));
                 }
                 else {
@@ -189,15 +226,6 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                         double maxHorizontalSpeed = 0.5D;
 
                         Vec3 newVelocity;
-                        /*if (horizontalSpeed > maxHorizontalSpeed) {
-                            // Keep their Y velocity (falling/jumping) intact but clamp the X and Z direction vectors
-                            double ratio = maxHorizontalSpeed / horizontalSpeed;
-                            newVelocity = new Vec3(velocity.x * ratio, velocity.y, velocity.z * ratio);
-                        } else {
-                            // Apply a clean 1.08x acceleration multiplier up until the cap is reached
-                            newVelocity = new Vec3(velocity.x * 1.375D, velocity.y, velocity.z * 1.375D);
-                        }
-                        entity.setDeltaMovement(newVelocity);*/
                         if (horizontalSpeed < maxHorizontalSpeed)
                         {
                             newVelocity = velocity.add(velocity.normalize().scale(0.0375f));
@@ -217,13 +245,13 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
             case BOUNCY -> applyBouncyGelEffect(state, level, pos, entity);
             case CURSED -> {
                 if (entity instanceof LivingEntity living) {
-                    living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, false));
-                    living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, false));
+                    living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 1, true, false));
+                    living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 10, 0, true, false));
                 }
             }
             case BLESSED -> {
                 if (entity instanceof LivingEntity living) {
-                    living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 40, 0, true, false));
+                    living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 10, 0, true, false));
                 }
             }
         }

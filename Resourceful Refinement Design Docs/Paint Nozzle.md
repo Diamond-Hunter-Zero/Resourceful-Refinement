@@ -18,6 +18,14 @@ The Paint Nozzle also has a configurable 'flow speed' variable, which can be in 
 | Medium    | 0.75       |
 | High      | 1.2        |
 
+**Gel Blobs**
+Projectiles created by the Paint Nozzle and the [[Hosegun]] are called 'Gel Blobs'. Gel blobs carry the fluid ID and FluidStack of the fluid used to instantiate them.
+
+Gel blobs have unique on-hit-behaviours according to the type of fluid they carry, and whether they impact a block surface or entity. Most gels types result in creating a Gel Splatter block when impacting a block surface.
+
+
+**Drains**
+When a gel-blob impacts a Create drain (*create:drain*), instead of creating a gel-splatter, the blob attempts to fill the drain with the fluid it was carrying. If the drain already contains an incompatible fluid, the gel-blob is instead discarded without instantiating anything.
 
 #### **Rendering**
 Players can right-click a Paint Nozzle to toggle it between 'Open' and 'Closed' states. Doing so updates an internal NBT flag, as well as a blockstate property called "valve_open", which in turn updates the block model used for the nozzle.

@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;

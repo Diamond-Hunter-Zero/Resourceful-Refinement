@@ -9,7 +9,7 @@ import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
-import com.resourceful_refinement.content.fluids.PlungerItem;
+import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;

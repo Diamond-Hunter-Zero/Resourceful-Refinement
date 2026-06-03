@@ -333,10 +333,10 @@
   "resourceful_refinement.ponder.hosegun.header": "Wielding the Hosegun",
   "resourceful_refinement.ponder.hosegun.text_1": "The Hosegun is a versatile tool for spraying paints and gels",
   "resourceful_refinement.ponder.hosegun.text_2": "To fill it with fluid, place it under a spout, or right-click on a Refill Station",
-  "resourceful_refinement.ponder.hosegun.text_3": "The Hosegun is a versatile tool for spraying paints and gels",
+  "resourceful_refinement.ponder.hosegun.text_3": "The Hosegun can take kind of fluid!",
   "resourceful_refinement.ponder.hosegun.text_4": "Hold down right-click to spray gel-blobs in front of you as you move",
   "resourceful_refinement.ponder.hosegun.text_5": "As you spray, the Hosegun's tanks will slowly deplete",
-  "resourceful_refinement.ponder.hosegun.text_6": "You can empty a Hosegun by placing it on a drain",
+  "resourceful_refinement.ponder.hosegun.text_6": "You can empty a Hosegun by right-clicking on a drain",
 
   "resourceful_refinement.ponder.refill_station_basics.header": "Refilling containers with the Refill Station",
   "resourceful_refinement.ponder.refill_station_basics.text_1": "The Fluid Refill station provides a quick method for refilling containers such as buckets, bottles, and hoseguns",

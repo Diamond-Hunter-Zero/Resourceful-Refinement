@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 
 public class PlungerItem extends TridentItem {
 
-  /** Thrown and melee hit damage (1.5 hearts). */
+  /** Thrown and melee hit damage (0.5 hearts). */
   public static final float THROW_DAMAGE = 1.0F;
 
   public PlungerItem(Properties properties) {

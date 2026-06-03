@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import com.resourceful_refinement.registry.ModEntities;
 import com.resourceful_refinement.registry.ModItems;

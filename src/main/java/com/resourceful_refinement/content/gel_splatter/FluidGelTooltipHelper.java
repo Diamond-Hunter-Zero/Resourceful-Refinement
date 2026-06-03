@@ -35,9 +35,8 @@ public final class FluidGelTooltipHelper {
         }
 
         GelType gelType = GelPropertiesManager.getGelType(fluid.getFluid());
-        tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color));
-        tooltip.add(Component.literal("§9[" + formatGelType(gelType) + "]"));
-
+        tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[" + formatGelType(gelType) + "]"));
+        //tooltip.add(Component.literal("§9[" + formatGelType(gelType) + "]"));
     }
 
     private static String formatGelType(GelType gelType) {

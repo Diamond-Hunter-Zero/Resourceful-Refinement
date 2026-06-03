@@ -1,7 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
-import com.resourceful_refinement.content.fluids.ThrownPlunger;
+import com.resourceful_refinement.content.plunger.ThrownPlunger;
 import com.resourceful_refinement.content.hosegun.GelBlobEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;

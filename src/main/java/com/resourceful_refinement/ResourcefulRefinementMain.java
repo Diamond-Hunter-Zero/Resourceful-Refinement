@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLa
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.refinery.rendering.*;
@@ -148,11 +149,15 @@ public class ResourcefulRefinementMain {
 
         // --- Fracking Pump ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), (be, side) -> {
+            if (!be.isAssembled()) {
+                return null;
+            }
             Direction facing = be.getBlockState().getValue(FrackingPumpOutletBlock.FACING);
-            if (side == facing) {
-                return be.outputTank;
-            } else if (side == facing.getOpposite()) {
+            if (FrackingPumpOutletBlock.isFluidInputSide(side, facing)) {
                 return be.inputTank;
+            }
+            if (FrackingPumpOutletBlock.isFluidOutputSide(side, facing)) {
+                return be.outputTank;
             }
             return null;
         });
@@ -220,7 +225,7 @@ public class ResourcefulRefinementMain {
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
-            event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), com.resourceful_refinement.content.fluids.ThrownPlungerRenderer::new);
+            event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
         }
 
         @SubscribeEvent

@@ -34,7 +34,7 @@ public class FrackingPonders {
         scene.configureBasePlate(1,0,10);
 
         scene.rotateCameraY(0);
-        scene.scaleSceneView(1.25f);
+        scene.scaleSceneView(1f);
 
         BlockPos geyserPos = util.grid().at(6, 1, 5);
         BlockPos outletBlock = util.grid().at(6, 2, 5);
@@ -220,7 +220,7 @@ public class FrackingPonders {
         // --- Page 4: Assembly  ---
         scene.addKeyframe();
 
-        scene.overlay().showControls(outletSegment.getCenter(), Pointing.RIGHT, 80);
+        scene.overlay().showControls(outletSegment.getCenter().add(0.5,0,-0.25), Pointing.RIGHT, 80).rightClick();
         scene.overlay().showText(100)
                 .text("resourceful_refinement.ponder.fracking_assembly.text_8")
                 .pointAt(outletSegment.getCenter());

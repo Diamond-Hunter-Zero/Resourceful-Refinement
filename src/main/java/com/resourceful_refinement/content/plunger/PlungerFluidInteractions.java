@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Empties every fluid tank exposed by a block's {@link IFluidHandler} capabilities (all faces).

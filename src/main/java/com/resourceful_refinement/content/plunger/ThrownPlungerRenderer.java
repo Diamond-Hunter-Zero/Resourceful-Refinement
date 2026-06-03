@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

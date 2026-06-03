@@ -78,6 +78,48 @@ public class FrackingPumpOutletBlock extends KineticBlock implements IBE<Frackin
         super.onRemove(state, level, pos, newState, isMoving);
     }
 
+    /**
+     * Converts a horizontal direction from model-local space into world space.
+     * Geometry and {@link FrackingPumpRenderer} are authored with {@link Direction#SOUTH} as the
+     * identity orientation (BER rotation {@code 180 - facing.toYRot()}).
+     */
+    public static Direction modelLocalToWorld(Direction local, Direction facing) {
+        if (local.getAxis() == Direction.Axis.Y) {
+            return local;
+        }
+        return switch (facing) {
+            case SOUTH -> local;
+            case NORTH -> local.getOpposite();
+            case WEST -> local.getCounterClockWise();
+            case EAST -> local.getClockWise();
+            default -> local;
+        };
+    }
+
+    /** Inverse of {@link #modelLocalToWorld(Direction, Direction)} for capability side queries. */
+    public static Direction worldToModelLocal(Direction world, Direction facing) {
+        if (world.getAxis() == Direction.Axis.Y) {
+            return world;
+        }
+        return switch (facing) {
+            case SOUTH -> world;
+            case NORTH -> world.getOpposite();
+            case WEST -> world.getClockWise();
+            case EAST -> world.getCounterClockWise();
+            default -> world;
+        };
+    }
+
+    /** Fluid intake on the model's local north face. */
+    public static boolean isFluidInputSide(Direction worldSide, Direction facing) {
+        return worldToModelLocal(worldSide, facing) == Direction.NORTH;
+    }
+
+    /** Fluid output on the model's local south face. */
+    public static boolean isFluidOutputSide(Direction worldSide, Direction facing) {
+        return worldToModelLocal(worldSide, facing) == Direction.SOUTH;
+    }
+
     @Override
     public Direction.Axis getRotationAxis(BlockState state) {
         return state.getValue(FACING).getClockWise().getAxis();

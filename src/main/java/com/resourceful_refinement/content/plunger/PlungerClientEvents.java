@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.fluids;
+package com.resourceful_refinement.content.plunger;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import net.neoforged.api.distmarker.Dist;

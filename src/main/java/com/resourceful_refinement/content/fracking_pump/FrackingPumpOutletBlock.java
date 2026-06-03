@@ -9,8 +9,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -58,16 +62,32 @@ public class FrackingPumpOutletBlock extends KineticBlock implements IBE<Frackin
     }
 
     @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof FrackingPumpOutletBlockEntity outlet && outlet.isAssembled()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (player.isShiftKeyDown()) return InteractionResult.PASS;
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof FrackingPumpOutletBlockEntity outlet)) return InteractionResult.PASS;
+
+        if (outlet.isAssembled()) return InteractionResult.PASS;
+
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
-        withBlockEntityDo(level, pos, be -> {
-            if (!be.isAssembled()) {
-                be.tryAssemble();
-            }
-        });
-        return InteractionResult.SUCCESS;
+        FrackingPumpOutletBlockEntity.AssemblyResult result = outlet.tryAssemble();
+        if (result.success()) {
+            player.displayClientMessage(Component.literal("[Fracking Pump] Structure assembled!"), false);
+        } else if (!result.reason().isEmpty()) {
+            player.displayClientMessage(Component.literal("[Fracking Pump] Assembly failed: " + result.reason()), true);
+        }
+        return InteractionResult.CONSUME;
     }
 
     @Override

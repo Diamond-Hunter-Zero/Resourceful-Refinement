@@ -167,8 +167,8 @@ public class BlenderBladeBlockEntity extends KineticBlockEntity {
 
         Vec3 tangent = (switch (shaftAxis) {
             case Y -> new Vec3(-r.z, 0, r.x);
-            case X -> new Vec3(0, -r.z, r.y);
-            case Z -> new Vec3(-r.y, r.x, 0);
+            case X -> new Vec3(0, r.z, -r.y);
+            case Z -> new Vec3(r.y, -r.x, 0);
         });
 
         double radial = switch (shaftAxis) {

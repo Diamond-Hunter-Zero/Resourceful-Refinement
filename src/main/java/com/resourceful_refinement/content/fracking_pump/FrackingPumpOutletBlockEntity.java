@@ -23,11 +23,22 @@ import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import java.util.List;
 
 public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements IBE<FrackingPumpOutletBlockEntity>, IHaveGoggleInformation {
+
+    public record AssemblyResult(boolean success, String reason) {
+        public static AssemblyResult fail(String reason) {
+            return new AssemblyResult(false, reason);
+        }
+
+        public static AssemblyResult ok() {
+            return new AssemblyResult(true, "");
+        }
+    }
 
     public static final int TANK_CAPACITY = 4000;
 
@@ -76,19 +87,19 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         Block sourceBlock = level.getBlockState(worldPosition.below()).getBlock();
         Fluid geyserFluid = resolveGeyserFluid(worldPosition.below());
 
-        // 1. RPM Validation
-        int rpmThreshold = getRequiredRPM();
-        if (Math.abs(getSpeed()) < rpmThreshold) return;
-
-        // 2. Fetch Recipe
-        FrackingPumpRecipeInput input = new FrackingPumpRecipeInput(sourceBlock, inputTank.getFluid(), geyserFluid);
-
         if (sourceBlock != lastSourceBlock || lastGeyserFluid != geyserFluid) {
             lastSourceBlock = sourceBlock;
             lastGeyserFluid = geyserFluid;
             lastRecipe = null; // force recipe re-lookup
             updateDisplayedRecipeFromSource(sourceBlock, geyserFluid);
         }
+
+        // 1. RPM Validation
+        int rpmThreshold = getRequiredRPM();
+        if (Math.abs(getSpeed()) < rpmThreshold) return;
+
+        // 2. Fetch Recipe
+        FrackingPumpRecipeInput input = new FrackingPumpRecipeInput(sourceBlock, inputTank.getFluid(), geyserFluid);
 
         if (lastRecipe == null || !lastRecipe.matches(input, level)) {
             var recipe = level.getRecipeManager()
@@ -170,17 +181,8 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
     private void updateDisplayedRecipeFromSource(Block sourceBlock, Fluid geyserFluid) {
         if (level == null || level.isClientSide) return;
 
-        // Find first recipe that matches this source block (and geyser fluid, if applicable)
-        for (var holder : level.getRecipeManager().getAllRecipesFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get())) {
-            FrackingPumpRecipe recipe = holder.value();
-            if (recipe.getSourceBlock() != sourceBlock) continue;
-
-            if (recipe.requiresGeyserFluid()) {
-                // Only match if the geyser actually contains the required fluid
-                if (geyserFluid == null || geyserFluid == Fluids.EMPTY) continue;
-                if (recipe.getSourceFluid() != geyserFluid) continue;
-            }
-
+        RecipeHolder<FrackingPumpRecipe> holder = findRecipeHolderForSource(sourceBlock, geyserFluid);
+        if (holder != null) {
             if (!holder.id().equals(displayedRecipeId)) {
                 displayedRecipeId = holder.id();
                 syncData();
@@ -192,6 +194,23 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
             displayedRecipeId = null;
             syncData();
         }
+    }
+
+    private RecipeHolder<FrackingPumpRecipe> findRecipeHolderForSource(Block sourceBlock, Fluid geyserFluid) {
+        if (level == null) return null;
+
+        for (var holder : level.getRecipeManager().getAllRecipesFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get())) {
+            FrackingPumpRecipe recipe = holder.value();
+            if (recipe.getSourceBlock() != sourceBlock) continue;
+
+            if (recipe.requiresGeyserFluid()) {
+                if (geyserFluid == null || geyserFluid == Fluids.EMPTY) continue;
+                if (recipe.getSourceFluid() != geyserFluid) continue;
+            }
+
+            return holder;
+        }
+        return null;
     }
 
     /**
@@ -228,14 +247,16 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         return h_ring;
     }
 
-    public void tryAssemble() {
+    public AssemblyResult tryAssemble() {
         // 1. Check we're not already assembled!
-        if (isAssembled()) return;
+        if (isAssembled()) return AssemblyResult.ok();
 
         // 2. Check casings
         for (int i = 1; i <= 2; i++) {
             BlockState state = level.getBlockState(worldPosition.above(i));
-            if (!AllBlocks.BRASS_CASING.has(state)) return;
+            if (!AllBlocks.BRASS_CASING.has(state)) {
+                return AssemblyResult.fail("Missing brass casing (layer " + i + " above outlet)");
+            }
         }
 
         // 3. Count girders
@@ -244,14 +265,23 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         while (AllBlocks.METAL_GIRDER.has(level.getBlockState(currentPos))) {
             poleCount++;
             currentPos = currentPos.above();
-            if (poleCount > 8) return; // Max pole length
+            if (poleCount > 8) {
+                return AssemblyResult.fail("Girder pole too tall (maximum 8 blocks)");
+            }
         }
 
-        if (poleCount == 0 || poleCount % 2 != 0) return; // Must be even and non-zero
+        if (poleCount == 0) {
+            return AssemblyResult.fail("Missing metal girder pole above casings");
+        }
+        if (poleCount % 2 != 0) {
+            return AssemblyResult.fail("Girder pole height must be even (counterweight must be half the pole height)");
+        }
 
         // 4. Check cap
         BlockState capState = level.getBlockState(currentPos);
-        if (!AllBlocks.ANDESITE_ALLOY_BLOCK.has(capState)) return;
+        if (!AllBlocks.ANDESITE_ALLOY_BLOCK.has(capState)) {
+            return AssemblyResult.fail("Missing andesite alloy block cap atop girder pole");
+        }
 
         // 5. Check rings
         int ringCount = poleCount / 2;
@@ -260,12 +290,13 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         int ringBottomY = ringTopY - ringCount + 1;
         
         for (int y = ringBottomY; y <= ringTopY; y++) {
+            int ringLayer = y - ringBottomY + 1;
             for (int x = -1; x <= 1; x++) {
                 for (int z = -1; z <= 1; z++) {
                     if (x == 0 && z == 0) continue; // center hole
                     BlockPos ringPos = new BlockPos(worldPosition.getX() + x, y, worldPosition.getZ() + z);
                     if (!AllBlocks.INDUSTRIAL_IRON_BLOCK.has(level.getBlockState(ringPos))) {
-                        return; // Invalid ring
+                        return AssemblyResult.fail("Counterweight ring incomplete (layer " + ringLayer + " of " + ringCount + ")");
                     }
                 }
             }
@@ -300,6 +331,13 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         }
 
         syncData();
+        Block sourceBlock = level.getBlockState(worldPosition.below()).getBlock();
+        Fluid geyserFluid = resolveGeyserFluid(worldPosition.below());
+        lastSourceBlock = sourceBlock;
+        lastGeyserFluid = geyserFluid;
+        updateDisplayedRecipeFromSource(sourceBlock, geyserFluid);
+        notifyFluidInterfaceChanged();
+        return AssemblyResult.ok();
     }
 
     private void convertToProxy(BlockPos pos) {
@@ -346,6 +384,7 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         this.h_pole = 0;
         this.h_ring = 0;
         syncData();
+        notifyFluidInterfaceChanged();
     }
 
     private void restoreFromProxy(BlockPos pos) {
@@ -409,6 +448,13 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         }
     }
 
+    /** Re-evaluate fluid capabilities and tell neighbouring pipes to reconnect. */
+    private void notifyFluidInterfaceChanged() {
+        if (level == null || level.isClientSide) return;
+        level.invalidateCapabilities(worldPosition);
+        level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
+    }
+
     @Override
     public AABB getRenderBoundingBox() {
         if (!assembled) return super.getRenderBoundingBox();
@@ -443,6 +489,14 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
                 recipeToDisplay = fpr;
             }
         }
+        if (recipeToDisplay == null && level != null) {
+            Block sourceBlock = level.getBlockState(worldPosition.below()).getBlock();
+            Fluid geyserFluid = resolveGeyserFluid(worldPosition.below());
+            RecipeHolder<FrackingPumpRecipe> holder = findRecipeHolderForSource(sourceBlock, geyserFluid);
+            if (holder != null) {
+                recipeToDisplay = holder.value();
+            }
+        }
 
         if (recipeToDisplay != null) {
             float processingRate = 1.0f + (h_ring - 1) * 0.25f;
@@ -466,8 +520,12 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
                         fluidName = matching[0].getHoverName().getString();
                     }
                 }
-                
-                tooltip.add(Component.literal("§9Intake: §r" + String.format("%.0f", rate) + "mB/s (" + fluidName + ")"));
+
+                boolean hasSufficientIntake = !inputTank.isEmpty()
+                    && ingredient.test(inputTank.getFluid())
+                    && inputTank.getFluidAmount() >= ingredient.amount();
+                String intakeRateText = String.format("%.0f", rate) + "mB/s (" + fluidName + ")";
+                tooltip.add(Component.literal("§9Intake: " + (hasSufficientIntake ? "§r" : "§c") + intakeRateText));
             }
 
             // Output

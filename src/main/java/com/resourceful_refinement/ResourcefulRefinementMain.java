@@ -141,11 +141,15 @@ public class ResourcefulRefinementMain {
 
         // --- Fracking Pump ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), (be, side) -> {
+            if (!be.isAssembled()) {
+                return null;
+            }
             Direction facing = be.getBlockState().getValue(FrackingPumpOutletBlock.FACING);
-            if (side == facing) {
-                return be.outputTank;
-            } else if (side == facing.getOpposite()) {
+            if (FrackingPumpOutletBlock.isFluidInputSide(side, facing)) {
                 return be.inputTank;
+            }
+            if (FrackingPumpOutletBlock.isFluidOutputSide(side, facing)) {
+                return be.outputTank;
             }
             return null;
         });

@@ -2,27 +2,27 @@
   "multipart": [
     {
       "when": { "down": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_down" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_down" }
     },
     {
       "when": { "up": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_up" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_up" }
     },
     {
       "when": { "north": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_north" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_north" }
     },
     {
       "when": { "south": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_south" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_south" }
     },
     {
       "when": { "west": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_west" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_west" }
     },
     {
       "when": { "east": "true" },
-      "apply": { "model": "resourceful_refinement:block/gel_splatter/gel_splatter_east" }
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/sticky/gel_splatter_sticky_east" }
     }
   ]
 }

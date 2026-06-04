@@ -1,5 +1,5 @@
 {
-  "parent": "resourceful_refinement:block/gel_splatter/gel_splatter_down",
+  "parent": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_down",
   "display": {
     "thirdperson_righthand": {
       "rotation": [75, 45, 0],

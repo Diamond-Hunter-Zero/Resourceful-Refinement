@@ -86,6 +86,8 @@ public class ModItems {
     public static final DeferredItem<PlungerItem> PLUNGER = ITEMS.register("plunger",
             () -> new PlungerItem(PlungerItem.createProperties()));
 
+    public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
+
 
     // -------------------------------------------------------------------------
     // Foods?...

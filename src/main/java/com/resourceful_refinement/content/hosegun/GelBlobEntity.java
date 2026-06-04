@@ -10,6 +10,7 @@ import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.gel_splatter.GelType;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import com.resourceful_refinement.registry.ModDamageTypes;
+import com.resourceful_refinement.registry.ModItems;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
@@ -31,7 +32,7 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -57,6 +58,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
     private static final EntityDataAccessor<CompoundTag> FLUID_DATA = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.COMPOUND_TAG);
     private static final EntityDataAccessor<String> TRACKING_ID = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Boolean> GLOOPY = SynchedEntityData.defineId(GelBlobEntity.class, EntityDataSerializers.BOOLEAN);
 
     private FluidStack fluidStack = FluidStack.EMPTY;
 
@@ -104,7 +106,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return Items.SLIME_BALL;
+        return ModItems.PAINT_BLOB.asItem();
     }
 
     @Override
@@ -112,11 +114,26 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         super.defineSynchedData(builder); // Let parent register its data (e.g. item slot, ID 8)
         builder.define(FLUID_DATA, new CompoundTag());
         builder.define(TRACKING_ID, "");
+        builder.define(GLOOPY, false);
+    }
+
+    public void setGloopy(boolean gloopy) {
+        this.entityData.set(GLOOPY, gloopy);
+    }
+
+    public boolean isGloopy() {
+        return this.entityData.get(GLOOPY);
     }
 
     public void setFluidStack(FluidStack stack) {
         this.fluidStack = stack == null || stack.isEmpty() ? FluidStack.EMPTY : stack.copy();
         syncFluidToEntityData();
+        refreshProjectileItem();
+    }
+
+    /** Keeps the synced stack a plain paint blob; fluid tint is applied client-side in {@link GelBlobEntityRenderer}. */
+    private void refreshProjectileItem() {
+        setItem(new ItemStack(ModItems.PAINT_BLOB.get()));
     }
 
     public void setFluid(Fluid fluid) {
@@ -153,6 +170,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         super.onSyncedDataUpdated(key);
         if (FLUID_DATA.equals(key)) {
             readFluidFromEntityData();
+            refreshProjectileItem();
         }
     }
 
@@ -178,6 +196,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         if (hasTrackingId()) {
             tag.putString("TrackingId", getTrackingId());
         }
+        tag.putBoolean("Gloopy", isGloopy());
     }
 
     @Override
@@ -191,6 +210,9 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         }
         if (tag.contains("TrackingId")) {
             setTrackingId(tag.getString("TrackingId"));
+        }
+        if (tag.contains("Gloopy")) {
+            setGloopy(tag.getBoolean("Gloopy"));
         }
     }
 
@@ -223,9 +245,11 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                 }
             }
             case PAINT -> {
-                DyeColor color = PAINT_FLUID_COLORS.get(fluid);
-                if (color != null && entity instanceof LivingEntity living && level() instanceof ServerLevel server) {
-                    PaintGelCollarHelper.tryDyeEntity(server, living, color);
+                if (!isGloopy()) {
+                    DyeColor color = PAINT_FLUID_COLORS.get(fluid);
+                    if (color != null && entity instanceof LivingEntity living && level() instanceof ServerLevel server) {
+                        PaintGelCollarHelper.tryDyeEntity(server, living, color);
+                    }
                 }
             }
             case POTION -> {
@@ -269,7 +293,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
             return;
         }
 
-        if (type == GelType.PAINT) {
+        if (type == GelType.PAINT && !isGloopy()) {
             // Paint Fluid: dye colorable blocks within a 3-block radius
             DyeColor color = PAINT_FLUID_COLORS.get(fluid);
             if (color != null) {

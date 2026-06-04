@@ -192,8 +192,11 @@
   "item.resourceful_refinement.ingot_mould": "Ingot Mould",
   "item.resourceful_refinement.shaft_mould": "Shaft Mould",
   "item.resourceful_refinement.hosegun": "Hosegun",
+  "item.resourceful_refinement.hosegun.gloopy": "Gloopy Hosegun",
+  "item.resourceful_refinement.glue_pot": "Glue Pot",
   "item.resourceful_refinement.plunger": "Plunger",
   "tooltip.resourceful_refinement.plunger": "Right-click fluid tanks to empty them",
+  "item.resourceful_refinement.paint_blob": "Paint Blob",
 
   "resourceful_refinement.ponder.tag.resourceful_refinement": "Resourceful Refinement Processing",
   "resourceful_refinement.ponder.tag.resourceful_refinement.description": "Components which allow for advanced processing of raw resources through fluids",
@@ -354,6 +357,13 @@
   "resourceful_refinement.ponder.binding_refills.text_6": "It will show a live count of all gel splatters linked to the station's ID",
   "resourceful_refinement.ponder.binding_refills.text_7": "If a redstone signal is applied to a Refill Station...",
   "resourceful_refinement.ponder.binding_refills.text_8": "...Any gel splatters linked to its Tracking ID will be cleaned up!",
+
+  "resourceful_refinement.ponder.gloopy_hosegun.header": "Creating a Gloopy Hosegun",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_1": "If you hold a Hosegun on your main hand, and a Glue Pot in your offhand...",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_2": "...And right-click...",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_3": "...Your Hosegun will turn into a Gloopy Hosegun!",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_4": "Gloopy Hoseguns turn paints into gel splatters like other fluids",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_5": "To ungloop a Hosegun, mix it with water in a basin",
 
   "gui.resourceful_refinement.fluid_refill_station.tracking_id": "Tracking ID",
   "gui.resourceful_refinement.fluid_refill_station.tracking_id_label": "Tracking ID:",

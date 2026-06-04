@@ -10,7 +10,8 @@
     "StructurePoolElementMixin",
     "JigsawPlacementMixin",
     "WolfCollarInvoker",
-    "CatCollarInvoker"
+    "CatCollarInvoker",
+    "BasinOperatingBlockEntityMixin"
   ],
   "client": [
     "client.LocalPlayerMixin"

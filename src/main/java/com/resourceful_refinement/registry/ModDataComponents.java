@@ -26,4 +26,11 @@ public class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                     .build()
     );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> HOSEGUN_GLOOPY = DATA_COMPONENTS.register("hosegun_gloopy",
+            () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build()
+    );
 }

@@ -4,16 +4,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationInteractions;
 import com.resourceful_refinement.registry.ModDataComponents;
+import com.resourceful_refinement.registry.ModItems;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.UseAnim;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -94,6 +97,16 @@ public class HosegunItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
+        InteractionHand otherHand = hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+        ItemStack otherStack = player.getItemInHand(otherHand);
+        if (!level.isClientSide && otherStack.is(ModItems.GLUE_POT.get()) && !HosegunGloopy.isGloopy(stack)) {
+            otherStack.shrink(1);
+            HosegunGloopy.setGloopy(stack);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 0.8F, 0.6F);
+            return InteractionResultHolder.sidedSuccess(stack, false);
+        }
+
         // Ensure player has enough fluid to fire
         HosegunFluidHandler fluidHandler = new HosegunFluidHandler(stack);
         FluidStack contained = fluidHandler.getFluid();
@@ -142,6 +155,7 @@ public class HosegunItem extends Item {
                     FluidStack blobFluid = contained.copy();
                     blobFluid.setAmount(getGelAmmoCost(contained.getFluid()));
                     projectile.setFluidStack(blobFluid);
+                    projectile.setGloopy(HosegunGloopy.isGloopy(stack));
                     HosegunTracking.getTrackingId(stack).ifPresent(projectile::setTrackingId);
                     projectile.setOwner(player);
                     projectile.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, velocity, HOSEGUN_INNACURACY);
@@ -162,11 +176,14 @@ public class HosegunItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
+        MutableComponent base = HosegunGloopy.isGloopy(stack)
+                ? Component.translatable("item.resourceful_refinement.hosegun.gloopy")
+                : Component.translatable("item.resourceful_refinement.hosegun");
         FluidStack fluid = new HosegunFluidHandler(stack).getFluid();
         if (fluid.isEmpty()) {
-            return super.getName(stack);
+            return base;
         }
-        return Component.translatable("item.resourceful_refinement.hosegun").append( " [§3" + fluid.getHoverName().getString() + "§f]");
+        return base.append(" [§3" + fluid.getHoverName().getString() + "§f]");
     }
 
     @Override
@@ -177,7 +194,7 @@ public class HosegunItem extends Item {
         if (fluid.isEmpty()) {
             tooltip.add(Component.translatable("tooltip.resourceful_refinement.hosegun.empty").withColor(0x7F7F7F));
         } else {
-            FluidGelTooltipHelper.addItemFluidLines(tooltip, fluid, CAPACITY, 0x3AB3DA);
+            FluidGelTooltipHelper.addItemFluidLines(tooltip, fluid, CAPACITY, 0x3AB3DA, HosegunGloopy.isGloopy(stack));
         }
 
         HosegunTracking.getTrackingId(stack).ifPresentOrElse(

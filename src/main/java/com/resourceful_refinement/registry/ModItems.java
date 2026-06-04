@@ -11,6 +11,9 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -82,6 +85,22 @@ public class ModItems {
 
     public static final DeferredItem<PlungerItem> PLUNGER = ITEMS.register("plunger",
             () -> new PlungerItem(PlungerItem.createProperties()));
+
+
+    // -------------------------------------------------------------------------
+    // Foods?...
+    // -------------------------------------------------------------------------
+
+    public static final FoodProperties GLUE_POT_FOOD = new FoodProperties.Builder()
+            .nutrition(0)                             // Hunger restored (e.g., 6 half-shanks)
+            .saturationModifier(0.3F)                 // Saturation multiplier
+            .alwaysEdible()                           // Allow eating even when full
+            .effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 200, 0), 1.0F)
+            .effect(() -> new MobEffectInstance(MobEffects.WEAKNESS, 200, 1), 1.0F)
+            .build();
+
+    public static final DeferredItem<Item> GLUE_POT = ITEMS.registerItem("glue_pot", Item::new, new Item.Properties()
+            .food(GLUE_POT_FOOD));
 
     // -------------------------------------------------------------------------
     // Buckets (Handled by FluidEntry)

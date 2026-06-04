@@ -1,23 +1,18 @@
 package com.resourceful_refinement.content.geyser;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import com.resourceful_refinement.content.sieve.MechanicalSieveCasingModel;
-import com.resourceful_refinement.content.sieve.MechanicalSieveCogModel;
-import com.resourceful_refinement.content.sieve.MechanicalSieveLayers;
-import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
 import com.resourceful_refinement.registry.ModPartialModels;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 public class GeyserItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final GeyserItemRenderer INSTANCE = new GeyserItemRenderer();
@@ -64,9 +59,10 @@ public class GeyserItemRenderer extends BlockEntityWithoutLevelRenderer {
             }
         }
 
-        // Render block model
-        SuperByteBuffer shaft = CachedBuffers.partial(ModPartialModels.GEYSER_CASING, Blocks.AIR.defaultBlockState());
-        shaft.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutout()));
+        GeyserRenderer.renderFluidCube(ms, buffer, Fluids.LAVA, light, 0.005f);
+
+        SuperByteBuffer geyserCasing = CachedBuffers.partial(ModPartialModels.GEYSER_CASING, Blocks.AIR.defaultBlockState());
+        geyserCasing.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutout()));
 
         ms.popPose();
     }

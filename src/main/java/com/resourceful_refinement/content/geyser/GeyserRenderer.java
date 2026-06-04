@@ -54,16 +54,19 @@ public class GeyserRenderer extends SafeBlockEntityRenderer<GeyserBlockEntity> {
         ms.popPose();
 
         // --- 2. Render Interior Fluid ---
-        Fluid fluid = be.getAssociatedFluid();
+        renderFluidCube(ms, buffer, be.getAssociatedFluid(), light, 0.005f);
+    }
+
+    static void renderFluidCube(PoseStack ms, MultiBufferSource buffer, Fluid fluid, int light, float margin) {
         if (fluid == null || fluid == Fluids.EMPTY) return;
 
         FluidStack stack = new FluidStack(fluid, 1000);
         IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluid);
         int color = props.getTintColor(stack);
         net.minecraft.resources.ResourceLocation stillTexture = props.getStillTexture(stack);
-        
+
         if (stillTexture == null) return;
-        
+
         TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(stillTexture);
 
         // Make fluid visible but translucent (alpha 80%) if opaque
@@ -72,19 +75,10 @@ public class GeyserRenderer extends SafeBlockEntityRenderer<GeyserBlockEntity> {
         }
 
         VertexConsumer consumer = buffer.getBuffer(RenderType.translucent());
-        
-        float margin = 0.005f; // Slightly smaller margin to stay within casing
-        float x1 = margin;
-        float y1 = margin;
-        float z1 = margin;
-        float x2 = 1f - margin;
-        float y2 = 1f - margin;
-        float z2 = 1f - margin;
-
-        renderBox(ms, consumer, x1, y1, z1, x2, y2, z2, color, light, sprite);
+        renderBox(ms, consumer, margin, margin, margin, 1f - margin, 1f - margin, 1f - margin, color, light, sprite);
     }
 
-    private void renderBox(PoseStack ms, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2,
+    private static void renderBox(PoseStack ms, VertexConsumer consumer, float x1, float y1, float z1, float x2, float y2,
                            float z2, int color, int light, TextureAtlasSprite sprite) {
         PoseStack.Pose pose = ms.last();
 
@@ -135,7 +129,7 @@ public class GeyserRenderer extends SafeBlockEntityRenderer<GeyserBlockEntity> {
         vertex(consumer, pose, x2, y1, z2, r, g, b, a, u1, v1, 1, 0, 0, light);
     }
 
-    private void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float z, int r, int g,
+    private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float z, int r, int g,
                         int b, int a, float u, float v, float nx, float ny, float nz, int light) {
         consumer.addVertex(pose, x, y, z)
                 .setColor(r, g, b, a)

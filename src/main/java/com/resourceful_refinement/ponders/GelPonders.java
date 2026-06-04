@@ -11,6 +11,7 @@ import com.resourceful_refinement.registry.ModFluids;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllParticleTypes;
+import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.ParticleEmitter;
@@ -770,6 +771,7 @@ public class GelPonders {
         scene.idle(20);
         scene.world().showSection(displayBoardSegment, Direction.DOWN);
         scene.idle(20);
+        scene.world().flashDisplayLink(displayLinkPos);
         scene.world().setKineticSpeed(displayBoardSegment, 24);
         scene.world().createEntity(level -> {
             Display.TextDisplay entity = new Display.TextDisplay(EntityType.TEXT_DISPLAY, level);
@@ -981,7 +983,7 @@ public class GelPonders {
         scene.overlay().showLine(PonderPalette.INPUT, displayLinkLeftSegment.getCenter(), displayBoardOutlineSegment.getCenter(), 20);
         scene.idle(60);
 
-
+        scene.world().flashDisplayLink(displayLinkLeftPos);
         scene.world().setKineticSpeed(displayBoardSegment, 24);
         var textLink = scene.world().createEntity(level -> {
             Display.TextDisplay entity = new Display.TextDisplay(EntityType.TEXT_DISPLAY, level);
@@ -1067,6 +1069,173 @@ public class GelPonders {
                 .independent();
         scene.idle(120);
 
+
+        scene.markAsFinished();
+    }
+
+    public static void gloopyHosegunScene(SceneBuilder builder, SceneBuildingUtil util) {
+
+        //Build scene
+        CreateSceneBuilder scene = new CreateSceneBuilder(builder);
+        scene.title("gloopy_hosegun", "Gloopy Hosegun");
+
+        scene.configureBasePlate(0,0,5);
+
+        scene.scaleSceneView(1f);
+
+        BlockPos basinPos = util.grid().at(3, 1, 3);
+        Selection basinSegment = util.select().fromTo(basinPos, basinPos);
+
+        BlockPos mixerPos = util.grid().at(3, 3, 3);
+        Selection mixerSegment = util.select().fromTo(mixerPos, mixerPos);
+        Selection mixerBasinSegment = util.select().fromTo(basinPos, mixerPos);
+
+        Vec3 hosegunPos = new Vec3(1.5f, 1.75f, 3.5);
+        Vec3 gluePos = new Vec3(3, 1.75f, 1.75f);
+
+        Selection gelSegment = util.select().fromTo(0,1,0, 2,1,2);
+
+
+        // Show baseplate
+        scene.showBasePlate();
+        scene.idle(20);
+
+        var hosegunLink = scene.world().createEntity(level -> {
+            Display.ItemDisplay hosegunItem = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
+            hosegunItem.setPos(hosegunPos);
+            try
+            {
+                Field itemStackAccessorField = Display.ItemDisplay.class.getDeclaredField("DATA_ITEM_STACK_ID");
+                Field scaleAccessorField = Display.class.getDeclaredField("DATA_SCALE_ID");
+                Field rotationAccessorField = Display.class.getDeclaredField("DATA_RIGHT_ROTATION_ID");
+                itemStackAccessorField.setAccessible(true);
+                scaleAccessorField.setAccessible(true);
+                rotationAccessorField.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<ItemStack> dataItemStackId = (EntityDataAccessor<ItemStack>) itemStackAccessorField.get(null);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<Vector3f> dataScaleId = (EntityDataAccessor<Vector3f>) scaleAccessorField.get(null);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<Quaternionf> dataRotationId = (EntityDataAccessor<Quaternionf>) rotationAccessorField.get(null);
+
+                ItemStack hosegunStack = ModItems.HOSEGUN.toStack();
+
+                // Update the entity's data tracker
+                hosegunItem.getEntityData().set(dataItemStackId, hosegunStack);
+                hosegunItem.getEntityData().set(dataScaleId, new Vector3f(2,2,2));
+                Quaternionf myRotation = new Quaternionf()
+                        .mul(Axis.ZP.rotationDegrees(0))
+                        .mul(Axis.XP.rotationDegrees(0))
+                        .mul(Axis.YP.rotationDegrees(-45));
+                hosegunItem.getEntityData().set(dataRotationId, myRotation);
+            } catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+
+            return hosegunItem;
+        });
+
+        var gluePotLink = scene.world().createEntity(level -> {
+            Display.ItemDisplay gluePotItem = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
+            gluePotItem.setPos(gluePos);
+            try
+            {
+                Field itemStackAccessorField = Display.ItemDisplay.class.getDeclaredField("DATA_ITEM_STACK_ID");
+                Field scaleAccessorField = Display.class.getDeclaredField("DATA_SCALE_ID");
+                Field rotationAccessorField = Display.class.getDeclaredField("DATA_RIGHT_ROTATION_ID");
+                itemStackAccessorField.setAccessible(true);
+                scaleAccessorField.setAccessible(true);
+                rotationAccessorField.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<ItemStack> dataItemStackId = (EntityDataAccessor<ItemStack>) itemStackAccessorField.get(null);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<Vector3f> dataScaleId = (EntityDataAccessor<Vector3f>) scaleAccessorField.get(null);
+                @SuppressWarnings("unchecked")
+                EntityDataAccessor<Quaternionf> dataRotationId = (EntityDataAccessor<Quaternionf>) rotationAccessorField.get(null);
+
+                ItemStack gluePotStack = ModItems.GLUE_POT.toStack();
+
+                // Update the entity's data tracker
+                gluePotItem.getEntityData().set(dataItemStackId, gluePotStack);
+                gluePotItem.getEntityData().set(dataScaleId, new Vector3f(1.25f,1.25f,1.25f));
+                Quaternionf myRotation = new Quaternionf()
+                        .mul(Axis.ZP.rotationDegrees(0))
+                        .mul(Axis.XP.rotationDegrees(0))
+                        .mul(Axis.YP.rotationDegrees(45));
+                gluePotItem.getEntityData().set(dataRotationId, myRotation);
+            } catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+
+            return gluePotItem;
+        });
+
+
+        // --- Page 1: Hosegun glooping ---
+        scene.addKeyframe();
+        scene.overlay().showText(170)
+                .text("resourceful_refinement.ponder.gloopy_hosegun.text_1")
+                .independent(-8);
+        scene.idle(100);
+
+        scene.overlay().showText(70)
+                .text("resourceful_refinement.ponder.gloopy_hosegun.text_2")
+                .independent(32);
+        scene.idle(10);
+        scene.overlay().showControls(new Vec3(3,1.75,3), Pointing.DOWN, 60).rightClick();
+        scene.idle(80);
+
+
+        scene.world().modifyEntity(gluePotLink, Entity::discard);
+        scene.world().modifyEntity(hosegunLink, entity -> {
+            entity.setPos(2.3,1.75f,2.9);
+        });
+        scene.overlay().showText(90)
+                .text("resourceful_refinement.ponder.gloopy_hosegun.text_3")
+                .independent();
+        scene.idle(110);
+
+        // --- Page 2: Gloopy Gun Gels ---
+        scene.addKeyframe();
+        scene.overlay().showText(90)
+                .text("resourceful_refinement.ponder.gloopy_hosegun.text_4")
+                .independent();
+
+        scene.idle(20);
+        PonderGelSprayHelper.playGelSpray(scene, new Vec3(2.75,1,2.8), gelSegment.getCenter(), 12, ModFluids.PINK_PAINT.color, 60,
+                () -> {
+                    scene.world().showIndependentSectionImmediately(gelSegment);
+                });
+        scene.idle(30);
+
+        scene.world().setBlocks(gelSegment, Blocks.AIR.defaultBlockState(), true);
+        scene.world().modifyEntity(hosegunLink, Entity::discard);
+        scene.idle(10);
+
+        scene.world().showSection(basinSegment, Direction.DOWN);
+        scene.idle(20);
+        scene.world().showSection(mixerSegment, Direction.DOWN);
+        scene.idle(20);
+
+
+        // --- Page 3: Cleaning Gloopy Guns ---
+        scene.addKeyframe();
+
+        scene.overlay().showText(100)
+                .text("resourceful_refinement.ponder.gloopy_hosegun.text_5")
+                .pointAt(mixerPos.getCenter());
+
+        scene.idle(20);
+        var basinHosegunItem = scene.world().createItemEntity(basinPos.getCenter().add(0,0.5,0), Vec3.ZERO, ModItems.HOSEGUN.toStack());
+        scene.idle(10);
+        scene.world().setKineticSpeed(mixerSegment, 48);
+        scene.idle(70);
+        scene.world().setKineticSpeed(mixerSegment, 0);
+        scene.world().modifyEntity(basinHosegunItem, Entity::discard);
+        scene.world().createItemEntity(basinPos.getCenter().add(-1,0,-1), Vec3.ZERO, ModItems.HOSEGUN.toStack());
+        scene.idle(20);
 
         scene.markAsFinished();
     }

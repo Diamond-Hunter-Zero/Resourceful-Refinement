@@ -21,12 +21,17 @@ public class ModCreativeTab {
         return false;
     }
 
+    /** Internal items used only as entity projectiles — not shown in creative tabs. */
+    public static boolean isHiddenCreativeItem(Item item) {
+        return item == ModItems.PAINT_BLOB.get();
+    }
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.resourceful_refinement.main"))
             .icon(() -> new ItemStack(ModItems.MECHANICAL_SIEVE_ITEM.get()))
             .displayItems((parameters, output) -> {
                 for (DeferredHolder<Item, ? extends Item> item : ModItems.ITEMS.getEntries()) {
-                    if (!isFluidBucketItem(item.get())) {
+                    if (!isFluidBucketItem(item.get()) && !isHiddenCreativeItem(item.get())) {
                         output.accept(item.get());
                     }
                 }

@@ -29,14 +29,16 @@ public final class FluidGelTooltipHelper {
         }
     }
 
-    public static void addItemFluidLines(List<Component> tooltip, FluidStack fluid, int capacity, int color) {
+    public static void addItemFluidLines(List<Component> tooltip, FluidStack fluid, int capacity, int color, boolean isGloopy) {
         if (fluid.isEmpty()) {
             return;
         }
 
         GelType gelType = GelPropertiesManager.getGelType(fluid.getFluid());
-        tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[" + formatGelType(gelType) + "]"));
-        //tooltip.add(Component.literal("§9[" + formatGelType(gelType) + "]"));
+        if (isGloopy)
+            tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[Gloop " + formatGelType(gelType) + "]"));
+        else
+            tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[" + formatGelType(gelType) + "]"));
     }
 
     private static String formatGelType(GelType gelType) {

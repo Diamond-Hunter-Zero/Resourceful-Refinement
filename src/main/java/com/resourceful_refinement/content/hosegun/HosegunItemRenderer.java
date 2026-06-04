@@ -76,10 +76,10 @@ public class HosegunItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static void applyDisplayTransform(ItemDisplayContext context, PoseStack poseStack) {
         switch (context) {
             case GUI -> {
-                poseStack.translate(-0.1F, 0.75F, 0F);
+                poseStack.translate(1.075F, 0.65F, 0F);
                 poseStack.scale(0.7F, 0.7F, 0.7F);
                 poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
-                poseStack.mulPose(Axis.YP.rotationDegrees(225.0F));
+                poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
                 poseStack.translate(-0.5F, -0.5F, -0.5F);
             }
             case GROUND -> {

@@ -8,9 +8,14 @@
     "ItemStackMixin",
     "SinglePoolElementAccessor",
     "StructurePoolElementMixin",
-    "JigsawPlacementMixin"
+    "JigsawPlacementMixin",
+    "WolfCollarInvoker",
+    "CatCollarInvoker",
+    "BasinOperatingBlockEntityMixin"
   ],
-  "client": [],
+  "client": [
+    "client.LocalPlayerMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

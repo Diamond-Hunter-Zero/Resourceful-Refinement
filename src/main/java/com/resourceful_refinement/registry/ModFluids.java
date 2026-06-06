@@ -54,4 +54,30 @@ public class ModFluids {
     public static final FluidEntry CATALYSED_CARBORAX = register("catalysed_carborax", 0x342152, FluidGroup.CARBORAX);
     public static final FluidEntry OVERCHARGED_CARBORAX = register("overcharged_carborax", 0x461B66, FluidGroup.CARBORAX);
     public static final FluidEntry CARBORAX_DIESEL = register("carborax_diesel", 0x7868A60, FluidGroup.CARBORAX);
+
+    // Misc Fluids
+    public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
+
+    // Paint Fluids (v0.2)
+    public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);
+    public static final FluidEntry ORANGE_PAINT = register("orange_paint", 0xF9801D, FluidGroup.PAINT);
+    public static final FluidEntry MAGENTA_PAINT = register("magenta_paint", 0xC74EBD, FluidGroup.PAINT);
+    public static final FluidEntry LIGHT_BLUE_PAINT = register("light_blue_paint", 0x3AB3DA, FluidGroup.PAINT);
+    public static final FluidEntry YELLOW_PAINT = register("yellow_paint", 0xFED83D, FluidGroup.PAINT);
+    public static final FluidEntry LIME_PAINT = register("lime_paint", 0x80C71F, FluidGroup.PAINT);
+    public static final FluidEntry PINK_PAINT = register("pink_paint", 0xF38BAA, FluidGroup.PAINT);
+    public static final FluidEntry GRAY_PAINT = register("gray_paint", 0x474F52, FluidGroup.PAINT);
+    public static final FluidEntry LIGHT_GRAY_PAINT = register("light_gray_paint", 0x9D9D97, FluidGroup.PAINT);
+    public static final FluidEntry CYAN_PAINT = register("cyan_paint", 0x169C9C, FluidGroup.PAINT);
+    public static final FluidEntry PURPLE_PAINT = register("purple_paint", 0x893293, FluidGroup.PAINT);
+    public static final FluidEntry BLUE_PAINT = register("blue_paint", 0x3C44AA, FluidGroup.PAINT);
+    public static final FluidEntry BROWN_PAINT = register("brown_paint", 0x835432, FluidGroup.PAINT);
+    public static final FluidEntry GREEN_PAINT = register("green_paint", 0x5E7C16, FluidGroup.PAINT);
+    public static final FluidEntry RED_PAINT = register("red_paint", 0xB02E26, FluidGroup.PAINT);
+    public static final FluidEntry BLACK_PAINT = register("black_paint", 0x1D1D21, FluidGroup.PAINT);
+
+    /** Paint fluid buckets use {@link FluidEntry#PAINT_FLUID_BUCKET_MODEL} instead of the vanilla bucket underlay. */
+    /*public static boolean isPaintFluid(FluidEntry entry) {
+        return entry != null && entry.group == FluidGroup.PAINT;
+    }*/
 }

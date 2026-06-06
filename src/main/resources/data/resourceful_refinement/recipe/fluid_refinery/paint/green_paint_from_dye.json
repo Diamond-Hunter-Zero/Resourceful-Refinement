@@ -1,0 +1,26 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "none",
+  "processing_time": 320,
+  "ingredients": [
+    {
+      "item": "minecraft:green_dye"
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 500
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:liquid_glue",
+      "amount": 25
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:green_paint",
+      "amount": 250
+    }
+  ]
+}

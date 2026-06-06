@@ -5,7 +5,7 @@
     "amount": 1000
   },
   "ingredient": {
-    "item": "minecraft:obsidian"
+    "item": "create:sturdy_sheet"
   },
   "coating": "Obsidianite",
   "duration": 200

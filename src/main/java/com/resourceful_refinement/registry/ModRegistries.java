@@ -7,6 +7,7 @@ public class ModRegistries {
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+        ModMenus.MENUS.register(modEventBus);
         ModFluidTypes.FLUID_TYPES.register(modEventBus);
         ModFluids.FLUIDS.register(modEventBus);
         ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
@@ -14,5 +15,7 @@ public class ModRegistries {
         ModCreativeTab.CREATIVE_MODE_TABS.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModStructureTypes.STRUCTURE_TYPES.register(modEventBus);
+        ModEntities.ENTITY_TYPES.register(modEventBus);
+        ModDisplaySources.init(modEventBus);
     }
 }

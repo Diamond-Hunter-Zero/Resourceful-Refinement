@@ -1,0 +1,31 @@
+{
+  "type": "create:mechanical_crafting",
+ "accept_mirrored": true,
+"category": "misc",
+  "key": {
+    "A": {
+      "tag": "create:valve_handles"
+    },
+    "B": {
+      "item": "resourceful_refinement:paint_nozzle"
+    },
+    "C": {
+      "item": "resourceful_refinement:durasteel_ingot"
+    },
+    "D": {
+      "item": "create:fluid_tank"
+    },
+    "E": {
+      "item": "minecraft:dried_kelp"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCD",
+    "  E"
+  ],
+  "result": {
+    "count": 1,
+    "id": "resourceful_refinement:hosegun"
+  }
+}

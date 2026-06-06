@@ -1,0 +1,28 @@
+{
+  "multipart": [
+    {
+      "when": { "down": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_down" }
+    },
+    {
+      "when": { "up": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_up" }
+    },
+    {
+      "when": { "north": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_north" }
+    },
+    {
+      "when": { "south": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_south" }
+    },
+    {
+      "when": { "west": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_west" }
+    },
+    {
+      "when": { "east": "true" },
+      "apply": { "model": "resourceful_refinement:block/gel_splatter/standard/gel_splatter_east" }
+    }
+  ]
+}

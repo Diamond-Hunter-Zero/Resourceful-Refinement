@@ -7,8 +7,13 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
+import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -47,6 +52,19 @@ public class ModItems {
     public static final DeferredItem<PlushieItem> PLUSHIE_ITEM = ITEMS.register("fox_plushie",
             () -> new PlushieItem(ModBlocks.PLUSHIE.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> PAINT_NOZZLE_ITEM = ITEMS.registerSimpleBlockItem("paint_nozzle", ModBlocks.PAINT_NOZZLE);
+
+    public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
+            () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
+
+    // -------------------------------------------------------------------------
+    // Gel Items
+    // -------------------------------------------------------------------------
+
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter", ModBlocks.GEL_SPLATTER);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_STICKY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_sticky", ModBlocks.GEL_SPLATTER_STICKY);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_SLIPPERY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_slippery", ModBlocks.GEL_SPLATTER_SLIPPERY);
+
     // -------------------------------------------------------------------------
     // Misc. Items
     // -------------------------------------------------------------------------
@@ -61,6 +79,30 @@ public class ModItems {
             properties -> new MouldItem(properties, INGOT_MOULD_BREAK_CHANCE));
     public static final DeferredItem<MouldItem> SHAFT_MOULD = ITEMS.registerItem("shaft_mould",
             properties -> new MouldItem(properties, SHAFT_MOULD_BREAK_CHANCE));
+
+    public static final DeferredItem<com.resourceful_refinement.content.hosegun.HosegunItem> HOSEGUN = ITEMS.register("hosegun",
+            () -> new com.resourceful_refinement.content.hosegun.HosegunItem(new Item.Properties()));
+
+    public static final DeferredItem<PlungerItem> PLUNGER = ITEMS.register("plunger",
+            () -> new PlungerItem(PlungerItem.createProperties()));
+
+    public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
+
+
+    // -------------------------------------------------------------------------
+    // Foods?...
+    // -------------------------------------------------------------------------
+
+    public static final FoodProperties GLUE_POT_FOOD = new FoodProperties.Builder()
+            .nutrition(0)                             // Hunger restored (e.g., 6 half-shanks)
+            .saturationModifier(0.3F)                 // Saturation multiplier
+            .alwaysEdible()                           // Allow eating even when full
+            .effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 200, 0), 1.0F)
+            .effect(() -> new MobEffectInstance(MobEffects.WEAKNESS, 200, 1), 1.0F)
+            .build();
+
+    public static final DeferredItem<Item> GLUE_POT = ITEMS.registerItem("glue_pot", Item::new, new Item.Properties()
+            .food(GLUE_POT_FOOD));
 
     // -------------------------------------------------------------------------
     // Buckets (Handled by FluidEntry)

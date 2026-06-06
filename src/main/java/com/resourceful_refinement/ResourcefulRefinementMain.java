@@ -6,13 +6,11 @@ import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLa
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
-import com.simibubi.create.api.registry.CreateRegistries;
-import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -27,15 +25,23 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import com.resourceful_refinement.registry.*;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
+import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
 import org.slf4j.Logger;
 
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.*;
+import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
+import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
+import com.resourceful_refinement.network.ModNetworking;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
@@ -49,9 +55,11 @@ public class ResourcefulRefinementMain {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(ModNetworking::registerPayloadHandlers);
 
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -154,6 +162,24 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Paint Nozzle ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.PAINT_NOZZLE_BE.get(), (be, side) -> {
+            if (side == PaintNozzleBlock.getPipeFace(be.getBlockState())) {
+                return be.tank;
+            }
+            return null;
+        });
+
+        // --- Fluid Refill Station ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FLUID_REFILL_STATION_BE.get(), (be, side) -> {
+            if (!FluidRefillStationBlock.isPipeFace(be.getBlockState(), side)) {
+                return null;
+            }
+            return be.tank;
+        });
+
+        // --- Hosegun Item Capability ---
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
     }
 
     /**
@@ -166,13 +192,21 @@ public class ResourcefulRefinementMain {
             LOGGER.info("[Resourceful Refinement] Client setup ran successfully!");
             event.enqueueWork(() -> {
                 for (FluidEntry entry : ModFluids.ENTRIES) {
-                    if (entry.group == FluidGroup.RAW || entry.group == FluidGroup.CATALYSED || entry.group == FluidGroup.CARBORAX) {
+                    if (entry.group == FluidGroup.RAW
+                            || entry.group == FluidGroup.CATALYSED
+                            || entry.group == FluidGroup.CARBORAX
+                            || entry.group == FluidGroup.PAINT) {
                         ItemBlockRenderTypes.setRenderLayer(entry.block.get(), RenderType.TRANSLUCENT);
                         ItemBlockRenderTypes.setRenderLayer(entry.source.get(), RenderType.TRANSLUCENT);
                         ItemBlockRenderTypes.setRenderLayer(entry.flowing.get(), RenderType.TRANSLUCENT);
                     }
                 }
             });
+        }
+
+        @SubscribeEvent
+        public static void registerMenuScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
         }
 
         @SubscribeEvent
@@ -187,6 +221,11 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+
+            // Register Projectile Renderer dynamically
+            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
+            event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
         }
 
         @SubscribeEvent
@@ -227,6 +266,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.TOP, FrackingPumpTopModel::createBodyLayer);
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
+            event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
         }
     }
 

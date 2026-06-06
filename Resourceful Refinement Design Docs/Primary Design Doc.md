@@ -75,3 +75,15 @@ The hosegun is a tool which stores fluids, and fires them as gel-blob projectile
 
 **Gel Splatters**
 Gel Splatters are multi-face blocks created when gel-blobs impact solid blocks. They store a linked fluid ID and gel-type, which determines their physical properties and tint color.
+
+**Paint Nozzle**
+A directional pipe block, which sprays gel-blobs while open.
+
+**Fluid Refill Station**
+A directional fluid tank block, which allows players to quickly refill fluid storing items such as Hoseguns. Can also be paired with Hoseguns and Display Links to track linked gel splatter blocks for minigames.
+
+**Liquid Glue**
+A fluid form of glue, replacing slime-balls and honey in some recipes.
+
+**Plunger**
+A thrown trident-like weapon, which can be used to right-click on fluid containing blocks to empty their fluid tanks.

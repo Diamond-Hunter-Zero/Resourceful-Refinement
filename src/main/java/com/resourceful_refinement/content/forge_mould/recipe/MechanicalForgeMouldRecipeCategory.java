@@ -58,7 +58,7 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
         if (!recipe.getIngredients().isEmpty())
             builder.addSlot(RecipeIngredientRole.INPUT, 39, 32).addIngredients(recipe.getIngredients().getFirst());
         builder.addSlot(RecipeIngredientRole.INPUT, 15, 32).addFluidStack(recipe.getFluidIngredients().getFirst().getFluids()[0].getFluid());
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 139, 33).addItemStack(recipe.getResultItem(null));
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 139, 32).addItemStack(recipe.getResultItem(null));
     }
 
     @Override

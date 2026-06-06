@@ -8,13 +8,17 @@ The Gel Splatter is a multi-face block. To create Gel Splatters, players must fi
 
 When a gel-blob projectile impacts a solid block face facing into a empty or replaceable space, it attempts to create a gel splatter block in that corresponding empty space. This new gel splatter will automatically populate any valid faces adjacent to solid blocks with the corresponding regions of it's model. 
 
-If a gel splatter already exists in the impacted space, and is of the same fluid type, it repopulates all valid faces.
+- If a gel splatter already exists in the impacted space, and is of the same fluid type, it repopulates all valid faces.
 
-If a gel splatter already exists in the impacted space, and is of a different fluid type, it replaces the data held by that gel splatter with the new fluid, and repopulates all valid faces.
+- If a gel splatter already exists in the impacted space, and is of a different fluid type, it replaces the data held by that gel splatter with the new fluid, and repopulates all valid faces.
 
-Like other multi-face blocks, the individual faces of a gel splatter can be broken by hand. 
+- Like other multi-face blocks, the individual faces of a gel splatter can be broken by hand. 
 
-Gel-blob projectiles carrying the water fluid do not create gel-splatters, but instead replace any gel splatter blocks they impact into with air, allowing players to 'clean' up gels.
+- Gel-blob projectiles carrying the water fluid do not create gel-splatters, but instead replace any gel splatter blocks they impact into with air, allowing players to 'clean' up gels.
+
+
+#### **Model**
+The Gel Splatter block uses a custom java block model, instead of the standard 6-face cube. Each 'face' element of the model is named after it's respective parent face however (i.e. 'north', 'south', 'east'... etc.)
 
 
 #### **Gel Properties**
@@ -24,17 +28,17 @@ For custom fluids implemented by this mod, this gel-type property is assigned as
 
 The following gel types are to be implemented:
 
-| **Gel Type ID** | **Properties**                                                                                                 | **Tag ID**        | **Registered Fluids**                                                                                                                         |
-| --------------- | -------------------------------------------------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Molten`        | - Deals contact damage (like magma blocks)<br>- Deals damage to any entities its gel-blobs collide with        | `makesMoltenGel`  | molten_crimsite, molten_veridium, molten_ochrum, molten_asurine, molten_scorchia, lava                                                        |
-| `Speedy`        | - Slippery<br>- Applies Speed 1                                                                                | `makesSpeedyGel`  | catalysed_iron, catalysed_copper, catalysed_gold, catalysed_zinc, catalysed_redstone, catalysed_sparkpowder, catalysed_carborax, builders_tea |
-| `Gooey`         | - Sticky                                                                                                       | `makesGooeyGel`   | honey, chocolate, carborax_diesel                                                                                                             |
-| `Bouncy`        | - High bounciness<br>- Gel-blob applies moderate knockback on impacting entities                               | `makesBouncyGel`  | durasteel_alloy, purified_durasteel, overcharged_carborax                                                                                     |
-| `Cursed`        | - Applies Slowness 2<br>- Applies Weakness 1                                                                   | `makesCursedGel`  | unrefined_carborax                                                                                                                            |
-| `Blessed`       | - Applies Strength 1                                                                                           | `makesBlessedGel` |                                                                                                                                               |
-| `Inert`         | - No effect                                                                                                    | `makesInertGel`   | silica_substrate, purified_iron, purified_copper, purified_gold, purified_zinc,                                                               |
-| `Cleanse`       | - Removes gel splatters                                                                                        | `makesCleanseGel` | water                                                                                                                                         |
-| `Potion`        | - Gel-blob applies potion effect on impacting entity                                                           | `makesPotionGel`  | *Any potion fluids*                                                                                                                           |
-| `Paint`         | - Gel-blob dyes entities on impact (sheep wool, dog & cat collars)<br>- Gel-blob dyes colored blocks on impact | `makesPaintGel`   | *Any paint fluids*                                                                                                                            |
+| **Gel Type ID** | **Properties**                                                                                                 | **Creates Gel Splatter?** | **Tag ID**        | **Registered Fluids**                                                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Molten`        | - Deals contact damage (like magma blocks)<br>- Deals damage to any entities its gel-blobs collide with        | Yes                       | `makesMoltenGel`  | molten_crimsite, molten_veridium, molten_ochrum, molten_asurine, molten_scorchia, lava                                                        |
+| `Speedy`        | - Slippery<br>- Applies Speed 1                                                                                | Yes                       | `makesSpeedyGel`  | catalysed_iron, catalysed_copper, catalysed_gold, catalysed_zinc, catalysed_redstone, catalysed_sparkpowder, catalysed_carborax, builders_tea |
+| `Gooey`         | - Sticky                                                                                                       | Yes                       | `makesGooeyGel`   | honey, chocolate, carborax_diesel                                                                                                             |
+| `Bouncy`        | - High bounciness<br>- Gel-blob applies moderate knockback on impacting entities                               | Yes                       | `makesBouncyGel`  | durasteel_alloy, purified_durasteel, overcharged_carborax                                                                                     |
+| `Cursed`        | - Applies Slowness 2<br>- Applies Weakness 1                                                                   | Yes                       | `makesCursedGel`  | unrefined_carborax                                                                                                                            |
+| `Blessed`       | - Applies Strength 1                                                                                           | Yes                       | `makesBlessedGel` |                                                                                                                                               |
+| `Inert`         | - No effect                                                                                                    | Yes                       | `makesInertGel`   | silica_substrate, purified_iron, purified_copper, purified_gold, purified_zinc,                                                               |
+| `Cleanse`       | - Removes gel splatters                                                                                        | No                        | `makesCleanseGel` | water                                                                                                                                         |
+| `Potion`        | - Gel-blob applies potion effect on impacting entity                                                           | No                        | `makesPotionGel`  | *Any potion fluids*                                                                                                                           |
+| `Paint`         | - Gel-blob dyes entities on impact (sheep wool, dog & cat collars)<br>- Gel-blob dyes colored blocks on impact | No                        | `makesPaintGel`   | *Any paint fluids*                                                                                                                            |
 
 

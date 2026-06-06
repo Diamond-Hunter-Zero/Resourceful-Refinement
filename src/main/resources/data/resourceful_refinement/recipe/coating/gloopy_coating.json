@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:coating",
+  "fluid": {
+    "fluid": "resourceful_refinement:liquid_glue",
+    "amount": 1000
+  },
+  "ingredient": {
+    "item": "create:zinc_ingot"
+  },
+  "coating": "Gloopy",
+  "duration": 200
+}

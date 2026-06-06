@@ -2,6 +2,7 @@ package com.resourceful_refinement.ponders;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.registry.ModBlocks;
+import com.resourceful_refinement.registry.ModItems;
 import net.createmod.ponder.api.registration.PonderPlugin;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.createmod.ponder.api.registration.PonderTagRegistrationHelper;
@@ -52,6 +53,28 @@ public class ModPonders implements PonderPlugin {
                 .addStoryBoard("large_fracking_ponder", FrackingPonders::frackingBuildScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("large_fracking_ponder", FrackingPonders::frackingCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
+        helper.forComponents(ModBlocks.PAINT_NOZZLE.getId())
+                .addStoryBoard("paint_nozzle_ponder", GelPonders::paintNozzleScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("gel_splatter_ponder", GelPonders::gelPropertiesScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModItems.HOSEGUN.getId())
+                .addStoryBoard("hosegun_ponder", GelPonders::hosegunBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("gel_splatter_ponder", GelPonders::gelPropertiesScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("refill_station_tracking_ponder", GelPonders::refillStationTrackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.GEL_SPLATTER.getId(), ModBlocks.GEL_SPLATTER_STICKY.getId(),ModBlocks.GEL_SPLATTER_SLIPPERY.getId())
+                .addStoryBoard("gel_splatter_ponder", GelPonders::gelPropertiesScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("refill_station_tracking_ponder", GelPonders::refillStationTrackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.FLUID_REFILL_STATION.getId())
+                .addStoryBoard("refill_station_basic_ponder", GelPonders::refillStationBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("refill_station_tracking_ponder", GelPonders::refillStationTrackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModItems.GLUE_POT.getId())
+                .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
     }
 
     public static void registerTagsHelper(PonderTagRegistrationHelper<ResourceLocation> helper) {
@@ -60,7 +83,7 @@ public class ModPonders implements PonderPlugin {
                 .addToIndex()
                 .title("Resourceful Refinement")
                 .description("Advanced processing and refinement for fluids and ores")
-                .icon(ModBlocks.MECHANICAL_FORGE_MOULD.getId())
+                .icon(ModBlocks.MECHANICAL_SIEVE.getId())
                 .register();
 
         helper.addToTag(RESOURCEFUL_REFINEMENT_CHAPTER)
@@ -69,6 +92,12 @@ public class ModPonders implements PonderPlugin {
                 .add(ModBlocks.CASTING_DEPOT.getId())
                 .add(ModBlocks.REFINERY_ACCESS_PORT.getId())
                 .add(ModBlocks.BLENDER_BLADE.getId())
-                .add(ModBlocks.FRACKING_PUMP_OUTLET.getId());
+                .add(ModBlocks.FRACKING_PUMP_OUTLET.getId())
+                .add(ModBlocks.PAINT_NOZZLE.getId())
+                .add(ModBlocks.GEL_SPLATTER_SLIPPERY.getId())
+                .add(ModBlocks.GEL_SPLATTER_STICKY.getId())
+                .add(ModBlocks.GEL_SPLATTER.getId())
+                .add(ModItems.HOSEGUN.getId())
+                .add(ModBlocks.FLUID_REFILL_STATION.getId());
     }
 }

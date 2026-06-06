@@ -1,5 +1,6 @@
 {
   "itemGroup.resourceful_refinement.main": "Resourceful Refinement",
+  "itemGroup.resourceful_refinement.fluids": "Resourceful Refinement Fluids",
   "block.resourceful_refinement.refinery_access_port": "Refinery Access Port",
   "block.resourceful_refinement.blender_blade": "Blender Blade",
   "block.resourceful_refinement.refinery_proxy": "Refinery (Assembled)",
@@ -9,102 +10,180 @@
   "block.resourceful_refinement.fracking_pump_outlet": "Fracking Pylon Outlet",
   "block.resourceful_refinement.geyser_block": "Geyser Block",
   "block.resourceful_refinement.fox_plushie": "Trinket Plushie",
+  "block.resourceful_refinement.paint_nozzle": "Paint Nozzle",
+  "block.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "block.resourceful_refinement.gel_splatter": "Gel Splatter",
+  "block.resourceful_refinement.gel_splatter_sticky": "Sticky Gel Splatter",
+  "block.resourceful_refinement.gel_splatter_slippery": "Slippery Gel Splatter",
 
   "fluid_type.resourceful_refinement.molten_crimsite": "Molten Crimsite",
-  "block.resourceful_refinement.molten_crimsite": "Molten Crimsite",
+  "block.resourceful_refinement.fluids.molten_crimsite": "Molten Crimsite",
   "item.resourceful_refinement.molten_crimsite_bucket": "Molten Crimsite Bucket",
 
   "fluid_type.resourceful_refinement.molten_ochrum": "Molten Ochrum",
-  "block.resourceful_refinement.molten_ochrum": "Molten Ochrum",
+  "block.resourceful_refinement.fluids.molten_ochrum": "Molten Ochrum",
   "item.resourceful_refinement.molten_ochrum_bucket": "Molten Ochrum Bucket",
 
   "fluid_type.resourceful_refinement.molten_veridium": "Molten Veridium",
-  "block.resourceful_refinement.molten_veridium": "Molten Veridium",
+  "block.resourceful_refinement.fluids.molten_veridium": "Molten Veridium",
   "item.resourceful_refinement.molten_veridium_bucket": "Molten Veridium Bucket",
 
   "fluid_type.resourceful_refinement.molten_scorchia": "Molten Scorchia",
-  "block.resourceful_refinement.molten_scorchia": "Molten Scorchia",
+  "block.resourceful_refinement.fluids.molten_scorchia": "Molten Scorchia",
   "item.resourceful_refinement.molten_scorchia_bucket": "Molten Scorchia Bucket",
 
   "fluid_type.resourceful_refinement.molten_asurine": "Molten Asurine",
-  "block.resourceful_refinement.molten_asurine": "Molten Asurine",
+  "block.resourceful_refinement.fluids.molten_asurine": "Molten Asurine",
   "item.resourceful_refinement.molten_asurine_bucket": "Molten Asurine Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_iron": "Catalysed Iron",
-  "block.resourceful_refinement.catalysed_iron": "Catalysed Iron",
+  "block.resourceful_refinement.fluids.catalysed_iron": "Catalysed Iron",
   "item.resourceful_refinement.catalysed_iron_bucket": "Catalysed Iron Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_gold": "Catalysed Gold",
-  "block.resourceful_refinement.catalysed_gold": "Catalysed Gold",
+  "block.resourceful_refinement.fluids.catalysed_gold": "Catalysed Gold",
   "item.resourceful_refinement.catalysed_gold_bucket": "Catalysed Gold Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_copper": "Catalysed Copper",
-  "block.resourceful_refinement.catalysed_copper": "Catalysed Copper",
+  "block.resourceful_refinement.fluids.catalysed_copper": "Catalysed Copper",
   "item.resourceful_refinement.catalysed_copper_bucket": "Catalysed Copper Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_zinc": "Catalysed Zinc",
-  "block.resourceful_refinement.catalysed_zinc": "Catalysed Zinc",
+  "block.resourceful_refinement.fluids.catalysed_zinc": "Catalysed Zinc",
   "item.resourceful_refinement.catalysed_zinc_bucket": "Catalysed Zinc Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_redstone": "Catalysed Redstone",
-  "block.resourceful_refinement.catalysed_redstone": "Catalysed Redstone",
+  "block.resourceful_refinement.fluids.catalysed_redstone": "Catalysed Redstone",
   "item.resourceful_refinement.catalysed_redstone_bucket": "Catalysed Redstone Bucket",
 
   "fluid_type.resourceful_refinement.silica_substrate": "Silica Substrate",
-  "block.resourceful_refinement.silica_substrate": "Silica Substrate",
+  "block.resourceful_refinement.fluids.silica_substrate": "Silica Substrate",
   "item.resourceful_refinement.silica_substrate_bucket": "Silica Substrate Bucket",
 
   "fluid_type.resourceful_refinement.molten_andesite_blend": "Molten Andesite Blend",
-  "block.resourceful_refinement.molten_andesite_blend": "Molten Andesite Blend",
+  "block.resourceful_refinement.fluids.molten_andesite_blend": "Molten Andesite Blend",
   "item.resourceful_refinement.molten_andesite_blend_bucket": "Molten Andesite Blend Bucket",
 
   "fluid_type.resourceful_refinement.molten_brass_blend": "Molten Brass Blend",
-  "block.resourceful_refinement.molten_brass_blend": "Molten Brass Blend",
+  "block.resourceful_refinement.fluids.molten_brass_blend": "Molten Brass Blend",
   "item.resourceful_refinement.molten_brass_blend_bucket": "Molten Brass Blend Bucket",
 
   "fluid_type.resourceful_refinement.molten_netherite_blend": "Molten Netherite Blend",
-  "block.resourceful_refinement.molten_netherite_blend": "Molten Netherite Blend",
+  "block.resourceful_refinement.fluids.molten_netherite_blend": "Molten Netherite Blend",
   "item.resourceful_refinement.molten_netherite_blend_bucket": "Molten Netherite Blend Bucket",
 
   "fluid_type.resourceful_refinement.durasteel_alloy": "Durasteel Alloy",
-  "block.resourceful_refinement.durasteel_alloy": "Durasteel Alloy",
+  "block.resourceful_refinement.fluids.durasteel_alloy": "Durasteel Alloy",
   "item.resourceful_refinement.durasteel_alloy_bucket": "Durasteel Alloy Bucket",
 
   "fluid_type.resourceful_refinement.purified_iron": "Purified Iron",
-  "block.resourceful_refinement.purified_iron": "Purified Iron",
+  "block.resourceful_refinement.fluids.purified_iron": "Purified Iron",
   "item.resourceful_refinement.purified_iron_bucket": "Purified Iron Bucket",
 
   "fluid_type.resourceful_refinement.purified_gold": "Purified Gold",
-  "block.resourceful_refinement.purified_gold": "Purified Gold",
+  "block.resourceful_refinement.fluids.purified_gold": "Purified Gold",
   "item.resourceful_refinement.purified_gold_bucket": "Purified Gold Bucket",
 
   "fluid_type.resourceful_refinement.purified_copper": "Purified Copper",
-  "block.resourceful_refinement.purified_copper": "Purified Copper",
+  "block.resourceful_refinement.fluids.purified_copper": "Purified Copper",
   "item.resourceful_refinement.purified_copper_bucket": "Purified Copper Bucket",
 
   "fluid_type.resourceful_refinement.purified_zinc": "Purified Zinc",
-  "block.resourceful_refinement.purified_zinc": "Purified Zinc",
+  "block.resourceful_refinement.fluids.purified_zinc": "Purified Zinc",
   "item.resourceful_refinement.purified_zinc_bucket": "Purified Zinc Bucket",
 
   "fluid_type.resourceful_refinement.purified_durasteel": "Purified Durasteel",
-  "block.resourceful_refinement.purified_durasteel": "Purified Durasteel",
+  "block.resourceful_refinement.fluids.purified_durasteel": "Purified Durasteel",
   "item.resourceful_refinement.purified_durasteel_bucket": "Purified Durasteel Bucket",
 
   "fluid_type.resourceful_refinement.unrefined_carborax": "Unrefined Carborax",
-  "block.resourceful_refinement.unrefined_carborax": "Unrefined Carborax",
+  "block.resourceful_refinement.fluids.unrefined_carborax": "Unrefined Carborax",
   "item.resourceful_refinement.unrefined_carborax_bucket": "Unrefined Carborax Bucket",
 
   "fluid_type.resourceful_refinement.catalysed_carborax": "Catalysed Carborax",
-  "block.resourceful_refinement.catalysed_carborax": "Catalysed Carborax",
+  "block.resourceful_refinement.fluids.catalysed_carborax": "Catalysed Carborax",
   "item.resourceful_refinement.catalysed_carborax_bucket": "Catalysed Carborax Bucket",
 
   "fluid_type.resourceful_refinement.overcharged_carborax": "Overcharged Carborax",
-  "block.resourceful_refinement.overcharged_carborax": "Overcharged Carborax",
+  "block.resourceful_refinement.fluids.overcharged_carborax": "Overcharged Carborax",
   "item.resourceful_refinement.overcharged_carborax_bucket": "Overcharged Carborax Bucket",
 
   "fluid_type.resourceful_refinement.carborax_diesel": "Carborax Diesel",
-  "block.resourceful_refinement.carborax_diesel": "Carborax Diesel",
+  "block.resourceful_refinement.fluids.carborax_diesel": "Carborax Diesel",
   "item.resourceful_refinement.carborax_diesel_bucket": "Carborax Diesel Bucket",
+
+  "fluid_type.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
+  "block.resourceful_refinement.fluids.catalysed_sparkpowder": "Catalysed Sparkpowder",
+  "item.resourceful_refinement.catalysed_sparkpowder_bucket": "Catalysed Sparkpowder Bucket",
+
+  "fluid_type.resourceful_refinement.liquid_glue": "Liquid Glue",
+  "block.resourceful_refinement.fluids.liquid_glue": "Liquid Glue",
+  "item.resourceful_refinement.liquid_glue_bucket": "Liquid Glue Bucket",
+
+  "fluid_type.resourceful_refinement.white_paint": "White Paint",
+  "block.resourceful_refinement.paint.white_paint": "White Paint",
+  "item.resourceful_refinement.white_paint_bucket": "White Paint Bucket",
+
+  "fluid_type.resourceful_refinement.orange_paint": "Orange Paint",
+  "block.resourceful_refinement.paint.orange_paint": "Orange Paint",
+  "item.resourceful_refinement.orange_paint_bucket": "Orange Paint Bucket",
+
+  "fluid_type.resourceful_refinement.magenta_paint": "Magenta Paint",
+  "block.resourceful_refinement.paint.magenta_paint": "Magenta Paint",
+  "item.resourceful_refinement.magenta_paint_bucket": "Magenta Paint Bucket",
+
+  "fluid_type.resourceful_refinement.light_blue_paint": "Light Blue Paint",
+  "block.resourceful_refinement.paint.light_blue_paint": "Light Blue Paint",
+  "item.resourceful_refinement.light_blue_paint_bucket": "Light Blue Paint Bucket",
+
+  "fluid_type.resourceful_refinement.yellow_paint": "Yellow Paint",
+  "block.resourceful_refinement.paint.yellow_paint": "Yellow Paint",
+  "item.resourceful_refinement.yellow_paint_bucket": "Yellow Paint Bucket",
+
+  "fluid_type.resourceful_refinement.lime_paint": "Lime Paint",
+  "block.resourceful_refinement.paint.lime_paint": "Lime Paint",
+  "item.resourceful_refinement.lime_paint_bucket": "Lime Paint Bucket",
+
+  "fluid_type.resourceful_refinement.pink_paint": "Pink Paint",
+  "block.resourceful_refinement.paint.pink_paint": "Pink Paint",
+  "item.resourceful_refinement.pink_paint_bucket": "Pink Paint Bucket",
+
+  "fluid_type.resourceful_refinement.gray_paint": "Gray Paint",
+  "block.resourceful_refinement.paint.gray_paint": "Gray Paint",
+  "item.resourceful_refinement.gray_paint_bucket": "Gray Paint Bucket",
+
+  "fluid_type.resourceful_refinement.light_gray_paint": "Light Gray Paint",
+  "block.resourceful_refinement.paint.light_gray_paint": "Light Gray Paint",
+  "item.resourceful_refinement.light_gray_paint_bucket": "Light Gray Paint Bucket",
+
+  "fluid_type.resourceful_refinement.cyan_paint": "Cyan Paint",
+  "block.resourceful_refinement.paint.cyan_paint": "Cyan Paint",
+  "item.resourceful_refinement.cyan_paint_bucket": "Cyan Paint Bucket",
+
+  "fluid_type.resourceful_refinement.purple_paint": "Purple Paint",
+  "block.resourceful_refinement.paint.purple_paint": "Purple Paint",
+  "item.resourceful_refinement.purple_paint_bucket": "Purple Paint Bucket",
+
+  "fluid_type.resourceful_refinement.blue_paint": "Blue Paint",
+  "block.resourceful_refinement.paint.blue_paint": "Blue Paint",
+  "item.resourceful_refinement.blue_paint_bucket": "Blue Paint Bucket",
+
+  "fluid_type.resourceful_refinement.brown_paint": "Brown Paint",
+  "block.resourceful_refinement.paint.brown_paint": "Brown Paint",
+  "item.resourceful_refinement.brown_paint_bucket": "Brown Paint Bucket",
+
+  "fluid_type.resourceful_refinement.green_paint": "Green Paint",
+  "block.resourceful_refinement.paint.green_paint": "Green Paint",
+  "item.resourceful_refinement.green_paint_bucket": "Green Paint Bucket",
+
+  "fluid_type.resourceful_refinement.red_paint": "Red Paint",
+  "block.resourceful_refinement.paint.red_paint": "Red Paint",
+  "item.resourceful_refinement.red_paint_bucket": "Red Paint Bucket",
+
+  "fluid_type.resourceful_refinement.black_paint": "Black Paint",
+  "block.resourceful_refinement.paint.black_paint": "Black Paint",
+  "item.resourceful_refinement.black_paint_bucket": "Black Paint Bucket",
 
   "item.resourceful_refinement.ferrous_crystal": "Ferrous Crystal",
   "item.resourceful_refinement.flux_dust": "Flux Dust",
@@ -112,10 +191,12 @@
   "item.resourceful_refinement.durasteel_sheet": "Durasteel Sheet",
   "item.resourceful_refinement.ingot_mould": "Ingot Mould",
   "item.resourceful_refinement.shaft_mould": "Shaft Mould",
-
-  "fluid_type.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
-  "block.resourceful_refinement.catalysed_sparkpowder": "Catalysed Sparkpowder",
-  "item.resourceful_refinement.catalysed_sparkpowder_bucket": "Catalysed Sparkpowder Bucket",
+  "item.resourceful_refinement.hosegun": "Hosegun",
+  "item.resourceful_refinement.hosegun.gloopy": "Gloopy Hosegun",
+  "item.resourceful_refinement.glue_pot": "Glue Pot",
+  "item.resourceful_refinement.plunger": "Plunger",
+  "tooltip.resourceful_refinement.plunger": "Right-click fluid tanks to empty them",
+  "item.resourceful_refinement.paint_blob": "Paint Blob",
 
   "resourceful_refinement.ponder.tag.resourceful_refinement": "Resourceful Refinement Processing",
   "resourceful_refinement.ponder.tag.resourceful_refinement.description": "Components which allow for advanced processing of raw resources through fluids",
@@ -228,5 +309,85 @@
   "resourceful_refinement.ponder.blender_blades.text_3": "However, they also have a secondary purpose...",
   "resourceful_refinement.ponder.blender_blades.text_4": "Entities caught in a blender blade will rotate with it until they're flung out",
   "resourceful_refinement.ponder.blender_blades.text_5": "The higher the RPM, the stronger the pull",
-  "resourceful_refinement.ponder.blender_blades.text_6": "Mobs and players will continuously take damage while being stirred in a blender blade!"
+  "resourceful_refinement.ponder.blender_blades.text_6": "Mobs and players will continuously take damage while being stirred in a blender blade!",
+
+  "resourceful_refinement.ponder.paint_nozzle.header": "Spraying fluids with paint nozzles",
+  "resourceful_refinement.ponder.paint_nozzle.text_1": "The Paint Nozzle can be attached to pipes from any direction",
+  "resourceful_refinement.ponder.paint_nozzle.text_2": "Once placed, right-click with a wrench to adjust the flow speed",
+  "resourceful_refinement.ponder.paint_nozzle.text_3": "Right-click on the nozzle itself to open the valve",
+  "resourceful_refinement.ponder.paint_nozzle.text_4": "Fluids being piped into the nozzle will spray out!",
+  "resourceful_refinement.ponder.paint_nozzle.text_5": "Filling a nozzle with paints allows you to paint any colorable blocks",
+  "resourceful_refinement.ponder.paint_nozzle.text_6": "You can paint concrete, glass, terracotta, or wool",
+  "resourceful_refinement.ponder.paint_nozzle.text_7": "Even some mobs can be dyed this way!",
+
+  "resourceful_refinement.ponder.gel_splatters.header": "Playing with gels",
+  "resourceful_refinement.ponder.gel_splatters.text_1": "When a fluid is ejected by a paint nozzle or hosegun, it turns into a gel blob",
+  "resourceful_refinement.ponder.gel_splatters.text_2": "When gel blobs hit a solid surface, they might create a Gel Splatter!",
+  "resourceful_refinement.ponder.gel_splatters.text_3": "Gel splatters have different properties according the fluid used to create them",
+  "resourceful_refinement.ponder.gel_splatters.text_4": "Some are speedy or sticky...",
+  "resourceful_refinement.ponder.gel_splatters.text_5": "Some are bouncy...",
+  "resourceful_refinement.ponder.gel_splatters.text_6": "Some are too hot to touch!",
+  "resourceful_refinement.ponder.gel_splatters.text_7": "Some fluids don't create gel splatters",
+  "resourceful_refinement.ponder.gel_splatters.text_8": "Water will wash away any gel splatters nearby",
+  "resourceful_refinement.ponder.gel_splatters.text_9": "Paint will dye nearby colorable blocks",
+  "resourceful_refinement.ponder.gel_splatters.text_10": "Potions will act as if thrown",
+  "resourceful_refinement.ponder.gel_splatters.text_11": "Gel blobs collected by drains will turn back into fluids",
+
+  "resourceful_refinement.ponder.hosegun.header": "Wielding the Hosegun",
+  "resourceful_refinement.ponder.hosegun.text_1": "The Hosegun is a versatile tool for spraying paints and gels",
+  "resourceful_refinement.ponder.hosegun.text_2": "To fill it with fluid, place it under a spout, or right-click on a Refill Station",
+  "resourceful_refinement.ponder.hosegun.text_3": "The Hosegun can take kind of fluid!",
+  "resourceful_refinement.ponder.hosegun.text_4": "Hold down right-click to spray gel-blobs in front of you as you move",
+  "resourceful_refinement.ponder.hosegun.text_5": "As you spray, the Hosegun's tanks will slowly deplete",
+  "resourceful_refinement.ponder.hosegun.text_6": "You can empty a Hosegun by right-clicking on a drain",
+
+  "resourceful_refinement.ponder.refill_station_basics.header": "Refilling containers with the Refill Station",
+  "resourceful_refinement.ponder.refill_station_basics.text_1": "The Fluid Refill station provides a quick method for refilling containers such as buckets, bottles, and hoseguns",
+  "resourceful_refinement.ponder.refill_station_basics.text_2": "You can pump in fluids from the top, bottom, or back face",
+  "resourceful_refinement.ponder.refill_station_basics.text_3": "The Refill Station holds up to a bucket worth of fluid",
+  "resourceful_refinement.ponder.refill_station_basics.text_4": "To retrieve fluid, right-click with a container",
+  "resourceful_refinement.ponder.refill_station_basics.text_5": "You can place a Display Link on refill stations, and display the fluid contents of the station",
+
+  "resourceful_refinement.ponder.binding_refills.header": "Tracking gels with Refill Stations",
+  "resourceful_refinement.ponder.binding_refills.text_1": "Refill Stations can be assigned a Tracking ID by right-clicking on the station",
+  "resourceful_refinement.ponder.binding_refills.text_2": "Multiple Refill Stations can share an ID",
+  "resourceful_refinement.ponder.binding_refills.text_3": "Once assigned an ID, you can crouch-right-click while holding a hosegun to bind the hosegun to the station's ID",
+  "resourceful_refinement.ponder.binding_refills.text_4": "Gels created by that hosegun will now carry this Tracking ID",
+  "resourceful_refinement.ponder.binding_refills.text_5": "Place a Display Link on the station, and connect it to a display board",
+  "resourceful_refinement.ponder.binding_refills.text_6": "It will show a live count of all gel splatters linked to the station's ID",
+  "resourceful_refinement.ponder.binding_refills.text_7": "If a redstone signal is applied to a Refill Station...",
+  "resourceful_refinement.ponder.binding_refills.text_8": "...Any gel splatters linked to its Tracking ID will be cleaned up!",
+
+  "resourceful_refinement.ponder.gloopy_hosegun.header": "Creating a Gloopy Hosegun",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_1": "If you hold a Hosegun on your main hand, and a Glue Pot in your offhand...",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_2": "...And right-click...",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_3": "...Your Hosegun will turn into a Gloopy Hosegun!",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_4": "Gloopy Hoseguns turn paints into gel splatters like other fluids",
+  "resourceful_refinement.ponder.gloopy_hosegun.text_5": "To ungloop a Hosegun, mix it with water in a basin",
+
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id": "Tracking ID",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id_label": "Tracking ID:",
+  "gui.resourceful_refinement.fluid_refill_station.footer_hint": "Press to confirm",
+  "gui.resourceful_refinement.fluid_refill_station.footer_hint2": "Tracking ID",
+  "gui.resourceful_refinement.fluid_refill_station.tracking_id_hint": "e.g. Team Red",
+  "gui.resourceful_refinement.fluid_refill_station.save": "Save",
+  "gui.resourceful_refinement.fluid_refill_station.clear": "Clear",
+  "gui.resourceful_refinement.fluid_refill_station.browse_ids": "Browse tracking IDs",
+  "gui.resourceful_refinement.fluid_refill_station.no_tracking_ids": "No tracking IDs in this world",
+
+  "tooltip.resourceful_refinement.hosegun.empty": "Empty",
+  "tooltip.resourceful_refinement.hosegun.tracking_id": "Tracking: %s",
+  "tooltip.resourceful_refinement.hosegun.tracking_id_unbound": "Tracking: unbound",
+  "message.resourceful_refinement.refill_station.no_tracking_id": "This station has no Tracking ID. Set one first (empty-hand use).",
+  "message.resourceful_refinement.refill_station.hosegun_bound": "Hosegun bound to \"%s\".",
+  "message.resourceful_refinement.refill_station.hosegun_unbound": "Hosegun unbound from \"%s\".",
+  "resourceful_refinement.display_source.fluid_refill_station": "Fluid Refill Station",
+
+  "death.attack.molten_gel_damage": "%1$s discovered the lava was floor.",
+  "death.attack.molten_gel_damage.player": "%1$s was incinerated by %2$s using spicy gel.",
+  "death.attack.molten_gel_damage.item": "%1$s was incinerated by %2$s's molten %3$s.",
+
+  "paint_nozzle.flow_speed.low": "Low",
+  "paint_nozzle.flow_speed.medium": "Medium",
+  "paint_nozzle.flow_speed.high": "High"
 }

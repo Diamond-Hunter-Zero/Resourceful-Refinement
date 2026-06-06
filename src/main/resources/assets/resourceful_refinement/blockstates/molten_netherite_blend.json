@@ -1,5 +1,5 @@
-﻿{
+{
   "variants": {
-    "": { "model": "resourceful_refinement:block/molten_netherite_blend" }
+    "": { "model": "resourceful_refinement:block/fluids/molten_netherite_blend" }
   }
 }

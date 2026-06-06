@@ -1,0 +1,26 @@
+{
+  "name": "resourceful_refinement:nether_scorchia_ocean_template/start_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:scorchia_geyser_ocean_1",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -1
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:scorchia_geyser_ocean_2",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -1
+      }
+    }
+  ]
+}

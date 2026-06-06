@@ -1,5 +1,5 @@
-﻿{
+{
   "variants": {
-    "": { "model": "resourceful_refinement:block/overcharged_carborax" }
+    "": { "model": "resourceful_refinement:block/fluids/overcharged_carborax" }
   }
 }

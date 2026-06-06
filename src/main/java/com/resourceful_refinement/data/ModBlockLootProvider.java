@@ -2,6 +2,7 @@ package com.resourceful_refinement.data;
 
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
 import com.resourceful_refinement.content.refinery.RefineryProxyBlock;
@@ -67,6 +68,7 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
      */
     private boolean isDropNothingBlock(Block block) {
         return block instanceof GeyserBlock
+                || block instanceof GelSplatterBlock
                 || block instanceof FrackingPumpProxyBlock
                 || block instanceof RefineryProxyBlock
                 || block instanceof RefineryKineticProxyBlock;

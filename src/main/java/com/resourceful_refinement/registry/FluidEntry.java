@@ -1,7 +1,9 @@
 package com.resourceful_refinement.registry;
 
+import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
 import com.resourceful_refinement.content.fluids.base.GeneralizedFlowingFluid;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -19,6 +21,11 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import java.util.function.Supplier;
 
 public class FluidEntry {
+
+    /** Shared item model for paint fluid buckets ({@code paint_bucket} underlay + {@code paint_bucket_content} tint). */
+    public static final ResourceLocation PAINT_FLUID_BUCKET_MODEL = ResourceLocation.fromNamespaceAndPath(
+            ResourcefulRefinementMain.MOD_ID, "item/paint_fluid_bucket");
+
     public DeferredHolder<FluidType, FluidType> type;
     public DeferredHolder<Fluid, FlowingFluid> source;
     public DeferredHolder<Fluid, FlowingFluid> flowing;
@@ -29,7 +36,10 @@ public class FluidEntry {
 
     public FluidEntry(String name, int color, FluidGroup group) {
         this.group = group;
-        this.color = ((group == FluidGroup.RAW || group == FluidGroup.CATALYSED || group == FluidGroup.CARBORAX) ? 0xFA000000 : 0xFF000000) | color;
+        this.color = ((group == FluidGroup.RAW
+                || group == FluidGroup.CATALYSED
+                || group == FluidGroup.CARBORAX
+                || group == FluidGroup.PAINT) ? 0xFA000000 : 0xFF000000) | color;
         // Register Type
         type = ModFluidTypes.registerType(name, color, group);
 
@@ -42,8 +52,9 @@ public class FluidEntry {
         source = ModFluids.FLUIDS.register(name, () -> new GeneralizedFlowingFluid.Source(properties.get(), group.dropRate));
         flowing = ModFluids.FLUIDS.register("flowing_" + name, () -> new GeneralizedFlowingFluid.Flowing(properties.get(), group.dropRate));
 
-        // Register Block
-        block = ModBlocks.BLOCKS.register(name, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+        // Register Block (path matches assets/blockstates/<group>/<name>.json)
+        String blockId = group == FluidGroup.PAINT ? "paint/" + name : name;
+        block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
 
         // Register Bucket
         bucket = ModItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
@@ -53,4 +64,15 @@ public class FluidEntry {
         // Return your registered FluidType holder or object instance
         return this.type.get();
     }
+
+    public boolean usesPaintBucketUnderlay() {
+        return group == FluidGroup.PAINT;
+    }
+
+    /** Item model parent used by {@code models/item/<fluid>_bucket.json}. */
+    /*public ResourceLocation getBucketItemModelParent() {
+        return usesPaintBucketUnderlay()
+                ? PAINT_FLUID_BUCKET_MODEL
+                : ResourceLocation.withDefaultNamespace("item/generated");
+    }*/
 }

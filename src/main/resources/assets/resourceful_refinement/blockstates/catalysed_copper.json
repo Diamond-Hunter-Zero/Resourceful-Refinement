@@ -1,5 +1,5 @@
-﻿{
+{
   "variants": {
-    "": { "model": "resourceful_refinement:block/catalysed_copper" }
+    "": { "model": "resourceful_refinement:block/fluids/catalysed_copper" }
   }
 }

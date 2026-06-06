@@ -12,5 +12,5 @@ public class ModStructureTypes {
             DeferredRegister.create(Registries.STRUCTURE_TYPE, ResourcefulRefinementMain.MOD_ID);
 
     public static final DeferredHolder<StructureType<?>, StructureType<NetherSurfaceJigsawStructure>> NETHER_SURFACE_JIGSAW =
-            STRUCTURE_TYPES.register("nether_surface_jigsaw", () -> () -> NetherSurfaceJigsawStructure.CODEC);
+            STRUCTURE_TYPES.register("nether_ground_jigsaw", () -> () -> NetherSurfaceJigsawStructure.CODEC);
 }

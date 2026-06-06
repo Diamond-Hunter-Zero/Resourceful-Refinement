@@ -1,24 +1,42 @@
 package com.resourceful_refinement.registry;
 
-import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotItemRenderer;
-import com.resourceful_refinement.content.forge_mould.ForgeMouldItemRenderer;
+import com.resourceful_refinement.content.gel_splatter.GelFluidTintColors;
+import com.resourceful_refinement.content.gel_splatter.GelFluidTintColorsClient;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
+
+import java.util.Stack;
 
 import static com.resourceful_refinement.ResourcefulRefinementMain.MOD_ID;
 
 @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEvents {
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            GelFluidTintColorsClient.install();
+            GelFluidTintColors.clearCompatCache();
+            // Force blocks to use the Translucent texture blend pass
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER.get(), RenderType.solid());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_SLIPPERY.get(), RenderType.solid());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_STICKY.get(), RenderType.solid());
+        });
+    }
 
     @SubscribeEvent
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
@@ -78,5 +96,33 @@ public class ModClientEvents {
             // Confirms the event should override default vanilla sky fog rendering passes
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_STICKY.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_SLIPPERY.get());
+    }
+
+    @SubscribeEvent
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        int defaultInertTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultInertTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_ITEM.get()
+        );
+
+        int defaultSlipperyTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_SLIPPERY.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultSlipperyTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_SLIPPERY_ITEM.get()
+        );
+
+        int defaultStickyTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_STICKY.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultStickyTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_STICKY_ITEM.get()
+        );
     }
 }

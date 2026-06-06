@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "resourceful_refinement:block/fluid_refill_station"
+      }
+    }
+  ]
+}

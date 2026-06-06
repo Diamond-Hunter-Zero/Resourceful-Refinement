@@ -1,0 +1,23 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "type": "neoforge:components",
+      "items": "resourceful_refinement:hosegun",
+      "components": {
+        "resourceful_refinement:hosegun_gloopy": true
+      }
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:hosegun"
+    }
+  ],
+  "processingTime": 100
+}

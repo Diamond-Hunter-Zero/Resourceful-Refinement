@@ -1,5 +1,5 @@
-﻿{
+{
   "variants": {
-    "": { "model": "resourceful_refinement:block/durasteel_alloy" }
+    "": { "model": "resourceful_refinement:block/fluids/durasteel_alloy" }
   }
 }

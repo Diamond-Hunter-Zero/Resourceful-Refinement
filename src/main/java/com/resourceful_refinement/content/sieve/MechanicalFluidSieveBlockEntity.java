@@ -38,12 +38,14 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
     public static final int TANK_CAPACITY = 4000;
+    public static final int MAX_STACK_HEIGHT = 4;
     private FilteringBehaviour filtering;
 
     public final FluidTank inputTank = new FluidTank(TANK_CAPACITY) {
@@ -169,9 +171,8 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
             lastRecipe = recipe.get().value();
             displayedRecipeId = recipe.get().id();
-            timer = lastRecipe.getProcessingDuration();
-            if (timer <= 0) timer = 200; // default if not specified
-            timer = (int) (timer * (1 + 0.25 * (stackSize - 1))); // Increase duration by 25% per additional sieve
+            timer = scaledProcessingDuration(lastRecipe.getProcessingDuration(), stackSize);
+            if (timer <= 0) timer = 200;
             sendData();
             return;
         }
@@ -189,9 +190,7 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
             return;
         }
 
-        timer = lastRecipe.getProcessingDuration();
-        if (timer <= 0) timer = 200;
-        timer = (int) (timer * (1 + 0.25 * (stackSize - 1)));
+        timer = scaledProcessingDuration(lastRecipe.getProcessingDuration(), stackSize);
         sendData();
     }
 
@@ -274,56 +273,104 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
     public void updateConnectivity() {
         if (level == null || level.isClientSide) return;
-        
-        // Find bottom
-        BlockPos bottom = worldPosition;
+
+        BlockPos columnBottom = findColumnBottom(worldPosition);
+        List<BlockPos> column = collectColumn(columnBottom);
+        if (column.isEmpty()) return;
+
+        for (int segmentStart = 0; segmentStart < column.size(); segmentStart += MAX_STACK_HEIGHT) {
+            int segmentSize = Math.min(MAX_STACK_HEIGHT, column.size() - segmentStart);
+            applyStackSegment(column, segmentStart, segmentSize);
+        }
+    }
+
+    private BlockPos findColumnBottom(BlockPos start) {
+        BlockPos bottom = start;
         while (level.getBlockEntity(bottom.below()) instanceof MechanicalFluidSieveBlockEntity) {
             bottom = bottom.below();
         }
-        
-        MechanicalFluidSieveBlockEntity controller = (MechanicalFluidSieveBlockEntity) level.getBlockEntity(bottom);
-        if (controller == null) return;
-        
-        // Find size
-        int newSize = 1;
-        BlockPos top = bottom.above();
-        while (newSize < 4 && level.getBlockEntity(top) instanceof MechanicalFluidSieveBlockEntity) {
-            newSize++;
-            top = top.above();
+        return bottom;
+    }
+
+    private List<BlockPos> collectColumn(BlockPos bottom) {
+        List<BlockPos> column = new ArrayList<>();
+        BlockPos current = bottom;
+        while (level.getBlockEntity(current) instanceof MechanicalFluidSieveBlockEntity) {
+            column.add(current.immutable());
+            current = current.above();
         }
-        
+        return column;
+    }
+
+    private void applyStackSegment(List<BlockPos> column, int segmentStart, int segmentSize) {
+        BlockPos controllerPos = column.get(segmentStart);
+        if (!(level.getBlockEntity(controllerPos) instanceof MechanicalFluidSieveBlockEntity controller)) {
+            return;
+        }
+
         Direction controllerFacing = controller.getBlockState().getValue(MechanicalFluidSieveBlock.FACING);
-        
-        // Update all in stack
-        for (int i = 0; i < newSize; i++) {
-            BlockPos currentPos = bottom.above(i);
-            BlockEntity be = level.getBlockEntity(currentPos);
-            if (be instanceof MechanicalFluidSieveBlockEntity sieve) {
-                boolean wasController = sieve.controllerPos != null && sieve.controllerPos.equals(sieve.worldPosition);
-                sieve.controllerPos = bottom;
-                sieve.stackSize = newSize;
-                sieve.stackIndex = i;
-                
-                // Clear inventory and drop items if not the controller and was previously its own controller
-                if (i > 0 && wasController) {
-                    sieve.inputTank.setFluid(FluidStack.EMPTY);
-                    sieve.outputTank.setFluid(FluidStack.EMPTY);
-                    for (int s = 0; s < sieve.outputInv.getSlots(); s++) {
-                        ItemStack stack = sieve.outputInv.getStackInSlot(s);
-                        if (!stack.isEmpty()) {
-                            net.minecraft.world.Containers.dropItemStack(level, currentPos.getX(), currentPos.getY(), currentPos.getZ(), stack);
-                            sieve.outputInv.setStackInSlot(s, ItemStack.EMPTY);
-                        }
-                    }
-                }
-                
-                // Update facing
-                if (sieve.getBlockState().getValue(MechanicalFluidSieveBlock.FACING) != controllerFacing) {
-                    level.setBlockAndUpdate(currentPos, sieve.getBlockState().setValue(MechanicalFluidSieveBlock.FACING, controllerFacing));
-                }
-                
-                sieve.setChanged();
-                sieve.sendData();
+
+        for (int i = 0; i < segmentSize; i++) {
+            BlockPos currentPos = column.get(segmentStart + i);
+            if (!(level.getBlockEntity(currentPos) instanceof MechanicalFluidSieveBlockEntity sieve)) {
+                continue;
+            }
+
+            boolean wasController = sieve.controllerPos != null && sieve.controllerPos.equals(sieve.worldPosition);
+            boolean assignmentChanged = sieve.stackIndex != i
+                    || sieve.stackSize != segmentSize
+                    || sieve.controllerPos == null
+                    || !sieve.controllerPos.equals(controllerPos);
+
+            if (i == 0 && wasController && sieve.timer > 0 && sieve.lastRecipe != null && sieve.stackSize != segmentSize) {
+                preserveRecipeProgress(sieve, sieve.stackSize, segmentSize);
+            }
+
+            if (i > 0 && assignmentChanged) {
+                clearMemberInventory(sieve, currentPos);
+            }
+
+            sieve.controllerPos = controllerPos;
+            sieve.stackSize = segmentSize;
+            sieve.stackIndex = i;
+
+            if (sieve.getBlockState().getValue(MechanicalFluidSieveBlock.FACING) != controllerFacing) {
+                level.setBlockAndUpdate(currentPos, sieve.getBlockState().setValue(MechanicalFluidSieveBlock.FACING, controllerFacing));
+            }
+
+            sieve.setChanged();
+            sieve.sendData();
+        }
+    }
+
+    private void preserveRecipeProgress(MechanicalFluidSieveBlockEntity controller, int oldStackSize, int newStackSize) {
+        int baseDuration = controller.lastRecipe.getProcessingDuration();
+        if (baseDuration <= 0) {
+            baseDuration = 200;
+        }
+
+        int oldTotalDuration = scaledProcessingDuration(baseDuration, oldStackSize);
+        int newTotalDuration = scaledProcessingDuration(baseDuration, newStackSize);
+        if (oldTotalDuration <= 0 || newTotalDuration <= 0) {
+            return;
+        }
+
+        float remainingRatio = controller.timer / (float) oldTotalDuration;
+        controller.timer = Mth.ceil(remainingRatio * newTotalDuration);
+    }
+
+    private static int scaledProcessingDuration(int baseDuration, int stackSize) {
+        return (int) (baseDuration * (1 + 0.25 * (stackSize - 1)));
+    }
+
+    private void clearMemberInventory(MechanicalFluidSieveBlockEntity sieve, BlockPos pos) {
+        sieve.inputTank.setFluid(FluidStack.EMPTY);
+        sieve.outputTank.setFluid(FluidStack.EMPTY);
+        for (int slot = 0; slot < sieve.outputInv.getSlots(); slot++) {
+            ItemStack stack = sieve.outputInv.getStackInSlot(slot);
+            if (!stack.isEmpty()) {
+                net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+                sieve.outputInv.setStackInSlot(slot, ItemStack.EMPTY);
             }
         }
     }

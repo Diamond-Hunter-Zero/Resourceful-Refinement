@@ -1,0 +1,23 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "none",
+  "processing_time": 100,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 500
+    },
+    {
+      "type": "neoforge:single",
+      "fluid": "create:honey",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_glue",
+      "amount": 250
+    }
+  ]
+}

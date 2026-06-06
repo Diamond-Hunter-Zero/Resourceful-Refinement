@@ -1,12 +1,12 @@
 {
   "type": "resourceful_refinement:coating",
   "fluid": {
-    "fluid": "resourceful_refinement:molten_scorchia",
+    "fluid": "resourceful_refinement:liquid_glue",
     "amount": 1000
   },
   "ingredient": {
-    "item": "create:sturdy_sheet"
+    "item": "create:zinc_ingot"
   },
-  "coating": "Obsidianite",
+  "coating": "Gloopy",
   "duration": 200
 }

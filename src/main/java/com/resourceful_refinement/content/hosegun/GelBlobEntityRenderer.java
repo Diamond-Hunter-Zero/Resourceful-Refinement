@@ -53,7 +53,7 @@ public class GelBlobEntityRenderer extends EntityRenderer<GelBlobEntity> {
         poseStack.mulPose(Axis.YP.rotationDegrees(
                 Mth.lerp(partialTick, entity.yRotO, entity.getYRot()) - 90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(
-                Mth.lerp(partialTick, entity.xRotO, entity.getXRot()) + 90.0F));
+                Mth.lerp(partialTick, entity.xRotO, entity.getXRot()) - 90.0F));
         poseStack.scale(SCALE, SCALE, SCALE);
 
         FluidStack fluid = entity.getFluidStack();

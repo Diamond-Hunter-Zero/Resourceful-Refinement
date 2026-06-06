@@ -8,8 +8,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -56,9 +59,10 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
     private static final double SURFACE_CONTACT_TOLERANCE = 0.15D;
 
     /** Cap bounce speed so repeated {@code entityInside} ticks cannot escalate height. */
-    private static final double MAX_BOUNCE_SPEED = 0.55D;
+    private static final double MAX_BOUNCE_SPEED = 0.6D;
 
     private static final double BOUNCE_DAMPING = 0.8D;
+    private static final double SPEED_BOUNCE_BONUS = 0.55D;
 
     /** Minimum downward speed before a bounce triggers (ignores gravity micro-jitter while standing). */
     private static final double MIN_FALL_SPEED = 0.15D;
@@ -228,7 +232,7 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
                         Vec3 newVelocity;
                         if (horizontalSpeed < maxHorizontalSpeed)
                         {
-                            newVelocity = velocity.add(velocity.normalize().scale(0.0375f));
+                            newVelocity = velocity.add(velocity.normalize().scale(0.0695f));
                             entity.setDeltaMovement(newVelocity);
                             entity.hurtMarked = true;
                         }
@@ -262,12 +266,29 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
      */
     private void applyBouncyGelEffect(BlockState state, Level level, BlockPos pos, Entity entity) {
         Vec3 velocity = entity.getDeltaMovement();
+        boolean hasSpeedGelEffect = false;
 
-        if (velocity.y >= 0.0D || velocity.y > -MIN_FALL_SPEED) {
+        if (entity instanceof LivingEntity livingEntity && livingEntity.hasEffect(MobEffects.MOVEMENT_SPEED))
+        {
+            MobEffectInstance effect = livingEntity.getEffect(MobEffects.MOVEMENT_SPEED);
+            if (effect != null && effect.getAmplifier() >= 4)
+                hasSpeedGelEffect = true;
+        }
+
+        // Any entity moving above a speed threshold is considered to be 'speeding'
+        Vec3 horizontalMomentum = new Vec3(entity.getKnownMovement().x, 0, entity.getKnownMovement().z);
+        if (hasSpeedGelEffect == false && horizontalMomentum.length() >= 0.45f)
+            hasSpeedGelEffect = true;
+
+        if (velocity.y > 0.0D || (velocity.y > -MIN_FALL_SPEED && velocity.y < 0)) {
             return;
         }
+
+        if (velocity.y == 0 && !hasSpeedGelEffect)
+            return;
+
         // Standing on gel applies tiny downward deltas each tick; require an actual fall.
-        if (entity.fallDistance < 0.15F) {
+        if (!hasSpeedGelEffect && entity.fallDistance < 0.15F) {
             return;
         }
 
@@ -284,6 +305,14 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
         }
 
         double bounceY = Math.min(Math.abs(velocity.y) * BOUNCE_DAMPING, MAX_BOUNCE_SPEED);
+
+        // Apply 'launch' bonus for moving from speed to bounce gels
+        if (hasSpeedGelEffect && bounceY < SPEED_BOUNCE_BONUS)
+        {
+            double bounceBonus = velocity.y == 0 ? SPEED_BOUNCE_BONUS * 1.5f : SPEED_BOUNCE_BONUS;
+            bounceY = Math.min(bounceY + bounceBonus, MAX_BOUNCE_SPEED + bounceBonus);
+        }
+
         if (bounceY < MIN_FALL_SPEED * BOUNCE_DAMPING) {
             return;
         }
@@ -296,7 +325,20 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
 
             if (serverPlayer.isCrouching()) return;
 
-            entity.setDeltaMovement(velocity.x, bounceY, velocity.z);
+            if (velocity.y == 0 || (hasSpeedGelEffect && horizontalMomentum.length() > 0.05f))
+            {
+                horizontalMomentum = horizontalMomentum.normalize().scale(1.3f);
+                serverPlayer.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20, 4, true, false));
+                level.playSound(null,  pos, SoundEvents.SLIME_BLOCK_FALL, SoundSource.BLOCKS, 0.7f, 0.8f);
+                //System.out.println("[Gel Bounce - From propel] Player velocity: " + entity.getKnownMovement());
+            }
+            else
+            {
+                horizontalMomentum = horizontalMomentum.normalize().scale(0.15f);
+                //System.out.println("[Gel Bounce - From vertical] Player velocity: " + entity.getKnownMovement());
+            }
+
+            entity.setDeltaMovement(horizontalMomentum.x, bounceY, horizontalMomentum.z);
             entity.fallDistance = 0;
             serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
             return;

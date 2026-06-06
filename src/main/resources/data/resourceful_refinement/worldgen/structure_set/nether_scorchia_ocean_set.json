@@ -1,14 +1,14 @@
 {
   "structures": [
     {
-      "structure": "resourceful_refinement:nether_scorchia_basalt_geyser",
+      "structure": "resourceful_refinement:nether_scorchia_ocean",
       "weight": 1
     }
   ],
   "placement": {
     "type": "minecraft:random_spread",
     "spacing": 6,
-    "separation": 1,
+    "separation": 2,
     "salt": 923842167
   }
 }

@@ -33,4 +33,11 @@ public class ModDataComponents {
                     .networkSynchronized(ByteBufCodecs.BOOL)
                     .build()
     );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> PLUNGER_CHARGING = DATA_COMPONENTS.register("plunger_charging",
+            () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL)
+                    .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build()
+    );
 }

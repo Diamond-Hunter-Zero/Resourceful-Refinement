@@ -3,7 +3,9 @@ package com.resourceful_refinement.content.gel_splatter;
 import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModFluids;
+import com.simibubi.create.AllFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,12 +25,17 @@ import net.minecraft.world.level.material.Fluids;
 
 public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBlockEntityAccess {
 
-    /** Default gel fluid when none is stored (molten andesite blend). */
-    public static Fluid getDefaultFluid() {
-        return ModFluids.MOLTEN_ANDESITE_BLEND.source.get();
+    /** Default gel fluid when none is stored (molten andesite blend for Inert, catalysed zinc for speedy, and glue for sticky). */
+    public static Fluid getDefaultFluid(Block linkedBlock) {
+        if (linkedBlock == ModBlocks.GEL_SPLATTER_SLIPPERY.get())
+            return ModFluids.CATALYSED_ZINC.source.get();
+        else if (linkedBlock == ModBlocks.GEL_SPLATTER_STICKY.get())
+            return ModFluids.LIQUID_GLUE.source.get();
+        else
+            return ModFluids.MOLTEN_ANDESITE_BLEND.source.get();
     }
 
-    private Fluid fluid = getDefaultFluid();
+    private Fluid fluid = getDefaultFluid(this.getBlockState().getBlock());
     private String trackingId = "";
 
     public GelSplatterBlockEntity(BlockPos pos, BlockState state) {
@@ -156,7 +163,7 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
         super.onLoad();
         if (level != null && !level.isClientSide) {
             if (fluid == null || fluid == Fluids.EMPTY) {
-                fluid = getDefaultFluid();
+                fluid = getDefaultFluid(this.getBlockState().getBlock());
                 syncToClients();
             }
         }
@@ -188,9 +195,9 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
         if (tag.contains("Fluid")) {
             ResourceLocation id = ResourceLocation.parse(tag.getString("Fluid"));
             Fluid loaded = BuiltInRegistries.FLUID.get(id);
-            this.fluid = loaded != Fluids.EMPTY ? GelPropertiesManager.resolveSourceFluid(loaded) : getDefaultFluid();
+            this.fluid = loaded != Fluids.EMPTY ? GelPropertiesManager.resolveSourceFluid(loaded) : getDefaultFluid(this.getBlockState().getBlock());
         } else {
-            this.fluid = getDefaultFluid();
+            this.fluid = getDefaultFluid(this.getBlockState().getBlock());
         }
         trackingId = tag.contains("TrackingId") ? tag.getString("TrackingId") : "";
     }

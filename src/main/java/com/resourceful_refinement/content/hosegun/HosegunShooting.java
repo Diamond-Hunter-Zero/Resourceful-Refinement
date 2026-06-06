@@ -17,7 +17,7 @@ public final class HosegunShooting {
     public static final double SIDE_OFFSET = 0.32D;
 
     /** Slightly below eye height toward the hands. */
-    public static final double VERTICAL_OFFSET = -0.15D;
+    public static final double VERTICAL_OFFSET = -0.325D;
 
     private HosegunShooting() {}
 

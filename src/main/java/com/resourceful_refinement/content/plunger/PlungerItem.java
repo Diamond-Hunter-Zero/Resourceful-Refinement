@@ -1,9 +1,12 @@
 package com.resourceful_refinement.content.plunger;
 
+import com.resourceful_refinement.registry.ModDataComponents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -116,8 +119,18 @@ public class PlungerItem extends TridentItem {
     return InteractionResult.PASS;
   }
 
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        var result = super.use(level, player, hand);
+        if (result.getResult().consumesAction()) {
+            result.getObject().set(ModDataComponents.PLUNGER_CHARGING.get(), true);
+        }
+        return result;
+    }
+
   @Override
   public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+      stack.set(ModDataComponents.PLUNGER_CHARGING.get(), false);
     if (!(entity instanceof Player player)) {
       return;
     }
@@ -148,4 +161,15 @@ public class PlungerItem extends TridentItem {
 
     player.awardStat(Stats.ITEM_USED.get(this));
   }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+        // Fail-safe cleanup for charging data
+        if (stack.getOrDefault(ModDataComponents.PLUNGER_CHARGING.get(), false)) {
+            if (!(entity instanceof LivingEntity living) || !living.isUsingItem() || living.getUseItem() != stack) {
+                stack.set(ModDataComponents.PLUNGER_CHARGING.get(), false);
+            }
+        }
+    }
 }

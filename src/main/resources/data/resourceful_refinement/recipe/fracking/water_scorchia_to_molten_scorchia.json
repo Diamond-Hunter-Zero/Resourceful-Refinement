@@ -7,13 +7,13 @@
     {
       "type": "neoforge:single",
       "fluid": "minecraft:water",
-      "amount": 200
+      "amount": 125
     }
   ],
   "results": [
     {
       "id": "resourceful_refinement:molten_scorchia",
-      "amount": 8
+      "amount": 20
     }
   ]
 }

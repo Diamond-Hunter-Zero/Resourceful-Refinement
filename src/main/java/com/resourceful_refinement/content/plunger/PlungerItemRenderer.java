@@ -3,6 +3,7 @@ package com.resourceful_refinement.content.plunger;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.registry.ModDataComponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -10,8 +11,11 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+
+import javax.lang.model.util.ElementScanner6;
 
 public class PlungerItemRenderer extends BlockEntityWithoutLevelRenderer {
 
@@ -49,7 +53,7 @@ public class PlungerItemRenderer extends BlockEntityWithoutLevelRenderer {
         prepareModel();
 
         poseStack.pushPose();
-        applyDisplayTransform(context, poseStack);
+        applyDisplayTransform(stack, context, poseStack);
 
         poseStack.pushPose();
         poseStack.scale(1.0F, -1.0F, -1.0F);
@@ -62,13 +66,13 @@ public class PlungerItemRenderer extends BlockEntityWithoutLevelRenderer {
         poseStack.popPose();
     }
 
-    private static void applyDisplayTransform(ItemDisplayContext context, PoseStack poseStack) {
+    private static void applyDisplayTransform(ItemStack stack, ItemDisplayContext context, PoseStack poseStack) {
         switch (context) {
             case GUI -> {
                 poseStack.scale(0.85F, 0.85F, 0.85F);
                 poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
                 poseStack.mulPose(Axis.YP.rotationDegrees(225.0F));
-                poseStack.translate(-0.8F, 1.4F, 0F);
+                poseStack.translate(-0.85F, 1.35F, 0F);
             }
             case GROUND -> {
                 poseStack.translate(0.5F, 1F, 0.5F);
@@ -93,10 +97,21 @@ public class PlungerItemRenderer extends BlockEntityWithoutLevelRenderer {
 
             }
             case THIRD_PERSON_RIGHT_HAND, THIRD_PERSON_LEFT_HAND -> {
+
+                boolean isCharging = stack.getOrDefault(ModDataComponents.PLUNGER_CHARGING.get(), false);
+
                 poseStack.scale(0.6F, 0.6F, 0.6F);
                 //poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-                poseStack.translate(-0.85F, 0.0F, 0.9F);
+
+                if (isCharging)
+                {
+                    poseStack.translate(0.85F, 1.5F, 0.925F);
+                }
+                else
+                {
+                    poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+                    poseStack.translate(-0.85F, 0.0F, 0.9F);
+                }
             }
             default -> {
                 poseStack.translate(0.5F, 0.5F, 0.5F);

@@ -3,7 +3,7 @@ package com.resourceful_refinement.content.paint_nozzle;
 import net.minecraft.network.chat.Component;
 
 public enum PaintNozzleFlowSpeed {
-    LOW(0.4F),
+    LOW(0.2F),
     MEDIUM(0.7F),
     HIGH(1.15F);
 

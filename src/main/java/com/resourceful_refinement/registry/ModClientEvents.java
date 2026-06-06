@@ -19,6 +19,8 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 
+import java.util.Stack;
+
 import static com.resourceful_refinement.ResourcefulRefinementMain.MOD_ID;
 
 @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -105,12 +107,22 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        int defaultTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid());
+        int defaultInertTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER.get()));
         event.getItemColors().register(
-                (stack, tintIndex) -> tintIndex == 0 ? defaultTint : 0xFFFFFFFF,
-                ModItems.GEL_SPLATTER_ITEM.get(),
-                ModItems.GEL_SPLATTER_STICKY_ITEM.get(),
+                (stack, tintIndex) -> tintIndex == 0 ? defaultInertTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_ITEM.get()
+        );
+
+        int defaultSlipperyTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_SLIPPERY.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultSlipperyTint : 0xFFFFFFFF,
                 ModItems.GEL_SPLATTER_SLIPPERY_ITEM.get()
+        );
+
+        int defaultStickyTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_STICKY.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultStickyTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_STICKY_ITEM.get()
         );
     }
 }

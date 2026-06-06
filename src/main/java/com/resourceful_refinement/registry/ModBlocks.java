@@ -103,7 +103,7 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .replaceable()
-                    .strength(0.5f)
+                    .strength(0.25f)
                     .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()
                     .noLootTable()));
@@ -115,7 +115,7 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .replaceable()
-                    .strength(0.5f)
+                    .strength(0.25f)
                     .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()
                     .noLootTable()));
@@ -127,7 +127,7 @@ public class ModBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .replaceable()
-                    .strength(0.5f)
+                    .strength(0.25f)
                     .sound(SoundType.HONEY_BLOCK)
                     .noOcclusion()
                     .noLootTable()));

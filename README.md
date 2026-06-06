@@ -44,7 +44,11 @@ Major feature release: Paint fluids & Gels!
 - **Hoseguns** allow players to spray gels whereever they like, turning any landscape into a colorful paintball fight.
 - **Fluid Refill Stations** provide an access point for players to refill fluid containers with ease, or can be used to bind Hoseguns to a Tracking ID. When paired with Display Links and Display Boards, you can track and display the number of gel blocks created by an individual hosegun, or an entire team!
 - Never sure how to get the last few pesky drops of fluid out of a tank or refinery without breaking it? Rest assured, the **Plunger** is here to do the dirty work.
-![Hosegun parkour](https://i.imgur.com/4ivzCVC.gif)
+
+
+https://github.com/user-attachments/assets/3f5b06b8-25de-4327-976d-fb54417728b3
+
+
 
 ---
 

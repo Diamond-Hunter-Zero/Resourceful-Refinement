@@ -91,15 +91,8 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
         // Render casting requirement
         if (recipe.isCasting())
         {
-            // 1. Get the block you want to display (e.g., the machine or a required catalyst)
             ItemStack blockStack = new ItemStack(ModBlocks.CASTING_DEPOT.get());
 
-            // 2. Calculate vertical center
-            // background.getHeight() returns the height you defined in the constructor
-            //centreXPos -= 8;
-            //centreYPos += 7;
-
-            // 3. Render the block
             pose.pushPose();
             pose.translate(0, 0, 0);
             pose.scale(1.5f, 1.5f, 1.5f);
@@ -107,8 +100,26 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
             pose.popPose();
 
             int castingWidth = font.width(CASTING_WARNING);
-            // Draw text at x=100, y=40 (adjust based on your background)
-            guiGraphics.drawString(font, CASTING_WARNING, centreXPos - (castingWidth/2f) + 8, centreYPos + 30, 0xFF808080, false);
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(centreXPos - ((castingWidth*0.75f)/2f), centreYPos + 30, 0);
+            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+            guiGraphics.drawString(font, CASTING_WARNING, 0,0, 0xFF808080, false);
+            guiGraphics.pose().popPose();
+        }
+
+        // Render break chance
+        if (!recipe.getIngredients().isEmpty())
+        {
+            float breakChance = recipe.getConsumptionChance(recipe.getIngredients().getFirst().getItems()[0].getItem());
+            if (breakChance < 1f)
+            {
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(8, 6, 0);
+                guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+                guiGraphics.drawString(font,   Math.round(breakChance*100) + "% Break", 0,0, 0xFFF5F5F5, false);
+                guiGraphics.drawString(font,  "Chance", 0,9, 0xFFF5F5F5, false);
+                guiGraphics.pose().popPose();
+            }
         }
     }
 

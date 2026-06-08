@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.forge_mould;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -317,19 +318,16 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
     }
 
     private void process() {
-        if (lastRecipe instanceof com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe coating) {
+        if (lastRecipe instanceof CoatingRecipe coating) {
             inputTank.drain(coating.getFluidIngredient().amount(), net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
             
             if (!coating.getItemIngredient().isEmpty()) {
                 int requiredItems = coating.getIngredients().size();
                 ItemStack itemInSlot = inputInv.getStackInSlot(0);
-                boolean isIngotMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
-                boolean isShaftMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
+                float consumeChance = coating.getConsumptionChance(itemInSlot.getItem());
 
                 // Moulds have a low chance to be consumed; other items are always consumed
-                if ((!isIngotMould && !isShaftMould)
-                        || (isIngotMould && level.random.nextFloat() < INGOT_MOULD_BREAK_CHANCE)
-                        || (isShaftMould && level.random.nextFloat() < SHAFT_MOULD_BREAK_CHANCE)) {
+                if (level != null && level.random.nextFloat() <= consumeChance) {
                     inputInv.extractItem(0, requiredItems, false);
                 }
             }
@@ -350,13 +348,10 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
             int requiredItems = recipe.getIngredients().size();
             if (requiredItems > 0) {
                 ItemStack itemInSlot = inputInv.getStackInSlot(0);
-                boolean isIngotMould = itemInSlot.is(ModItems.INGOT_MOULD.get());
-                boolean isShaftMould = itemInSlot.is(ModItems.SHAFT_MOULD.get());
+                float consumeChance = recipe.getConsumptionChance(itemInSlot.getItem());
 
-                // Moulds have a low chance to be consumed; other items are always consumed
-                if ((!isIngotMould && !isShaftMould)
-                        || (isIngotMould && level.random.nextFloat() < INGOT_MOULD_BREAK_CHANCE)
-                        || (isShaftMould && level.random.nextFloat() < SHAFT_MOULD_BREAK_CHANCE)) {
+                // Ingredient items have a probabilistic chance to be consumed on processing
+                if (level != null && level.random.nextFloat() <= consumeChance) {
                     inputInv.extractItem(0, requiredItems, false);
                 }
             }

@@ -1,0 +1,58 @@
+{
+  "multipart": [
+    {
+      "when": { "down": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_down", "y": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_down", "y": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_down", "y": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_down", "y": 270 }
+      ]
+    },
+    {
+      "when": { "up": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_up", "y": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_up", "y": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_up", "y": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_up", "y": 270 }
+      ]
+    },
+    {
+      "when": { "north": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_north", "z": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_north", "z": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_north", "z": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_north", "z": 270 }
+      ]
+    },
+    {
+      "when": { "south": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_south", "z": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_south", "z": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_south", "z": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_south", "z": 270 }
+      ]
+    },
+    {
+      "when": { "west": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_west", "x": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_west", "x": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_west", "x": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_west", "x": 270 }
+      ]
+    },
+    {
+      "when": { "east": "true" },
+      "apply": [
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_east", "x": 0 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_east", "x": 90 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_east", "x": 180 },
+        { "model": "resourceful_refinement:block/gel_splatter/bouncy/gel_splatter_bouncy_east", "x": 270 }
+      ]
+    }
+  ]
+}

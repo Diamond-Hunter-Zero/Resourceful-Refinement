@@ -6,7 +6,9 @@ import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModDamageTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.MultifaceSpreader;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -66,6 +69,14 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
 
     /** Minimum downward speed before a bounce triggers (ignores gravity micro-jitter while standing). */
     private static final double MIN_FALL_SPEED = 0.15D;
+
+    private boolean isMolten = false;
+
+    public GelSplatterBlock(Properties properties, boolean isMolten)
+    {
+        super(properties);
+        this.isMolten = isMolten;
+    }
 
     public GelSplatterBlock(Properties properties) {
         super(properties);
@@ -393,11 +404,26 @@ public class GelSplatterBlock extends MultifaceBlock implements EntityBlock {
             GelType type = GelPropertiesManager.getGelType(fluid);
             if (type == GelType.MOLTEN) {
                 return 10; // Bright molten light
-            } else if (type == GelType.BOUNCY) {
+            } else if (type == GelType.BOUNCY || type == GelType.SPEEDY) {
                 return 4; // Glow from carborax
             }
         }
         return 2;
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, net.minecraft.util.RandomSource rand) {
+        if (!level.isClientSide) return; // Only process on the client side
+        if (!isMolten) return;
+
+        if (rand.nextInt(32) == 0) {
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 0.15; // Spawn slightly above the block
+            double z = pos.getZ() + 0.5;
+
+            // 3. Spawn the particle using ParticleTypes
+            level.addParticle(ParticleTypes.LAVA, x, y, z, 0.0D, 1D, 0.0D);
+        }
     }
 
     // Tells lighting engines not to block sky/block light through this block

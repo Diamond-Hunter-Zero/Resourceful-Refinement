@@ -31,10 +31,6 @@ public class ModClientEvents {
         event.enqueueWork(() -> {
             GelFluidTintColorsClient.install();
             GelFluidTintColors.clearCompatCache();
-            // Force blocks to use the Translucent texture blend pass
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER.get(), RenderType.solid());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_SLIPPERY.get(), RenderType.solid());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.GEL_SPLATTER_STICKY.get(), RenderType.solid());
         });
     }
 
@@ -103,6 +99,8 @@ public class ModClientEvents {
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_STICKY.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_SLIPPERY.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_MOLTEN.get());
+        event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_BOUNCY.get());
     }
 
     @SubscribeEvent
@@ -123,6 +121,18 @@ public class ModClientEvents {
         event.getItemColors().register(
                 (stack, tintIndex) -> tintIndex == 0 ? defaultStickyTint : 0xFFFFFFFF,
                 ModItems.GEL_SPLATTER_STICKY_ITEM.get()
+        );
+
+        int defaultMoltenTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_MOLTEN.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultMoltenTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_MOLTEN_ITEM.get()
+        );
+
+        int defaultBouncyTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER_BOUNCY.get()));
+        event.getItemColors().register(
+                (stack, tintIndex) -> tintIndex == 0 ? defaultBouncyTint : 0xFFFFFFFF,
+                ModItems.GEL_SPLATTER_BOUNCY_ITEM.get()
         );
     }
 }

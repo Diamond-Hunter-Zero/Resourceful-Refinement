@@ -19,8 +19,6 @@ import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import static com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity.INGOT_MOULD_BREAK_CHANCE;
-import static com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity.SHAFT_MOULD_BREAK_CHANCE;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ResourcefulRefinementMain.MOD_ID);
@@ -64,6 +62,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> GEL_SPLATTER_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter", ModBlocks.GEL_SPLATTER);
     public static final DeferredItem<BlockItem> GEL_SPLATTER_STICKY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_sticky", ModBlocks.GEL_SPLATTER_STICKY);
     public static final DeferredItem<BlockItem> GEL_SPLATTER_SLIPPERY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_slippery", ModBlocks.GEL_SPLATTER_SLIPPERY);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_MOLTEN_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_molten", ModBlocks.GEL_SPLATTER_MOLTEN);
+    public static final DeferredItem<BlockItem> GEL_SPLATTER_BOUNCY_ITEM = ITEMS.registerSimpleBlockItem("gel_splatter_bouncy", ModBlocks.GEL_SPLATTER_BOUNCY);
 
     // -------------------------------------------------------------------------
     // Misc. Items
@@ -76,9 +76,9 @@ public class ModItems {
     public static final DeferredItem<Item> DURASTEEL_SHEET = ITEMS.registerItem("durasteel_sheet", Item::new, new Item.Properties());
 
     public static final DeferredItem<MouldItem> INGOT_MOULD = ITEMS.registerItem("ingot_mould",
-            properties -> new MouldItem(properties, INGOT_MOULD_BREAK_CHANCE));
+            MouldItem::new);
     public static final DeferredItem<MouldItem> SHAFT_MOULD = ITEMS.registerItem("shaft_mould",
-            properties -> new MouldItem(properties, SHAFT_MOULD_BREAK_CHANCE));
+            MouldItem::new);
 
     public static final DeferredItem<com.resourceful_refinement.content.hosegun.HosegunItem> HOSEGUN = ITEMS.register("hosegun",
             () -> new com.resourceful_refinement.content.hosegun.HosegunItem(new Item.Properties()));
@@ -94,7 +94,7 @@ public class ModItems {
     // -------------------------------------------------------------------------
 
     public static final FoodProperties GLUE_POT_FOOD = new FoodProperties.Builder()
-            .nutrition(0)                             // Hunger restored (e.g., 6 half-shanks)
+            .nutrition(0)                             // Hunger restored
             .saturationModifier(0.3F)                 // Saturation multiplier
             .alwaysEdible()                           // Allow eating even when full
             .effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 200, 0), 1.0F)

@@ -31,6 +31,10 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
             return ModFluids.CATALYSED_ZINC.source.get();
         else if (linkedBlock == ModBlocks.GEL_SPLATTER_STICKY.get())
             return ModFluids.LIQUID_GLUE.source.get();
+        else if (linkedBlock == ModBlocks.GEL_SPLATTER_MOLTEN.get())
+            return ModFluids.MOLTEN_CRIMSITE.source.get();
+        else if (linkedBlock == ModBlocks.GEL_SPLATTER_BOUNCY.get())
+            return ModFluids.DURASTEEL_ALLOY.source.get();
         else
             return ModFluids.MOLTEN_ANDESITE_BLEND.source.get();
     }

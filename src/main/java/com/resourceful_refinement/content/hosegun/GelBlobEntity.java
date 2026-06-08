@@ -231,6 +231,10 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
         Entity entity = result.getEntity();
         FluidStack fluidStack = getFluidStack();
+
+        if (fluidStack.isEmpty() || fluidStack.getFluid() == Fluids.EMPTY)
+            return;
+
         Fluid fluid = fluidStack.getFluid();
         GelType type = GelPropertiesManager.getGelType(fluid);
 
@@ -266,8 +270,11 @@ public class GelBlobEntity extends ThrowableItemProjectile {
         if (this.level().isClientSide) return;
 
         FluidStack fluidStack = getFluidStack();
-        BlockPos impactPos = result.getBlockPos();
 
+        if (fluidStack.isEmpty() || fluidStack.getFluid() == Fluids.EMPTY)
+            return;
+
+        BlockPos impactPos = result.getBlockPos();
         if (tryTransferFluidToCreateItemDrain(impactPos, fluidStack)) {
             return;
         }

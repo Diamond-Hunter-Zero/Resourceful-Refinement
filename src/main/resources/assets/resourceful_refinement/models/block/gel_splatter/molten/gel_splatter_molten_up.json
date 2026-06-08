@@ -1,0 +1,25 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "resourceful_refinement:block/gel_splatter_molten",
+		"particle": "resourceful_refinement:block/gel_splatter_molten"
+	},
+	"elements": [
+		{
+			"name": "up",
+			"from": [0, 15, 0],
+			"to": [16, 16, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 15, 0]},
+			"faces": {
+				"north": {"uv": [8, 0, 16, 0.5], "texture": "#0", "tintindex": 0},
+				"east": {"uv": [8, 0.5, 16, 1], "texture": "#0", "tintindex": 0},
+				"south": {"uv": [8, 1, 16, 1.5], "texture": "#0", "tintindex": 0},
+				"west": {"uv": [8, 1.5, 16, 2], "texture": "#0", "tintindex": 0},
+				"up": {"uv": [8, 8, 0, 0], "texture": "#0", "tintindex": 0},
+				"down": {"uv": [8, 8, 0, 16], "texture": "#0", "tintindex": 0}
+			}
+		}
+	]
+}

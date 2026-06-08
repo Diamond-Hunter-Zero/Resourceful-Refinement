@@ -28,7 +28,7 @@ public class GelSplatterBlockEntity extends BlockEntity implements GelSplatterBl
     /** Default gel fluid when none is stored (molten andesite blend for Inert, catalysed zinc for speedy, and glue for sticky). */
     public static Fluid getDefaultFluid(Block linkedBlock) {
         if (linkedBlock == ModBlocks.GEL_SPLATTER_SLIPPERY.get())
-            return ModFluids.CATALYSED_ZINC.source.get();
+            return ModFluids.CATALYSED_COPPER.source.get();
         else if (linkedBlock == ModBlocks.GEL_SPLATTER_STICKY.get())
             return ModFluids.LIQUID_GLUE.source.get();
         else if (linkedBlock == ModBlocks.GEL_SPLATTER_MOLTEN.get())

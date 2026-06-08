@@ -31,6 +31,7 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
     private final IDrawable background;
     private final IDrawable icon;
     private final ResourceLocation background_texture = ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/gui/jei/jei_forge_backdrop.png");
+    private final ResourceLocation break_tab_texture = ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/gui/jei/jei_forge_break_tab.png");
     private final String CASTING_WARNING = "Requires Casting Depot";
 
     public MechanicalForgeMouldRecipeCategory(IGuiHelper guiHelper) {
@@ -72,7 +73,7 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
         // Render Processing Time (e.g., "200 ticks")
         String timeText = recipe.getProcessingDuration() + "t";
         int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, centreXPos + 20, centreYPos - 28, 0xFF808080, false);
+        guiGraphics.drawString(font, timeText, centreXPos + 34, centreYPos - 27, 0xFFF5F5F5, false);
 
         // Render Fluid amount
         String fluidText = recipe.getFluidIngredients().getFirst().amount() + "mB";
@@ -113,11 +114,13 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
             float breakChance = recipe.getConsumptionChance(recipe.getIngredients().getFirst().getItems()[0].getItem());
             if (breakChance < 1f)
             {
+                guiGraphics.blit(break_tab_texture, 0,0, 0,0,175, 82);
+
                 guiGraphics.pose().pushPose();
-                guiGraphics.pose().translate(8, 6, 0);
+                guiGraphics.pose().translate(9, 9, 0);
                 guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
-                guiGraphics.drawString(font,   Math.round(breakChance*100) + "% Break", 0,0, 0xFFF5F5F5, false);
-                guiGraphics.drawString(font,  "Chance", 0,9, 0xFFF5F5F5, false);
+                guiGraphics.drawString(font, Math.round(breakChance*100) + "% Break", 0,0, 0xFFA5A5A5, false);
+                guiGraphics.drawString(font, "Chance", 0,10, 0xFFA5A5A5, false);
                 guiGraphics.pose().popPose();
             }
         }

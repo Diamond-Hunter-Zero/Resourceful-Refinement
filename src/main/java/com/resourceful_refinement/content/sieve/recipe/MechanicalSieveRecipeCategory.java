@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.sieve.recipe;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipe;
 import com.resourceful_refinement.registry.ModBlocks;
@@ -70,7 +71,7 @@ public class MechanicalSieveRecipeCategory implements IRecipeCategory<Mechanical
         String timeText = recipe.getProcessingDuration() + "t";
         int timeWidth = font.width(timeText);
         // Draw text at x=100, y=40 (adjust based on your background)
-        guiGraphics.drawString(font, timeText, 8, centreYPos + 30, 0xFF808080, false);
+        guiGraphics.drawString(font, timeText, 15, centreYPos + 31, 0xFFF5F5F5, false);
 
         // Render fluid stack amounts
         int inputAmount = recipe.getFluidIngredients().getFirst().amount();
@@ -99,6 +100,7 @@ public class MechanicalSieveRecipeCategory implements IRecipeCategory<Mechanical
         ItemStack forgeBlock = new ItemStack(ModBlocks.MECHANICAL_SIEVE.get());
         PoseStack pose = guiGraphics.pose();
         pose.pushPose();
+
         pose.translate(-centreXPos, -centreYPos-2, 0);
         pose.scale(2.0f, 2.0f, 2.0f);
         guiGraphics.renderFakeItem(forgeBlock, centreXPos-8, centreYPos-8);

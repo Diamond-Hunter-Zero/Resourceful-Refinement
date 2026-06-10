@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
@@ -91,6 +92,13 @@ public class ModBlocks {
             () -> new FluidRefillStationBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<DistilleryBlock> DISTILLERY = BLOCKS.register("distillery",
+            () -> new DistilleryBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
 

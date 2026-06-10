@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
+import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
@@ -63,6 +64,10 @@ public class ModBlockEntities {
                     (pos, state) -> new FluidRefillStationBlockEntity(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), pos, state),
                     ModBlocks.FLUID_REFILL_STATION.get()
             ).build(null));
+
+    public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
+            () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));
+
 
     /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */
     public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE =

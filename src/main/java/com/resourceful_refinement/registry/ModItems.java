@@ -55,6 +55,8 @@ public class ModItems {
     public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
             () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
+
     // -------------------------------------------------------------------------
     // Gel Items
     // -------------------------------------------------------------------------

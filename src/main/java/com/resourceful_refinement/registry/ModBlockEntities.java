@@ -7,6 +7,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockE
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
+import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryProxyBlockEntity;
@@ -67,6 +68,10 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
             () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RadiatorBlockEntity>> RADIATOR_PIPE_BE = BLOCK_ENTITIES.register("radiator_pipe",
+            () -> BlockEntityType.Builder.of((pos, state) -> new RadiatorBlockEntity(ModBlockEntities.RADIATOR_PIPE_BE.get(), pos, state), ModBlocks.RADIATOR_PIPE.get()).build(null));
+
 
 
     /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */

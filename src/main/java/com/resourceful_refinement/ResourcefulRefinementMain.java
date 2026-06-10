@@ -217,6 +217,11 @@ public class ResourcefulRefinementMain {
             }
             return null;
         });
+
+        // --- Radiator ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.RADIATOR_PIPE_BE.get(),
+                (be, direction) -> direction != null ? be.getFluidHandler(direction) : null
+        );
     }
 
     /**

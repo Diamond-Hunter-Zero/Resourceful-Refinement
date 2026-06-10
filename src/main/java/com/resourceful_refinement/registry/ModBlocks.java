@@ -9,6 +9,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
+import com.resourceful_refinement.content.radiator.RadiatorBlock;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
@@ -101,6 +102,14 @@ public class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<RadiatorBlock> RADIATOR_PIPE = BLOCKS.register("radiator_pipe",
+            () -> new RadiatorBlock(BlockBehaviour.Properties.of()
+                    .strength(1f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
 
     // -------------------------------------------------------------------------
     // Fluid Gel Blocks

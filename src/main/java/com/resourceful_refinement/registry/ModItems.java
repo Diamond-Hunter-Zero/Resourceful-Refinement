@@ -57,6 +57,8 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
 
+    public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
+
     // -------------------------------------------------------------------------
     // Gel Items
     // -------------------------------------------------------------------------

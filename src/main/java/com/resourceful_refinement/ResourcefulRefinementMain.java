@@ -5,6 +5,9 @@ import com.mojang.logging.LogUtils;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
+import com.resourceful_refinement.content.distillery.DistilleryBlock;
+import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
@@ -60,6 +63,7 @@ public class ResourcefulRefinementMain {
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -180,6 +184,39 @@ public class ResourcefulRefinementMain {
 
         // --- Hosegun Item Capability ---
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
+
+        // --- Distillery ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {
+            DistilleryBlockEntity controller = be.getController();
+            if (controller == null) return null;
+
+            // Only top block exposes output from TOP
+            if (side == Direction.UP && be.stackIndex == be.stackSize - 1) {
+                return controller.outputTank;
+            }
+
+            // Only bottom block accepts input from non-front sides
+            if (!be.getBlockState().hasProperty(DistilleryBlock.FACING)) return null;
+
+            Direction facing = controller.getBlockState().getValue(DistilleryBlock.FACING);
+            if ((side != Direction.DOWN && side != Direction.UP && side != facing)
+                    && be.stackIndex == 0) {
+                return controller.inputTank;
+            }
+            return null;
+        });
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {
+            DistilleryBlockEntity controller = be.getController();
+            if (controller == null) return null;
+
+            // Only bottom block accepts input from FRONT
+            if (be.stackIndex == 0 && be.getBlockState().hasProperty(DistilleryBlock.FACING)) {
+                if (side == be.getBlockState().getValue(DistilleryBlock.FACING)) {
+                    return controller.inputInv;
+                }
+            }
+            return null;
+        });
     }
 
     /**
@@ -222,6 +259,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);

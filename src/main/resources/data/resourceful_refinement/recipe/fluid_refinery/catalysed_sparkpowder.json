@@ -4,7 +4,7 @@
   "processing_time": 40,
   "ingredients": [
     {
-      "item": "resourceful_refinement:flux_dust"
+      "item": "resourceful_refinement:shaft_mould"
     },
     {
       "type": "neoforge:single",
@@ -15,6 +15,12 @@
       "type": "neoforge:single",
       "fluid": "resourceful_refinement:molten_ochrum",
       "amount": 15
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "resourceful_refinement:flux_dust",
+      "count": 3
     }
   ],
   "results": [

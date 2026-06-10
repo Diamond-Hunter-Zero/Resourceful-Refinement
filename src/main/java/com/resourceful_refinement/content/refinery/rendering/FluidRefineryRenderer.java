@@ -8,6 +8,7 @@ import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
 import com.resourceful_refinement.registry.ModPartialModels;
+import com.resourceful_refinement.utilities.FluidBoxRendering;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringRenderer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
@@ -51,6 +52,9 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
             InventoryMenu.BLOCK_ATLAS,
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_0")
     );
+
+    private static final float FLUID_STACK_START_Y = 0.9375f;
+    private static final float FLUID_STACK_RADII = 1.35f;
 
     private final RefineryBaseModel base;
     private final RefineryMiddleModel middle;
@@ -179,26 +183,9 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
     }
 
     private void renderFluids(RefineryAccessPortBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light) {
-        int height = be.getStructureHeight();
-        float totalHeight = height - 1.0625f;
-        float tankHeightLimit = totalHeight / 3f;
-        float startY = 0.9375f;
+        float height = be.getStructureHeight()- 1.0625f;
 
-        float currentY = startY;
-
-        // Render Output Tank (Bottom)
-        currentY += renderFluidStack(be.outputTank.getFluid(), be.outputTank.getCapacity(), ms, buffer, light, currentY,
-                tankHeightLimit);
-
-        // Render Input A (Middle)
-        currentY += renderFluidStack(be.inputTankA.getFluid(), be.inputTankA.getCapacity(), ms, buffer, light,
-                currentY,
-                tankHeightLimit);
-
-        // Render Input B (Top)
-        currentY += renderFluidStack(be.inputTankB.getFluid(), be.inputTankB.getCapacity(), ms, buffer, light,
-                currentY,
-                tankHeightLimit);
+        FluidBoxRendering.renderFluidsForTanks(ms, buffer, light, height, FLUID_STACK_START_Y, FLUID_STACK_RADII, false, be.outputTank, be.inputTankA, be.inputTankB);
     }
 
     /**
@@ -210,7 +197,7 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
      * bleeding.
      * Default (1.0) stretches the texture once across the face.
      */
-    private float renderFluidStack(FluidStack stack, int capacity, PoseStack ms, MultiBufferSource buffer, int light,
+    /*private float renderFluidStack(FluidStack stack, int capacity, PoseStack ms, MultiBufferSource buffer, int light,
             float yStart, float maxHeight) {
         if (stack.isEmpty() || stack.getAmount() <= 0)
             return 0;
@@ -293,6 +280,16 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
         vertex(consumer, pose, x2, y2, z2, r, g, b, a, u0 + uw, v0, 1, 0, 0, light);
         vertex(consumer, pose, x2, y1, z2, r, g, b, a, u0 + uw, v0 + vw, 1, 0, 0, light);
     }
+
+        private void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float z, int r, int g,
+            int b, int a, float u, float v, float nx, float ny, float nz, int light) {
+        consumer.addVertex(pose, x, y, z)
+                .setColor(r, g, b, a)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
+    }*/
 
     private void renderBlazeFires(VertexConsumer vc, PoseStack ms, int light, int heatLevel)
     {
@@ -379,16 +376,6 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
                 .setNormal(ms.last(), (float) norm.x, (float)norm.y, (float)norm.z);
 
         ms.popPose();
-    }
-
-    private void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float z, int r, int g,
-            int b, int a, float u, float v, float nx, float ny, float nz, int light) {
-        consumer.addVertex(pose, x, y, z)
-                .setColor(r, g, b, a)
-                .setUv(u, v)
-                .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(light)
-                .setNormal(pose, nx, ny, nz);
     }
 
     @Override

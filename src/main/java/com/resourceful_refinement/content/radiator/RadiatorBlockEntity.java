@@ -74,7 +74,9 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         int targetHeatState = (be.heatEnergy * 3) / MAX_HEAT_ENERGY;
 
         if (currentHeatState != targetHeatState) {
-            level.setBlock(pos, state.setValue(RadiatorBlock.HEAT_STATE, targetHeatState), 3);
+            // Use flag 2 (Block.UPDATE_CLIENTS) instead of 3 (which would trigger neighbor updates
+            // and wipe the pressure of adjacent pipe networks, disrupting fluid flow rendering)
+            level.setBlock(pos, state.setValue(RadiatorBlock.HEAT_STATE, targetHeatState), 2);
         }
     }
 
@@ -152,7 +154,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             visited.add(current);
 
             FluidTransportBehaviour pipe = FluidPropagator.getPipe(level, current);
-            if (pipe == null) break; // Reached a tank/machine — stop propagating
+            if (pipe == null) continue; // Reached a tank/machine — skip, don't break the whole loop!
 
             // The direction on this pipe that faces back toward the radiator
             // (or the previous pipe in the chain). We tell the pipe that fluid
@@ -167,24 +169,16 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
                     break;
                 }
             }
-            if (inboundFace == null) break;
+            if (inboundFace == null) continue;
 
             // Add a small inbound pressure pulse – enough for one tick of flow animation
             pipe.addPressure(inboundFace, true, 1f);
 
-            // Continue down straight axis-aligned pipes
-            if (pipeState.hasProperty(AxisPipeBlock.AXIS)
-                    && pipeState.getValue(AxisPipeBlock.AXIS) == inboundFace.getAxis()) {
-                Direction ahead = inboundFace.getOpposite();
-                queue.add(current.relative(ahead));
-            } else {
-                // For branching pipes, continue down all open directions
-                for (Direction d : Direction.values()) {
-                    if (d == inboundFace) continue;
-                    var prop = net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(d);
-                    if (prop != null && pipeState.hasProperty(prop) && pipeState.getValue(prop)) {
-                        queue.add(current.relative(d));
-                    }
+            // Continue down all open directions
+            for (Direction d : Direction.values()) {
+                if (d == inboundFace) continue;
+                if (pipe.canHaveFlowToward(pipeState, d)) {
+                    queue.add(current.relative(d));
                 }
             }
         }
@@ -236,28 +230,13 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
                     continue; // Destination reached! Stop scanning deeper down this specific branch.
                 }
 
-                // 2. If it's not a tank/machine, check if it's a passive Create pipe block we can traverse
+                // 2. If it's not a tank/machine, check if it's a passive Create pipe block we can traverse (such as standard pipes, encased pipes, pumps, etc.)
                 BlockState state = level.getBlockState(pos);
-
-                // Handle straight axis-aligned pipes (e.g., Encased Pipes, other Radiators)
-                if (state.hasProperty(AxisPipeBlock.AXIS)) {
-                    if (state.getValue(AxisPipeBlock.AXIS) == cameFrom.getAxis()) {
-                        Direction straightAhead = cameFrom.getOpposite();
-                        queue.add(new PathNode(pos.relative(straightAhead), straightAhead.getOpposite()));
-                    }
-                    continue;
-                }
-
-                // Handle multi-directional branching Create Fluid Pipes
-                var cameFromProp = net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(cameFrom);
-                if (cameFromProp != null && state.hasProperty(cameFromProp) && state.getValue(cameFromProp)) {
-                    // This pipe accepts a connection from where we just came.
-                    // Now find and queue every other open branch direction on this pipe junction.
+                FluidTransportBehaviour pipe = FluidPropagator.getPipe(level, pos);
+                if (pipe != null && pipe.canHaveFlowToward(state, cameFrom)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == cameFrom) continue;
-
-                        var branchProp = net.minecraft.world.level.block.PipeBlock.PROPERTY_BY_DIRECTION.get(dir);
-                        if (branchProp != null && state.hasProperty(branchProp) && state.getValue(branchProp)) {
+                        if (pipe.canHaveFlowToward(state, dir)) {
                             queue.add(new PathNode(pos.relative(dir), dir.getOpposite()));
                         }
                     }

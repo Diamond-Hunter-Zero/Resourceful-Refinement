@@ -100,15 +100,9 @@ public class RadiatorBlock extends AxisPipeBlock implements EntityBlock {
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource r) {
         FluidPropagator.propagateChangedPipe(level, pos, state);
-        // Also re-propagate every adjacent pipe so they pick up the correct
-        // FlowSource for the radiator (OtherPipe rather than FluidHandler).
-        for (Direction dir : Direction.values()) {
-            BlockPos neighbourPos = pos.relative(dir);
-            FluidTransportBehaviour pipe = FluidPropagator.getPipe(level, neighbourPos);
-            if (pipe != null) {
-                pipe.wipePressure();
-            }
-        }
+        // Note: propagateChangedPipe already calls wipePressure() on every pipe it visits.
+        // We intentionally do NOT additionally wipe adjacent pipes here: those on the
+        // output side live in a separate network and would lose their flow animation.
     }
 
     @Override

@@ -15,6 +15,9 @@ import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModBlocks;
+import com.simibubi.create.api.boiler.BoilerHeater;
+import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -75,6 +78,15 @@ public class ResourcefulRefinementMain {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(ModStressValues::register);
+        event.enqueueWork(() -> BoilerHeater.REGISTRY.register(
+                ModBlocks.RADIATOR_PIPE.get(),
+                (level, pos, state) -> {
+                    if (level.getBlockEntity(pos) instanceof RadiatorBlockEntity radiator) {
+                        return radiator.getHeat(level, pos, state);
+                    }
+                    return BoilerHeater.NO_HEAT;
+                }
+        ));
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

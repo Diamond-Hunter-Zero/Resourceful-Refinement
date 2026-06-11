@@ -5,6 +5,7 @@ import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.foundation.block.WrenchableDirectionalBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,15 +38,19 @@ import java.util.List;
 public class RadiatorBlock extends WrenchableDirectionalBlock implements EntityBlock, SimpleWaterloggedBlock {
 
     public static final MapCodec<RadiatorBlock> CODEC = simpleCodec(RadiatorBlock::new);
+    public static final IntegerProperty HEAT_STATE = IntegerProperty.create("heat_state", 0, 5);
 
-    public static final IntegerProperty HEAT_STATE = IntegerProperty.create("heat_state", 0, 3);
+    private static final VoxelShape Z_AXIS_AABB = Block.box(2, 2, 0, 14, 14, 16);
+    private static final VoxelShape X_AXIS_AABB = Block.box(0, 2, 2, 16, 14, 14);
+    private static final VoxelShape Y_AXIS_AABB = Block.box(2, 0, 2, 14, 16, 14);
 
     public RadiatorBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.UP)
-                .setValue(HEAT_STATE, 0)
-                .setValue(BlockStateProperties.WATERLOGGED, false));
+                .setValue(HEAT_STATE, 2)
+                .setValue(BlockStateProperties.WATERLOGGED, false)
+                .setValue(BlazeBurnerBlock.HEAT_LEVEL, BlazeBurnerBlock.HeatLevel.NONE));
     }
 
     @Override
@@ -53,6 +58,7 @@ public class RadiatorBlock extends WrenchableDirectionalBlock implements EntityB
         builder.add(BlockStateProperties.WATERLOGGED);
         super.createBlockStateDefinition(builder);
         builder.add(HEAT_STATE);
+        builder.add(BlazeBurnerBlock.HEAT_LEVEL);
     }
 
     @Override
@@ -81,7 +87,14 @@ public class RadiatorBlock extends WrenchableDirectionalBlock implements EntityB
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return AllShapes.TEN_VOXEL_POLE.get(state.getValue(FACING).getAxis());
+        Direction.Axis radiatorAxis = state.getValue(FACING).getAxis();
+
+        if (radiatorAxis == Direction.Axis.X)
+            return X_AXIS_AABB;
+        else if (radiatorAxis == Direction.Axis.Z)
+            return Z_AXIS_AABB;
+
+        return Y_AXIS_AABB;
     }
 
     @Override

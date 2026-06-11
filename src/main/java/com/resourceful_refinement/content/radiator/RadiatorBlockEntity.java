@@ -3,10 +3,12 @@ package com.resourceful_refinement.content.radiator;
 import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
+import com.simibubi.create.api.boiler.BoilerHeater;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import com.simibubi.create.content.fluids.PipeConnection;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -23,7 +25,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -38,12 +39,14 @@ import java.util.List;
 
 import static com.resourceful_refinement.content.radiator.RadiatorBlock.HEAT_STATE;
 
-public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
+public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, BoilerHeater {
 
     private static final float FLUID_CONSUMPTION = 0.25f;
     public static final int TANK_CAPACITY = 25;
     public static final int HEAT_GROWTH = 5;
     public static final int HEAT_DECAY = 8;
+
+    public static final int HEAT_STATE_OFFSET = 3;
 
     private int heatLevel = 0; // Visual/internal heat level (-1000 to 1000)
 
@@ -133,16 +136,14 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         return (int) Math.signum(delta) * Math.clamp(Math.abs(delta), 0, HEAT_GROWTH);
     }
 
-    public static int getHeatBlockState(ExtendedHeatCondition targetState)
-    {
-        if (targetState == ExtendedHeatCondition.CHILLED)
-            return 2;
-        else if (targetState == ExtendedHeatCondition.COOLED)
-            return 1;
-        else if (targetState == ExtendedHeatCondition.HEATED || targetState == ExtendedHeatCondition.SUPERHEATED)
-            return 3;
-
-        return 0;
+    // Maps ExtendedHeatCondition to the BlazeBurner HeatLevel used by the basin
+    public static BlazeBurnerBlock.HeatLevel getBlazeHeatLevelForCondition(ExtendedHeatCondition condition) {
+        return switch (condition) {
+            case PASSIVE     -> BlazeBurnerBlock.HeatLevel.SMOULDERING;
+            case HEATED      -> BlazeBurnerBlock.HeatLevel.KINDLED;
+            case SUPERHEATED -> BlazeBurnerBlock.HeatLevel.SEETHING;
+            default          -> BlazeBurnerBlock.HeatLevel.NONE;
+        };
     }
 
 
@@ -176,12 +177,18 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             be.decayHeat(level);
         }
 
-        // Map to block state
-        int currentHeatState = state.getValue(HEAT_STATE);
-        int targetHeatState = getHeatBlockState(getHeatConditionFromEnergy(be.heatLevel));
-        if (currentHeatState != targetHeatState) {
+        // Map to block state (HEAT_STATE for visuals, HEAT_LEVEL for basin/boiler compat)
+        int currentHeatState = state.getValue(HEAT_STATE) + HEAT_STATE_OFFSET;
+        ExtendedHeatCondition currentHeatCondition = getHeatConditionFromEnergy(be.heatLevel);
+        int targetHeatState = currentHeatCondition.getBlazeHeatEnergy() + HEAT_STATE_OFFSET;
+        BlazeBurnerBlock.HeatLevel targetBlazeLevel = getBlazeHeatLevelForCondition(currentHeatCondition);
+        BlazeBurnerBlock.HeatLevel currentBlazeLevel = state.getValue(BlazeBurnerBlock.HEAT_LEVEL);
+
+        if (currentHeatState != targetHeatState || currentBlazeLevel != targetBlazeLevel) {
             // Use flag 2 (Block.UPDATE_CLIENTS) to avoid neighbor pipe updates wiping pressure
-            level.setBlock(pos, state.setValue(HEAT_STATE, targetHeatState), 2);
+            level.setBlock(pos, state
+                    .setValue(HEAT_STATE, targetHeatState)
+                    .setValue(BlazeBurnerBlock.HEAT_LEVEL, targetBlazeLevel), 2);
         }
 
         // Active output pushing (for direct connections to tanks/machines without pipes)
@@ -229,7 +236,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     private static void freezeTick(BlockState state, Level level, BlockPos pos, RandomSource random)
     {
         if (!level.isClientSide()) {
-            if (state.getValue(HEAT_STATE) != 2)
+            if (state.getValue(HEAT_STATE) != ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy() + HEAT_STATE_OFFSET)
                 return;
 
             if (random.nextFloat() > 0.0075f)
@@ -265,6 +272,19 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
                     level.setBlockAndUpdate(fluidToFreeze.pos, Blocks.DEEPSLATE.defaultBlockState());
             }
         }
+    }
+
+    // Create BoilerHeater interface method
+    // Returns heat level for fluid-tank boilers (0 = passive, 1 = heated, 2 = superheated, -1 = none)
+    @Override
+    public float getHeat(Level level, BlockPos blockPos, BlockState blockState) {
+        ExtendedHeatCondition condition = getHeatConditionFromEnergy(heatLevel);
+        return switch (condition) {
+            case PASSIVE     -> BoilerHeater.PASSIVE_HEAT;  // 0
+            case HEATED      -> 1;
+            case SUPERHEATED -> 2;
+            default          -> BoilerHeater.NO_HEAT;       // -1
+        };
     }
 
     private record FreezeableFluidPos(BlockPos pos, int type) {}

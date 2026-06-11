@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resourceful Refinement — Recipe Tree Viewer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #12151a;
+      --panel: #1b2028;
+      --border: #2d3642;
+      --text: #e8edf2;
+      --muted: #93a1b3;
+      --accent: #5b9bd5;
+      --external: #c9a227;
+      --provided: #4ec9b0;
+      --shared: #d4a574;
+      --world: #6fbf73;
+      --cycle: #d16b6b;
+      --byproduct: #b084f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #1a2230, var(--bg));
+    }
+    h1 { margin: 0 0 .35rem; font-size: 1.35rem; }
+    header p { margin: 0; color: var(--muted); font-size: .95rem; }
+    main { display: grid; grid-template-columns: 320px 1fr; gap: 1rem; padding: 1rem 1.5rem 2rem; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .35rem; }
+    input, select, button {
+      width: 100%;
+      padding: .55rem .65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f1318;
+      color: var(--text);
+      font: inherit;
+    }
+    button {
+      margin-top: .75rem;
+      background: var(--accent);
+      border-color: #4a86b8;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.secondary {
+      margin-top: .45rem;
+      background: #243040;
+      border-color: var(--border);
+      font-weight: 500;
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+    }
+    .btn-row button { margin-top: 0; }
+    .status-banner {
+      margin-top: .65rem;
+      padding: .55rem .65rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      border: 1px solid var(--border);
+      background: #151a21;
+    }
+    .status-banner.ok { border-color: #3d7a55; color: #9fd4ad; }
+    .status-banner.warn { border-color: #9a7b3a; color: #e8c878; }
+    .status-banner.err { border-color: #8a4545; color: #e8a0a0; }
+    .compare-panel {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #9a7b3a;
+      border-radius: 10px;
+      background: #1a1812;
+    }
+    .compare-panel h3 {
+      margin: 0 0 .65rem;
+      font-size: .95rem;
+      color: #e8c878;
+    }
+    .compare-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: .88rem;
+    }
+    .compare-list li { margin: .25rem 0; }
+    .compare-list .added { color: #9fd4ad; }
+    .compare-list .removed { color: #e8a0a0; }
+    .compare-list .changed { color: #e8c878; }
+    .compare-list .same { color: var(--muted); }
+    label.inline { display: flex; align-items: center; gap: .45rem; cursor: pointer; }
+    label.inline input[type="checkbox"] { width: auto; }
+    .provided-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .4rem;
+      margin-bottom: .4rem;
+    }
+    .provided-row button {
+      width: auto;
+      margin-top: 0;
+      padding: .55rem .75rem;
+    }
+    .field { margin-bottom: .75rem; }
+    .stats { font-size: .85rem; color: var(--muted); margin-top: 1rem; }
+    .output { min-height: 60vh; overflow: auto; }
+    .path-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #151a21;
+    }
+    .path-card h2 { margin: 0 0 .75rem; font-size: 1rem; color: var(--accent); }
+    .tree ul { list-style: none; margin: .2rem 0 .2rem 1rem; padding: 0; }
+    .tree li { margin: .35rem 0; }
+    .node-recipe { border-left: 3px solid var(--accent); padding-left: .65rem; }
+    .node-meta { color: var(--muted); font-size: .88rem; }
+    .node-external { color: var(--external); }
+    .node-provided { color: var(--provided); }
+    .node-shared { color: var(--shared); }
+    .node-world { color: var(--world); }
+    .node-cycle { color: var(--cycle); }
+    .byproduct { color: var(--byproduct); font-size: .88rem; margin-left: .5rem; }
+    .recipe-select {
+      width: 100%;
+      max-width: 520px;
+      margin-top: .4rem;
+      font-size: .88rem;
+    }
+    .recipe-select-label {
+      display: block;
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .35rem;
+    }
+    .summary {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .summary h3 {
+      margin: 0 0 .65rem;
+      font-size: .95rem;
+      color: var(--accent);
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .summary-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .summary-list li {
+      margin: .3rem 0;
+      font-size: .9rem;
+    }
+    .summary-list li span {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+    .empty { color: var(--muted); padding: 2rem 0; text-align: center; }
+    @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Recipe Tree Viewer</h1>
+    <p>Mod processing chains only — fracking, refinery, sieve, forge mould, coating, Create mixing/crafting from this mod's datapack.</p>
+  </header>
+  <main>
+    <section class="panel">
+      <div class="field">
+        <label for="target">Target item / fluid ID</label>
+        <input id="target" value="resourceful_refinement:purified_iron" />
+      </div>
+      <div class="field">
+        <label for="amount">Amount (items or mB)</label>
+        <input id="amount" type="number" min="0.001" step="any" value="750" />
+      </div>
+      <div class="field">
+        <label for="kind">Kind (optional)</label>
+        <select id="kind">
+          <option value="">Auto-detect</option>
+          <option value="fluid">Fluid</option>
+          <option value="item">Item</option>
+          <option value="coating">Coating</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Provided inputs (optional, unlimited supply)</label>
+        <div id="provided-list"></div>
+        <button type="button" class="secondary" id="add-provided">+ Add provided input</button>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="simplify" /> Simplify tree (share duplicate production)</label>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="build">Build tree</button>
+        <button type="button" class="secondary" id="refresh-recipes">Refresh recipes</button>
+      </div>
+      <div class="field">
+        <label for="config-name">Config name (optional, for export)</label>
+        <input id="config-name" type="text" placeholder="e.g. Purified iron 750 mB" />
+      </div>
+      <div class="field">
+        <label>Session config</label>
+        <div class="btn-row">
+          <button type="button" class="secondary" id="export-config">Export config</button>
+          <button type="button" class="secondary" id="import-config">Import config</button>
+        </div>
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
+      </div>
+      <div class="status-banner" id="status-banner" hidden></div>
+      <div class="stats" id="stats"></div>
+    </section>
+    <section class="panel output" id="output">
+      <div class="empty">Enter a target and click Build tree.</div>
+    </section>
+  </main>
+  <script>
+    const CONFIG_VERSION = 1;
+    let recipeSelections = {};
+    let treeBuilt = false;
+    let lastTreeData = null;
+
+    function fmtResource(r) {
+      const short = r.id.split(':').pop().replaceAll('_', ' ');
+      if (r.kind === 'fluid') return `${r.amount} mB ${short}`;
+      if (r.kind === 'coating') return `Coating ${r.id}`;
+      return `${r.amount}x ${short}`;
+    }
+
+    function attachRecipeSelect(li, node) {
+      if (!node.alternatives?.length || node.alternatives.length <= 1 || !node.selection_path) return;
+      const label = document.createElement('span');
+      label.className = 'recipe-select-label';
+      label.textContent = 'Production recipe';
+      li.appendChild(label);
+      const select = document.createElement('select');
+      select.className = 'recipe-select';
+      for (const alt of node.alternatives) {
+        const opt = document.createElement('option');
+        opt.value = alt.recipe_id;
+        opt.textContent = `${alt.recipe_id} · ${alt.machine} · ${alt.proportional_seconds}s · scale ${(alt.scale_factor * 100).toFixed(1)}%`;
+        if (alt.recipe_id === node.selected_recipe_id) opt.selected = true;
+        select.appendChild(opt);
+      }
+      select.addEventListener('change', () => {
+        const path = node.selection_path;
+        const prefix = `${path}.`;
+        for (const key of Object.keys(recipeSelections)) {
+          if (key.startsWith(prefix)) delete recipeSelections[key];
+        }
+        recipeSelections[path] = select.value;
+        buildTree({ preserveSelections: true });
+      });
+      li.appendChild(select);
+    }
+
+    function appendRecipeMeta(li, node) {
+      const meta = document.createElement('div');
+      meta.className = 'node-meta';
+      const bits = [
+        node.recipe.machine,
+        node.recipe.id,
+        `scale ${(node.scale_factor * 100).toFixed(2)}% (${node.recipe_yield} base yield)`,
+        `${node.total_duration_seconds}s proportional`,
+      ];
+      if (node.operational_batches) {
+        bits.push(`${node.operational_batches} whole batch(es), ${node.operational_excess} excess primary`);
+      }
+      if (node.recipe.heat_requirement && node.recipe.heat_requirement !== 'none') bits.push(`heat: ${node.recipe.heat_requirement}`);
+      if (node.recipe.casting) bits.push('Casting Depot');
+      meta.textContent = bits.join(' · ');
+      li.appendChild(meta);
+      if (node.note) {
+        const note = document.createElement('div');
+        note.className = 'node-meta';
+        note.textContent = node.note;
+        li.appendChild(note);
+      }
+      for (const bp of node.byproducts || []) {
+        const b = document.createElement('div');
+        b.className = 'byproduct';
+        b.textContent = `Byproduct: ${bp.display}`;
+        li.appendChild(b);
+      }
+    }
+
+    function renderNode(node, sharedNodes) {
+      const li = document.createElement('li');
+      if (node.node_type === 'recipe' && node.recipe) {
+        li.className = 'node-recipe';
+        const title = document.createElement('div');
+        title.innerHTML = `<strong>${fmtResource(node.resource)}</strong>`;
+        li.appendChild(title);
+        attachRecipeSelect(li, node);
+        appendRecipeMeta(li, node);
+      } else if (node.node_type === 'shared_ref') {
+        li.className = 'node-shared';
+        const total = node.shared_total_amount ?? node.resource.amount;
+        li.textContent = `${fmtResource(node.resource)} — shared (${total} total production; ${node.resource.amount} used here)`;
+      } else if (node.node_type === 'external') {
+        li.className = 'node-external';
+        li.textContent = `${fmtResource(node.resource)} — external/raw input`;
+      } else if (node.node_type === 'provided') {
+        li.className = 'node-provided';
+        li.textContent = `${fmtResource(node.resource)} — provided input (unlimited)`;
+      } else if (node.node_type === 'world_source') {
+        li.className = 'node-world';
+        li.textContent = node.note || fmtResource(node.resource);
+      } else if (node.node_type === 'cycle') {
+        li.className = 'node-cycle';
+        li.textContent = `${fmtResource(node.resource)} — cycle stopped`;
+      } else {
+        li.textContent = `${fmtResource(node.resource)} [${node.node_type}]`;
+      }
+
+      if (node.inputs?.length) {
+        const ul = document.createElement('ul');
+        for (const child of node.inputs) ul.appendChild(renderNode(child, sharedNodes));
+        li.appendChild(ul);
+      }
+      return li;
+    }
+
+    function renderSharedNodes(sharedNodes) {
+      const section = document.createElement('section');
+      section.className = 'summary';
+      const heading = document.createElement('h3');
+      heading.textContent = 'Shared production nodes';
+      section.appendChild(heading);
+      for (const [key, node] of Object.entries(sharedNodes)) {
+        const block = document.createElement('div');
+        block.style.marginBottom = '1rem';
+        const title = document.createElement('strong');
+        title.textContent = key;
+        block.appendChild(title);
+        const tree = document.createElement('div');
+        tree.className = 'tree';
+        const ul = document.createElement('ul');
+        const li = document.createElement('li');
+        li.className = 'node-recipe';
+        const head = document.createElement('div');
+        head.innerHTML = `<strong>${fmtResource(node.resource)}</strong>`;
+        li.appendChild(head);
+        attachRecipeSelect(li, node);
+        appendRecipeMeta(li, node);
+        if (node.inputs?.length) {
+          const childUl = document.createElement('ul');
+          for (const child of node.inputs) childUl.appendChild(renderNode(child, sharedNodes));
+          li.appendChild(childUl);
+        }
+        ul.appendChild(li);
+        tree.appendChild(ul);
+        block.appendChild(tree);
+        section.appendChild(block);
+      }
+      return section;
+    }
+
+    function renderSummary(summary) {
+      const section = document.createElement('section');
+      section.className = 'summary';
+
+      const heading = document.createElement('h3');
+      heading.textContent = 'Cumulative overview (scaled)';
+      section.appendChild(heading);
+
+      if (summary.target) {
+        const target = document.createElement('div');
+        target.className = 'node-meta';
+        target.style.marginBottom = '.75rem';
+        target.textContent = `Target: ${fmtResource(summary.target)}`;
+        section.appendChild(target);
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'summary-grid';
+
+      const inputCol = document.createElement('div');
+      const inputTitle = document.createElement('strong');
+      inputTitle.textContent = 'Combined inputs';
+      inputCol.appendChild(inputTitle);
+      const inputList = document.createElement('ul');
+      inputList.className = 'summary-list';
+      if (!summary.inputs?.length) {
+        const li = document.createElement('li');
+        li.textContent = '(none)';
+        inputList.appendChild(li);
+      } else {
+        const labels = { external: 'raw/external', provided: 'provided', world_source: 'world source' };
+        for (const entry of summary.inputs) {
+          const li = document.createElement('li');
+          li.textContent = entry.display;
+          const tag = document.createElement('span');
+          tag.textContent = ` · ${labels[entry.category] || entry.category}`;
+          li.appendChild(tag);
+          inputList.appendChild(li);
+        }
+      }
+      inputCol.appendChild(inputList);
+
+      const outputCol = document.createElement('div');
+      const outputTitle = document.createElement('strong');
+      outputTitle.textContent = 'Combined outputs';
+      outputCol.appendChild(outputTitle);
+      const outputList = document.createElement('ul');
+      outputList.className = 'summary-list';
+      if (!summary.outputs?.length) {
+        const li = document.createElement('li');
+        li.textContent = '(none)';
+        outputList.appendChild(li);
+      } else {
+        for (const entry of summary.outputs) {
+          const li = document.createElement('li');
+          li.textContent = entry.display;
+          const tag = document.createElement('span');
+          tag.textContent = entry.category === 'byproduct' ? ' · byproduct' : ' · batch excess';
+          li.appendChild(tag);
+          outputList.appendChild(li);
+        }
+      }
+      outputCol.appendChild(outputList);
+
+      grid.appendChild(inputCol);
+      grid.appendChild(outputCol);
+      section.appendChild(grid);
+      return section;
+    }
+
+    function addProvidedRow(value = '') {
+      const row = document.createElement('div');
+      row.className = 'provided-row';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'e.g. minecraft:water';
+      input.value = value;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'secondary';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => row.remove());
+      row.appendChild(input);
+      row.appendChild(remove);
+      document.getElementById('provided-list').appendChild(row);
+    }
+
+    function getProvidedInputs() {
+      return [...document.querySelectorAll('#provided-list input')]
+        .map(el => el.value.trim())
+        .filter(Boolean);
+    }
+
+    function setProvidedInputs(ids) {
+      const list = document.getElementById('provided-list');
+      list.innerHTML = '';
+      for (const id of ids || []) addProvidedRow(id);
+    }
+
+    function getViewState() {
+      return {
+        target: document.getElementById('target').value.trim(),
+        amount: parseFloat(document.getElementById('amount').value) || 1,
+        kind: document.getElementById('kind').value,
+        simplify: document.getElementById('simplify').checked,
+        provided_inputs: getProvidedInputs(),
+        recipe_selections: { ...recipeSelections },
+      };
+    }
+
+    function applyViewState(view) {
+      if (!view) return;
+      document.getElementById('target').value = view.target || '';
+      document.getElementById('amount').value = view.amount ?? 1;
+      document.getElementById('kind').value = view.kind || '';
+      document.getElementById('simplify').checked = !!view.simplify;
+      setProvidedInputs(view.provided_inputs || []);
+      recipeSelections = { ...(view.recipe_selections || {}) };
+    }
+
+    function showStatus(message, kind = 'ok') {
+      const banner = document.getElementById('status-banner');
+      banner.hidden = false;
+      banner.className = `status-banner ${kind}`;
+      banner.textContent = message;
+    }
+
+    function hideStatus() {
+      const banner = document.getElementById('status-banner');
+      banner.hidden = true;
+      banner.textContent = '';
+    }
+
+    function summaryEntryKey(entry) {
+      return `${entry.category}:${entry.kind}:${entry.id}`;
+    }
+
+    function indexSummaryEntries(entries) {
+      const map = new Map();
+      for (const entry of entries || []) {
+        map.set(summaryEntryKey(entry), entry);
+      }
+      return map;
+    }
+
+    function diffSummarySections(label, oldEntries, newEntries) {
+      const oldMap = indexSummaryEntries(oldEntries);
+      const newMap = indexSummaryEntries(newEntries);
+      const lines = [];
+      for (const [key, entry] of newMap) {
+        const prev = oldMap.get(key);
+        if (!prev) {
+          lines.push({ kind: 'added', text: `${label}: ${entry.display} (new)` });
+        } else if (Math.abs(prev.amount - entry.amount) > 0.001) {
+          lines.push({
+            kind: 'changed',
+            text: `${label}: ${entry.display} was ${prev.amount}, now ${entry.amount}`,
+          });
+        }
+      }
+      for (const [key, entry] of oldMap) {
+        if (!newMap.has(key)) {
+          lines.push({ kind: 'removed', text: `${label}: ${entry.display} (removed)` });
+        }
+      }
+      return lines;
+    }
+
+    function diffSelections(oldSelections, newSelections) {
+      const lines = [];
+      const oldKeys = new Set(Object.keys(oldSelections || {}));
+      const newKeys = new Set(Object.keys(newSelections || {}));
+      for (const path of newKeys) {
+        const oldVal = oldSelections?.[path];
+        const newVal = newSelections[path];
+        if (oldVal === undefined) {
+          lines.push({ kind: 'added', text: `Selection ${path} -> ${newVal} (new)` });
+        } else if (oldVal !== newVal) {
+          lines.push({ kind: 'changed', text: `Selection ${path}: ${oldVal} -> ${newVal}` });
+        }
+      }
+      for (const path of oldKeys) {
+        if (!newKeys.has(path)) {
+          lines.push({ kind: 'removed', text: `Selection ${path}: ${oldSelections[path]} (removed)` });
+        }
+      }
+      return lines;
+    }
+
+    function renderComparison(snapshot, currentData, importedView) {
+      const panel = document.createElement('section');
+      panel.className = 'compare-panel';
+      const heading = document.createElement('h3');
+      heading.textContent = 'Changes since exported config';
+      panel.appendChild(heading);
+
+      const list = document.createElement('ul');
+      list.className = 'compare-list';
+
+      const oldStats = snapshot.index_stats || {};
+      const newStats = currentData.index_stats || {};
+      if (oldStats.total_recipes !== undefined && newStats.total_recipes !== undefined
+          && oldStats.total_recipes !== newStats.total_recipes) {
+        const li = document.createElement('li');
+        li.className = 'changed';
+        li.textContent = `Recipe index: ${oldStats.total_recipes} -> ${newStats.total_recipes} recipes`;
+        list.appendChild(li);
+      }
+
+      const oldDuration = snapshot.total_duration_seconds;
+      const newDuration = currentData.tree?.total_duration_seconds;
+      if (oldDuration !== undefined && newDuration !== undefined
+          && Math.abs(oldDuration - newDuration) > 0.001) {
+        const li = document.createElement('li');
+        li.className = 'changed';
+        li.textContent = `Total proportional time: ${oldDuration}s -> ${newDuration}s`;
+        list.appendChild(li);
+      }
+
+      for (const line of diffSummarySections('Input', snapshot.summary?.inputs, currentData.summary?.inputs)) {
+        const li = document.createElement('li');
+        li.className = line.kind;
+        li.textContent = line.text;
+        list.appendChild(li);
+      }
+      for (const line of diffSummarySections('Output', snapshot.summary?.outputs, currentData.summary?.outputs)) {
+        const li = document.createElement('li');
+        li.className = line.kind;
+        li.textContent = line.text;
+        list.appendChild(li);
+      }
+      for (const line of diffSelections(snapshot.recipe_selections, currentData.recipe_selections)) {
+        const li = document.createElement('li');
+        li.className = line.kind;
+        li.textContent = line.text;
+        list.appendChild(li);
+      }
+
+      if (importedView) {
+        const currentView = getViewState();
+        const viewFields = [
+          ['target', 'Target'],
+          ['amount', 'Amount'],
+          ['kind', 'Kind'],
+          ['simplify', 'Simplify'],
+        ];
+        for (const [key, label] of viewFields) {
+          const oldVal = importedView[key];
+          const newVal = currentView[key];
+          if (String(oldVal ?? '') !== String(newVal ?? '')) {
+            const li = document.createElement('li');
+            li.className = 'changed';
+            li.textContent = `${label}: ${oldVal ?? '(empty)'} -> ${newVal ?? '(empty)'}`;
+            list.appendChild(li);
+          }
+        }
+      }
+
+      if (!list.children.length) {
+        const li = document.createElement('li');
+        li.className = 'same';
+        li.textContent = 'No differences detected — tree matches the exported snapshot.';
+        list.appendChild(li);
+      }
+
+      panel.appendChild(list);
+      return panel;
+    }
+
+    function buildExportConfig() {
+      const view = getViewState();
+      const nameInput = document.getElementById('config-name').value.trim();
+      const config = {
+        version: CONFIG_VERSION,
+        name: nameInput || `${view.target} x ${view.amount}`,
+        exported_at: new Date().toISOString(),
+        view,
+      };
+      if (lastTreeData?.tree) {
+        config.snapshot = {
+          index_stats: lastTreeData.index_stats || {},
+          total_duration_seconds: lastTreeData.tree.total_duration_seconds,
+          summary: lastTreeData.summary || null,
+          recipe_selections: lastTreeData.recipe_selections || {},
+        };
+      }
+      return config;
+    }
+
+    function exportConfig() {
+      const config = buildExportConfig();
+      const slug = (config.name || 'recipe-tree-config')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'recipe-tree-config';
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${slug}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showStatus(`Exported config: ${link.download}`);
+    }
+
+    async function importConfigFile(file) {
+      const text = await file.text();
+      let config;
+      try {
+        config = JSON.parse(text);
+      } catch {
+        showStatus('Import failed: invalid JSON file.', 'err');
+        return;
+      }
+      if (!config.view) {
+        showStatus('Import failed: config must include a "view" object.', 'err');
+        return;
+      }
+      if (config.name) {
+        document.getElementById('config-name').value = config.name;
+      }
+      applyViewState(config.view);
+      await buildTree({
+        preserveSelections: true,
+        compareSnapshot: config.snapshot || null,
+        importedView: config.view,
+      });
+      showStatus(`Imported config${config.name ? `: ${config.name}` : ''}${config.exported_at ? ` (exported ${new Date(config.exported_at).toLocaleString()})` : ''}`);
+    }
+
+    async function refreshRecipes() {
+      hideStatus();
+      try {
+        const res = await fetch('/api/reload', { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        document.getElementById('stats').textContent =
+          `${data.stats.total_recipes} recipes indexed · ${data.stats.fluid_ids} fluids · ${data.stats.item_ids} items`;
+        if (treeBuilt) {
+          await buildTree({ preserveSelections: true });
+          showStatus('Recipes reloaded and tree rebuilt.');
+        } else {
+          showStatus('Recipes reloaded from disk.');
+        }
+      } catch (err) {
+        showStatus(`Refresh failed: ${err.message}`, 'err');
+      }
+    }
+
+    async function loadStats() {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      document.getElementById('stats').textContent =
+        `${data.stats.total_recipes} recipes indexed · ${data.stats.fluid_ids} fluids · ${data.stats.item_ids} items`;
+    }
+
+    async function buildTree(options = {}) {
+      const preserveSelections = options.preserveSelections === true;
+      const compareSnapshot = options.compareSnapshot || null;
+      const importedView = options.importedView || null;
+      if (!preserveSelections) {
+        recipeSelections = {};
+      }
+
+      const target = document.getElementById('target').value.trim();
+      if (!target) {
+        showStatus('Enter a target item or fluid ID.', 'warn');
+        return;
+      }
+      const amount = document.getElementById('amount').value;
+      const kind = document.getElementById('kind').value;
+      const simplify = document.getElementById('simplify').checked;
+      const params = new URLSearchParams({ target, amount });
+      if (kind) params.set('kind', kind);
+      if (simplify) params.set('simplify', '1');
+      for (const id of getProvidedInputs()) params.append('provided', id);
+      for (const [path, recipeId] of Object.entries(recipeSelections)) {
+        if (!simplify && path.startsWith('shared/')) continue;
+        if (simplify && path.startsWith('root.c') && !path.startsWith('shared/')) continue;
+        params.append('sel', `${path}:${recipeId}`);
+      }
+
+      const output = document.getElementById('output');
+      output.innerHTML = '<div class="empty">Building…</div>';
+
+      try {
+        const res = await fetch('/api/tree?' + params.toString());
+        const data = await res.json();
+
+        if (!data.tree && !data.paths?.length) {
+          treeBuilt = false;
+          lastTreeData = null;
+          output.innerHTML = `<div class="empty">${data.message || 'No production paths found.'}</div>`;
+          return;
+        }
+
+        recipeSelections = { ...(data.recipe_selections || {}), ...recipeSelections };
+        lastTreeData = data;
+        treeBuilt = true;
+
+        const tree = data.tree || data.paths[0];
+        const sharedNodes = data.shared_nodes || {};
+        output.innerHTML = '';
+        if (compareSnapshot) {
+          output.appendChild(renderComparison(compareSnapshot, data, importedView));
+        }
+        if (data.provided_inputs?.length) {
+          const banner = document.createElement('div');
+          banner.className = 'node-meta';
+          banner.style.marginBottom = '1rem';
+          banner.textContent = `Provided inputs: ${data.provided_inputs.join(', ')}`;
+          output.appendChild(banner);
+        }
+
+        const card = document.createElement('article');
+        card.className = 'path-card';
+        const h = document.createElement('h2');
+        h.textContent = `Recipe tree · ${tree.total_duration_seconds}s total proportional time`;
+        card.appendChild(h);
+        const treeEl = document.createElement('div');
+        treeEl.className = 'tree';
+        const ul = document.createElement('ul');
+        ul.appendChild(renderNode(tree, sharedNodes));
+        treeEl.appendChild(ul);
+        card.appendChild(treeEl);
+        if (Object.keys(sharedNodes).length) {
+          card.appendChild(renderSharedNodes(sharedNodes));
+        }
+        if (data.summary) {
+          card.appendChild(renderSummary(data.summary));
+        }
+        output.appendChild(card);
+      } catch (err) {
+        treeBuilt = false;
+        lastTreeData = null;
+        output.innerHTML = `<div class="empty">Build failed: ${err.message}</div>`;
+        showStatus(`Build failed: ${err.message}`, 'err');
+      }
+    }
+
+    document.getElementById('build').addEventListener('click', () => {
+      hideStatus();
+      buildTree();
+    });
+    document.getElementById('refresh-recipes').addEventListener('click', refreshRecipes);
+    document.getElementById('export-config').addEventListener('click', exportConfig);
+    document.getElementById('import-config').addEventListener('click', () => {
+      document.getElementById('import-file').click();
+    });
+    document.getElementById('import-file').addEventListener('change', (event) => {
+      const file = event.target.files?.[0];
+      if (file) importConfigFile(file);
+      event.target.value = '';
+    });
+    document.getElementById('simplify').addEventListener('change', () => {
+      recipeSelections = {};
+      buildTree({ preserveSelections: true });
+    });
+    document.getElementById('add-provided').addEventListener('click', () => addProvidedRow());
+    loadStats().catch(() => {
+      document.getElementById('stats').textContent = 'Run server.py to enable live recipe loading.';
+    });
+  </script>
+</body>
+</html>

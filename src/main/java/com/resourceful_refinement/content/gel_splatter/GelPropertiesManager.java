@@ -17,6 +17,7 @@ public class GelPropertiesManager {
 
     private static final Map<Fluid, GelType> FLUID_TO_GEL = new HashMap<>();
     public static final int GEL_AMMO_COST = 5;
+    public static final int MOLTEN_GEL_AMMO_COST = 20;
     public static final int POTION_AMMO_COST = 125;
 
     static {
@@ -85,6 +86,8 @@ public class GelPropertiesManager {
     {
         if (getGelType(fluid) == GelType.POTION)
             return POTION_AMMO_COST;
+        else if (getGelType(fluid) == GelType.MOLTEN)
+            return MOLTEN_GEL_AMMO_COST;
         return GEL_AMMO_COST;
     }
 

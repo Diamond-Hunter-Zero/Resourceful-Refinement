@@ -67,7 +67,7 @@ public class FrackingPumpRecipeCategory implements IRecipeCategory<FrackingPumpR
         if (recipe.requiresGeyserFluid())
         {
             builder.addSlot(RecipeIngredientRole.INPUT, this.background.getWidth() / 2 - 20, this.background.getHeight() - 19).addItemStack(recipe.getSourceBlock().asItem().getDefaultInstance());
-            builder.addSlot(RecipeIngredientRole.INPUT, this.background.getWidth() / 2 + 4, this.background.getHeight() - 19).addFluidStack(recipe.getSourceFluid());
+            builder.addSlot(RecipeIngredientRole.INPUT, this.background.getWidth() / 2 + 6, this.background.getHeight() - 19).addFluidStack(recipe.getSourceFluid());
         }
         else
             builder.addSlot(RecipeIngredientRole.INPUT, this.background.getWidth() / 2 - 8, this.background.getHeight() - 19).addItemStack(recipe.getSourceBlock().asItem().getDefaultInstance());
@@ -85,7 +85,7 @@ public class FrackingPumpRecipeCategory implements IRecipeCategory<FrackingPumpR
         String timeText = recipe.getProcessingDuration() + "t";
         int timeWidth = font.width(timeText);
         // Draw text at x=100, y=40 (adjust based on your background)
-        guiGraphics.drawString(font, timeText, 5, this.background.getHeight() - 10, 0xFF808080, false);
+        guiGraphics.drawString(font, timeText, 16, this.background.getHeight() - 10, 0xFFF5F5F5, false);
 
         // Render fluid stack amounts
         int inputAmount = recipe.getFluidIngredients().getFirst().amount();
@@ -103,7 +103,7 @@ public class FrackingPumpRecipeCategory implements IRecipeCategory<FrackingPumpR
 
         PoseStack pose = guiGraphics.pose();
         pose.pushPose();
-        pose.translate(centreXPos, centreYPos-2, 6);
+        pose.translate(centreXPos, centreYPos-7, 8);
         pose.scale(-8f, 8f, 8f);
         pose.mulPose(Axis.YP.rotationDegrees(225f));
         pose.mulPose(Axis.XP.rotationDegrees(15f));

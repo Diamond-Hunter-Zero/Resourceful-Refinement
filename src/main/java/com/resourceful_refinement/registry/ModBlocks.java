@@ -106,7 +106,8 @@ public class ModBlocks {
                     .strength(0.25f)
                     .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()
-                    .noLootTable()));
+                    .noLootTable(),
+                    false));
 
     public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_SLIPPERY = BLOCKS.register("gel_splatter_slippery",
             () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
@@ -118,19 +119,46 @@ public class ModBlocks {
                     .strength(0.25f)
                     .sound(SoundType.SLIME_BLOCK)
                     .noOcclusion()
-                    .noLootTable()));
+                    .noLootTable(),
+                    false));
 
     public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_STICKY = BLOCKS.register("gel_splatter_sticky",
             () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
                     .jumpFactor(0.35f)
-                    .speedFactor(0.75f)
+                    .speedFactor(0.6f)
                     .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .replaceable()
                     .strength(0.25f)
                     .sound(SoundType.HONEY_BLOCK)
                     .noOcclusion()
-                    .noLootTable()));
+                    .noLootTable(),
+                    false));
+
+    public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_MOLTEN = BLOCKS.register("gel_splatter_molten",
+            () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
+                    .jumpFactor(0.9f)
+                    .speedFactor(0.75f)
+                    .pushReaction(PushReaction.DESTROY)
+                    .noCollission()
+                    .replaceable()
+                    .strength(0.25f)
+                    .sound(SoundType.NETHERRACK)
+                    .noOcclusion()
+                    .noLootTable(),
+                    true));
+
+    public static final DeferredBlock<GelSplatterBlock> GEL_SPLATTER_BOUNCY = BLOCKS.register("gel_splatter_bouncy",
+            () -> new GelSplatterBlock(BlockBehaviour.Properties.of()
+                    .jumpFactor(1f)
+                    .pushReaction(PushReaction.DESTROY)
+                    .noCollission()
+                    .replaceable()
+                    .strength(0.25f)
+                    .sound(SoundType.SLIME_BLOCK)
+                    .noOcclusion()
+                    .noLootTable(),
+                    false));
 
 
     // -------------------------------------------------------------------------

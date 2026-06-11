@@ -27,6 +27,8 @@ public final class GelSplatterBlocks {
         return switch (type) {
             case GOOEY -> ModBlocks.GEL_SPLATTER_STICKY.get();
             case SPEEDY -> ModBlocks.GEL_SPLATTER_SLIPPERY.get();
+            case MOLTEN -> ModBlocks.GEL_SPLATTER_MOLTEN.get();
+            case BOUNCY -> ModBlocks.GEL_SPLATTER_BOUNCY.get();
             default -> ModBlocks.GEL_SPLATTER.get();
         };
     }

@@ -8,18 +8,15 @@ import net.minecraft.world.item.TooltipFlag;
 import java.util.List;
 
 public class MouldItem extends Item {
-    public MouldItem(Properties properties, float breakChance) {
+    public MouldItem(Properties properties) {
         super(properties);
-        this.breakChance = breakChance;
     }
 
-    private float breakChance = 0;
-
-    @Override
+    /*@Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         // Add your custom translation key
         tooltipComponents.add(Component.literal("§7" + ((int)(breakChance * 100)) + "% chance to break when"));
         tooltipComponents.add(Component.literal("§7used at a Mechanical Forge"));
         super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
-    }
+    }*/
 }

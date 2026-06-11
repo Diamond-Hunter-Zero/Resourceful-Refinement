@@ -31,6 +31,7 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
     private final IDrawable background;
     private final IDrawable icon;
     private final ResourceLocation background_texture = ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/gui/jei/jei_forge_backdrop.png");
+    private final ResourceLocation break_tab_texture = ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/gui/jei/jei_forge_break_tab.png");
     private final String CASTING_WARNING = "Requires Casting Depot";
 
     public MechanicalForgeMouldRecipeCategory(IGuiHelper guiHelper) {
@@ -72,7 +73,7 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
         // Render Processing Time (e.g., "200 ticks")
         String timeText = recipe.getProcessingDuration() + "t";
         int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, centreXPos + 20, centreYPos - 28, 0xFF808080, false);
+        guiGraphics.drawString(font, timeText, centreXPos + 34, centreYPos - 27, 0xFFF5F5F5, false);
 
         // Render Fluid amount
         String fluidText = recipe.getFluidIngredients().getFirst().amount() + "mB";
@@ -91,15 +92,8 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
         // Render casting requirement
         if (recipe.isCasting())
         {
-            // 1. Get the block you want to display (e.g., the machine or a required catalyst)
             ItemStack blockStack = new ItemStack(ModBlocks.CASTING_DEPOT.get());
 
-            // 2. Calculate vertical center
-            // background.getHeight() returns the height you defined in the constructor
-            //centreXPos -= 8;
-            //centreYPos += 7;
-
-            // 3. Render the block
             pose.pushPose();
             pose.translate(0, 0, 0);
             pose.scale(1.5f, 1.5f, 1.5f);
@@ -107,8 +101,28 @@ public class MechanicalForgeMouldRecipeCategory implements IRecipeCategory<Mecha
             pose.popPose();
 
             int castingWidth = font.width(CASTING_WARNING);
-            // Draw text at x=100, y=40 (adjust based on your background)
-            guiGraphics.drawString(font, CASTING_WARNING, centreXPos - (castingWidth/2f) + 8, centreYPos + 30, 0xFF808080, false);
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(centreXPos - ((castingWidth*0.75f)/2f), centreYPos + 30, 0);
+            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+            guiGraphics.drawString(font, CASTING_WARNING, 0,0, 0xFF808080, false);
+            guiGraphics.pose().popPose();
+        }
+
+        // Render break chance
+        if (!recipe.getIngredients().isEmpty())
+        {
+            float breakChance = recipe.getConsumptionChance(recipe.getIngredients().getFirst().getItems()[0].getItem());
+            if (breakChance < 1f)
+            {
+                guiGraphics.blit(break_tab_texture, 0,0, 0,0,175, 82);
+
+                guiGraphics.pose().pushPose();
+                guiGraphics.pose().translate(9, 9, 0);
+                guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+                guiGraphics.drawString(font, Math.round(breakChance*100) + "% Break", 0,0, 0xFFA5A5A5, false);
+                guiGraphics.drawString(font, "Chance", 0,10, 0xFFA5A5A5, false);
+                guiGraphics.pose().popPose();
+            }
         }
     }
 

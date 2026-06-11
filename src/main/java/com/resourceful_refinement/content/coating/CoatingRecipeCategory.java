@@ -70,7 +70,7 @@ public class CoatingRecipeCategory implements IRecipeCategory<CoatingRecipe> {
         // Render Processing Time (e.g., "200 ticks")
         String timeText = recipe.getProcessingDuration() + "t";
         int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, this.background.getWidth()-32, 16  - font.lineHeight/2, 0xFF808080, false);
+        guiGraphics.drawString(font, timeText, this.background.getWidth()-34, 13  - font.lineHeight/2, 0xFFF5F5F5, false);
 
         // Render Fluid amount
         String fluidText = recipe.getFluidIngredient().amount() + "mB";

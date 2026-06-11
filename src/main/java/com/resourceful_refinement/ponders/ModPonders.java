@@ -63,7 +63,8 @@ public class ModPonders implements PonderPlugin {
                 .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("refill_station_tracking_ponder", GelPonders::refillStationTrackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
-        helper.forComponents(ModBlocks.GEL_SPLATTER.getId(), ModBlocks.GEL_SPLATTER_STICKY.getId(),ModBlocks.GEL_SPLATTER_SLIPPERY.getId())
+        helper.forComponents(ModBlocks.GEL_SPLATTER.getId(), ModBlocks.GEL_SPLATTER_STICKY.getId(),ModBlocks.GEL_SPLATTER_SLIPPERY.getId(),
+                        ModBlocks.GEL_SPLATTER_MOLTEN.getId(), ModBlocks.GEL_SPLATTER_BOUNCY.getId())
                 .addStoryBoard("gel_splatter_ponder", GelPonders::gelPropertiesScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("refill_station_tracking_ponder", GelPonders::refillStationTrackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
@@ -96,6 +97,8 @@ public class ModPonders implements PonderPlugin {
                 .add(ModBlocks.PAINT_NOZZLE.getId())
                 .add(ModBlocks.GEL_SPLATTER_SLIPPERY.getId())
                 .add(ModBlocks.GEL_SPLATTER_STICKY.getId())
+                .add(ModBlocks.GEL_SPLATTER_MOLTEN.getId())
+                .add(ModBlocks.GEL_SPLATTER_BOUNCY.getId())
                 .add(ModBlocks.GEL_SPLATTER.getId())
                 .add(ModItems.HOSEGUN.getId())
                 .add(ModBlocks.FLUID_REFILL_STATION.getId());

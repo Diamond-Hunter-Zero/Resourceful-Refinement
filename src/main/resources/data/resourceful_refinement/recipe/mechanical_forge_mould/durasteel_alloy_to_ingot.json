@@ -3,7 +3,8 @@
   "processing_time": 120,
   "ingredients": [
     {
-      "item": "resourceful_refinement:ingot_mould"
+      "item": "resourceful_refinement:ingot_mould",
+      "consumption_chance": 0.25
     },
     {
       "type": "neoforge:single",

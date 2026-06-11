@@ -71,6 +71,8 @@ public class ModBlockEntities {
                             com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity::new,
                             ModBlocks.GEL_SPLATTER.get(),
                             ModBlocks.GEL_SPLATTER_SLIPPERY.get(),
-                            ModBlocks.GEL_SPLATTER_STICKY.get()
+                            ModBlocks.GEL_SPLATTER_STICKY.get(),
+                            ModBlocks.GEL_SPLATTER_MOLTEN.get(),
+                            ModBlocks.GEL_SPLATTER_BOUNCY.get()
                     ).build(null));
 }

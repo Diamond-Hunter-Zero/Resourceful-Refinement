@@ -8,6 +8,7 @@ import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.utilities.GoggleUtilities;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -18,9 +19,12 @@ import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -46,7 +50,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
     public static final int TANK_CAPACITY = 8000;
     public static final int MAX_STACK_HEIGHT = 8;
     public static final int MIN_STACK_HEIGHT = 2;
-    public static final int EXPLOSIVE_DISTILLERY_TIME = 3600;
+    public static final int EXPLOSIVE_DISTILLERY_TIME = 200;
     private FilteringBehaviour filtering;
 
     public int timer;
@@ -217,6 +221,43 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         }
     }
 
+    private void explodeDistillery(DistilleryErrorCode processingError)
+    {
+        if (processingError == DistilleryErrorCode.OUTPUT_SPACE)
+        {
+            tankFullTime += 1;
+
+            // Exit early if client-side
+            if (level == null || !(level instanceof ServerLevel serverLevel))
+            {
+                if (tankFullTime >= EXPLOSIVE_DISTILLERY_TIME)
+                    tankFullTime = 0;
+                return;
+            }
+
+            if (tankFullTime < EXPLOSIVE_DISTILLERY_TIME && tankFullTime > EXPLOSIVE_DISTILLERY_TIME - 100 && tankFullTime % 20 == 0)
+            {
+                // Playe whistle sfx every 10 ticks
+                level.playSound(null, worldPosition, AllSoundEvents.WHISTLE_TRAIN.getMainEvent(), SoundSource.BLOCKS, 0.7f, 1.2f + level.random.nextFloat() * 0.4f);
+            }
+            else if (tankFullTime == EXPLOSIVE_DISTILLERY_TIME)
+            {
+                for (int i = 0; i < stackSize; i += 2)
+                {
+                    level.explode(null, getBlockPos().getX() + 0.5, getBlockPos().getY() + i + 0.5, getBlockPos().getZ() + 0.5,
+                            2.5f, false, Level.ExplosionInteraction.BLOCK);
+
+                    serverLevel.sendParticles(ParticleTypes.GUST,
+                            getBlockPos().getX() + 0.5, getBlockPos().getY() + i + 0.5, getBlockPos().getZ() + 0.5,
+                            0, 0, 0.25, 0, 1);
+                }
+                tankFullTime = 0;
+            }
+        }
+        else
+            tankFullTime = 0;
+    }
+
 
     // -------------------------------------------------------------------------
     // Filtering
@@ -285,22 +326,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             if (lastRecipe != null && processingError != DistilleryErrorCode.NO_ERROR)
             {
                 // Check for exploding distilleries
-                if (processingError == DistilleryErrorCode.OUTPUT_SPACE)
-                {
-                    tankFullTime += 1;
-                    if (level != null && !level.isClientSide && tankFullTime == EXPLOSIVE_DISTILLERY_TIME)
-                    {
-                        for (int i = 0; i < stackSize; i += 2)
-                        {
-                            level.explode(null, getBlockPos().getX() + 0.5, getBlockPos().getY() + i + 0.5, getBlockPos().getZ() + 0.5,
-                                    2.5f, false, Level.ExplosionInteraction.BLOCK);
-                        }
-                        tankFullTime = 0;
-                    }
-                }
-                else
-                    tankFullTime = 0;
-
+                explodeDistillery(processingError);
                 return;
             }
 
@@ -508,7 +534,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
 
     public float getProgressionFactor()
     {
-        if (lastRecipe == null) return 0;
+        if (lastRecipe == null || displayedRecipeId == null) return 0;
 
         int recipeDuration = lastRecipe.getProcessingDuration();
         return (1f - (float) timer/recipeDuration);

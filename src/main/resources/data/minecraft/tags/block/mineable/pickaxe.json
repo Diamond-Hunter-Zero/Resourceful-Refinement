@@ -9,6 +9,8 @@
     "resourceful_refinement:mechanical_forge_mould",
     "resourceful_refinement:casting_depot",
     "resourceful_refinement:fracking_pump_outlet",
-    "resourceful_refinement:fracking_pump_proxy"
+    "resourceful_refinement:fracking_pump_proxy",
+    "resourceful_refinement:fluid_refill_station",
+    "resourceful_refinement:paint_nozzle"
   ]
 }

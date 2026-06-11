@@ -3,6 +3,8 @@
   "values": [
     "resourceful_refinement:gel_splatter",
     "resourceful_refinement:gel_splatter_slippery",
-    "resourceful_refinement:gel_splatter_sticky"
+    "resourceful_refinement:gel_splatter_sticky",
+    "resourceful_refinement:gel_splatter_molten",
+    "resourceful_refinement:gel_splatter_bouncy"
   ]
 }

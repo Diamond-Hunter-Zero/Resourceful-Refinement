@@ -2,8 +2,8 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"4": "resourceful_refinement:block/radiator/radiator_inert",
-		"particle": "resourceful_refinement:block/radiator/radiator_inert"
+		"4": "resourceful_refinement:block/radiator/radiator_chilled",
+		"particle": "resourceful_refinement:block/radiator/radiator_chilled"
 	},
 	"elements": [
 		{

@@ -1,82 +1,221 @@
 package com.resourceful_refinement.content.radiator;
 
+import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
+import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
-import com.simibubi.create.content.fluids.pipes.AxisPipeBlock;
+import com.simibubi.create.content.fluids.PipeConnection;
+import com.simibubi.create.content.processing.recipe.HeatCondition;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.resourceful_refinement.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.createmod.catnip.data.Couple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.resourceful_refinement.content.radiator.RadiatorBlock.HEAT_STATE;
 
 public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
 
-    private static final float CONSUMPTION_RATE = 0.10f; // 10% of fluid is dissipated/consumed
-    private static final int MAX_HEAT_ENERGY = 1000;
+    private static final float FLUID_CONSUMPTION = 0.25f;
+    public static final int TANK_CAPACITY = 25;
+    public static final int HEAT_GROWTH = 5;
+    public static final int HEAT_DECAY = 8;
 
-    private int heatEnergy = 0;
-    private boolean isProcessingFlow = false; // Recursion guard flag
+    private int heatLevel = 0; // Visual/internal heat level (-1000 to 1000)
+
+    // Flow rate limiting fields (transient / tick-by-tick)
+    private int fluidReceivedCurrentTick = 0;
+    private int fluidReceivedLastTick = 0;
+    private int fluidDrainedCurrentTick = 0;
+
+    public final FluidTank tank = new FluidTank(TANK_CAPACITY) {
+        @Override
+        protected void onContentsChanged() {
+            syncData();
+        }
+    };
 
     public RadiatorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> list) { }
+    public void addBehaviours(List<BlockEntityBehaviour> list) {
+        list.add(new RadiatorFluidTransportBehaviour(this));
+    }
 
-
-    // -------------------------------------------------------------------------
-    // Tick Behaviour
-    // -------------------------------------------------------------------------
-
-    // Checks if the accessing face matches the radiator's current axis orientation.
     public boolean isValidFace(Direction face) {
         BlockState state = getBlockState();
-        if (!state.hasProperty(AxisPipeBlock.AXIS)) return false;
-        return face.getAxis() == state.getValue(AxisPipeBlock.AXIS);
+        if (!state.hasProperty(RadiatorBlock.FACING)) return false;
+        return face.getAxis() == state.getValue(RadiatorBlock.FACING).getAxis();
     }
 
-    private void onFluidConsumed(int amount)
+
+    // -------------------------------------------------------------------------
+    // Utilities
+    // -------------------------------------------------------------------------
+    public static boolean isEffectiveFluid(FluidStack stack) {
+        return getHeatStateForFluid(stack) != ExtendedHeatCondition.NONE;
+    }
+
+    public static ExtendedHeatCondition getHeatStateForFluid(FluidStack stack) {
+        return HeatUtilities.GetCoolantConditionFromFluid(stack);
+    }
+
+    private static int getConsumeAmount(Level level, ExtendedHeatCondition fluidCoolantType)
     {
-        int previousHeat = this.heatEnergy;
-        this.heatEnergy = Math.min(this.heatEnergy + amount, MAX_HEAT_ENERGY);
+        double fluidConsumption = 0;
+        if (fluidCoolantType == ExtendedHeatCondition.CHILLED)
+            fluidConsumption = ServerConfig.CHILLED_COOLANT_CONSUMPTION.get();
+        else if (fluidCoolantType == ExtendedHeatCondition.COOLED)
+            fluidConsumption = ServerConfig.COOLED_COOLANT_CONSUMPTION.get();
+        else if (fluidCoolantType == ExtendedHeatCondition.PASSIVE)
+            fluidConsumption = ServerConfig.PASSIVE_COOLANT_CONSUMPTION.get();
+        else if (fluidCoolantType == ExtendedHeatCondition.HEATED)
+            fluidConsumption = ServerConfig.HEATED_COOLANT_CONSUMPTION.get();
+        else if (fluidCoolantType == ExtendedHeatCondition.SUPERHEATED)
+            fluidConsumption = ServerConfig.SUPERHEATED_COOLANT_CONSUMPTION.get();
 
-        if (previousHeat != this.heatEnergy)
-            syncData();
+
+        if (fluidConsumption >= 1)
+            return (int)Math.round(fluidConsumption);
+        else if (level.random.nextFloat() <= fluidConsumption)
+            return 1;
+
+        return 0;
     }
 
-    // Server tick handling heat decay and updating the block state's HEAT_STATE.
-    public static void serverTick(Level level, BlockPos pos, BlockState state, RadiatorBlockEntity be) {
-        // Slowly cool down over time
-        if (be.heatEnergy > 0 && level.random.nextInt(4) == 3) {
-            int previousHeat = be.heatEnergy;
-            be.heatEnergy = Math.max(be.heatEnergy - 1, 0);
+    public static ExtendedHeatCondition getHeatConditionFromEnergy(int energy)
+    {
+        if (energy <= ExtendedHeatCondition.CHILLED.getMaxHeatEnergy())
+            return ExtendedHeatCondition.CHILLED;
+        else if (energy < ExtendedHeatCondition.COOLED.getMaxHeatEnergy())
+            return ExtendedHeatCondition.COOLED;
+        else if (energy < ExtendedHeatCondition.NONE.getMaxHeatEnergy())
+            return ExtendedHeatCondition.NONE;
+        else if (energy < ExtendedHeatCondition.PASSIVE.getMaxHeatEnergy())
+            return ExtendedHeatCondition.PASSIVE;
+        else if (energy < ExtendedHeatCondition.HEATED.getMaxHeatEnergy())
+            return ExtendedHeatCondition.HEATED;
+        else
+            return ExtendedHeatCondition.SUPERHEATED;
+    }
 
-            if (previousHeat != be.heatEnergy)
-                be.syncData();
+    public static int getHeatGainDelta(int currentEnergy, ExtendedHeatCondition targetState)
+    {
+        int delta = (targetState.getTargetHeatEnergy() - currentEnergy);
+        if (delta == 0) return 0;
+
+        return (int) Math.signum(delta) * Math.clamp(Math.abs(delta), 0, HEAT_GROWTH);
+    }
+
+    public static int getHeatBlockState(ExtendedHeatCondition targetState)
+    {
+        if (targetState == ExtendedHeatCondition.CHILLED)
+            return 2;
+        else if (targetState == ExtendedHeatCondition.COOLED)
+            return 1;
+        else if (targetState == ExtendedHeatCondition.HEATED || targetState == ExtendedHeatCondition.SUPERHEATED)
+            return 3;
+
+        return 0;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Server Fluid Logic
+    // -------------------------------------------------------------------------
+    // Server tick handling decay, setBlock (visual only), and active output push
+    public static void serverTick(Level level, BlockPos pos, BlockState state, RadiatorBlockEntity be) {
+        // Roll over tick-by-tick rate trackers (clamped to 1 so radiators always try to drain themselves)
+        be.fluidReceivedLastTick = Math.max(1, be.fluidReceivedCurrentTick);
+        be.fluidReceivedCurrentTick = 0;
+        be.fluidDrainedCurrentTick = 0;
+
+        // Process flat-rate consumption and heat updates per tick
+        FluidStack fluidInTank = be.tank.getFluid();
+        if (!fluidInTank.isEmpty() && isEffectiveFluid(fluidInTank)) {
+            ExtendedHeatCondition targetState = getHeatStateForFluid(fluidInTank);
+            int coolantConsumption = getConsumeAmount(level, targetState);
+            if (fluidInTank.getAmount() >= coolantConsumption) {
+
+                // Deduct flat rate directly from the tank
+                be.tank.drain(coolantConsumption, IFluidHandler.FluidAction.EXECUTE);
+
+                be.heatLevel += getHeatGainDelta(be.heatLevel, targetState);
+                be.setChanged();
+            } else {
+                // Cannot afford the flat rate, do not consume anything and decay instead
+                be.decayHeat(level);
+            }
+        } else {
+            be.decayHeat(level);
         }
 
-        // Map internal heat energy directly to the 0-3 block state property
-        int currentHeatState = state.getValue(RadiatorBlock.HEAT_STATE);
-        int targetHeatState = (be.heatEnergy * 3) / MAX_HEAT_ENERGY;
-
+        // Map to block state
+        int currentHeatState = state.getValue(HEAT_STATE);
+        int targetHeatState = getHeatBlockState(getHeatConditionFromEnergy(be.heatLevel));
         if (currentHeatState != targetHeatState) {
-            // Use flag 2 (Block.UPDATE_CLIENTS) instead of 3 (which would trigger neighbor updates
-            // and wipe the pressure of adjacent pipe networks, disrupting fluid flow rendering)
-            level.setBlock(pos, state.setValue(RadiatorBlock.HEAT_STATE, targetHeatState), 2);
+            // Use flag 2 (Block.UPDATE_CLIENTS) to avoid neighbor pipe updates wiping pressure
+            level.setBlock(pos, state.setValue(HEAT_STATE, targetHeatState), 2);
+        }
+
+        // Active output pushing (for direct connections to tanks/machines without pipes)
+        if (state.hasProperty(RadiatorBlock.FACING)) {
+            Direction facing = state.getValue(RadiatorBlock.FACING);
+            BlockPos targetPos = pos.relative(facing);
+            IFluidHandler targetHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, targetPos, facing.getOpposite());
+            if (targetHandler != null && be.tank.getFluidAmount() > 0) {
+                int maxPush = Math.max(0, be.fluidReceivedLastTick - be.fluidDrainedCurrentTick);
+                if (maxPush > 0) {
+                    FluidStack toDrain = be.tank.getFluid().copy();
+                    toDrain.setAmount(Math.min(toDrain.getAmount(), maxPush));
+
+                    int filled = targetHandler.fill(toDrain, IFluidHandler.FluidAction.SIMULATE);
+                    if (filled > 0) {
+                        FluidStack drained = be.tank.drain(filled, IFluidHandler.FluidAction.EXECUTE);
+                        if (!drained.isEmpty()) {
+                            targetHandler.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                            be.fluidDrainedCurrentTick += drained.getAmount();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Run block freezing logic
+        freezeTick(state, level, pos, level.random);
+    }
+
+    private void decayHeat(Level level) {
+        if (heatLevel != 0 && level.random.nextInt(4) == 0) {
+            heatLevel = (int)(Math.signum(heatLevel) * Math.max(Math.abs(heatLevel) - HEAT_DECAY, 0));
+            setChanged();
+            syncData();
         }
     }
 
@@ -87,39 +226,88 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         return new RadiatorProxyFluidHandler(side);
     }
 
+    private static void freezeTick(BlockState state, Level level, BlockPos pos, RandomSource random)
+    {
+        if (!level.isClientSide()) {
+            if (state.getValue(HEAT_STATE) != 2)
+                return;
+
+            if (random.nextFloat() > 0.0075f)
+                return;
+
+            List<FreezeableFluidPos> adjacentFluidSources = new ArrayList<>();
+
+            // Find all adjacent fluids
+            for (Direction direction : Direction.values()) {
+                BlockPos adjacentPos = pos.relative(direction);
+                BlockState adjacentState = level.getBlockState(adjacentPos);
+
+                // Check if it's a water state or lava source
+                if (adjacentState.getFluidState().is(Fluids.WATER) && level.getFluidState(adjacentPos).isSource() &&
+                        (!adjacentState.hasProperty(BlockStateProperties.WATERLOGGED) || !adjacentState.getValue(BlockStateProperties.WATERLOGGED)))
+                    adjacentFluidSources.add(new FreezeableFluidPos(adjacentPos, 0));
+                else if (adjacentState.getFluidState().is(Fluids.WATER) && !level.getFluidState(adjacentPos).isSource() &&
+                        (!adjacentState.hasProperty(BlockStateProperties.WATERLOGGED) || !adjacentState.getValue(BlockStateProperties.WATERLOGGED)))
+                    adjacentFluidSources.add(new FreezeableFluidPos(adjacentPos, 1));
+                else if (adjacentState.getFluidState().is(Fluids.LAVA) && level.getFluidState(adjacentPos).isSource())
+                    adjacentFluidSources.add(new FreezeableFluidPos(adjacentPos, 2));
+            }
+
+            // Randomly select one and freeze it
+            if (!adjacentFluidSources.isEmpty()) {
+                FreezeableFluidPos fluidToFreeze = adjacentFluidSources.get(random.nextInt(adjacentFluidSources.size()));
+
+                if (fluidToFreeze.type == 0)
+                    level.setBlockAndUpdate(fluidToFreeze.pos, Blocks.ICE.defaultBlockState());
+                else if (fluidToFreeze.type == 1)
+                    level.setBlockAndUpdate(fluidToFreeze.pos, Blocks.POWDER_SNOW.defaultBlockState());
+                else if (fluidToFreeze.type == 2)
+                    level.setBlockAndUpdate(fluidToFreeze.pos, Blocks.DEEPSLATE.defaultBlockState());
+            }
+        }
+    }
+
+    private record FreezeableFluidPos(BlockPos pos, int type) {}
+
+
+    // -------------------------------------------------------------------------
+    //  Client Visuals
+    // -------------------------------------------------------------------------
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+        tooltip.add(Component.literal("     Radiator:"));
 
-        tooltip.add(Component.literal(""));
-        tooltip.add(Component.literal("§6Heat: §8" + heatEnergy));
-        tooltip.add(Component.literal("§7Processing: §8" + isProcessingFlow));
+        BlockState state = getBlockState();
+
+        ExtendedHeatCondition radiatorHeat = getHeatConditionFromEnergy(heatLevel);
+        tooltip.add(Component.literal("§7Heat: ").append(Component.literal(radiatorHeat.getSerializedName()).withColor(radiatorHeat.getColor())).append(" §8(" + heatLevel + "° H)"));
+        tooltip.add(Component.literal("§7Flow Status: §8" + (fluidReceivedLastTick != 0 ? "Operational" : "Stationary")));
 
         return true;
     }
 
 
     // -------------------------------------------------------------------------
-    // NBT persistence
+    // NBT Persistence
     // -------------------------------------------------------------------------
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-
-        tag.putInt("HeatEnergy", heatEnergy);
-        tag.putBoolean("IsProcessingFlow", isProcessingFlow);
+        tag.putInt("HeatLevel", heatLevel);
+        tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
+        tag.putInt("FluidReceivedLastTick", fluidReceivedLastTick);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-
-        heatEnergy = tag.getInt("HeatEnergy");
-        isProcessingFlow = tag.getBoolean("IsProcessingFlow");
+        heatLevel = tag.getInt("HeatLevel");
+        if (tag.contains("Tank")) {
+            tank.readFromNBT(registries, tag.getCompound("Tank"));
+        }
+        fluidReceivedLastTick = tag.getInt("FluidReceivedLastTick");
     }
 
-    // -------------------------------------------------------------------------
-    // Network sync (for client-side rendering)
-    // -------------------------------------------------------------------------
     private void syncData() {
         setChanged();
         if (level != null) {
@@ -127,64 +315,50 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         }
     }
 
-    /**
-     * After a real (execute) fluid transfer, poke the FluidTransportBehaviour of
-     * every pipe adjacent to the radiator's output face so that they know pressure
-     * is arriving from the radiator. This drives the flow animation on glass pipes
-     * that are technically bypassed by the radiator's BFS delegation.
-     *
-     * @param outputSide the direction in which fluid has just been sent (away from
-     *                   the radiator, toward downstream pipes/tanks)
-     * @param fluid      the fluid that was transferred, used to ensure the pipe
-     *                   registers an appropriate flow type
-     */
-    private void notifyOutputPipes(Direction outputSide, FluidStack fluid) {
-        if (level == null || fluid.isEmpty()) return;
 
-        // Walk the BFS path starting from the first block on the output side and
-        // notify every pipe we encounter (stopping as soon as we hit a non-pipe).
-        java.util.Set<BlockPos> visited = new java.util.HashSet<>();
-        java.util.Queue<BlockPos> queue = new java.util.LinkedList<>();
-        visited.add(worldPosition);
-        queue.add(worldPosition.relative(outputSide));
+    // -------------------------------------------------------------------------
+    // FluidTransport Implementation
+    // -------------------------------------------------------------------------
+    public class RadiatorFluidTransportBehaviour extends FluidTransportBehaviour {
+        public RadiatorFluidTransportBehaviour(SmartBlockEntity be) {
+            super(be);
+        }
 
-        while (!queue.isEmpty()) {
-            BlockPos current = queue.poll();
-            if (visited.contains(current)) continue;
-            visited.add(current);
+        @Override
+        public void tick() {
+            super.tick();
+            if (level == null || level.isClientSide) return;
+            BlockState state = getBlockState();
+            if (!state.hasProperty(RadiatorBlock.FACING)) return;
+            Direction facing = state.getValue(RadiatorBlock.FACING);
 
-            FluidTransportBehaviour pipe = FluidPropagator.getPipe(level, current);
-            if (pipe == null) continue; // Reached a tank/machine — skip, don't break the whole loop!
-
-            // The direction on this pipe that faces back toward the radiator
-            // (or the previous pipe in the chain). We tell the pipe that fluid
-            // is arriving inbound from that direction.
-            BlockState pipeState = level.getBlockState(current);
-
-            // Find which of our visited neighbours connects to this pipe block
-            Direction inboundFace = null;
-            for (Direction d : Direction.values()) {
-                if (visited.contains(current.relative(d)) && pipe.canHaveFlowToward(pipeState, d)) {
-                    inboundFace = d;
-                    break;
-                }
-            }
-            if (inboundFace == null) continue;
-
-            // Add a small inbound pressure pulse – enough for one tick of flow animation
-            pipe.addPressure(inboundFace, true, 1f);
-
-            // Continue down all open directions
-            for (Direction d : Direction.values()) {
-                if (d == inboundFace) continue;
-                if (pipe.canHaveFlowToward(pipeState, d)) {
-                    queue.add(current.relative(d));
+            if (interfaces != null) {
+                for (java.util.Map.Entry<Direction, PipeConnection> entry : interfaces.entrySet()) {
+                    Direction side = entry.getKey();
+                    Couple<Float> pressure = entry.getValue().getPressure();
+                    if (side == facing) {
+                        // Push face: apply pressure based on how much fluid we received last tick
+                        float targetPressure = 2.0f * fluidReceivedLastTick;
+                        //float targetPressure = Math.max(2.0f * fluidReceivedLastTick, 2f);
+                        pressure.set(true, targetPressure);
+                        pressure.set(false, 0f);
+                    } else {
+                        // Pull face: no active pressure generated by the radiator
+                        pressure.set(true, 0f);
+                        pressure.set(false, 0f);
+                    }
                 }
             }
         }
+
+        @Override
+        public boolean canHaveFlowToward(BlockState state, Direction direction) {
+            if (!state.hasProperty(RadiatorBlock.FACING)) return false;
+            Direction facing = state.getValue(RadiatorBlock.FACING);
+            return direction.getAxis() == facing.getAxis();
+        }
     }
 
-    // Dedicated inline handler that mirrors and penalizes fluid operations dynamically.
     private class RadiatorProxyFluidHandler implements IFluidHandler {
         private final Direction accessedSide;
 
@@ -192,232 +366,92 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             this.accessedSide = accessedSide;
         }
 
-        private List<IFluidHandler> getOppositeHandlers() {
-            if (level == null || isProcessingFlow) return List.of();
-
-            Direction oppositeSide = accessedSide.getOpposite();
-            return findAllTerminalHandlers(oppositeSide);
+        private boolean isInput() {
+            BlockState state = getBlockState();
+            if (!state.hasProperty(RadiatorBlock.FACING)) return false;
+            return accessedSide == state.getValue(RadiatorBlock.FACING).getOpposite();
         }
 
-        // Uses a Breadth-First Search (BFS) to gather ALL unique fluid capability endpoints reachable through connected Create pipe lines.
-        private List<IFluidHandler> findAllTerminalHandlers(Direction initialDir) {
-            List<IFluidHandler> foundHandlers = new java.util.ArrayList<>();
-            java.util.Set<BlockPos> visited = new java.util.HashSet<>();
-            java.util.Queue<PathNode> queue = new java.util.LinkedList<>();
-
-            // Start scanning from the block immediately adjacent to our output face
-            BlockPos startPos = worldPosition.relative(initialDir);
-            queue.add(new PathNode(startPos, initialDir.getOpposite()));
-
-            // Mark the radiator itself as visited so searches never circle backward through it
-            visited.add(worldPosition);
-
-            int safetyCounter = 0;
-            // Cap search at 128 checked blocks to guarantee zero server tick lag on huge setups
-            while (!queue.isEmpty() && safetyCounter < 128) {
-                PathNode node = queue.poll();
-                BlockPos pos = node.pos;
-                Direction cameFrom = node.cameFrom;
-
-                if (visited.contains(pos)) continue;
-                visited.add(pos);
-                safetyCounter++;
-
-                // 1. Check if this destination contains a real fluid handler capability
-                IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, cameFrom);
-                if (handler != null) {
-                    foundHandlers.add(handler);
-                    continue; // Destination reached! Stop scanning deeper down this specific branch.
-                }
-
-                // 2. If it's not a tank/machine, check if it's a passive Create pipe block we can traverse (such as standard pipes, encased pipes, pumps, etc.)
-                BlockState state = level.getBlockState(pos);
-                FluidTransportBehaviour pipe = FluidPropagator.getPipe(level, pos);
-                if (pipe != null && pipe.canHaveFlowToward(state, cameFrom)) {
-                    for (Direction dir : Direction.values()) {
-                        if (dir == cameFrom) continue;
-                        if (pipe.canHaveFlowToward(state, dir)) {
-                            queue.add(new PathNode(pos.relative(dir), dir.getOpposite()));
-                        }
-                    }
-                }
-            }
-
-            return foundHandlers;
+        private boolean isOutput() {
+            BlockState state = getBlockState();
+            if (!state.hasProperty(RadiatorBlock.FACING)) return false;
+            return accessedSide == state.getValue(RadiatorBlock.FACING);
         }
 
         @Override
         public int getTanks() {
-            // Aggregate total tank count from all endpoints
-            return getOppositeHandlers().stream().mapToInt(IFluidHandler::getTanks).sum();
+            return 1;
         }
 
         @Override
         @NotNull
-        public FluidStack getFluidInTank(int tank) {
-            // Safe fallback logic for structural queries
-            List<IFluidHandler> handlers = getOppositeHandlers();
-            if (handlers.isEmpty()) return FluidStack.EMPTY;
-            return handlers.get(0).getFluidInTank(tank);
+        public FluidStack getFluidInTank(int tankSlot) {
+            return tank.getFluid();
         }
 
         @Override
-        public int getTankCapacity(int tank) {
-            return getOppositeHandlers().stream().mapToInt(h -> h.getTankCapacity(tank)).sum();
+        public int getTankCapacity(int tankSlot) {
+            return tank.getCapacity();
         }
 
         @Override
-        public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
-            return getOppositeHandlers().stream().anyMatch(h -> h.isFluidValid(tank, stack));
+        public boolean isFluidValid(int tankSlot, @NotNull FluidStack stack) {
+            return tank.isFluidValid(tankSlot, stack);
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
+            if (!isInput()) return 0;
             if (resource.isEmpty()) return 0;
-            List<IFluidHandler> targets = getOppositeHandlers();
-            if (targets.isEmpty()) return 0;
 
-            int originalAmount = resource.getAmount();
-            int forwardAmount = (int) (originalAmount * (1.0f - CONSUMPTION_RATE));
-            if (forwardAmount <= 0 && originalAmount > 0) forwardAmount = 1;
+            int filled = tank.fill(resource, action);
 
-            try {
-                isProcessingFlow = true;
-                int totalFilledByOpposites = 0;
-                int remainingToForward = forwardAmount;
-
-                // Evenly split and fill across all accessible branches/tanks
-                for (IFluidHandler opp : targets) {
-                    if (remainingToForward <= 0) break;
-
-                    FluidStack forwardedStack = resource.copyWithAmount(remainingToForward);
-                    int filled = opp.fill(forwardedStack, action);
-
-                    remainingToForward -= filled;
-                    totalFilledByOpposites += filled;
-                }
-
-                if (totalFilledByOpposites <= 0) return 0;
-
-                // Scale the returned value back up so the pump accounts for the heat loss
-                int totalAccepted = (int) Math.ceil(totalFilledByOpposites / (1.0f - CONSUMPTION_RATE));
-                totalAccepted = Math.min(totalAccepted, originalAmount);
-
+            if (filled > 0) {
                 if (action.execute()) {
-                    int consumed = totalAccepted - totalFilledByOpposites;
-                    if (consumed > 0) onFluidConsumed(consumed);
-                    // Poke downstream pipes so they show fluid-flow animation
-                    notifyOutputPipes(accessedSide.getOpposite(), resource);
+                    fluidReceivedCurrentTick += filled;
+                    setChanged();
                 }
-
-                return totalAccepted;
-            } finally {
-                isProcessingFlow = false;
+                return filled;
             }
+            return 0;
         }
 
         @Override
         @NotNull
         public FluidStack drain(FluidStack resource, FluidAction action) {
+            if (!isOutput()) return FluidStack.EMPTY; // Can only drain from the output face
             if (resource.isEmpty()) return FluidStack.EMPTY;
-            List<IFluidHandler> targets = getOppositeHandlers();
-            if (targets.isEmpty()) return FluidStack.EMPTY;
 
-            int targetDrain = resource.getAmount();
-            int requiredFromSource = (int) Math.ceil(targetDrain / (1.0f - CONSUMPTION_RATE));
+            int maxDrain = Math.max(0, fluidReceivedLastTick - fluidDrainedCurrentTick);
+            if (maxDrain <= 0) return FluidStack.EMPTY;
 
-            try {
-                isProcessingFlow = true;
-                int totalDrainedFromSources = 0;
-                FluidStack mergedResult = FluidStack.EMPTY;
-                int remainingRequired = requiredFromSource;
+            FluidStack toDrain = resource.copy();
+            toDrain.setAmount(Math.min(toDrain.getAmount(), maxDrain));
 
-                // Draw and pool matching fluids from any branch with stock available
-                for (IFluidHandler opp : targets) {
-                    if (remainingRequired <= 0) break;
-
-                    FluidStack toDrainStack = resource.copyWithAmount(remainingRequired);
-                    FluidStack drained = opp.drain(toDrainStack, action);
-
-                    if (!drained.isEmpty()) {
-                        if (mergedResult.isEmpty()) {
-                            mergedResult = drained.copy();
-                        } else if (FluidStack.isSameFluidSameComponents(mergedResult, drained)) {
-                            mergedResult.grow(drained.getAmount());
-                        }
-                        remainingRequired -= drained.getAmount();
-                        totalDrainedFromSources += drained.getAmount();
-                    }
-                }
-
-                if (totalDrainedFromSources <= 0) return FluidStack.EMPTY;
-
-                int deliveredAmount = (int) (totalDrainedFromSources * (1.0f - CONSUMPTION_RATE));
-
-                if (action.execute()) {
-                    int consumed = totalDrainedFromSources - deliveredAmount;
-                    if (consumed > 0) onFluidConsumed(consumed);
-                    // Poke downstream pipes so they show fluid-flow animation
-                    notifyOutputPipes(accessedSide.getOpposite(), mergedResult);
-                }
-
-                return mergedResult.copyWithAmount(deliveredAmount);
-            } finally {
-                isProcessingFlow = false;
+            FluidStack drained = tank.drain(toDrain, action);
+            if (!drained.isEmpty() && action.execute()) {
+                fluidDrainedCurrentTick += drained.getAmount();
+                setChanged();
             }
+            return drained;
         }
 
         @Override
         @NotNull
         public FluidStack drain(int maxDrain, FluidAction action) {
+            if (!isOutput()) return FluidStack.EMPTY; // Can only drain from the output face
             if (maxDrain <= 0) return FluidStack.EMPTY;
-            List<IFluidHandler> targets = getOppositeHandlers();
-            if (targets.isEmpty()) return FluidStack.EMPTY;
 
-            int requiredFromSource = (int) Math.ceil(maxDrain / (1.0f - CONSUMPTION_RATE));
+            int allowedDrain = Math.max(0, fluidReceivedLastTick - fluidDrainedCurrentTick);
+            if (allowedDrain <= 0) return FluidStack.EMPTY;
 
-            try {
-                isProcessingFlow = true;
-                int totalDrainedFromSources = 0;
-                FluidStack mergedResult = FluidStack.EMPTY;
-                int remainingRequired = requiredFromSource;
-
-                for (IFluidHandler opp : targets) {
-                    if (remainingRequired <= 0) break;
-
-                    FluidStack drained = opp.drain(remainingRequired, action);
-                    if (!drained.isEmpty()) {
-                        if (mergedResult.isEmpty()) {
-                            mergedResult = drained.copy();
-                        } else if (FluidStack.isSameFluidSameComponents(mergedResult, drained)) {
-                            mergedResult.grow(drained.getAmount());
-                        }
-                        remainingRequired -= drained.getAmount();
-                        totalDrainedFromSources += drained.getAmount();
-                    }
-                }
-
-                if (totalDrainedFromSources <= 0) return FluidStack.EMPTY;
-
-                int deliveredAmount = (int) (totalDrainedFromSources * (1.0f - CONSUMPTION_RATE));
-
-                if (action.execute()) {
-                    int consumed = totalDrainedFromSources - deliveredAmount;
-                    if (consumed > 0) onFluidConsumed(consumed);
-                    // Poke downstream pipes so they show fluid-flow animation
-                    notifyOutputPipes(accessedSide.getOpposite(), mergedResult);
-                }
-
-                return mergedResult.copyWithAmount(deliveredAmount);
-            } finally {
-                isProcessingFlow = false;
+            int toDrainAmount = Math.min(maxDrain, allowedDrain);
+            FluidStack drained = tank.drain(toDrainAmount, action);
+            if (!drained.isEmpty() && action.execute()) {
+                fluidDrainedCurrentTick += drained.getAmount();
+                setChanged();
             }
+            return drained;
         }
-
-        /**
-         * Small helper record to keep track of positions and the orientation they came from
-         * during graph traversal.
-         */
-        private record PathNode(BlockPos pos, Direction cameFrom) {}
     }
 }

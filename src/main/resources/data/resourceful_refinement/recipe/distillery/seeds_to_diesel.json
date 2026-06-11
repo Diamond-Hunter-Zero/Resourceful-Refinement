@@ -2,7 +2,7 @@
   "type": "resourceful_refinement:distillery",
   "heat_requirement": "heated",
   "distillery_height": 3,
-  "processing_time": 3600,
+  "processing_time": 40,
   "ingredients": [
     {
       "type": "neoforge:single",

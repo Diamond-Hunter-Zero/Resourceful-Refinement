@@ -10,21 +10,25 @@ import org.jetbrains.annotations.NotNull;
 
 public enum ExtendedHeatCondition implements StringRepresentable {
 
-    CHILLED("chilled", 0xBFF2F5),
-    COOLED("cooled", 0x1A83C9),
-    NONE("none", 16777215),
-    PASSIVE("passive", 0xFF86C43B),
-    HEATED("heated", 15237888),
-    SUPERHEATED("superheated", 6067176);
+    CHILLED("chilled", 0xBFF2F5, -500, -750),
+    COOLED("cooled", 0x1A83C9, -50, -350),
+    NONE("none", 16777215, 50, 0),
+    PASSIVE("passive", 0xFF86C43B, 333, 250),
+    HEATED("heated", 15237888, 666, 500),
+    SUPERHEATED("superheated", 6067176, 1000, 750);
 
     private final String name;
     private int color;
+    private int maxHeatEnergy;
+    private int targetHeatEnergy;
     public static final Codec<ExtendedHeatCondition> CODEC = StringRepresentable.fromEnum(ExtendedHeatCondition::values);
     public static final StreamCodec<ByteBuf, ExtendedHeatCondition> STREAM_CODEC = CatnipStreamCodecBuilders.ofEnum(ExtendedHeatCondition.class);
 
-    private ExtendedHeatCondition(String name, int color) {
+    private ExtendedHeatCondition(String name, int color, int maxHeatEnergy, int targetHeatEnergy) {
         this.name = name;
         this.color = color;
+        this.maxHeatEnergy = maxHeatEnergy;
+        this.targetHeatEnergy = targetHeatEnergy;
     }
 
     @Override
@@ -39,4 +43,7 @@ public enum ExtendedHeatCondition implements StringRepresentable {
     public int getColor() {
         return this.color;
     }
+
+    public int getMaxHeatEnergy() { return this.maxHeatEnergy; }
+    public int getTargetHeatEnergy() { return this.targetHeatEnergy; }
 }

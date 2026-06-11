@@ -2,6 +2,7 @@ package com.resourceful_refinement;
 
 import com.mojang.logging.LogUtils;
 
+import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
@@ -23,6 +24,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -53,6 +55,11 @@ public class ResourcefulRefinementMain {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public ResourcefulRefinementMain(IEventBus modEventBus, ModContainer modContainer) {
+
+        // Register configs
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+
+        // Initialise content
         ModRegistries.init(modEventBus);
         com.resourceful_refinement.worldgen.GeyserOffsetManager.init();
 

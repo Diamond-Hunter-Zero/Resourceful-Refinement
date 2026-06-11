@@ -24,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,6 +46,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
     public static final int TANK_CAPACITY = 8000;
     public static final int MAX_STACK_HEIGHT = 8;
     public static final int MIN_STACK_HEIGHT = 2;
+    public static final int EXPLOSIVE_DISTILLERY_TIME = 3600;
     private FilteringBehaviour filtering;
 
     public int timer;
@@ -56,6 +58,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
     public int stackIndex = 0;
     public BlockPos controllerPos;
     public int heatLevel = 0;
+    public int tankFullTime = 0;
     private String processErrorString = "";
 
     public final FluidTank inputTank = new FluidTank(TANK_CAPACITY) {
@@ -278,9 +281,30 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         if (timer > 0) {
 
             // Check progress of ongoing recipe conditions
-            if (lastRecipe != null && !canProcess())
-                return;
+            DistilleryErrorCode processingError = canProcess();
+            if (lastRecipe != null && processingError != DistilleryErrorCode.NO_ERROR)
+            {
+                // Check for exploding distilleries
+                if (processingError == DistilleryErrorCode.OUTPUT_SPACE)
+                {
+                    tankFullTime += 1;
+                    if (level != null && !level.isClientSide && tankFullTime == EXPLOSIVE_DISTILLERY_TIME)
+                    {
+                        for (int i = 0; i < stackSize; i += 2)
+                        {
+                            level.explode(null, getBlockPos().getX() + 0.5, getBlockPos().getY() + i + 0.5, getBlockPos().getZ() + 0.5,
+                                    2.5f, false, Level.ExplosionInteraction.BLOCK);
+                        }
+                        tankFullTime = 0;
+                    }
+                }
+                else
+                    tankFullTime = 0;
 
+                return;
+            }
+
+            tankFullTime = 0;
             timer -= 1;
 
             if (level != null && level.isClientSide) {
@@ -345,7 +369,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         }
 
         // Ensure we can process (enough space in outputs, enough fluid in input, valid heat/height)
-        if (!canProcess()) {
+        if (canProcess() != DistilleryErrorCode.NO_ERROR) {
             return;
         }
 
@@ -354,7 +378,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
     }
 
     private void process() {
-        if (!canProcess()) return;
+        if (canProcess() != DistilleryErrorCode.NO_ERROR) return;
 
         // Drain input
         if (lastRecipe.getCombinedIngredients() != null && !lastRecipe.getCombinedIngredients().isEmpty()) {
@@ -391,17 +415,17 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         sendData();
     }
 
-    private boolean canProcess() {
+    private DistilleryErrorCode canProcess() {
         if (lastRecipe == null)
         {
             processErrorString = "";
-            return false;
+            return DistilleryErrorCode.NO_RECIPE;
         }
 
         if (!lastRecipe.matchesFilter(getTopBlock().getFiltering()))
         {
-            processErrorString = "No recipes match filter";
-            return false;
+            processErrorString = DistilleryErrorCode.NO_FILTER_MATCH.getErrorText();
+            return DistilleryErrorCode.NO_FILTER_MATCH;
         }
 
         // Check input fluid amount
@@ -409,8 +433,8 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         {
             SizedFluidIngredient fluidIngredient = lastRecipe.getFluidIngredients().getFirst();
             if (!fluidIngredient.test(inputTank.getFluid())) {
-                processErrorString = "Insufficient fluid";
-                return false;
+                processErrorString = DistilleryErrorCode.INPUT_FLUID.getErrorText();
+                return DistilleryErrorCode.INPUT_FLUID;
             }
         }
 
@@ -419,37 +443,37 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             SizedIngredient itemIngredient = lastRecipe.getCombinedIngredients().getFirst();
             ItemStack inputSlot = inputInv.getStackInSlot(0);
             if (!itemIngredient.test(inputSlot)) {
-                processErrorString = "Insufficient items";
-                return false;
-            }
-        }
-
-        // Check output fluid space
-        if (!lastRecipe.getFluidResults().isEmpty()) {
-            FluidStack resultFluid = lastRecipe.getFluidResults().getFirst();
-            int filled = outputTank.fill(resultFluid, IFluidHandler.FluidAction.SIMULATE);
-            if (filled != resultFluid.getAmount()) {
-                processErrorString = "Output tank full";
-                return false; // not enough space
+                processErrorString = DistilleryErrorCode.INPUT_ITEM.getErrorText();
+                return DistilleryErrorCode.INPUT_ITEM;
             }
         }
 
         // Check heat
         if (lastRecipe.getRequiredHeatCondition() != HeatUtilities.ConvertHeatLevelToExtendedCondition(heatLevel))
         {
-            processErrorString = "Distillery must be " + lastRecipe.getRequiredHeatCondition().getSerializedName();
-            return false;
+            processErrorString = DistilleryErrorCode.HEAT.getErrorText() + lastRecipe.getRequiredHeatCondition().getSerializedName();
+            return DistilleryErrorCode.HEAT;
         }
 
         // Check stack height
         if (lastRecipe.getRequiredHeight() != stackSize)
         {
-            processErrorString = "Distillery must be " + lastRecipe.getRequiredHeight() + " blocks high";
-            return false;
+            processErrorString = DistilleryErrorCode.STACK_HEIGHT.getErrorText() + lastRecipe.getRequiredHeight() + " blocks tall";
+            return DistilleryErrorCode.STACK_HEIGHT;
         }
 
-        processErrorString = "";
-        return true;
+        // Check output fluid space - LAST
+        if (!lastRecipe.getFluidResults().isEmpty()) {
+            FluidStack resultFluid = lastRecipe.getFluidResults().getFirst();
+            int filled = outputTank.fill(resultFluid, IFluidHandler.FluidAction.SIMULATE);
+            if (filled != resultFluid.getAmount()) {
+                processErrorString = DistilleryErrorCode.OUTPUT_SPACE.getErrorText();
+                return DistilleryErrorCode.OUTPUT_SPACE; // not enough space
+            }
+        }
+
+        processErrorString = DistilleryErrorCode.NO_ERROR.getErrorText();
+        return DistilleryErrorCode.NO_ERROR;
     }
 
     public DistilleryRecipe getLocalRecipe()
@@ -529,7 +553,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             tooltip.add(Component.literal(""));
             tooltip.add(Component.literal("§c" + GoggleUtilities.BuildTextProgressBar(progressFactor)
                     + " §c" + GoggleUtilities.FormatTicksToTime((int)((1f - progressFactor) * lastRecipe.getProcessingDuration()))));
-            if (!canProcess())
+            if (canProcess() != DistilleryErrorCode.NO_ERROR)
             {
                 tooltip.add(Component.literal("§c" + processErrorString));
             }
@@ -550,6 +574,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         tag.putInt("StackSize", stackSize);
         tag.putInt("StackIndex", stackIndex);
         tag.putInt("HeatLevel", heatLevel);
+        tag.putInt("TankFullTime", tankFullTime);
         if (controllerPos != null) {
             tag.putLong("ControllerPos", controllerPos.asLong());
         }
@@ -569,6 +594,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         stackSize = tag.getInt("StackSize");
         stackIndex = tag.getInt("StackIndex");
         heatLevel = tag.getInt("HeatLevel");
+        tankFullTime = tag.getInt("TankFullTime");
         if (tag.contains("ControllerPos")) {
             controllerPos = BlockPos.of(tag.getLong("ControllerPos"));
         }

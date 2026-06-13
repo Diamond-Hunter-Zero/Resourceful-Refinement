@@ -4,6 +4,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.simibubi.create.api.boiler.BoilerHeater;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -99,6 +100,41 @@ public class HeatUtilities {
             return ExtendedHeatCondition.SUPERHEATED;
 
         return ExtendedHeatCondition.NONE;
+    }
+
+    // Check if any adjacent block is a heat-source with the matching heat value
+    public static boolean HasAdjacentHeatSource(Level level, BlockPos pos, int heatLevel)
+    {
+        for (Direction direction : Direction.values())
+        {
+            if (HeatUtilities.GetExtendedHeatLevel(level, pos.relative(direction)) == heatLevel)
+                return true;
+        }
+        return false;
+    }
+
+    public static int GetColdestAdjacentHeatSource(Level level, BlockPos pos)
+    {
+        int lowestSource = ExtendedHeatCondition.SUPERHEATED.getBlazeHeatEnergy();
+        for (Direction direction : Direction.values())
+        {
+            int adjacentHeatLevel = HeatUtilities.GetExtendedHeatLevel(level, pos.relative(direction));
+            if (adjacentHeatLevel < lowestSource)
+                lowestSource = adjacentHeatLevel;
+        }
+        return lowestSource;
+    }
+
+    public static int GetHottestAdjacentHeatSource(Level level, BlockPos pos)
+    {
+        int highestSource = ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy();
+        for (Direction direction : Direction.values())
+        {
+            int adjacentHeatLevel = HeatUtilities.GetExtendedHeatLevel(level, pos.relative(direction));
+            if (adjacentHeatLevel > highestSource)
+                highestSource = adjacentHeatLevel;
+        }
+        return highestSource;
     }
 
 }

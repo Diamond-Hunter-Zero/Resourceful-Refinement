@@ -188,7 +188,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             // Use flag 2 (Block.UPDATE_CLIENTS) to avoid neighbor pipe updates wiping pressure
             level.setBlock(pos, state
                     .setValue(HEAT_STATE, targetHeatState)
-                    .setValue(BlazeBurnerBlock.HEAT_LEVEL, targetBlazeLevel), 2);
+                    .setValue(BlazeBurnerBlock.HEAT_LEVEL, targetBlazeLevel), 3);
         }
 
         // Active output pushing (for direct connections to tanks/machines without pipes)
@@ -280,6 +280,8 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     public float getHeat(Level level, BlockPos blockPos, BlockState blockState) {
         ExtendedHeatCondition condition = getHeatConditionFromEnergy(heatLevel);
         return switch (condition) {
+            case CHILLED     -> -3;
+            case COOLED      -> -2;
             case PASSIVE     -> BoilerHeater.PASSIVE_HEAT;  // 0
             case HEATED      -> 1;
             case SUPERHEATED -> 2;

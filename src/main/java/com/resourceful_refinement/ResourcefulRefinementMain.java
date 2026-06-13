@@ -6,6 +6,8 @@ import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
@@ -77,7 +79,10 @@ public class ResourcefulRefinementMain {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        // Register stress values
         event.enqueueWork(ModStressValues::register);
+
+        // Register boiler heaters
         event.enqueueWork(() -> BoilerHeater.REGISTRY.register(
                 ModBlocks.RADIATOR_PIPE.get(),
                 (level, pos, state) -> {
@@ -241,6 +246,19 @@ public class ResourcefulRefinementMain {
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.RADIATOR_PIPE_BE.get(),
                 (be, direction) -> direction != null ? be.getFluidHandler(direction) : null
         );
+
+        // --- Combustion Chamber ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), (be, side) -> {
+
+            // Only accept input from front
+            if (!be.getBlockState().hasProperty(DistilleryBlock.FACING)) return null;
+
+            Direction facing = be.getBlockState().getValue(DistilleryBlock.FACING);
+            if (side == facing.getOpposite())
+                return be.inputTank;
+            return null;
+        });
+
     }
 
     /**
@@ -284,6 +302,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
@@ -329,6 +348,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
+            event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
         }
     }
 

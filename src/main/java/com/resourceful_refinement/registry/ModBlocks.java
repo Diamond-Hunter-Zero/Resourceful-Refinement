@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
@@ -106,6 +107,13 @@ public class ModBlocks {
     public static final DeferredBlock<RadiatorBlock> RADIATOR_PIPE = BLOCKS.register("radiator_pipe",
             () -> new RadiatorBlock(BlockBehaviour.Properties.of()
                     .strength(1f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<CombustionChamberBlock> COMBUSTION_CHAMBER = BLOCKS.register("combustion_chamber",
+            () -> new CombustionChamberBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));

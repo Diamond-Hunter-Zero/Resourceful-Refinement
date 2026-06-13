@@ -4,9 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.registry.ModBlocks;
+import com.resourceful_refinement.registry.ModPartialModels;
 import com.resourceful_refinement.utilities.FluidBoxRendering;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringRenderer;
+import net.createmod.catnip.render.CachedBuffers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -66,6 +69,18 @@ public class DistilleryRenderer implements BlockEntityRenderer<DistilleryBlockEn
             ms.translate(-3f/16f, 0, 0.5005f);
             ms.mulPose(Axis.ZP.rotationDegrees(gaugeRotation));
             renderColouredQuad(ms, buffer, light, overlay, 1f/16f, 3.15f/16f, -0.5f/16f, -0.5f/16f, 150, 10, 0, 255);
+            ms.popPose();
+        }
+
+        // Render heat stand
+        if (be.stackIndex == 0
+        && be.getLevel() != null && be.getLevel().getBlockState(be.getBlockPos().below()).is(HeatUtilities.SUPPORTS_HEATER_STAND_BLOCK_TAG))
+        {
+            ms.pushPose();
+            ms.translate(0,-1,0);
+            CachedBuffers.partial(ModPartialModels.INDUSTRIAL_HEATER_STAND, be.getBlockState())
+                    .light(light)
+                    .renderInto(ms, buffer.getBuffer(RenderType.cutout()));
             ms.popPose();
         }
 

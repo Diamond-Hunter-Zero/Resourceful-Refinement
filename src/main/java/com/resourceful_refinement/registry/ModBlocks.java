@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
@@ -115,6 +116,11 @@ public class ModBlocks {
             () -> new CombustionChamberBlock(BlockBehaviour.Properties.of()
                     .strength(1.5f)
                     .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<AdvancedPumpBlock> ADVANCED_PUMP = BLOCKS.register("advanced_pump",
+            () -> new AdvancedPumpBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.MECHANICAL_PUMP.get())
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
 

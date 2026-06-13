@@ -4,28 +4,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
-import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
-import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
-import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
-import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
-import com.resourceful_refinement.content.refill_station.FluidRefillStationCasingModel;
-import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
 import com.resourceful_refinement.registry.ModPartialModels;
+import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import static com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock.FACING;
 import static com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer.getAngleForBe;
@@ -53,20 +42,36 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
         ms.translate(0.5, 1.5, 0.5);
         ms.scale(1, -1, -1);
         ms.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
-        casing.render(ms, casingBuffer, light, overlay);
 
         // --- Render Animations ---
-        if (Math.abs(be.getSpeed()) >= 0) {
-            long timeMs = (long) ((be.getLevel().getGameTime() + partialTicks) * 50);
+        float engineSpeed = Math.abs(be.getRenderedEngineSpeed());
+        if (engineSpeed > 0) {
+            long timeMs = (long) ((be.getLevel().getGameTime() + partialTicks) * 50 * (engineSpeed / 16f));
             casing.animatePistons(timeMs);
         } else {
-            casing.animatePistons(0);
+            casing.animatePistons(125);
         }
+
+        casing.render(ms, casingBuffer, light, overlay);
         ms.popPose();
 
 
         // --- Shaft Kinetic Rendering ---
-        renderKineticShaft(be, state, ms, buffer, light);
+        if (be.getLevel() != null && be.getLevel().getBlockState(be.getBlockPos().below()).is(HeatUtilities.SUPPORTS_HEATER_STAND_BLOCK_TAG))
+        {
+            ms.pushPose();
+            ms.translate(0,-1,0);
+            CachedBuffers.partial(ModPartialModels.INDUSTRIAL_HEATER_STAND, be.getBlockState())
+                    .light(light)
+                    .renderInto(ms, buffer.getBuffer(RenderType.cutout()));
+            ms.popPose();
+        }
+
+
+        // --- Shaft Kinetic Rendering ---
+        if (be.isOutputEngine()) {
+            renderKineticShaft(be, state, ms, buffer, light);
+        }
     }
 
     private void renderKineticShaft(CombustionChamberBlockEntity be, BlockState state, PoseStack ms, MultiBufferSource buffer, int light) {
@@ -85,5 +90,10 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
 
     protected Direction.Axis getRotationAxisOf(CombustionChamberBlockEntity be) {
         return be.getBlockState().getValue(CombustionChamberBlock.FACING).getAxis();
+    }
+
+    @Override
+    public int getViewDistance() {
+        return 128;
     }
 }

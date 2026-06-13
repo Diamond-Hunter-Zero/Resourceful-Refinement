@@ -2,6 +2,7 @@ package com.resourceful_refinement;
 
 import com.mojang.logging.LogUtils;
 
+import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
 import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
@@ -249,14 +250,7 @@ public class ResourcefulRefinementMain {
 
         // --- Combustion Chamber ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), (be, side) -> {
-
-            // Only accept input from front
-            if (!be.getBlockState().hasProperty(DistilleryBlock.FACING)) return null;
-
-            Direction facing = be.getBlockState().getValue(DistilleryBlock.FACING);
-            if (side == facing.getOpposite())
-                return be.inputTank;
-            return null;
+            return side != null ? be.getFluidHandler(side) : null;
         });
 
     }
@@ -303,6 +297,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
@@ -323,6 +318,8 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_VERTICAL.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.ADVANCED_PUMP_COG.modelLocation(), "standalone"));
         }
 
         @SubscribeEvent

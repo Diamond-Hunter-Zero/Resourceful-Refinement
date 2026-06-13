@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
@@ -75,6 +76,9 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<CombustionChamberBlockEntity>> COMBUSTION_CHAMBER_BE = BLOCK_ENTITIES.register("combustion_chamber",
             () -> BlockEntityType.Builder.of((pos, state) -> new CombustionChamberBlockEntity(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), pos, state), ModBlocks.COMBUSTION_CHAMBER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<AdvancedPumpBlockEntity>> ADVANCED_PUMP_BE = BLOCK_ENTITIES.register("advanced_pump",
+            () -> BlockEntityType.Builder.of((pos, state) -> new AdvancedPumpBlockEntity(ModBlockEntities.ADVANCED_PUMP_BE.get(), pos, state), ModBlocks.ADVANCED_PUMP.get()).build(null));
 
 
 

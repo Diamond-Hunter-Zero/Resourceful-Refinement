@@ -42,7 +42,8 @@ import static com.resourceful_refinement.content.radiator.RadiatorBlock.HEAT_STA
 public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, BoilerHeater {
 
     private static final float FLUID_CONSUMPTION = 0.25f;
-    public static final int TANK_CAPACITY = 25;
+    public static final int TANK_CAPACITY = 50;
+    public static final int MIN_TANK_FILL_THRESHOLD = 25;
     public static final int HEAT_GROWTH = 5;
     public static final int HEAT_DECAY = 8;
 
@@ -192,11 +193,12 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         }
 
         // Active output pushing (for direct connections to tanks/machines without pipes)
-        if (state.hasProperty(RadiatorBlock.FACING)) {
+        // Only push if the radiator has more than the minimum tank fill threshold
+        if (be.tank.getFluidAmount() > MIN_TANK_FILL_THRESHOLD && state.hasProperty(RadiatorBlock.FACING)) {
             Direction facing = state.getValue(RadiatorBlock.FACING);
             BlockPos targetPos = pos.relative(facing);
             IFluidHandler targetHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, targetPos, facing.getOpposite());
-            if (targetHandler != null && be.tank.getFluidAmount() > 0) {
+            if (targetHandler != null) {
                 int maxPush = Math.max(0, be.fluidReceivedLastTick - be.fluidDrainedCurrentTick);
                 if (maxPush > 0) {
                     FluidStack toDrain = be.tank.getFluid().copy();
@@ -303,7 +305,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
 
         ExtendedHeatCondition radiatorHeat = getHeatConditionFromEnergy(heatLevel);
         tooltip.add(Component.literal("§7Heat: ").append(Component.literal(radiatorHeat.getSerializedName()).withColor(radiatorHeat.getColor())).append(" §8(" + heatLevel + "° H)"));
-        tooltip.add(Component.literal("§7Flow Status: §8" + (fluidReceivedLastTick != 0 ? "Operational" : "Stationary")));
+        tooltip.add(Component.literal("§7Flow Status: §8" + (fluidReceivedLastTick != 1 ? "Operational" : "Stagnant")));
 
         return true;
     }
@@ -445,6 +447,8 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             if (resource.isEmpty()) return FluidStack.EMPTY;
 
             int maxDrain = Math.max(0, fluidReceivedLastTick - fluidDrainedCurrentTick);
+            if (tank.getFluidAmount() - maxDrain < MIN_TANK_FILL_THRESHOLD)
+                maxDrain = Math.min(maxDrain, tank.getFluidAmount() - MIN_TANK_FILL_THRESHOLD);
             if (maxDrain <= 0) return FluidStack.EMPTY;
 
             FluidStack toDrain = resource.copy();
@@ -465,7 +469,10 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             if (maxDrain <= 0) return FluidStack.EMPTY;
 
             int allowedDrain = Math.max(0, fluidReceivedLastTick - fluidDrainedCurrentTick);
+            if (tank.getFluidAmount() - allowedDrain < MIN_TANK_FILL_THRESHOLD)
+                allowedDrain = Math.min(allowedDrain, tank.getFluidAmount() - MIN_TANK_FILL_THRESHOLD);
             if (allowedDrain <= 0) return FluidStack.EMPTY;
+
 
             int toDrainAmount = Math.min(maxDrain, allowedDrain);
             FluidStack drained = tank.drain(toDrainAmount, action);

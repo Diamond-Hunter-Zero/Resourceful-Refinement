@@ -11,6 +11,7 @@ public class ModStressValues {
     public static final double FRACKING_STRESS = 16;
     public static final double SIEVE_STRESS = 4;
     public static final double FORGE_STRESS = 8;
+    public static final double ADVANCED_PUMP_STRESS = 8;
 
 
     public static void register() {
@@ -19,6 +20,7 @@ public class ModStressValues {
         registerImpact(ModBlocks.FRACKING_PUMP_OUTLET.get(), () -> FRACKING_STRESS);
         registerImpact(ModBlocks.MECHANICAL_SIEVE.get(), () -> SIEVE_STRESS);
         registerImpact(ModBlocks.MECHANICAL_FORGE_MOULD.get(), () -> FORGE_STRESS);
+        registerImpact(ModBlocks.ADVANCED_PUMP.get(), () -> ADVANCED_PUMP_STRESS);
 
         // Register generation capacities
         registerCapacity(ModBlocks.COMBUSTION_CHAMBER.get(), () -> 10);

@@ -21,6 +21,8 @@ public class HeatUtilities {
     public static TagKey<Block> COOLED_BLOCK_TAG = BlockTags.create(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "cooled_source"));
     public static TagKey<Block> CHILLED_BLOCK_TAG = BlockTags.create(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "chilled_source"));
 
+    public static TagKey<Block> SUPPORTS_HEATER_STAND_BLOCK_TAG = BlockTags.create(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "supports_heater_stand"));
+
     public static TagKey<Fluid> CHILLED_FLUID_TAG = TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "chilled_coolants"));
     public static TagKey<Fluid> COOLED_FLUID_TAG = TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "cooled_coolants"));
     public static TagKey<Fluid> PASSIVE_FLUID_TAG = TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "passive_coolants"));

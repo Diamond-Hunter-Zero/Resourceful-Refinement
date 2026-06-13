@@ -24,6 +24,7 @@ public class CombustionChamberModel extends HierarchicalModel<Entity> {
         );
     private final Vector3f ANIMATION_VECTOR_CACHE = new Vector3f();
 
+        private final ModelPart root;
         private final ModelPart pistons_rack;
         private final ModelPart piston_cylinder;
         private final ModelPart piston_cap;
@@ -41,6 +42,7 @@ public class CombustionChamberModel extends HierarchicalModel<Entity> {
         private final ModelPart bb_main;
 
 	public CombustionChamberModel(ModelPart root) {
+            this.root = root;
             this.pistons_rack = root.getChild("pistons_rack");
             this.piston_cylinder = this.pistons_rack.getChild("piston_cylinder");
             this.piston_cap = this.piston_cylinder.getChild("piston_cap");
@@ -132,9 +134,7 @@ public class CombustionChamberModel extends HierarchicalModel<Entity> {
     }
 
     public void animatePistons(long accumulatedTime) {
-        bb_main.getAllParts().forEach(ModelPart::resetPose);
-        pistons_rack.getAllParts().forEach(ModelPart::resetPose);
-        pistons_rack_2.getAllParts().forEach(ModelPart::resetPose);
+        root.getAllParts().forEach(ModelPart::resetPose);
         KeyframeAnimations.animate(this, engine_active_loop, accumulatedTime, 1.0f, ANIMATION_VECTOR_CACHE);
     }
 
@@ -173,6 +173,6 @@ public class CombustionChamberModel extends HierarchicalModel<Entity> {
 
     @Override
     public ModelPart root() {
-        return bb_main;
+        return root;
     }
 }

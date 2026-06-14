@@ -1,0 +1,45 @@
+{
+  "multipart": [
+    { "when": { "facing": "down",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled", "x": 180 } },
+    { "when": { "facing": "down",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled",  "x": 180 } },
+    { "when": { "facing": "down",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert",   "x": 180 } },
+    { "when": { "facing": "down",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive",  "x": 180 } },
+    { "when": { "facing": "down",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated",  "x": 180 } },
+    { "when": { "facing": "down",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated", "x": 180 } },
+
+    { "when": { "facing": "up",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled" } },
+    { "when": { "facing": "up",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled" } },
+    { "when": { "facing": "up",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert" } },
+    { "when": { "facing": "up",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive" } },
+    { "when": { "facing": "up",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated" } },
+    { "when": { "facing": "up",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated" } },
+
+    { "when": { "facing": "north",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled", "x": 90} },
+    { "when": { "facing": "north",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled", "x": 90} },
+    { "when": { "facing": "north",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert", "x": 90} },
+    { "when": { "facing": "north",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive", "x": 90} },
+    { "when": { "facing": "north",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated", "x": 90} },
+    { "when": { "facing": "north",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated", "x": 90} },
+
+    { "when": { "facing": "south",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled", "x": 90, "y": 180} },
+    { "when": { "facing": "south",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled", "x": 90, "y": 180} },
+    { "when": { "facing": "south",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert", "x": 90, "y": 180} },
+    { "when": { "facing": "south",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive", "x": 90, "y": 180} },
+    { "when": { "facing": "south",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated", "x": 90, "y": 180} },
+    { "when": { "facing": "south",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated", "x": 90, "y": 180} },
+
+    { "when": { "facing": "west",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled", "x": 90, "y": 270} },
+    { "when": { "facing": "west",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled", "x": 90, "y": 270} },
+    { "when": { "facing": "west",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert", "x": 90, "y": 270} },
+    { "when": { "facing": "west",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive", "x": 90, "y": 270} },
+    { "when": { "facing": "west",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated", "x": 90, "y": 270} },
+    { "when": { "facing": "west",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated", "x": 90, "y": 270} },
+
+    { "when": { "facing": "east",  "heat_state": "0" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_chilled", "x": 90, "y": 90} },
+    { "when": { "facing": "east",  "heat_state": "1" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_cooled", "x": 90, "y": 90} },
+    { "when": { "facing": "east",  "heat_state": "2" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_inert", "x": 90, "y": 90} },
+    { "when": { "facing": "east",  "heat_state": "3" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_passive", "x": 90, "y": 90} },
+    { "when": { "facing": "east",  "heat_state": "4" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_heated", "x": 90, "y": 90} },
+    { "when": { "facing": "east",  "heat_state": "5" }, "apply": { "model": "resourceful_refinement:block/radiator/radiator_pipe_superheated", "x": 90, "y": 90} }
+  ]
+}

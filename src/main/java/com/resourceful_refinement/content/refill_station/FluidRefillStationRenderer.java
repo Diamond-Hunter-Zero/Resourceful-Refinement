@@ -152,4 +152,9 @@ public class FluidRefillStationRenderer extends SafeBlockEntityRenderer<FluidRef
                 .setLight(light)
                 .setNormal(pose, nx, ny, nz);
     }
+
+    @Override
+    public int getViewDistance() {
+        return 128;
+    }
 }

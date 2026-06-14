@@ -10,4 +10,6 @@ public class ModPartialModels {
     public static final PartialModel SHAFT_VERTICAL = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_vertical"));
     public static final PartialModel GEYSER_CASING = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/geyser_block"));
     public static final PartialModel NETHERRACK_GEYSER_CASING = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/netherrack_geyser_block"));
+    public static final PartialModel INDUSTRIAL_HEATER_STAND = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/distillery/industrial_heater_stand"));
+    public static final PartialModel ADVANCED_PUMP_COG = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/advanced_pump/advanced_pump_cog"));
 }

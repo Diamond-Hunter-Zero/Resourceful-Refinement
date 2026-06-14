@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:goat",
+  "processing_time": 400,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "create:milk",
+      "amount": 250
+    }
+  ]
+}

@@ -11,7 +11,8 @@
     "JigsawPlacementMixin",
     "WolfCollarInvoker",
     "CatCollarInvoker",
-    "BasinOperatingBlockEntityMixin"
+    "BasinOperatingBlockEntityMixin",
+    "FluidNetworkMixin"
   ],
   "client": [
     "client.LocalPlayerMixin"

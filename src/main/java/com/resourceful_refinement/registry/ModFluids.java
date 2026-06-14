@@ -57,6 +57,7 @@ public class ModFluids {
 
     // Misc Fluids
     public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
+    public static final FluidEntry COOLANT = register("coolant", 0xD9F4FA, FluidGroup.ALLOYED);
 
     // Paint Fluids (v0.2)
     public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);

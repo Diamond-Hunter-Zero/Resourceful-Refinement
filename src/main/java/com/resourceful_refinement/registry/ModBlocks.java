@@ -1,13 +1,19 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
+import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
+import com.resourceful_refinement.content.fuel_tank.FuelTankBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
+import com.resourceful_refinement.content.radiator.RadiatorBlock;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
 import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
@@ -93,6 +99,47 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<DistilleryBlock> DISTILLERY = BLOCKS.register("distillery",
+            () -> new DistilleryBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<RadiatorBlock> RADIATOR_PIPE = BLOCKS.register("radiator_pipe",
+            () -> new RadiatorBlock(BlockBehaviour.Properties.of()
+                    .strength(1f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<CombustionChamberBlock> COMBUSTION_CHAMBER = BLOCKS.register("combustion_chamber",
+            () -> new CombustionChamberBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<FuelTankBlock> FUEL_TANK = BLOCKS.register("fuel_tank",
+            () -> new FuelTankBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<AdvancedPumpBlock> ADVANCED_PUMP = BLOCKS.register("advanced_pump",
+            () -> new AdvancedPumpBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.MECHANICAL_PUMP.get())
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<MilkingStationBlock> MILKING_STATION = BLOCKS.register("milking_station",
+            () -> new MilkingStationBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
 
     // -------------------------------------------------------------------------
     // Fluid Gel Blocks

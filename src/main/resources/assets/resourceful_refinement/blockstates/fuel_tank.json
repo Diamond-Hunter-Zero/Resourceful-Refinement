@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "resourceful_refinement:block/fuel_tank",
+      "uvlock": true
+    },
+    "facing=east": {
+      "model": "resourceful_refinement:block/fuel_tank",
+      "y": 90,
+      "uvlock": true
+    },
+    "facing=south": {
+      "model": "resourceful_refinement:block/fuel_tank",
+      "y": 180,
+      "uvlock": true
+    },
+    "facing=west": {
+      "model": "resourceful_refinement:block/fuel_tank",
+      "y": 270,
+      "uvlock": true
+    }
+  }
+}

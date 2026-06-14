@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.casting_depot.CastingDepotItem;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberItem;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
@@ -54,6 +55,20 @@ public class ModItems {
 
     public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
             () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
+
+    public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
+
+    public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
+            () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
+
+    public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
+
+    public static final DeferredItem<BlockItem> MILKING_STATION_ITEM = ITEMS.registerSimpleBlockItem("milking_station", ModBlocks.MILKING_STATION);
+
 
     // -------------------------------------------------------------------------
     // Gel Items

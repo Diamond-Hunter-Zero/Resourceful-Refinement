@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:ghast",
+  "processing_time": 800,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:ghast_tear",
+      "count": 1
+    }
+  ]
+}

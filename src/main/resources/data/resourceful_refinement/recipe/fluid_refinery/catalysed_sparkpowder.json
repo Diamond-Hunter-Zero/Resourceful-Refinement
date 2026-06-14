@@ -1,7 +1,7 @@
 {
   "type": "resourceful_refinement:fluid_refinery",
   "heat_requirement": "heated",
-  "processing_time": 40,
+  "processing_time": 60,
   "ingredients": [
     {
       "item": "resourceful_refinement:flux_dust"

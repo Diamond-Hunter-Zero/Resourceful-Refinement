@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:squid",
+  "processing_time": 400,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:ink_sac",
+      "count": 8
+    }
+  ]
+}

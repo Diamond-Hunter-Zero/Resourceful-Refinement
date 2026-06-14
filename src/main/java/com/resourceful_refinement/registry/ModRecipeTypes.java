@@ -1,6 +1,9 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
+import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
+import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipe;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipe;
@@ -25,65 +28,66 @@ public class ModRecipeTypes {
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<FluidRefineryRecipe>> FLUID_REFINERY_TYPE =
             RECIPE_TYPES.register("fluid_refinery", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering fluid_refinery RecipeType");
                 return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "fluid_refinery"));
             });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FluidRefineryRecipe>> FLUID_REFINERY_SERIALIZER =
-            RECIPE_SERIALIZERS.register("fluid_refinery", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering fluid_refinery RecipeSerializer");
-                return new StandardProcessingRecipe.Serializer<>(FluidRefineryRecipe::new);
-            });
+            RECIPE_SERIALIZERS.register("fluid_refinery", FluidRefineryRecipe.Serializer::new);
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<MechanicalSieveRecipe>> MECHANICAL_SIEVE_TYPE =
             RECIPE_TYPES.register("mechanical_fluid_sieve", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering mechanical_fluid_sieve RecipeType");
                 return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_fluid_sieve"));
             });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MechanicalSieveRecipe>> MECHANICAL_SIEVE_SERIALIZER =
             RECIPE_SERIALIZERS.register("mechanical_fluid_sieve", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering mechanical_fluid_sieve RecipeSerializer");
                 return new StandardProcessingRecipe.Serializer<>(MechanicalSieveRecipe::new);
             });
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<MechanicalForgeMouldRecipe>> MECHANICAL_FORGE_MOULD_TYPE =
             RECIPE_TYPES.register("mechanical_forge_mould", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering mechanical_forge_mould RecipeType");
                 return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_forge_mould"));
             });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MechanicalForgeMouldRecipe>> MECHANICAL_FORGE_MOULD_SERIALIZER =
-            RECIPE_SERIALIZERS.register("mechanical_forge_mould", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering mechanical_forge_mould RecipeSerializer");
-                return new MechanicalForgeMouldRecipe.Serializer();
-            });
+            RECIPE_SERIALIZERS.register("mechanical_forge_mould", MechanicalForgeMouldRecipe.Serializer::new);
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe>> COATING_TYPE =
             RECIPE_TYPES.register("coating", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering coating RecipeType");
                 return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "coating"));
             });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe>> COATING_SERIALIZER =
-            RECIPE_SERIALIZERS.register("coating", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering coating RecipeSerializer");
-                return new com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe.Serializer();
-            });
+            RECIPE_SERIALIZERS.register("coating", CoatingRecipe.Serializer::new);
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<FrackingPumpRecipe>> FRACKING_PUMP_TYPE =
             RECIPE_TYPES.register("fracking_pump", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering fracking_pump RecipeType");
                 return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "fracking_pump"));
             });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FrackingPumpRecipe>> FRACKING_PUMP_SERIALIZER =
-            RECIPE_SERIALIZERS.register("fracking_pump", () -> {
-                ResourcefulRefinementMain.LOGGER.info("[ModRecipeTypes] Registering fracking_pump RecipeSerializer");
-                return new FrackingPumpRecipe.Serializer();
+            RECIPE_SERIALIZERS.register("fracking_pump", FrackingPumpRecipe.Serializer::new);
+
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<DistilleryRecipe>> DISTILLERY_TYPE =
+            RECIPE_TYPES.register("distillery", () -> {
+                return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "distillery"));
             });
 
-    public record RefineryRecipeTypeInfo(ResourceLocation id,
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<DistilleryRecipe>> DISTILLERY_SERIALIZER =
+            RECIPE_SERIALIZERS.register("distillery", DistilleryRecipe.Serializer::new);
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<MilkingStationRecipe>> MILKING_STATION_TYPE =
+            RECIPE_TYPES.register("milking_station", () -> {
+                return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "milking_station"));
+            });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MilkingStationRecipe>> MILKING_STATION_SERIALIZER =
+            RECIPE_SERIALIZERS.register("milking_station", MilkingStationRecipe.Serializer::new);
+
+
+
+    public record RefinementRecipeTypeInfo(ResourceLocation id,
                                          Supplier<RecipeSerializer<?>> serializer,
                                          Supplier<RecipeType<?>> type) implements IRecipeTypeInfo {
         @Override
@@ -97,33 +101,45 @@ public class ModRecipeTypes {
         }
     }
 
-    public static final IRecipeTypeInfo FLUID_REFINERY_TYPE_INFO = new RefineryRecipeTypeInfo(
+    public static final IRecipeTypeInfo FLUID_REFINERY_TYPE_INFO = new RefinementRecipeTypeInfo(
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "fluid_refinery"),
             FLUID_REFINERY_SERIALIZER::get,
             FLUID_REFINERY_TYPE::get
     );
 
-    public static final IRecipeTypeInfo MECHANICAL_SIEVE_TYPE_INFO = new RefineryRecipeTypeInfo(
+    public static final IRecipeTypeInfo MECHANICAL_SIEVE_TYPE_INFO = new RefinementRecipeTypeInfo(
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_fluid_sieve"),
             MECHANICAL_SIEVE_SERIALIZER::get,
             MECHANICAL_SIEVE_TYPE::get
     );
 
-    public static final IRecipeTypeInfo MECHANICAL_FORGE_MOULD_TYPE_INFO = new RefineryRecipeTypeInfo(
+    public static final IRecipeTypeInfo MECHANICAL_FORGE_MOULD_TYPE_INFO = new RefinementRecipeTypeInfo(
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_forge_mould"),
             MECHANICAL_FORGE_MOULD_SERIALIZER::get,
             MECHANICAL_FORGE_MOULD_TYPE::get
     );
 
-    public static final IRecipeTypeInfo COATING_TYPE_INFO = new RefineryRecipeTypeInfo(
+    public static final IRecipeTypeInfo COATING_TYPE_INFO = new RefinementRecipeTypeInfo(
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "coating"),
             COATING_SERIALIZER::get,
             COATING_TYPE::get
     );
 
-    public static final IRecipeTypeInfo FRACKING_PUMP_TYPE_INFO = new RefineryRecipeTypeInfo(
+    public static final IRecipeTypeInfo FRACKING_PUMP_TYPE_INFO = new RefinementRecipeTypeInfo(
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "fracking_pump"),
             FRACKING_PUMP_SERIALIZER::get,
             FRACKING_PUMP_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo DISTILLERY_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "distillery"),
+            DISTILLERY_SERIALIZER::get,
+            DISTILLERY_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo MILKING_STATION_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "milking_station"),
+            MILKING_STATION_SERIALIZER::get,
+            MILKING_STATION_TYPE::get
     );
 }

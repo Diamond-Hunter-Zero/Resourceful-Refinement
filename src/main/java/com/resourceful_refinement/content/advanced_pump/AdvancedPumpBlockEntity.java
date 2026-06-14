@@ -32,6 +32,11 @@ import java.util.Set;
 public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGoggleInformation {
 
     private boolean redstonePowered;
+    private int measuredThroughputMbPerTick;
+    private int throughputThisTick;
+    private long throughputTick = -1;
+    private int syncCooldown;
+    private boolean pendingThroughputSync;
 
     public AdvancedPumpBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -57,9 +62,18 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
     }
 
     @Override
+    public void updatePressureChange() {
+        AdvancedPumpThroughputTracker.remove(this);
+        resetMeasuredThroughput();
+        super.updatePressureChange();
+    }
+
+    @Override
     public void tick() {
-        if (level != null && !level.isClientSide)
+        if (level != null && !level.isClientSide) {
             updateRedstonePower();
+            updateMeasuredThroughput();
+        }
         super.tick();
     }
 
@@ -77,11 +91,12 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
         boolean pull = isPullingOnSide(isFront(side));
         Set<BlockFace> targets = new HashSet<>();
         Map<BlockPos, Pair<Integer, Map<Direction, Boolean>>> pipeGraph = new HashMap<>();
+        boolean immediateEndpoint = hasReachedValidEndpoint(level, start, pull);
 
         if (!pull)
             FluidPropagator.resetAffectedFluidNetworks(level, worldPosition, side.getOpposite());
 
-        if (!hasReachedValidEndpoint(level, start, pull)) {
+        if (!immediateEndpoint) {
             pipeGraph.computeIfAbsent(worldPosition, $ -> Pair.of(0, new IdentityHashMap<>()))
                 .getSecond()
                 .put(side, pull);
@@ -156,9 +171,13 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
             new BlockFace(start.getPos(), start.getOppositeFace()), pull);
 
         float pressure = Math.abs(getSpeed());
+        Set<BlockFace> measuredFaces = new HashSet<>();
+        if (immediateEndpoint)
+            measuredFaces.add(start);
         for (Set<BlockFace> set : validFaces.values()) {
             int parallelBranches = Math.max(1, set.size() - 1);
             for (BlockFace face : set) {
+                measuredFaces.add(face);
                 BlockPos pipePos = face.getPos();
                 Direction pipeSide = face.getFace();
 
@@ -175,6 +194,8 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
                 pipeBehaviour.addPressure(pipeSide, inbound, pressure / parallelBranches);
             }
         }
+
+        AdvancedPumpThroughputTracker.addPath(this, measuredFaces);
     }
 
     private boolean hasReachedValidEndpoint(LevelAccessor world, BlockFace blockFace, boolean pull) {
@@ -207,23 +228,89 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putBoolean("RedstonePowered", redstonePowered);
+        tag.putInt("MeasuredThroughputMbPerTick", measuredThroughputMbPerTick);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         redstonePowered = tag.getBoolean("RedstonePowered");
+        measuredThroughputMbPerTick = tag.getInt("MeasuredThroughputMbPerTick");
     }
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        float speed = Math.abs(getSpeed());
-        int millibucketsPerSecond = speed == 0 ? 0 : Math.max(1, Math.round(speed / 2f)) * 20;
+        int millibucketsPerSecond = measuredThroughputMbPerTick * 20;
 
         tooltip.add(Component.literal("     Advanced Pump:"));
-        tooltip.add(Component.literal("§9Flow Rate: §7" + millibucketsPerSecond + " mB/s"));
-        tooltip.add(Component.literal("§7Range: §8" + (FluidPropagator.getPumpRange() * 2) + " blocks"));
-        tooltip.add(Component.literal("§7Direction: §8" + (redstonePowered ? "Reversed" : "Normal")));
+        tooltip.add(Component.literal("\u00A79Throughput: \u00A77" + measuredThroughputMbPerTick + " mB/t \u00A78(" + millibucketsPerSecond + " mB/s)"));
+        tooltip.add(Component.literal("\u00A77Range: \u00A78" + (FluidPropagator.getPumpRange() * 2) + " blocks"));
+        tooltip.add(Component.literal("\u00A77Direction: \u00A78" + (redstonePowered ? "Reversed" : "Normal")));
         return true;
+    }
+
+    public void recordMeasuredThroughput(int amount) {
+        if (level == null || level.isClientSide)
+            return;
+
+        long gameTime = level.getGameTime();
+        if (throughputTick != gameTime) {
+            throughputTick = gameTime;
+            throughputThisTick = 0;
+        }
+
+        throughputThisTick += amount;
+        if (measuredThroughputMbPerTick != throughputThisTick) {
+            measuredThroughputMbPerTick = throughputThisTick;
+            syncMeasuredThroughput();
+        }
+    }
+
+    private void updateMeasuredThroughput() {
+        if (level == null)
+            return;
+
+        if (throughputTick < level.getGameTime() - 1 && measuredThroughputMbPerTick != 0) {
+            throughputThisTick = 0;
+            measuredThroughputMbPerTick = 0;
+            syncMeasuredThroughput();
+        }
+
+        if (getSpeed() == 0)
+            AdvancedPumpThroughputTracker.remove(this);
+
+        if (syncCooldown > 0)
+            syncCooldown--;
+
+        if (syncCooldown == 0 && pendingThroughputSync) {
+            pendingThroughputSync = false;
+            syncMeasuredThroughput();
+        }
+    }
+
+    private void syncMeasuredThroughput() {
+        if (syncCooldown > 0) {
+            pendingThroughputSync = true;
+            return;
+        }
+
+        syncCooldown = 5;
+        sendData();
+    }
+
+    private void resetMeasuredThroughput() {
+        throughputThisTick = 0;
+        throughputTick = level == null ? -1 : level.getGameTime();
+        if (measuredThroughputMbPerTick == 0)
+            return;
+
+        measuredThroughputMbPerTick = 0;
+        syncMeasuredThroughput();
+    }
+
+    @Override
+    public void remove() {
+        AdvancedPumpThroughputTracker.remove(this);
+        super.remove();
     }
 }

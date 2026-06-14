@@ -45,6 +45,9 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
 
     public static final int TANK_CAPACITY = 1000;
     public static final int MAX_CHAIN_LENGTH = 16;
+    public static final int PASSIVE_FUEL_BURN_TIME = 6;
+    public static final int HEATED_FUEL_BURN_TIME = 9;
+    public static final int SUPERHEATED_FUEL_BURN_TIME = 12;
 
     public static TagKey<Fluid> PASSIVE_FUEL_FLUID_TAG = TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "passive_fuel"));
     public static TagKey<Fluid> HEATED_FUEL_FLUID_TAG = TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "heated_fuel"));
@@ -57,6 +60,8 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     private boolean localRedstonePowered = false;
     private boolean chainRedstonePowered = false;
     private boolean isUnderPerforming = false;
+    private int burnTimer = 0;
+    private int burnFuelState = 0;
     private BlockPos controllerPos;
     private int chainIndex = 0;
     private int chainSize = 1;
@@ -137,17 +142,17 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     private int getChainFuelState() {
         CombustionChamberBlockEntity controller = getController();
         if (controller == null) {
-            return getCombustionFuelState(inputTank);
+            return getEffectiveFuelState();
         }
 
         List<CombustionChamberBlockEntity> members = controller.getChainMembers();
         if (members.isEmpty()) {
-            return getCombustionFuelState(controller.inputTank);
+            return controller.getEffectiveFuelState();
         }
 
         int highestFuelState = 0;
         for (CombustionChamberBlockEntity member : members) {
-            int memberFuelState = getCombustionFuelState(member.inputTank);
+            int memberFuelState = member.getEffectiveFuelState();
             if (memberFuelState > highestFuelState) {
                 highestFuelState = memberFuelState;
             }
@@ -382,9 +387,9 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     }
 
     private void consumeFuel() {
-        int localFuelState = getCombustionFuelState(inputTank);
         CombustionChamberBlockEntity controller = getController();
         float generatedSpeed = controller != null ? controller.getControllerGeneratedSpeed() : getControllerGeneratedSpeed();
+        int localFuelState = getEffectiveFuelState();
         if (localFuelState <= 0 || generatedSpeed == 0 || chainRedstonePowered) {
             return;
         }
@@ -392,13 +397,47 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
             return;
         }
 
+        if (burnTimer <= 0) {
+            int tankFuelState = getCombustionFuelState(inputTank);
+            if (tankFuelState <= 0) {
+                burnFuelState = 0;
+                return;
+            }
+
+            burnFuelState = tankFuelState;
+            burnTimer = getFuelBurnTime(tankFuelState);
+            inputTank.drain(1, IFluidHandler.FluidAction.EXECUTE);
+        }
+
         // Play audio
         if (chainIndex % 4 == 0 && level.getGameTime() % 2 == 0)
             level.playSound(null, worldPosition, AllSoundEvents.CRUSHING_3.getMainEvent(), SoundSource.BLOCKS, 0.225f, 0.1f + level.random.nextFloat() * 0.05f);
 
-        // Consume fuel from tank
-        inputTank.drain(1, IFluidHandler.FluidAction.EXECUTE);
-        setChanged();
+        burnTimer--;
+        if (burnTimer <= 0) {
+            burnTimer = 0;
+            burnFuelState = 0;
+            handleFuelStateChanged();
+        }
+        syncData();
+    }
+
+    private int getEffectiveFuelState() {
+        if (burnTimer > 0 && burnFuelState > 0) {
+            return burnFuelState;
+        }
+        return getCombustionFuelState(inputTank);
+    }
+
+    private int getFuelBurnTime(int fuelState) {
+        if (fuelState >= 3) {
+            return SUPERHEATED_FUEL_BURN_TIME;
+        } else if (fuelState == 2) {
+            return HEATED_FUEL_BURN_TIME;
+        } else if (fuelState == 1) {
+            return PASSIVE_FUEL_BURN_TIME;
+        }
+        return 0;
     }
 
 
@@ -540,7 +579,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
 
         float totalStress = 0;
         for (CombustionChamberBlockEntity member : getChainMembers()) {
-            totalStress += getStressCapacityForFuelState(getCombustionFuelState(member.inputTank));
+            totalStress += getStressCapacityForFuelState(member.getEffectiveFuelState());
         }
         return totalStress;
     }
@@ -575,7 +614,9 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         if (chainRedstonePowered) {
             tooltip.add(Component.literal("§cDeactivated by redstone signal"));
         }
-        tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §8(" + (int) (((float) inputTank.getFluidAmount() / TANK_CAPACITY) * 100) + "%)"));
+        tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §8(" + (int) (((float) inputTank.getFluidAmount() / TANK_CAPACITY) * 100)
+                + "%) at " + (int)((float)20/getFuelBurnTime(currentFuelState)) + "mb/s"));
+
         float displayedSpeed = displaySource.getControllerGeneratedSpeed();
         tooltip.add(Component.literal("§7Generating §b" + String.format("%,d", (int) (displaySource.getChainStressCapacity() * Math.abs(displayedSpeed))) + "su §8at " + (int) displayedSpeed + " RPM"));
 
@@ -626,6 +667,8 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         tag.putBoolean("LocalRedstonePowered", localRedstonePowered);
         tag.putBoolean("ChainRedstonePowered", chainRedstonePowered);
         tag.putBoolean("IsUnderPerforming", isUnderPerforming);
+        tag.putInt("BurnTimer", burnTimer);
+        tag.putInt("BurnFuelState", burnFuelState);
         tag.putInt("ChainIndex", chainIndex);
         tag.putInt("ChainSize", chainSize);
         if (controllerPos != null) {
@@ -643,6 +686,8 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         localRedstonePowered = tag.getBoolean("LocalRedstonePowered");
         chainRedstonePowered = tag.getBoolean("ChainRedstonePowered");
         isUnderPerforming = tag.getBoolean("IsUnderPerforming");
+        burnTimer = tag.getInt("BurnTimer");
+        burnFuelState = tag.getInt("BurnFuelState");
         chainIndex = tag.getInt("ChainIndex");
         chainSize = tag.contains("ChainSize") ? tag.getInt("ChainSize") : 1;
         controllerPos = tag.contains("ControllerPos") ? BlockPos.of(tag.getLong("ControllerPos")) : worldPosition;

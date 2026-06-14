@@ -7,6 +7,8 @@ import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBl
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
+import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
+import com.resourceful_refinement.content.milking_station.MilkingStationBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
 import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
@@ -77,8 +79,14 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<CombustionChamberBlockEntity>> COMBUSTION_CHAMBER_BE = BLOCK_ENTITIES.register("combustion_chamber",
             () -> BlockEntityType.Builder.of((pos, state) -> new CombustionChamberBlockEntity(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), pos, state), ModBlocks.COMBUSTION_CHAMBER.get()).build(null));
 
+    public static final Supplier<BlockEntityType<FuelTankBlockEntity>> FUEL_TANK_BE = BLOCK_ENTITIES.register("fuel_tank",
+            () -> BlockEntityType.Builder.of((pos, state) -> new FuelTankBlockEntity(ModBlockEntities.FUEL_TANK_BE.get(), pos, state), ModBlocks.FUEL_TANK.get()).build(null));
+
     public static final Supplier<BlockEntityType<AdvancedPumpBlockEntity>> ADVANCED_PUMP_BE = BLOCK_ENTITIES.register("advanced_pump",
             () -> BlockEntityType.Builder.of((pos, state) -> new AdvancedPumpBlockEntity(ModBlockEntities.ADVANCED_PUMP_BE.get(), pos, state), ModBlocks.ADVANCED_PUMP.get()).build(null));
+
+    public static final Supplier<BlockEntityType<MilkingStationBlockEntity>> MILKING_STATION_BE = BLOCK_ENTITIES.register("milking_station",
+            () -> BlockEntityType.Builder.of((pos, state) -> new MilkingStationBlockEntity(ModBlockEntities.MILKING_STATION_BE.get(), pos, state), ModBlocks.MILKING_STATION.get()).build(null));
 
 
 

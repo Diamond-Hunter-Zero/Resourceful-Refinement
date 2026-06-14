@@ -13,6 +13,9 @@ import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.milking_station.MilkingStationModel;
+import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
+import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
@@ -253,6 +256,29 @@ public class ResourcefulRefinementMain {
             return side != null ? be.getFluidHandler(side) : null;
         });
 
+        // --- Fuel Tank ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FUEL_TANK_BE.get(), (be, side) -> {
+            return side != null ? be.tank : null;
+        });
+
+        // --- Milking Station ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MILKING_STATION_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING);
+            return side == facing ? be.outputItemHandler : null;
+        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.MILKING_STATION_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING);
+            return side == facing.getOpposite() ? be.outputFluidHandler : null;
+        });
+
     }
 
     /**
@@ -298,10 +324,12 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MILKING_STATION_BE.get(), MilkingStationRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
+            event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
         }
 
         @SubscribeEvent
@@ -346,6 +374,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+            event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
         }
     }
 

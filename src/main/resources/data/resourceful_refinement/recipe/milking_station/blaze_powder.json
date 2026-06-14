@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:blaze",
+  "processing_time": 500,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:blaze_powder",
+      "count": 1
+    }
+  ]
+}

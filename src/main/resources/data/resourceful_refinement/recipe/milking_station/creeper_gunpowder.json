@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:creeper",
+  "processing_time": 500,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:gunpowder",
+      "count": 1
+    }
+  ]
+}

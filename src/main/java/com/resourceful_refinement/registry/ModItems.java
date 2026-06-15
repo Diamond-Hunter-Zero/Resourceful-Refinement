@@ -69,6 +69,13 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> MILKING_STATION_ITEM = ITEMS.registerSimpleBlockItem("milking_station", ModBlocks.MILKING_STATION);
 
+    // -------------------------------------------------------------------------
+    // Choral Clusters
+    // -------------------------------------------------------------------------
+
+    public static final DeferredItem<BlockItem> CHORUS_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("chorus_crystal", ModBlocks.CHORUS_CRYSTAL);
+    public static final DeferredItem<BlockItem> CHORAL_END_STONE_ITEM = ITEMS.registerSimpleBlockItem("choral_end_stone", ModBlocks.CHORAL_END_STONE);
+
 
     // -------------------------------------------------------------------------
     // Gel Items

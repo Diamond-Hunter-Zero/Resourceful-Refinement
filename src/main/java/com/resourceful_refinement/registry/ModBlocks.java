@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.choral_cluster.ChorusCrystalBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
@@ -22,9 +23,10 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.simibubi.create.AllBlocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -139,6 +141,26 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    // -------------------------------------------------------------------------
+    // Choral Clusters
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<ChorusCrystalBlock> CHORUS_CRYSTAL = BLOCKS.register("chorus_crystal",
+            () -> new ChorusCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f, 6.0f)
+                    .sound(SoundType.AMETHYST)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()
+                    .lightLevel(state -> 10)
+                    .isRedstoneConductor((state, getter, pos) -> false)
+                    .isSuffocating((state, getter, pos) -> false)
+                    .isViewBlocking((state, getter, pos) -> false)));
+
+    public static final DeferredBlock<Block> CHORAL_END_STONE = BLOCKS.register("choral_end_stone",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.END_STONE)
+                    .strength(3.0f, 9.0f)
+                    .requiresCorrectToolForDrops()));
 
 
     // -------------------------------------------------------------------------

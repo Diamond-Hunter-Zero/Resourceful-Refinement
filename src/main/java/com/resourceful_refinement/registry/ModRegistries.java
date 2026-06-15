@@ -15,6 +15,7 @@ public class ModRegistries {
         ModCreativeTab.CREATIVE_MODE_TABS.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModStructureTypes.STRUCTURE_TYPES.register(modEventBus);
+        ModStructurePieceTypes.STRUCTURE_PIECE_TYPES.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModDisplaySources.init(modEventBus);
     }

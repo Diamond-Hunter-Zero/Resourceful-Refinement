@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.worldgen.choral.ChoralClusterMountainStructure;
 import com.resourceful_refinement.worldgen.structure.NetherSurfaceJigsawStructure;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -13,4 +14,7 @@ public class ModStructureTypes {
 
     public static final DeferredHolder<StructureType<?>, StructureType<NetherSurfaceJigsawStructure>> NETHER_SURFACE_JIGSAW =
             STRUCTURE_TYPES.register("nether_ground_jigsaw", () -> () -> NetherSurfaceJigsawStructure.CODEC);
+
+    public static final DeferredHolder<StructureType<?>, StructureType<ChoralClusterMountainStructure>> CHORAL_CLUSTER_MOUNTAIN =
+            STRUCTURE_TYPES.register("choral_cluster_mountain", () -> () -> ChoralClusterMountainStructure.CODEC);
 }

@@ -56,6 +56,9 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationLayer
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
 import com.resourceful_refinement.network.ModNetworking;
+import com.resourceful_refinement.worldgen.choral.ChoralClustersBiomeHolder;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
@@ -79,7 +82,17 @@ public class ResourcefulRefinementMain {
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
+        NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
 
+    }
+
+    private void onServerAboutToStart(ServerAboutToStartEvent event) {
+        ChoralClustersBiomeHolder.resolve(event.getServer().registryAccess());
+    }
+
+    private void onServerStopping(ServerStoppingEvent event) {
+        ChoralClustersBiomeHolder.clear();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -300,6 +313,7 @@ public class ResourcefulRefinementMain {
                         ItemBlockRenderTypes.setRenderLayer(entry.flowing.get(), RenderType.TRANSLUCENT);
                     }
                 }
+                ItemBlockRenderTypes.setRenderLayer(ModBlocks.CHORUS_CRYSTAL.get(), RenderType.translucent());
             });
         }
 

@@ -1,0 +1,7 @@
+{
+  "type": "resourceful_refinement:choral_cluster_mountain",
+  "biomes": "#resourceful_refinement:has_structure/choral_cluster_mountain",
+  "spawn_overrides": {},
+  "step": "raw_generation",
+  "terrain_adaptation": "none"
+}

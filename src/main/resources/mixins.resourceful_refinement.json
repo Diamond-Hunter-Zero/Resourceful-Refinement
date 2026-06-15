@@ -9,6 +9,8 @@
     "SinglePoolElementAccessor",
     "StructurePoolElementMixin",
     "JigsawPlacementMixin",
+    "BiomeSourceMixin",
+    "ChoralClustersEndBiomeSourceMixin",
     "WolfCollarInvoker",
     "CatCollarInvoker",
     "BasinOperatingBlockEntityMixin",

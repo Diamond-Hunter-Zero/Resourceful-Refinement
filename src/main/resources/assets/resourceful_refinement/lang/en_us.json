@@ -23,6 +23,9 @@
   "block.resourceful_refinement.fuel_tank": "Fuel Tank",
   "block.resourceful_refinement.advanced_pump": "Advanced Pump",
   "block.resourceful_refinement.milking_station": "Milking Station",
+  "block.resourceful_refinement.chorus_crystal": "Chorus Crystal",
+  "block.resourceful_refinement.choral_end_stone": "Choral End Stone",
+  "biome.resourceful_refinement.choral_clusters": "Choral Clusters",
 
   "fluid_type.resourceful_refinement.molten_crimsite": "Molten Crimsite",
   "block.resourceful_refinement.fluids.molten_crimsite": "Molten Crimsite",

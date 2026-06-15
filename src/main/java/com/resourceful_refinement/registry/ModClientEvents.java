@@ -4,6 +4,7 @@ import com.resourceful_refinement.content.gel_splatter.GelFluidTintColors;
 import com.resourceful_refinement.content.gel_splatter.GelFluidTintColorsClient;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
+import com.resourceful_refinement.content.choral_cluster.ChorusCrystalColors;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
@@ -101,10 +102,16 @@ public class ModClientEvents {
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_SLIPPERY.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_MOLTEN.get());
         event.getBlockColors().register(GelSplatterBlock::RegisterRendererTint, ModBlocks.GEL_SPLATTER_BOUNCY.get());
+        event.getBlockColors().register(ChorusCrystalColors::blockTint, ModBlocks.CHORUS_CRYSTAL.get());
     }
 
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        event.getItemColors().register(
+                (stack, tintIndex) -> ChorusCrystalColors.itemTint(tintIndex),
+                ModItems.CHORUS_CRYSTAL_ITEM.get()
+        );
+
         int defaultInertTint = GelFluidTintColors.getGelTint(GelSplatterBlockEntity.getDefaultFluid(ModBlocks.GEL_SPLATTER.get()));
         event.getItemColors().register(
                 (stack, tintIndex) -> tintIndex == 0 ? defaultInertTint : 0xFFFFFFFF,

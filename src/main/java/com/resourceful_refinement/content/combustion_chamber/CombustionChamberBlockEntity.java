@@ -614,8 +614,13 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         if (chainRedstonePowered) {
             tooltip.add(Component.literal("§cDeactivated by redstone signal"));
         }
-        tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §8(" + (int) (((float) inputTank.getFluidAmount() / TANK_CAPACITY) * 100)
-                + "%) at " + (int)((float)20/getFuelBurnTime(currentFuelState)) + "mb/s"));
+
+        int effectiveFuelState = getEffectiveFuelState();
+        if (effectiveFuelState <= 0)
+            tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §c(Not a fuel)"));
+        else
+            tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §8(" + (int) (((float) inputTank.getFluidAmount() / TANK_CAPACITY) * 100)
+                + "%) at " + (int)((float)20/getFuelBurnTime(effectiveFuelState)) + "mb/s"));
 
         float displayedSpeed = displaySource.getControllerGeneratedSpeed();
         tooltip.add(Component.literal("§7Generating §b" + String.format("%,d", (int) (displaySource.getChainStressCapacity() * Math.abs(displayedSpeed))) + "su §8at " + (int) displayedSpeed + " RPM"));

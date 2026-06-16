@@ -13,6 +13,7 @@ import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
@@ -325,6 +326,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MILKING_STATION_BE.get(), MilkingStationRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.FUEL_TANK_BE.get(), FuelTankRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);

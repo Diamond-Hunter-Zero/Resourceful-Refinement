@@ -18,11 +18,11 @@
     },
     {
       "when": { "facing": "up", "powered": "false" },
-      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 90 }
+      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 270 }
     },
     {
       "when": { "facing": "down", "powered": "false" },
-      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 270 }
+      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 90 }
     },
     {
       "when": { "facing": "north", "powered": "true" },
@@ -42,11 +42,11 @@
     },
     {
       "when": { "facing": "up", "powered": "true" },
-      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 270 }
+      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 90 }
     },
     {
       "when": { "facing": "down", "powered": "true" },
-      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 90 }
+      "apply": { "model": "resourceful_refinement:block/advanced_pump/advanced_pump", "x": 270 }
     }
   ]
 }

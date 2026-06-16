@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -22,41 +23,46 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.Nullable;
 
-public class FuelTankBlock extends HorizontalDirectionalBlock implements EntityBlock {
+public class FuelTankBlock extends Block implements EntityBlock {
 
     public static final MapCodec<FuelTankBlock> CODEC = simpleCodec(FuelTankBlock::new);
+    public static final BooleanProperty FRONT_PORT = BooleanProperty.create("front_port");
+    public static final BooleanProperty EAST_PORT = BooleanProperty.create("east_port");
+    public static final BooleanProperty SOUTH_PORT = BooleanProperty.create("south_port");
+    public static final BooleanProperty WEST_PORT = BooleanProperty.create("west_port");
 
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
+    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 16, 15);
     private static final VoxelShape SUPPORT_SHAPE = Shapes.block();
 
     public FuelTankBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
+        registerDefaultState(defaultBlockState()
+                .setValue(FRONT_PORT, false)
+                .setValue(EAST_PORT, false)
+                .setValue(SOUTH_PORT, false)
+                .setValue(WEST_PORT, false));
     }
 
     @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+    protected MapCodec<? extends Block> codec() {
         return CODEC;
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
-    }
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        builder.add(FRONT_PORT, EAST_PORT, SOUTH_PORT, WEST_PORT);
     }
 
     @Override
@@ -82,6 +88,47 @@ public class FuelTankBlock extends HorizontalDirectionalBlock implements EntityB
     @Override
     protected boolean isCollisionShapeFullBlock(BlockState state, BlockGetter level, BlockPos pos) {
         return true;
+    }
+
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+        super.onPlace(state, level, pos, oldState, isMoving);
+        if (!level.isClientSide && !state.is(oldState.getBlock())) {
+            updateConnections(level, pos, state);
+        }
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos,
+            boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+        if (!level.isClientSide) {
+            updateConnections(level, pos, state);
+        }
+    }
+
+    private static void updateConnections(Level level, BlockPos pos, BlockState state) {
+        BlockState updated = updateConnectionState(state, level, pos);
+        if (updated != state) {
+            level.setBlock(pos, updated, Block.UPDATE_ALL);
+        }
+    }
+
+    private static BlockState updateConnectionState(BlockState state, LevelAccessor level, BlockPos pos) {
+        return state
+                .setValue(FRONT_PORT, hasFluidInterface(level, pos, Direction.NORTH))
+                .setValue(EAST_PORT, hasFluidInterface(level, pos, Direction.EAST))
+                .setValue(SOUTH_PORT, hasFluidInterface(level, pos, Direction.SOUTH))
+                .setValue(WEST_PORT, hasFluidInterface(level, pos, Direction.WEST));
+    }
+
+    private static boolean hasFluidInterface(LevelAccessor level, BlockPos pos, Direction direction) {
+        if (!(level instanceof Level realLevel)) {
+            return false;
+        }
+
+        BlockPos neighbourPos = pos.relative(direction);
+        return realLevel.getCapability(Capabilities.FluidHandler.BLOCK, neighbourPos, direction.getOpposite()) != null;
     }
 
     @Nullable

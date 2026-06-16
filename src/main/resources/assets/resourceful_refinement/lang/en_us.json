@@ -124,6 +124,10 @@
   "block.resourceful_refinement.fluids.catalysed_sparkpowder": "Catalysed Sparkpowder",
   "item.resourceful_refinement.catalysed_sparkpowder_bucket": "Catalysed Sparkpowder Bucket",
 
+  "fluid_type.resourceful_refinement.liquid_concrete": "Liquid Concrete",
+  "block.resourceful_refinement.fluids.liquid_concrete": "Liquid Concrete",
+  "item.resourceful_refinement.liquid_concrete": "Liquid Concrete Bucket",
+
   "fluid_type.resourceful_refinement.liquid_glue": "Liquid Glue",
   "block.resourceful_refinement.fluids.liquid_glue": "Liquid Glue",
   "item.resourceful_refinement.liquid_glue_bucket": "Liquid Glue Bucket",

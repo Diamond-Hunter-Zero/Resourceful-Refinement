@@ -1,0 +1,24 @@
+{
+  "format_version": "1.9.0",
+  "render_type": "minecraft:cutout",
+  "texture_size": [64, 64],
+  "textures": {
+    "0": "resourceful_refinement:block/fuel_tank",
+    "particle": "resourceful_refinement:block/copper_casing"
+  },
+  "elements": [
+    {
+      "name": "south_port_box",
+      "from": [3, 3, 15],
+      "to": [13, 13, 16],
+      "faces": {
+        "north": {"uv": [5.5, 13.5, 8, 16], "texture": "#0"},
+        "east": {"uv": [3, 4.25, 3.25, 6.75], "texture": "#0"},
+        "south": {"uv": [5.5, 13.5, 8, 16], "texture": "#0"},
+        "west": {"uv": [3.25, 4.25, 3.5, 6.75], "texture": "#0"},
+        "up": {"uv": [0.25, 4.25, 2.75, 4.5], "rotation": 180, "texture": "#0"},
+        "down": {"uv": [0.25, 4.5, 2.75, 4.75], "rotation": 180, "texture": "#0"}
+      }
+    }
+  ]
+}

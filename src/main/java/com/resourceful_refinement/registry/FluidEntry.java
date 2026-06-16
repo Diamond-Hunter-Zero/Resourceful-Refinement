@@ -1,12 +1,14 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.fluids.LiquidConcreteBlock;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
 import com.resourceful_refinement.content.fluids.base.GeneralizedFlowingFluid;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -34,7 +36,7 @@ public class FluidEntry {
     public int color;
     public final FluidGroup group;
 
-    public FluidEntry(String name, int color, FluidGroup group) {
+    public FluidEntry(String name, int color, FluidGroup group, Class blockClass) {
         this.group = group;
         this.color = ((group == FluidGroup.RAW
                 || group == FluidGroup.CATALYSED
@@ -54,7 +56,11 @@ public class FluidEntry {
 
         // Register Block (path matches assets/blockstates/<group>/<name>.json)
         String blockId = group == FluidGroup.PAINT ? "paint/" + name : name;
-        block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+
+        if (blockClass == LiquidConcreteBlock.class)
+            block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidConcreteBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+        else
+            block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
 
         // Register Bucket
         bucket = ModItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
@@ -69,10 +75,4 @@ public class FluidEntry {
         return group == FluidGroup.PAINT;
     }
 
-    /** Item model parent used by {@code models/item/<fluid>_bucket.json}. */
-    /*public ResourceLocation getBucketItemModelParent() {
-        return usesPaintBucketUnderlay()
-                ? PAINT_FLUID_BUCKET_MODEL
-                : ResourceLocation.withDefaultNamespace("item/generated");
-    }*/
 }

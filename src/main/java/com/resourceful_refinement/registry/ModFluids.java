@@ -1,8 +1,10 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.fluids.LiquidConcreteBlock;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -14,7 +16,11 @@ public class ModFluids {
     public static final List<FluidEntry> ENTRIES = new ArrayList<>();
 
     private static FluidEntry register(String name, int color, FluidGroup group) {
-        FluidEntry entry = new FluidEntry(name, color, group);
+        return register(name, color, group, null);
+    }
+
+    private static FluidEntry register(String name, int color, FluidGroup group, Class blockClass) {
+        FluidEntry entry = new FluidEntry(name, color, group, blockClass);
         ENTRIES.add(entry);
         return entry;
     }
@@ -58,6 +64,8 @@ public class ModFluids {
     // Misc Fluids
     public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
     public static final FluidEntry COOLANT = register("coolant", 0xD9F4FA, FluidGroup.ALLOYED);
+    public static final FluidEntry LIQUID_CONCRETE = register("liquid_concrete", 0x948d83, FluidGroup.ALLOYED);
+    public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, LiquidConcreteBlock.class);
 
     // Paint Fluids (v0.2)
     public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);
@@ -77,8 +85,4 @@ public class ModFluids {
     public static final FluidEntry RED_PAINT = register("red_paint", 0xB02E26, FluidGroup.PAINT);
     public static final FluidEntry BLACK_PAINT = register("black_paint", 0x1D1D21, FluidGroup.PAINT);
 
-    /** Paint fluid buckets use {@link FluidEntry#PAINT_FLUID_BUCKET_MODEL} instead of the vanilla bucket underlay. */
-    /*public static boolean isPaintFluid(FluidEntry entry) {
-        return entry != null && entry.group == FluidGroup.PAINT;
-    }*/
 }

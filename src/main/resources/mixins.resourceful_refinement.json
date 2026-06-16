@@ -12,7 +12,9 @@
     "WolfCollarInvoker",
     "CatCollarInvoker",
     "BasinOperatingBlockEntityMixin",
-    "FluidNetworkMixin"
+    "FluidNetworkMixin",
+    "HosePulleyFluidHandlerMixin",
+    "OpenEndedPipeFluidHandlerMixin"
   ],
   "client": [
     "client.LocalPlayerMixin"

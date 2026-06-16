@@ -1,10 +1,9 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
-import com.resourceful_refinement.content.fluids.LiquidConcreteBlock;
+import com.resourceful_refinement.content.fluids.PouredCementBlock;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -65,7 +64,7 @@ public class ModFluids {
     public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
     public static final FluidEntry COOLANT = register("coolant", 0xD9F4FA, FluidGroup.ALLOYED);
     public static final FluidEntry LIQUID_CONCRETE = register("liquid_concrete", 0x948d83, FluidGroup.ALLOYED);
-    public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, LiquidConcreteBlock.class);
+    public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, PouredCementBlock.class);
 
     // Paint Fluids (v0.2)
     public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);

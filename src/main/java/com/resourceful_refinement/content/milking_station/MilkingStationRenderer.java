@@ -58,7 +58,7 @@ public class MilkingStationRenderer extends SafeBlockEntityRenderer<MilkingStati
             return;
         }
 
-        float yaw = facing.toYRot() + 180f;
+        float yaw = facing.toYRot() + 0f;
         entity.yRotO = yaw;
         entity.xRotO = 0;
         entity.setYRot(yaw);

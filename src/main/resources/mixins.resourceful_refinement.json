@@ -12,6 +12,8 @@
     "WolfCollarInvoker",
     "CatCollarInvoker",
     "BasinOperatingBlockEntityMixin",
+    "CreateSimpleRegistryMixin",
+    "EncasedFanBlockMixin",
     "FluidNetworkMixin",
     "HosePulleyFluidHandlerMixin",
     "OpenEndedPipeFluidHandlerMixin"

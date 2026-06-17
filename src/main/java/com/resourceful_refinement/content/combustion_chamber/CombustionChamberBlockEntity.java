@@ -44,7 +44,9 @@ import static com.resourceful_refinement.content.combustion_chamber.CombustionCh
 public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity implements IHaveGoggleInformation, IRotate {
 
     public static final int TANK_CAPACITY = 1000;
-    public static final int MAX_CHAIN_LENGTH = 16;
+    public static final int MAX_CHAIN_LENGTH = 8;
+    public static final float INTAKE_FAN_SPEED_MULTIPLIER = 1.25f;
+
     public static final int PASSIVE_FUEL_BURN_TIME = 6;
     public static final int HEATED_FUEL_BURN_TIME = 9;
     public static final int SUPERHEATED_FUEL_BURN_TIME = 12;
@@ -59,6 +61,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     private int coldestHeatSource = 0;
     private boolean localRedstonePowered = false;
     private boolean chainRedstonePowered = false;
+    private boolean hasIntakeFan = false;
     private boolean isUnderPerforming = false;
     private int burnTimer = 0;
     private int burnFuelState = 0;
@@ -193,6 +196,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
             applyChain(chain);
 
             if (level.getBlockEntity(chain.get(0)) instanceof CombustionChamberBlockEntity controller) {
+                controller.updateIntakeFanState();
                 controller.updateChainHeat();
                 controller.updateChainRedstone();
                 controller.updateChainRotation();
@@ -244,6 +248,9 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
             chamber.controllerPos = controller;
             chamber.chainIndex = i;
             chamber.chainSize = chain.size();
+            if (i > 0) {
+                chamber.hasIntakeFan = false;
+            }
             chamber.refreshLocalRedstonePower();
 
             if (i > 0 && !chamber.inputTank.isEmpty()
@@ -253,6 +260,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
 
             chamber.setChanged();
             chamber.sendData();
+            CombustionChamberFanIntegration.refreshFanInFront(level, currentPos, chamber.getBlockState());
         }
     }
 
@@ -331,6 +339,23 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         }
     }
 
+    private void updateIntakeFanState() {
+        CombustionChamberBlockEntity controller = getController();
+        CombustionChamberBlockEntity output = getOutputEngine();
+        if (controller == null || output == null || level == null || level.isClientSide) {
+            return;
+        }
+
+        boolean newHasIntakeFan = CombustionChamberFanIntegration.hasIntakeFan(level, output);
+        if (controller.hasIntakeFan == newHasIntakeFan) {
+            return;
+        }
+
+        controller.hasIntakeFan = newHasIntakeFan;
+        controller.updateSpeedAndStressOutput(controller.getChainFuelState());
+        controller.syncChainToClients();
+    }
+
     public boolean isController() {
         return controllerPos == null || controllerPos.equals(worldPosition);
     }
@@ -367,6 +392,11 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
 
     public boolean isOutputEngine() {
         return chainIndex == chainSize - 1;
+    }
+
+    public boolean hasIntakeFan() {
+        CombustionChamberBlockEntity controller = getController();
+        return controller != null && controller.hasIntakeFan;
     }
 
     private CombustionChamberBlockEntity getOutputEngine() {
@@ -531,12 +561,13 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     }
 
     private float getMaxGeneratedSpeed(int fuelState) {
+        float multiplier = hasIntakeFan ? INTAKE_FAN_SPEED_MULTIPLIER : 1;
         if (fuelState >= 3) {
-            return 48f;
+            return 48f * multiplier;
         } else if (fuelState == 2) {
-            return 32f;
+            return 32f * multiplier;
         } else if (fuelState == 1) {
-            return 16f;
+            return 16f * multiplier;
         }
 
         return 0;
@@ -579,18 +610,21 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
 
         float totalStress = 0;
         for (CombustionChamberBlockEntity member : getChainMembers()) {
-            totalStress += getStressCapacityForFuelState(member.getEffectiveFuelState());
+            totalStress += getStressCapacityForFuelState(member.getEffectiveFuelState(), hasIntakeFan);
         }
         return totalStress;
     }
 
-    private float getStressCapacityForFuelState(int fuelState) {
+    private float getStressCapacityForFuelState(int fuelState, boolean hasIntakeFan) {
         float maxSpeed = getMaxGeneratedSpeed(fuelState);
         if (fuelState <= 0 || maxSpeed == 0) {
             return 0;
         }
 
-        return (fuelState * fuelState * 512) / maxSpeed;
+        if (hasIntakeFan)
+            return ((fuelState * fuelState * 512) / maxSpeed) * INTAKE_FAN_SPEED_MULTIPLIER;
+        else
+            return (fuelState * fuelState * 512) / maxSpeed;
     }
 
     public float getRenderedEngineSpeed() {
@@ -622,8 +656,8 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
             tooltip.add(Component.literal("§7" + inputTank.getFluid().getHoverName().getString() + " §8(" + (int) (((float) inputTank.getFluidAmount() / TANK_CAPACITY) * 100)
                 + "%) at " + (int)((float)20/getFuelBurnTime(effectiveFuelState)) + "mb/s"));
 
-        float displayedSpeed = displaySource.getControllerGeneratedSpeed();
-        tooltip.add(Component.literal("§7Generating §b" + String.format("%,d", (int) (displaySource.getChainStressCapacity() * Math.abs(displayedSpeed))) + "su §8at " + (int) displayedSpeed + " RPM"));
+        float displayedSpeed = Math.abs(displaySource.getControllerGeneratedSpeed());
+        tooltip.add(Component.literal("§7Generating §b" + String.format("%,d", (int) (displaySource.getChainStressCapacity() * displayedSpeed)) + "su §8at " + (int) displayedSpeed + " RPM"));
 
         if (displaySource.currentFuelState > 1 && displaySource.isUnderPerforming) {
             tooltip.add(Component.literal(""));
@@ -671,6 +705,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         tag.putInt("ColdestHeatSource", coldestHeatSource);
         tag.putBoolean("LocalRedstonePowered", localRedstonePowered);
         tag.putBoolean("ChainRedstonePowered", chainRedstonePowered);
+        tag.putBoolean("HasIntakeFan", hasIntakeFan);
         tag.putBoolean("IsUnderPerforming", isUnderPerforming);
         tag.putInt("BurnTimer", burnTimer);
         tag.putInt("BurnFuelState", burnFuelState);
@@ -690,6 +725,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         coldestHeatSource = tag.getInt("ColdestHeatSource");
         localRedstonePowered = tag.getBoolean("LocalRedstonePowered");
         chainRedstonePowered = tag.getBoolean("ChainRedstonePowered");
+        hasIntakeFan = tag.getBoolean("HasIntakeFan");
         isUnderPerforming = tag.getBoolean("IsUnderPerforming");
         burnTimer = tag.getInt("BurnTimer");
         burnFuelState = tag.getInt("BurnFuelState");

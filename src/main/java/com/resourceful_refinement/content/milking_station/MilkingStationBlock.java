@@ -50,7 +50,7 @@ public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStat
     public static final MapCodec<MilkingStationBlock> CODEC = simpleCodec(MilkingStationBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    private static final VoxelShape BOUNDING_AABB = Shapes.or(Block.box(0, 0, 0, 16, 13, 16), Block.box(3, 13, 3, 13, 16, 13));
+    private static final VoxelShape BOUNDING_AABB = Shapes.or(Block.box(0, 0, 0, 16, 13, 16), Block.box(2, 13, 2, 14, 16, 14));
     private static final VoxelShape SUPPORT_SHAPE = Shapes.block();
 
 

@@ -7,6 +7,7 @@ import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberFanModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
@@ -23,6 +24,7 @@ import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.simibubi.create.api.boiler.BoilerHeater;
@@ -42,6 +44,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -59,12 +62,16 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationLayer
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
 import com.resourceful_refinement.network.ModNetworking;
+import com.simibubi.create.foundation.model.ModelSwapper;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
 
     public static final String MOD_ID = "resourceful_refinement";
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final AtomicBoolean COMMON_SETUP_REGISTERED = new AtomicBoolean(false);
 
     public ResourcefulRefinementMain(IEventBus modEventBus, ModContainer modContainer) {
 
@@ -86,6 +93,11 @@ public class ResourcefulRefinementMain {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        if (!COMMON_SETUP_REGISTERED.compareAndSet(false, true)) {
+            LOGGER.warn("[Resourceful Refinement] Common setup was invoked more than once; skipping duplicate registration work.");
+            return;
+        }
+
         // Register stress values
         event.enqueueWork(ModStressValues::register);
 
@@ -352,6 +364,11 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.ADVANCED_PUMP_COG.modelLocation(), "standalone"));
+        }
+
+        @SubscribeEvent
+        public static void modifyBakedModels(ModelEvent.ModifyBakingResult event) {
+            ModelSwapper.swapModels(event.getModels(), ModelSwapper.getAllBlockStateModelLocations(AllBlocks.ENCASED_FAN.get()), CombustionChamberFanModel::new);
         }
 
         @SubscribeEvent

@@ -451,17 +451,17 @@ public class MilkingStationBlockEntity extends KineticBlockEntity {
         tooltip.add(Component.literal("     \u00a7b" + (int) (speed * ModStressValues.MILKING_STATION_STRESS) + "su \u00a78at current speed"));
         if (hasCapturedEntity()) {
             tooltip.add(Component.literal("     \u00a77Holding: \u00a78" + capturedEntityType));
-            if (timer > 0) {
-                tooltip.add(Component.literal("     \u00a77Progress: \u00a78" + timer + " ticks remaining"));
-            }
+            if (timer > 0)
+                tooltip.add(Component.literal("     \u00a77Progress: \u00a78" + String.format("%.0f",timer/20f) + "s remaining"));
+
         } else if (hasSeatedPlayer()) {
             tooltip.add(Component.literal("     \u00a77Holding: \u00a78minecraft:player"));
-            if (timer > 0) {
-                tooltip.add(Component.literal("     \u00a77Progress: \u00a78" + timer + " ticks remaining"));
-            }
-        } else {
+            if (timer > 0)
+                tooltip.add(Component.literal("     \u00a77Progress: \u00a78" + String.format("%.0f",timer/20f) + "s remaining"));
+
+        } else
             tooltip.add(Component.literal(speed == 0 ? "     \u00a78Idle" : "     \u00a77Awaiting captured entity"));
-        }
+
         return true;
     }
 

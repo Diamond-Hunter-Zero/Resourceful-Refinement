@@ -3,8 +3,8 @@
     "render_type": "minecraft:cutout",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "resourceful_refinement:block/distillery_tank_connected",
-		"particle": "resourceful_refinement:block/distillery_tank_connected"
+		"0": "resourceful_refinement:block/distillery/distillery_tank_connected",
+		"particle": "resourceful_refinement:block/distillery/distillery_tank_connected"
 	},
 	"elements": [
 		{

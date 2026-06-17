@@ -19,24 +19,43 @@ public class MilkingStationModel extends HierarchicalModel<Entity> {
     private final ModelPart root;
     private final ModelPart arms_axes;
     private final ModelPart milker_arm;
+    private final ModelPart milker_arm2;
+    private final ModelPart milker_arm3;
+    private final ModelPart milker_arm4;
     private final ModelPart bb_main;
 
     public MilkingStationModel(ModelPart root) {
         this.root = root;
         this.arms_axes = root.getChild("arms_axes");
         this.milker_arm = this.arms_axes.getChild("milker_arm");
+        this.milker_arm2 = this.arms_axes.getChild("milker_arm2");
+        this.milker_arm3 = this.arms_axes.getChild("milker_arm3");
+        this.milker_arm4 = this.arms_axes.getChild("milker_arm4");
         this.bb_main = root.getChild("bb_main");
+
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        PartDefinition arms_axes = partdefinition.addOrReplaceChild("arms_axes", CubeListBuilder.create(), PartPose.offset(0.0F, 10.0F, 0.0F));
+        PartDefinition arms_axes = partdefinition.addOrReplaceChild("arms_axes", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 10.0F, 0.0F, 0.0F, -0.7854F, 0.0F));
 
         PartDefinition milker_arm = arms_axes.addOrReplaceChild("milker_arm", CubeListBuilder.create().texOffs(39, 44).addBox(-19.0F, 0.0F, -1.0F, 20.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 44).addBox(-19.0F, -13.0F, 0.0F, 19.0F, 13.0F, 0.0F, new CubeDeformation(0.0F))
                 .texOffs(65, 7).addBox(-20.0F, -13.0F, -1.0F, 1.0F, 14.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+
+        PartDefinition milker_arm2 = arms_axes.addOrReplaceChild("milker_arm2", CubeListBuilder.create().texOffs(39, 44).addBox(-19.0F, 0.0F, -1.0F, 20.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 44).addBox(-19.0F, -13.0F, 0.0F, 19.0F, 13.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(65, 7).addBox(-20.0F, -13.0F, -1.0F, 1.0F, 14.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 1.5708F, 0.0F));
+
+        PartDefinition milker_arm3 = arms_axes.addOrReplaceChild("milker_arm3", CubeListBuilder.create().texOffs(39, 44).addBox(-19.0F, 0.0F, -1.0F, 20.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 44).addBox(-19.0F, -13.0F, 0.0F, 19.0F, 13.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(65, 7).addBox(-20.0F, -13.0F, -1.0F, 1.0F, 14.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, -1.5708F, 0.0F));
+
+        PartDefinition milker_arm4 = arms_axes.addOrReplaceChild("milker_arm4", CubeListBuilder.create().texOffs(39, 44).addBox(-19.0F, 0.0F, -1.0F, 20.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+                .texOffs(0, 44).addBox(-19.0F, -13.0F, 0.0F, 19.0F, 13.0F, 0.0F, new CubeDeformation(0.0F))
+                .texOffs(65, 7).addBox(-20.0F, -13.0F, -1.0F, 1.0F, 14.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 3.1416F, 0.0F));
 
         PartDefinition bb_main = partdefinition.addOrReplaceChild("bb_main", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -13.0F, -8.0F, 16.0F, 12.0F, 16.0F, new CubeDeformation(0.0F))
                 .texOffs(65, 0).addBox(-5.0F, -15.0F, -8.0F, 10.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
@@ -58,7 +77,7 @@ public class MilkingStationModel extends HierarchicalModel<Entity> {
 
     public void animateArm(float angle) {
         root.getAllParts().forEach(ModelPart::resetPose);
-        milker_arm.zRot = angle;
+        //milker_arm.zRot = angle;
     }
 
     @Override

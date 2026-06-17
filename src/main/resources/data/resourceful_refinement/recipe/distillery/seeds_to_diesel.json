@@ -2,7 +2,7 @@
   "type": "resourceful_refinement:distillery",
   "heat_requirement": "heated",
   "distillery_height": 3,
-  "processing_time": 40,
+  "processing_time": 3600,
   "ingredients": [
     {
       "type": "neoforge:single",
@@ -13,7 +13,7 @@
   "sized_ingredients": [
     {
       "item": "minecraft:wheat_seeds",
-      "count": 1
+      "count": 8
     }
   ],
   "results": [

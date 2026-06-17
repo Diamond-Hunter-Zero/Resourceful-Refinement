@@ -11,6 +11,7 @@ import com.resourceful_refinement.content.combustion_chamber.CombustionChamberMo
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
@@ -20,6 +21,7 @@ import com.resourceful_refinement.content.milking_station.MilkingStationSeatRend
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
+import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
@@ -377,6 +379,8 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
             event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
+            event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
+            event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
         }
     }
 

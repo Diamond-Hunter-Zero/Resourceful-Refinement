@@ -20,6 +20,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -34,6 +35,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -44,6 +49,10 @@ public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStat
 
     public static final MapCodec<MilkingStationBlock> CODEC = simpleCodec(MilkingStationBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
+    private static final VoxelShape BOUNDING_AABB = Shapes.or(Block.box(0, 0, 0, 16, 13, 16), Block.box(3, 13, 3, 13, 16, 13));
+    private static final VoxelShape SUPPORT_SHAPE = Shapes.block();
+
 
     public MilkingStationBlock(Properties properties) {
         super(properties);
@@ -74,6 +83,29 @@ public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStat
     public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
+
+    // -------------------------------------------------------------------------
+    // Block Shapes
+    // -------------------------------------------------------------------------
+    @NotNull
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return BOUNDING_AABB; }
+
+    @NotNull
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {  return BOUNDING_AABB; }
+
+    @Override
+    public VoxelShape getBlockSupportShape(BlockState state, BlockGetter level, BlockPos pos) {
+        return SUPPORT_SHAPE;
+    }
+
+    @Override
+    protected boolean isCollisionShapeFullBlock(BlockState state, BlockGetter level, BlockPos pos) {
+        return true;
+    }
+
+
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

@@ -11,6 +11,7 @@ public class ModStressValues {
     public static final double FRACKING_STRESS = 16;
     public static final double SIEVE_STRESS = 4;
     public static final double FORGE_STRESS = 8;
+    public static final double GLARE_EMITTER_STRESS = 8;
 
 
     public static void register() {
@@ -18,6 +19,7 @@ public class ModStressValues {
         registerImpact(ModBlocks.FRACKING_PUMP_OUTLET.get(), () -> FRACKING_STRESS);
         registerImpact(ModBlocks.MECHANICAL_SIEVE.get(), () -> SIEVE_STRESS);
         registerImpact(ModBlocks.MECHANICAL_FORGE_MOULD.get(), () -> FORGE_STRESS);
+        registerImpact(ModBlocks.GLARE_EMITTER_DISH.get(), () -> GLARE_EMITTER_STRESS);
     }
 
     private static void registerImpact(Block block, DoubleSupplier impact) {

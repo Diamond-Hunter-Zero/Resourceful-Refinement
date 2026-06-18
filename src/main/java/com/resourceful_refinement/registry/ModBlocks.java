@@ -6,6 +6,11 @@ import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.glare.GlareEmitterDishBlock;
+import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareNodeBlock;
+import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
@@ -93,6 +98,39 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<GlareNodeBlock> GLARE_RELAY = BLOCKS.register("glare_relay",
+            () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), GlareRelayBlockEntity::new));
+
+    public static final DeferredBlock<GlareEmitterDishBlock> GLARE_EMITTER_DISH = BLOCKS.register("glare_emitter_dish",
+            () -> new GlareEmitterDishBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<GlareNodeBlock> GLARE_KINETIC_RECEIVER = BLOCKS.register("glare_kinetic_receiver",
+            () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), GlareKineticReceiverBlockEntity::new));
+
+    public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
+            () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), false));
+
+    public static final DeferredBlock<ResonanceCrystalBlock> ARTIFICIAL_RESONANCE_CRYSTAL = BLOCKS.register("artificial_resonance_crystal",
+            () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), true));
 
     // -------------------------------------------------------------------------
     // Fluid Gel Blocks

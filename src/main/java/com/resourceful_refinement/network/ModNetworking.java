@@ -12,6 +12,11 @@ public final class ModNetworking {
     public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar(ResourcefulRefinementMain.MOD_ID)
                 .versioned("1")
+                .playToClient(
+                        GlareLinkSyncPayload.TYPE,
+                        GlareLinkSyncPayload.STREAM_CODEC,
+                        ModNetworking::handleGlareLinkSync
+                )
                 .playToServer(
                         SetRefillStationTrackingIdPayload.TYPE,
                         SetRefillStationTrackingIdPayload.STREAM_CODEC,
@@ -25,5 +30,9 @@ public final class ModNetworking {
                 SetRefillStationTrackingIdPayload.handle(payload, serverPlayer);
             }
         });
+    }
+
+    private static void handleGlareLinkSync(GlareLinkSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> com.resourceful_refinement.content.glare.rendering.GlareClientLinks.handleSync(payload));
     }
 }

@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.casting_depot.CastingDepotItem;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
+import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
@@ -54,6 +55,19 @@ public class ModItems {
 
     public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
             () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_RELAY = ITEMS.register("glare_relay",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_RELAY.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_EMITTER_DISH = ITEMS.register("glare_emitter_dish",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_EMITTER_DISH.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_KINETIC_RECEIVER = ITEMS.register("glare_kinetic_receiver",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_KINETIC_RECEIVER.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("resonance_crystal", ModBlocks.RESONANCE_CRYSTAL);
+
+    public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);
 
     // -------------------------------------------------------------------------
     // Gel Items

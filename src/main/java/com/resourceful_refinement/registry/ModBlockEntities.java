@@ -13,6 +13,9 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEnti
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
+import com.resourceful_refinement.content.glare.GlareEmitterDishBlockEntity;
+import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -63,6 +66,15 @@ public class ModBlockEntities {
                     (pos, state) -> new FluidRefillStationBlockEntity(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), pos, state),
                     ModBlocks.FLUID_REFILL_STATION.get()
             ).build(null));
+
+    public static final Supplier<BlockEntityType<GlareRelayBlockEntity>> GLARE_RELAY_BE = BLOCK_ENTITIES.register("glare_relay",
+            () -> BlockEntityType.Builder.of(GlareRelayBlockEntity::new, ModBlocks.GLARE_RELAY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareEmitterDishBlockEntity>> GLARE_EMITTER_DISH_BE = BLOCK_ENTITIES.register("glare_emitter_dish",
+            () -> BlockEntityType.Builder.of(GlareEmitterDishBlockEntity::new, ModBlocks.GLARE_EMITTER_DISH.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareKineticReceiverBlockEntity>> GLARE_KINETIC_RECEIVER_BE = BLOCK_ENTITIES.register("glare_kinetic_receiver",
+            () -> BlockEntityType.Builder.of(GlareKineticReceiverBlockEntity::new, ModBlocks.GLARE_KINETIC_RECEIVER.get()).build(null));
 
     /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */
     public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE =

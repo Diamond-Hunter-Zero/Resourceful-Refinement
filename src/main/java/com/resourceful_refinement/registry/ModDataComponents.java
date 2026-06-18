@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.mojang.serialization.Codec;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.coating.CoatingData;
+import com.resourceful_refinement.content.glare.GlareTargetsData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -38,6 +39,13 @@ public class ModDataComponents {
             () -> DataComponentType.<Boolean>builder()
                     .persistent(Codec.BOOL)
                     .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlareTargetsData>> GLARE_TARGETS = DATA_COMPONENTS.register("glare_targets",
+            () -> DataComponentType.<GlareTargetsData>builder()
+                    .persistent(GlareTargetsData.CODEC)
+                    .networkSynchronized(GlareTargetsData.STREAM_CODEC)
                     .build()
     );
 }

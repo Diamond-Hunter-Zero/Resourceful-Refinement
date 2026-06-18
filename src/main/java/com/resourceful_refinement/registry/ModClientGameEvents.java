@@ -2,11 +2,13 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.coating.CoatingData;
+import com.resourceful_refinement.content.glare.rendering.GlareClientLinks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid = ResourcefulRefinementMain.MOD_ID, value = Dist.CLIENT)
@@ -23,5 +25,10 @@ public class ModClientGameEvents {
                 event.getToolTip().add(Component.literal("Coating: " + name + " (" + data.integrity() + "/" + data.type().getMaxDurability() + ")").withColor(data.type().getColor()));
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent event) {
+        GlareClientLinks.render(event);
     }
 }

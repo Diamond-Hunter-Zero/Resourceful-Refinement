@@ -82,7 +82,7 @@ public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecip
         // 1. Render Processing Time (e.g., "200 ticks")
         String timeText = String.format("%.0f", recipe.getProcessingDuration()/20f) + "s";
         int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, 18, 10, 0xFFF5F5F5, false);
+        guiGraphics.drawString(font, timeText, 24, 10, 0xFFF5F5F5, false);
 
         // Render fluid stack amounts
         int inputAmount = recipe.getFluidIngredients().getFirst().amount();
@@ -106,7 +106,7 @@ public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecip
         // Height warning
         int maxHeight = recipe.getRequiredHeight();
         String heightText = maxHeight + " Blocks";
-        guiGraphics.drawString(font, heightText, this.background.getWidth() - 47, 9, 0xFFF5F5F5, false);
+        guiGraphics.drawString(font, heightText, this.background.getWidth() - 48, 9, 0xFFF5F5F5, false);
 
 
         // Render block model

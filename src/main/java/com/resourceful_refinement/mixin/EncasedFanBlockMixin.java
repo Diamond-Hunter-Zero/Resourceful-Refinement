@@ -17,6 +17,7 @@ public class EncasedFanBlockMixin {
     private void resourceful_refinement$addCombustionChamberOutputShaft(LevelReader world, BlockPos pos,
                                                                        BlockState state, Direction face,
                                                                        CallbackInfoReturnable<Boolean> cir) {
+
         if (face == state.getValue(EncasedFanBlock.FACING)
                 && CombustionChamberFanIntegration.isFanDrivenByOutputChamber(world, pos, state)) {
             cir.setReturnValue(true);

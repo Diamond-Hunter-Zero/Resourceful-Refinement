@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.combustion_chamber.CombustionChamberIt
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
+import com.resourceful_refinement.content.milking_station.MilkingStationItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
@@ -67,7 +68,8 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
 
-    public static final DeferredItem<BlockItem> MILKING_STATION_ITEM = ITEMS.registerSimpleBlockItem("milking_station", ModBlocks.MILKING_STATION);
+    public static final DeferredItem<MilkingStationItem> MILKING_STATION_ITEM = ITEMS.register("milking_station",
+            () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
 
 
     // -------------------------------------------------------------------------

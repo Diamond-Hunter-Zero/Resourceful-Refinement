@@ -9,6 +9,8 @@ import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMoul
 import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipeCategory;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipe;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipeCategory;
+import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
+import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipeCategory;
 import com.resourceful_refinement.content.radiator.RadiatorVirtualHeatingCategory;
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipeCategory;
@@ -44,6 +46,7 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(new FluidRefineryRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new RadiatorVirtualHeatingCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new DistilleryRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        registration.addRecipeCategories(new MilkingStationRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -101,6 +104,14 @@ public class ModJeiPlugin implements IModPlugin {
                 .toList();
 
         registration.addRecipes(DistilleryRecipeCategory.TYPE, distilleryRecipes);
+
+        // Milking Station
+        List<MilkingStationRecipe> milkingRecipes = rm.getAllRecipesFor(ModRecipeTypes.MILKING_STATION_TYPE.get())
+                .stream()
+                .map(RecipeHolder::value)
+                .toList();
+
+        registration.addRecipes(MilkingStationRecipeCategory.TYPE, milkingRecipes);
     }
 
     @Override
@@ -116,5 +127,6 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.REFINERY_ACCESS_PORT.get()), FluidRefineryRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.RADIATOR_PIPE.get()), RadiatorVirtualHeatingCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.DISTILLERY.get()), DistilleryRecipeCategory.TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.MILKING_STATION.get()), MilkingStationRecipeCategory.TYPE);
     }
 }

@@ -1,3 +1,4 @@
 {
-  "parent": "resourceful_refinement:block/milking_station"
+  "parent": "builtin/entity"
 }
+

@@ -56,7 +56,7 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
         ms.popPose();
 
 
-        // --- Shaft Kinetic Rendering ---
+        // --- Heat Stand Rendering ---
         if (be.getLevel() != null && be.getLevel().getBlockState(be.getBlockPos().below()).is(HeatUtilities.SUPPORTS_HEATER_STAND_BLOCK_TAG))
         {
             ms.pushPose();
@@ -71,6 +71,16 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
         // --- Shaft Kinetic Rendering ---
         if (be.isOutputEngine()) {
             renderKineticShaft(be, state, ms, buffer, light);
+        }
+
+        // --- Fan Shaft Rendering ---
+        if (be.hasIntakeFan() && be.isOutputEngine()) {
+            ms.pushPose();
+            ms.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
+            ms.translate(0,0, facing.getAxis() == Direction.Axis.X? -1 : 1);
+            ms.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
+            renderKineticShaft(be, state, ms, buffer, light);
+            ms.popPose();
         }
     }
 

@@ -364,11 +364,17 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.ADVANCED_PUMP_COG.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_NORTH.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_EAST.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_SOUTH.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_WEST.modelLocation(), "standalone"));
         }
 
         @SubscribeEvent
         public static void modifyBakedModels(ModelEvent.ModifyBakingResult event) {
             ModelSwapper.swapModels(event.getModels(), ModelSwapper.getAllBlockStateModelLocations(AllBlocks.ENCASED_FAN.get()), CombustionChamberFanModel::new);
+            CombustionChamberFanModel.loadCustomModels(event.getModels());
         }
 
         @SubscribeEvent
@@ -394,10 +400,10 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
-            event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
             event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
             event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
+            event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
         }
     }
 

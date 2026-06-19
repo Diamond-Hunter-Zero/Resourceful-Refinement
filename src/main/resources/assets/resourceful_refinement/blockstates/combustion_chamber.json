@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "resourceful_refinement:block/combustion_chamber"
+        "model": "resourceful_refinement:block/combustion_chamber/combustion_chamber"
       }
     }
   ]

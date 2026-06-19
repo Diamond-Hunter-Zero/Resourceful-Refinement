@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
+import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
@@ -136,6 +137,13 @@ public class ModBlocks {
     public static final DeferredBlock<MilkingStationBlock> MILKING_STATION = BLOCKS.register("milking_station",
             () -> new MilkingStationBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<BrewersTapBlock> BREWERS_TAP = BLOCKS.register("brewers_tap",
+            () -> new BrewersTapBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));

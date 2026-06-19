@@ -71,6 +71,8 @@ public class ModItems {
     public static final DeferredItem<MilkingStationItem> MILKING_STATION_ITEM = ITEMS.register("milking_station",
             () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
+
 
     // -------------------------------------------------------------------------
     // Gel Items

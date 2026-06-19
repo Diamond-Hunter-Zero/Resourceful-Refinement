@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
+import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
@@ -88,6 +89,8 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<MilkingStationBlockEntity>> MILKING_STATION_BE = BLOCK_ENTITIES.register("milking_station",
             () -> BlockEntityType.Builder.of((pos, state) -> new MilkingStationBlockEntity(ModBlockEntities.MILKING_STATION_BE.get(), pos, state), ModBlocks.MILKING_STATION.get()).build(null));
 
+    public static final Supplier<BlockEntityType<BrewersTapBlockEntity>> BREWERS_TAP_BE = BLOCK_ENTITIES.register("brewers_tap",
+            () -> BlockEntityType.Builder.of((pos, state) -> new BrewersTapBlockEntity(ModBlockEntities.BREWERS_TAP_BE.get(), pos, state), ModBlocks.BREWERS_TAP.get()).build(null));
 
 
 

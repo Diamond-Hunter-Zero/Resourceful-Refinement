@@ -14,6 +14,7 @@
     "BasinOperatingBlockEntityMixin",
     "CreateSimpleRegistryMixin",
     "EncasedFanBlockMixin",
+    "BeltInventoryMixin",
     "FluidNetworkMixin",
     "HosePulleyFluidHandlerMixin",
     "OpenEndedPipeFluidHandlerMixin"

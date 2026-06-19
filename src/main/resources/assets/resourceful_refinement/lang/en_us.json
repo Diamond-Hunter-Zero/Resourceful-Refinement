@@ -401,5 +401,12 @@
 
   "paint_nozzle.flow_speed.low": "Low",
   "paint_nozzle.flow_speed.medium": "Medium",
-  "paint_nozzle.flow_speed.high": "High"
+  "paint_nozzle.flow_speed.high": "High",
+
+  "tag.item.resourceful_refinement:fruit_flavour": "Fruit Flavour",
+  "tag.item.resourceful_refinement:sweet_flavour": "Sweet Flavour",
+  "tag.item.resourceful_refinement:veg_flavour": "Veg Flavour",
+  "tag.item.resourceful_refinement:yeast_flavour": "Yeast Flavour",
+  "tag.item.resourceful_refinement:chilled_flavour": "Chilled Flavour",
+  "tag.item.resourceful_refinement:cosmic_flavour": "Cosmic Flavour"
 }

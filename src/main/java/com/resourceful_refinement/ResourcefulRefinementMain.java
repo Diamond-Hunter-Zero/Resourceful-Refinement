@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
 import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.brewers_tap.BrewersTapRenderer;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
@@ -217,6 +218,9 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Brewer's Tap ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BREWERS_TAP_BE.get(), (be, side) -> be.flavourInv);
+
         // --- Fluid Refill Station ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FLUID_REFILL_STATION_BE.get(), (be, side) -> {
             if (!FluidRefillStationBlock.isPipeFace(be.getBlockState(), side)) {
@@ -341,6 +345,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MILKING_STATION_BE.get(), MilkingStationRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FUEL_TANK_BE.get(), FuelTankRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);

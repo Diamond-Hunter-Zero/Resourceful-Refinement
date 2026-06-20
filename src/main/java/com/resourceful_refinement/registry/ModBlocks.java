@@ -7,6 +7,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.glare.GlareEmitterDishBlock;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlock;
 import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
@@ -119,6 +120,13 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion(), GlareKineticReceiverBlockEntity::new));
+
+    public static final DeferredBlock<GlareChromaticTransceiverBlock> GLARE_CHROMATIC_TRANSCEIVER = BLOCKS.register("glare_chromatic_transceiver",
+            () -> new GlareChromaticTransceiverBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
 
     public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
             () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)

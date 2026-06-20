@@ -21,6 +21,11 @@ public final class ModNetworking {
                         SetRefillStationTrackingIdPayload.TYPE,
                         SetRefillStationTrackingIdPayload.STREAM_CODEC,
                         ModNetworking::handleSetTrackingId
+                )
+                .playToServer(
+                        ConfigureGlareTransceiverPayload.TYPE,
+                        ConfigureGlareTransceiverPayload.STREAM_CODEC,
+                        ModNetworking::handleConfigureTransceiver
                 );
     }
 
@@ -34,5 +39,13 @@ public final class ModNetworking {
 
     private static void handleGlareLinkSync(GlareLinkSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> com.resourceful_refinement.content.glare.rendering.GlareClientLinks.handleSync(payload));
+    }
+
+    private static void handleConfigureTransceiver(ConfigureGlareTransceiverPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                ConfigureGlareTransceiverPayload.handle(payload, serverPlayer);
+            }
+        });
     }
 }

@@ -172,6 +172,10 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
         return colour.getName().replace('_', ' ');
     }
 
+    protected int getSyncedColourCharge(DyeColor colour) {
+        return syncedColourCharges[colour.ordinal()];
+    }
+
     private String colourChargeSummary() {
         StringBuilder builder = new StringBuilder();
         DyeColor[] colours = DyeColor.values();

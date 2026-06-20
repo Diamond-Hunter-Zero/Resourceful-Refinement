@@ -290,6 +290,79 @@ public final class GlareGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "empty")
+    public static void chromaticTransceiverLogicModesAndThresholds(GameTestHelper helper) {
+        int[] filters = new int[DyeColor.values().length];
+        java.util.Arrays.fill(filters, GlareChromaticTransceiverBlockEntity.DISABLED_FILTER);
+        filters[DyeColor.RED.ordinal()] = 4;
+        filters[DyeColor.BLUE.ordinal()] = 2;
+
+        int[] bothMatch = new int[DyeColor.values().length];
+        bothMatch[DyeColor.RED.ordinal()] = 4;
+        bothMatch[DyeColor.BLUE.ordinal()] = 3;
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, bothMatch), "AND should pass when every enabled threshold matches");
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.OR, filters, bothMatch), "OR should pass when filters match");
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.XOR, filters, bothMatch), "XOR should fail when two filters match");
+
+        int[] oneMatch = bothMatch.clone();
+        oneMatch[DyeColor.BLUE.ordinal()] = 1;
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, oneMatch), "AND should fail below a threshold");
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.OR, filters, oneMatch), "OR should pass with one match");
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.XOR, filters, oneMatch), "XOR should pass with exactly one match");
+
+        java.util.Arrays.fill(filters, GlareChromaticTransceiverBlockEntity.DISABLED_FILTER);
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, bothMatch), "an empty filter set should not emit redstone");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void chromaticTransceiverComparisonTypes(GameTestHelper helper) {
+        int[] filters = new int[DyeColor.values().length];
+        java.util.Arrays.fill(filters, GlareChromaticTransceiverBlockEntity.DISABLED_FILTER);
+        filters[DyeColor.GREEN.ordinal()] = 5;
+        int[] charges = new int[DyeColor.values().length];
+        charges[DyeColor.GREEN.ordinal()] = 5;
+        GlareComparison[] comparisons = new GlareComparison[DyeColor.values().length];
+        java.util.Arrays.fill(comparisons, GlareComparison.GREATER_THAN_OR_EQUAL);
+
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), ">= should include equality");
+        comparisons[DyeColor.GREEN.ordinal()] = GlareComparison.GREATER_THAN;
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "> should exclude equality");
+        comparisons[DyeColor.GREEN.ordinal()] = GlareComparison.LESS_THAN_OR_EQUAL;
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "<= should include equality");
+        comparisons[DyeColor.GREEN.ordinal()] = GlareComparison.LESS_THAN;
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "< should exclude equality");
+        comparisons[DyeColor.GREEN.ordinal()] = GlareComparison.EQUAL;
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "= should match equal counts");
+        comparisons[DyeColor.GREEN.ordinal()] = GlareComparison.NOT_EQUAL;
+        require(!GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "!= should reject equal counts");
+        charges[DyeColor.GREEN.ordinal()] = 4;
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, comparisons, charges), "!= should accept unequal counts");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void chromaticTransceiverUsesUnloadedEmitterColourState(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos emitter = new GlareNodePos(level.dimension(), new BlockPos(30_000_000, 80, 30_000_000));
+        GlareNodePos transceiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 150)));
+        data.registerNode(level, new TestEmitterNode(emitter, 1, 7, DyeColor.MAGENTA, true));
+        data.registerNode(level, new TestReceiverNode(transceiver, 1, 0, GlareOperationStatus.ONLINE));
+        data.tryAddLink(level, emitter, transceiver);
+
+        GlareSavedData.NetworkRecord network = requireNetworkRecord(data, transceiver);
+        int[] charges = new int[DyeColor.values().length];
+        for (var entry : network.colourCharges.entrySet()) charges[entry.getKey().ordinal()] = entry.getValue();
+        int[] filters = new int[DyeColor.values().length];
+        java.util.Arrays.fill(filters, GlareChromaticTransceiverBlockEntity.DISABLED_FILTER);
+        filters[DyeColor.MAGENTA.ordinal()] = 7;
+
+        require(charges[DyeColor.MAGENTA.ordinal()] == 7, "unloaded emitter should retain its persisted magenta charge");
+        require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, charges), "transceiver gate should include unloaded emitter charge");
+        helper.succeed();
+    }
+
     private static UUID requireNetwork(GlareSavedData data, GlareNodePos pos) {
         return data.getNode(pos)
                 .flatMap(node -> java.util.Optional.ofNullable(node.networkId))

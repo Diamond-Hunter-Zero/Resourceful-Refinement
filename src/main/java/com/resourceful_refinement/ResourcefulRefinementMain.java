@@ -41,6 +41,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock
 import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverScreen;
 import com.resourceful_refinement.network.ModNetworking;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
@@ -207,6 +208,7 @@ public class ResourcefulRefinementMain {
         @SubscribeEvent
         public static void registerMenuScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
+            event.register(ModMenus.GLARE_CHROMATIC_TRANSCEIVER.get(), GlareChromaticTransceiverScreen::new);
         }
 
         @SubscribeEvent

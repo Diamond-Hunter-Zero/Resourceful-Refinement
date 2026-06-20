@@ -14,6 +14,7 @@ import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
 import com.resourceful_refinement.content.glare.GlareEmitterDishBlockEntity;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
@@ -75,6 +76,9 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<GlareKineticReceiverBlockEntity>> GLARE_KINETIC_RECEIVER_BE = BLOCK_ENTITIES.register("glare_kinetic_receiver",
             () -> BlockEntityType.Builder.of(GlareKineticReceiverBlockEntity::new, ModBlocks.GLARE_KINETIC_RECEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareChromaticTransceiverBlockEntity>> GLARE_CHROMATIC_TRANSCEIVER_BE = BLOCK_ENTITIES.register("glare_chromatic_transceiver",
+            () -> BlockEntityType.Builder.of(GlareChromaticTransceiverBlockEntity::new, ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get()).build(null));
 
     /** Shared by {@code gel_splatter}, {@code gel_splatter_sticky}, and {@code gel_splatter_slippery}. */
     public static final Supplier<BlockEntityType<com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity>> GEL_SPLATTER_BE =

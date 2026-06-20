@@ -2,6 +2,8 @@ package com.resourceful_refinement.content.fuel_tank;
 
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.simibubi.create.content.fluids.FluidPropagator;
+import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -128,6 +130,12 @@ public class FuelTankBlock extends Block implements EntityBlock {
         }
 
         BlockPos neighbourPos = pos.relative(direction);
+        BlockState neighbourState = level.getBlockState(neighbourPos);
+        FluidTransportBehaviour transport = FluidPropagator.getPipe(level, neighbourPos);
+        if (transport != null && transport.canHaveFlowToward(neighbourState, direction.getOpposite())) {
+            return true;
+        }
+
         return realLevel.getCapability(Capabilities.FluidHandler.BLOCK, neighbourPos, direction.getOpposite()) != null;
     }
 

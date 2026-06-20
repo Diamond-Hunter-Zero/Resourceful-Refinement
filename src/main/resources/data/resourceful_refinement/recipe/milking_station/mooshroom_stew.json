@@ -1,7 +1,7 @@
 {
   "type": "resourceful_refinement:milking_station",
   "entity": "minecraft:mooshroom",
-  "processing_time": 400,
+  "processing_time": 4800,
   "ingredients": [
   ],
   "results": [

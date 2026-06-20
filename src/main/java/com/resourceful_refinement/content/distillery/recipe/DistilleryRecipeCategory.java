@@ -31,6 +31,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Arrays;
+
 public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecipe> {
 
     public static final RecipeType<DistilleryRecipe> TYPE =
@@ -61,10 +63,9 @@ public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecip
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, DistilleryRecipe recipe, IFocusGroup focuses) {
-        // Define where items go. Note: 1.21.1 uses RecipeHolder for recipes.
-        // If 'recipe' is a RecipeHolder, use recipe.value() to get the actual recipe class.
         if (!recipe.getCombinedIngredients().isEmpty() && !recipe.getCombinedIngredients().getFirst().ingredient().isEmpty())
-            builder.addSlot(RecipeIngredientRole.INPUT, 43, 32).addItemStack(recipe.getCombinedIngredients().getFirst().getItems()[0]);
+            builder.addSlot(RecipeIngredientRole.INPUT, 43, 32)
+                    .addItemStacks(Arrays.asList(recipe.getCombinedIngredients().getFirst().getItems()));
 
         builder.addSlot(RecipeIngredientRole.INPUT, 17, 32).addFluidStack(recipe.getFluidIngredients().getFirst().getFluids()[0].getFluid());
         if (!recipe.getFluidResults().isEmpty())
@@ -79,10 +80,10 @@ public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecip
         int centreXPos = (this.background.getWidth() / 2); // Horizontal position of your choice
         int centreYPos = (this.background.getHeight() / 2); // Subtract 8 (half of 16px item) to center
 
-        // 1. Render Processing Time (e.g., "200 ticks")
+        // Render Processing Time (e.g., "200 ticks")
         String timeText = String.format("%.0f", recipe.getProcessingDuration()/20f) + "s";
         int timeWidth = font.width(timeText);
-        guiGraphics.drawString(font, timeText, 24, 10, 0xFFF5F5F5, false);
+        guiGraphics.drawString(font, timeText, 25, 10, 0xFFF5F5F5, false);
 
         // Render fluid stack amounts
         int inputAmount = recipe.getFluidIngredients().getFirst().amount();
@@ -100,7 +101,7 @@ public class DistilleryRecipeCategory implements IRecipeCategory<DistilleryRecip
 
         // Heating warning
         String heatText = recipe.getRequiredHeatCondition().getSerializedName();
-        guiGraphics.drawString(font, heatText, this.background.getWidth() - 54, this.background.getHeight() - 7 -font.lineHeight, recipe.getRequiredHeatCondition().getColor(), false);
+        guiGraphics.drawString(font, heatText, this.background.getWidth() - 53, this.background.getHeight() - 7 -font.lineHeight, recipe.getRequiredHeatCondition().getColor(), false);
 
 
         // Height warning

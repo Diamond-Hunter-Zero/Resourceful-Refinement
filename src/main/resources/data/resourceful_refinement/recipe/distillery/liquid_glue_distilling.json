@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "chilled",
+  "distillery_height": 3,
+  "processing_time": 6000,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:polymer_sludge",
+      "amount": 250
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "resourceful_refinement:compacted_biomatter",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_glue",
+      "amount": 1000
+    }
+  ]
+}

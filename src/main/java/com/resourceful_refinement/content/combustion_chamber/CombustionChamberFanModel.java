@@ -51,8 +51,8 @@ public class CombustionChamberFanModel extends BakedModelWrapperWithData {
 
             if (model != null)
                 CUSTOM_MODELS.put(direction, model);
-             else
-                ResourcefulRefinementMain.LOGGER.warn("Failed to load custom combustion chamber fan model for facing: " + direction.getName());
+             //else
+                //ResourcefulRefinementMain.LOGGER.warn("Failed to load custom combustion chamber fan model for facing: " + direction.getName());
         }
     }
 

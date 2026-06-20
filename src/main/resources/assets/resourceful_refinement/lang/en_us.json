@@ -197,6 +197,34 @@
   "block.resourceful_refinement.paint.black_paint": "Black Paint",
   "item.resourceful_refinement.black_paint_bucket": "Black Paint Bucket",
 
+  "fluid_type.resourceful_refinement.coolant": "Coolant",
+  "block.resourceful_refinement.fluids.coolant": "Coolant",
+  "item.resourceful_refinement.coolant_bucket": "Coolant Bucket",
+
+  "fluid_type.resourceful_refinement.organic_slush": "Organic Slush",
+  "block.resourceful_refinement.fluids.organic_slush": "Organic Slush",
+  "item.resourceful_refinement.organic_slush_bucket": "Organic Slush Bucket",
+
+  "fluid_type.resourceful_refinement.polymer_sludge": "Polymer Sludge",
+  "block.resourceful_refinement.fluids.polymer_sludge": "Polymer Sludge",
+  "item.resourceful_refinement.polymer_sludge_bucket": "Polymer Sludge Bucket",
+
+  "fluid_type.resourceful_refinement.hot_chocolate": "Hot Chocolate",
+  "block.resourceful_refinement.fluids.hot_chocolate": "Hot Chocolate",
+  "item.resourceful_refinement.hot_chocolate_bucket": "Hot Chocolate Bucket",
+
+  "fluid_type.resourceful_refinement.mead": "Mead",
+  "block.resourceful_refinement.fluids.mead": "Mead",
+  "item.resourceful_refinement.mead_bucket": "Mead Bucket",
+
+  "fluid_type.resourceful_refinement.liquid_syrup": "Syrup",
+  "block.resourceful_refinement.fluids.liquid_syrup": "Syrup",
+  "item.resourceful_refinement.liquid_syrup_bucket": "Syrup Bucket",
+
+  "fluid_type.resourceful_refinement.liquid_spirits": "Spirits",
+  "block.resourceful_refinement.fluids.liquid_spirits": "Spirits",
+  "item.resourceful_refinement.liquid_spirits_bucket": "Spirits Bucket",
+
   "item.resourceful_refinement.ferrous_crystal": "Ferrous Crystal",
   "item.resourceful_refinement.flux_dust": "Flux Dust",
   "item.resourceful_refinement.durasteel_ingot": "Durasteel Ingot",
@@ -209,6 +237,19 @@
   "item.resourceful_refinement.plunger": "Plunger",
   "tooltip.resourceful_refinement.plunger": "Right-click fluid tanks to empty them",
   "item.resourceful_refinement.paint_blob": "Paint Blob",
+
+  "item.resourceful_refinement.compacted_biomatter": "Compacted Biomatter",
+  "item.resourceful_refinement.polymer_residue": "Polymer Residue",
+  "item.resourceful_refinement.graphite": "Graphite",
+  "item.resourceful_refinement.graphene_mesh": "Graphene Mesh",
+  "item.resourceful_refinement.incomplete_graphene_mesh": "Incomplete Graphene Mesh",
+
+  "item.resourceful_refinement.drinks_glass": "Drinks Glass",
+  "item.resourceful_refinement.hot_chocolate_mug": "Hot Chocolate Mug",
+  "item.resourceful_refinement.milkshake": "Milkshake",
+  "item.resourceful_refinement.energy_drink": "Energy Drink",
+  "item.resourceful_refinement.mead_tankard": "Mead Tankard",
+  "item.resourceful_refinement.spirits_bottle": "Spirits",
 
   "resourceful_refinement.ponder.tag.resourceful_refinement": "Resourceful Refinement Processing",
   "resourceful_refinement.ponder.tag.resourceful_refinement.description": "Components which allow for advanced processing of raw resources through fluids",

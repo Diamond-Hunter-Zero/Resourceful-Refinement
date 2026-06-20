@@ -121,14 +121,21 @@ public class BrewersTapBlock extends HorizontalDirectionalBlock implements Entit
             return ItemInteractionResult.SUCCESS;
         }
 
+        // Check if held item has a flavour tag. If not, toggle valve state
+        if (!stack.is(FlavourType.ALL_FLAVOURS_ITEM_TAG))
+        {
+            toggleValve(state, level, pos, player, hitResult);
+            return ItemInteractionResult.SUCCESS;
+        }
+
+        // Insert new itemstack, and switch out previous stack if it exists
         ItemStack stored = tap.flavourInv.getStackInSlot(0).copy();
         ItemStack held = stack.copy();
         tap.flavourInv.setStackInSlot(0, held);
 
-        if (!player.isCreative() || !stored.isEmpty()) {
-            player.setItemInHand(hand, stored);
-            player.getInventory().setChanged();
-        }
+        // Switch held item (clears player's hand if previous flavour item was empty)
+        player.setItemInHand(hand, stored);
+        player.getInventory().setChanged();
 
         level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.45F, 1.4F);
         tap.onFlavourItemChanged();
@@ -141,6 +148,7 @@ public class BrewersTapBlock extends HorizontalDirectionalBlock implements Entit
             return InteractionResult.SUCCESS;
         }
 
+        // Remove held item if shifting while empty-handed
         if (player.isShiftKeyDown() && level.getBlockEntity(pos) instanceof BrewersTapBlockEntity tap) {
             ItemStack stored = tap.flavourInv.getStackInSlot(0).copy();
             if (stored.isEmpty()) {
@@ -156,6 +164,12 @@ public class BrewersTapBlock extends HorizontalDirectionalBlock implements Entit
             return InteractionResult.CONSUME;
         }
 
+        // Toggle the valve
+        return toggleValve(state, level, pos, player, hit);
+    }
+
+    private InteractionResult toggleValve(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit)
+    {
         boolean open = !isValveOpen(state);
         BlockState updated = state.setValue(VALVE_OPEN, open);
         level.setBlock(pos, updated, Block.UPDATE_ALL);
@@ -172,6 +186,7 @@ public class BrewersTapBlock extends HorizontalDirectionalBlock implements Entit
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+        // Drop contents
         if (!state.is(newState.getBlock()) && !level.isClientSide
                 && level.getBlockEntity(pos) instanceof BrewersTapBlockEntity tap) {
             ItemStack stored = tap.flavourInv.getStackInSlot(0);

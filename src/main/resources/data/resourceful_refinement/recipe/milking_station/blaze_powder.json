@@ -1,7 +1,7 @@
 {
   "type": "resourceful_refinement:milking_station",
   "entity": "minecraft:blaze",
-  "processing_time": 500,
+  "processing_time": 2400,
   "ingredients": [
   ],
   "results": [

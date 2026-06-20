@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 3,
+  "processing_time": 8400,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 5000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "minecraft:hay_block",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:mead",
+      "amount": 500
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:brewers_tap",
+  "processing_time": 80,
+  "ingredients": [
+    { "item": "resourceful_refinement:drinks_glass" },
+    { "type": "neoforge:single", "fluid": "resourceful_refinement:liquid_syrup", "amount": 750 }
+  ],
+  "flavour_tags": ["cosmic_flavour", "fruit_flavour", "sweet_flavour", "chilled_flavour"],
+  "results": [
+    { "id": "resourceful_refinement:energy_drink", "count": 1 }
+  ]
+}

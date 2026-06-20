@@ -25,7 +25,7 @@ public class ModFluids {
     }
 
     // Raw Molten Minerals
-    public static final FluidEntry MOLTEN_CRIMSITE = register("molten_crimsite", 0xCC3333, FluidGroup.RAW);
+    public static final FluidEntry MOLTEN_CRIMSITE = register("molten_crimsite", 0xb92936, FluidGroup.RAW);
     public static final FluidEntry MOLTEN_VERIDIUM = register("molten_veridium", 0x296E52, FluidGroup.RAW);
     public static final FluidEntry MOLTEN_OCHRUM = register("molten_ochrum", 0xD9B568, FluidGroup.RAW);
     public static final FluidEntry MOLTEN_ASURINE = register("molten_asurine", 0x4D8CA8, FluidGroup.RAW);
@@ -37,7 +37,7 @@ public class ModFluids {
     public static final FluidEntry CATALYSED_COPPER = register("catalysed_copper", 0xB87333, FluidGroup.CATALYSED);
     public static final FluidEntry CATALYSED_GOLD = register("catalysed_gold", 0xFFD700, FluidGroup.CATALYSED);
     public static final FluidEntry CATALYSED_ZINC = register("catalysed_zinc", 0x7BA699, FluidGroup.CATALYSED);
-    public static final FluidEntry CATALYSED_REDSTONE = register("catalysed_redstone", 0xFF0000, FluidGroup.CATALYSED);
+    public static final FluidEntry CATALYSED_REDSTONE = register("catalysed_redstone", 0xd40a12, FluidGroup.CATALYSED);
     public static final FluidEntry CATALYSED_SPARKPOWDER = register("catalysed_sparkpowder", 0xF5E7A2, FluidGroup.CATALYSED);
 
     // Alloyed Fluids
@@ -52,19 +52,27 @@ public class ModFluids {
     public static final FluidEntry PURIFIED_COPPER = register("purified_copper", 0xDE7514, FluidGroup.PURIFIED);
     public static final FluidEntry PURIFIED_GOLD = register("purified_gold", 0xFFD700, FluidGroup.PURIFIED);
     public static final FluidEntry PURIFIED_ZINC = register("purified_zinc", 0x91B8B4, FluidGroup.PURIFIED);
-    public static final FluidEntry PURIFIED_DURASTEEL = register("purified_durasteel", 0x364744, FluidGroup.PURIFIED);
+    public static final FluidEntry PURIFIED_DURASTEEL = register("purified_durasteel", 0x1d3438, FluidGroup.PURIFIED);
 
     // Carborax Fluids
     public static final FluidEntry UNREFINED_CARBORAX = register("unrefined_carborax", 0x29243B, FluidGroup.CARBORAX);
     public static final FluidEntry CATALYSED_CARBORAX = register("catalysed_carborax", 0x342152, FluidGroup.CARBORAX);
     public static final FluidEntry OVERCHARGED_CARBORAX = register("overcharged_carborax", 0x461B66, FluidGroup.CARBORAX);
-    public static final FluidEntry CARBORAX_DIESEL = register("carborax_diesel", 0x7868A60, FluidGroup.CARBORAX);
+    public static final FluidEntry CARBORAX_DIESEL = register("carborax_diesel", 0x9fa66d, FluidGroup.CARBORAX);
 
     // Misc Fluids
     public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
     public static final FluidEntry COOLANT = register("coolant", 0xD9F4FA, FluidGroup.ALLOYED);
     public static final FluidEntry LIQUID_CONCRETE = register("liquid_concrete", 0x948d83, FluidGroup.ALLOYED);
     public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, PouredCementBlock.class);
+    public static final FluidEntry ORGANIC_SLUSH = register("organic_slush", 0x516e3e, FluidGroup.ALLOYED);
+    public static final FluidEntry POLYMER_SLUDGE = register("polymer_sludge", 0x1f2840, FluidGroup.ALLOYED);
+
+    // Drinks
+    public static final FluidEntry HOT_CHOCOLATE = register("hot_chocolate", 0x633721, FluidGroup.DRINK);
+    public static final FluidEntry SYRUP = register("liquid_syrup", 0xc8e5c8, FluidGroup.DRINK);
+    public static final FluidEntry MEAD = register("mead", 0xcaa56d, FluidGroup.DRINK);
+    public static final FluidEntry SPIRITS = register("liquid_spirits", 0x530f1d, FluidGroup.DRINK);
 
     // Paint Fluids (v0.2)
     public static final FluidEntry WHITE_PAINT = register("white_paint", 0xF9FFFE, FluidGroup.PAINT);

@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 4,
+  "processing_time": 15000,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:unrefined_carborax",
+      "amount": 2000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "resourceful_refinement:compacted_biomatter",
+      "count": 6
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:carborax_diesel",
+      "amount": 3500
+    }
+  ]
+}

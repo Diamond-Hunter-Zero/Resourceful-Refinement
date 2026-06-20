@@ -309,7 +309,8 @@ public class MilkingStationBlockEntity extends KineticBlockEntity {
         }
 
         if (timer > 0) {
-            timer -= getProcessingSpeed();
+            //timer -= getProcessingSpeed();
+            timer -= 1;
             if (timer <= 0) {
                 process();
             }

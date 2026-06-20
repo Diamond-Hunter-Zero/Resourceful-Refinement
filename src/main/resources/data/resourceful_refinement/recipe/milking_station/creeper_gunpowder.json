@@ -1,7 +1,7 @@
 {
   "type": "resourceful_refinement:milking_station",
   "entity": "minecraft:creeper",
-  "processing_time": 500,
+  "processing_time": 600,
   "ingredients": [
   ],
   "results": [

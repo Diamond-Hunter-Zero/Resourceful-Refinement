@@ -1,22 +1,27 @@
 {
   "type": "resourceful_refinement:fluid_refinery",
-  "processing_time": 120,
+  "heat_requirement": "heated",
+  "processing_time": 200,
   "ingredients": [
     {
       "type": "neoforge:single",
       "fluid": "resourceful_refinement:unrefined_carborax",
-      "amount": 250
+      "amount": 150
     },
     {
       "type": "neoforge:single",
       "fluid": "resourceful_refinement:catalysed_sparkpowder",
-      "amount": 25
+      "amount": 10
+    },
+    {
+      "item": "resourceful_refinement:polymer_residue",
+      "count": 1
     }
   ],
   "results": [
     {
       "id": "resourceful_refinement:catalysed_carborax",
-      "amount": 350
+      "amount": 250
     }
   ]
 }

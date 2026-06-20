@@ -1,0 +1,17 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "processing_time": 60,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:liquid_syrup",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:sugar",
+      "count": 3
+    }
+  ]
+}

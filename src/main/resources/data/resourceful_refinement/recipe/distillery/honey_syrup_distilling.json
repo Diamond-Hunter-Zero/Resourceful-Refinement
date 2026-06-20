@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 4,
+  "processing_time": 4800,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "create:honey",
+      "amount": 1000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "minecraft:sugar",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_syrup",
+      "amount": 1000
+    }
+  ]
+}

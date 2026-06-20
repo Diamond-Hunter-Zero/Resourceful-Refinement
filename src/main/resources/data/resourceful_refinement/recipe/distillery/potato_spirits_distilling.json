@@ -2,24 +2,24 @@
   "type": "resourceful_refinement:distillery",
   "heat_requirement": "heated",
   "distillery_height": 3,
-  "processing_time": 3600,
+  "processing_time": 8400,
   "ingredients": [
     {
       "type": "neoforge:single",
-      "fluid": "minecraft:water",
-      "amount": 4000
+      "fluid": "resourceful_refinement:liquid_syrup",
+      "amount": 250
     }
   ],
   "sized_ingredients": [
     {
-      "item": "minecraft:wheat_seeds",
-      "count": 8
+      "item": "minecraft:potato",
+      "count": 28
     }
   ],
   "results": [
     {
-      "id": "resourceful_refinement:carborax_diesel",
-      "amount": 800
+      "id": "resourceful_refinement:liquid_spirits",
+      "amount": 500
     }
   ]
 }

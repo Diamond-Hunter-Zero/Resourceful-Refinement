@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:brewers_tap",
+  "processing_time": 60,
+  "ingredients": [
+    { "item": "resourceful_refinement:drinks_glass" },
+    { "type": "neoforge:single", "fluid": "minecraft:milk", "amount": 500 }
+  ],
+  "flavour_tags": ["cosmic_flavour", "fruit_flavour", "sweet_flavour"],
+  "results": [
+    { "id": "resourceful_refinement:milkshake", "count": 1 }
+  ]
+}

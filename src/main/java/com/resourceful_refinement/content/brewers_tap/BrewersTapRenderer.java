@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 
@@ -31,7 +32,7 @@ public class BrewersTapRenderer implements BlockEntityRenderer<BrewersTapBlockEn
             ms.translate(0.5F, 0.5F, 0.5F);
             ms.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
 
-            if (itemstack.getItem() instanceof BlockItem)
+            if (itemstack.getItem() instanceof BlockItem && !itemstack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS))
                 ms.translate(0F, -0.03F, -0.275F);
             else
                 ms.translate(0F, 0.02F, -0.275F);
@@ -40,7 +41,7 @@ public class BrewersTapRenderer implements BlockEntityRenderer<BrewersTapBlockEn
             ms.scale(0.85F, 0.85F, 0.85F);
             this.itemRenderer.renderStatic(
                     be.flavourInv.getStackInSlot(0),
-                    ItemDisplayContext.GROUND, // How it should be lit/held (e.g., GROUND, FIXED)
+                    ItemDisplayContext.GROUND,
                     light,
                     overlay,
                     ms,

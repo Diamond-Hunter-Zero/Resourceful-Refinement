@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 4,
+  "processing_time": 10800,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:organic_slush",
+      "amount": 250
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "resourceful_refinement:polymer_residue",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:polymer_sludge",
+      "amount": 750
+    }
+  ]
+}

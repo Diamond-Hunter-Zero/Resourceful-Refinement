@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 2,
+  "processing_time": 4800,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "create:chocolate",
+      "amount": 1000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "minecraft:ice",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:hot_chocolate",
+      "amount": 1000
+    }
+  ]
+}

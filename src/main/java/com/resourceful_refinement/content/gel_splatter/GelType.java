@@ -13,7 +13,9 @@ public enum GelType {
     INERT("inert", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_inert_gel")),
     CLEANSE("cleanse", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_cleanse_gel")),
     POTION("potion", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_potion_gel")),
-    PAINT("paint", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_paint_gel"));
+    PAINT("paint", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_paint_gel")),
+    FROZEN("frozen", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_frozen_gel")),
+    CONCRETE("frozen", ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "makes_concrete_gel"));
 
     private final String id;
     private final ResourceLocation tagLocation;

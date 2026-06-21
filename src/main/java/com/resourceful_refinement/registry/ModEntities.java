@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.milking_station.MilkingStationSeatEntity;
 import com.resourceful_refinement.content.plunger.ThrownPlunger;
 import com.resourceful_refinement.content.hosegun.GelBlobEntity;
 import net.minecraft.core.registries.Registries;
@@ -26,5 +27,14 @@ public class ModEntities {
                     .clientTrackingRange(4)
                     .updateInterval(20)
                     .build("thrown_plunger")
+    );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MilkingStationSeatEntity>> MILKING_STATION_SEAT = ENTITY_TYPES.register("milking_station_seat",
+            () -> EntityType.Builder.<MilkingStationSeatEntity>of(MilkingStationSeatEntity::new, MobCategory.MISC)
+                    .sized(0.25F, 0.35F)
+                    .clientTrackingRange(4)
+                    .updateInterval(20)
+                    .noSave()
+                    .build("milking_station_seat")
     );
 }

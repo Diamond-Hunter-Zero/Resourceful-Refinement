@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.mojang.serialization.Codec;
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.glare.GlareTargetsData;
 import net.minecraft.core.component.DataComponentType;
@@ -46,6 +47,13 @@ public class ModDataComponents {
             () -> DataComponentType.<GlareTargetsData>builder()
                     .persistent(GlareTargetsData.CODEC)
                     .networkSynchronized(GlareTargetsData.STREAM_CODEC)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<FlavourType>> FLAVOUR = DATA_COMPONENTS.register("flavour",
+            () -> DataComponentType.<FlavourType>builder()
+                    .persistent(FlavourType.CODEC)
+                    .networkSynchronized(FlavourType.STREAM_CODEC)
                     .build()
     );
 }

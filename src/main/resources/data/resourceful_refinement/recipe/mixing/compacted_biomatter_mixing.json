@@ -1,0 +1,22 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "type": "neoforge:single",
+      "amount": 500,
+      "fluid": "resourceful_refinement:organic_slush"
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:compacted_biomatter"
+    },
+    {
+      "id": "resourceful_refinement:compacted_biomatter"
+    }
+  ],
+  "processingTime": 80
+}

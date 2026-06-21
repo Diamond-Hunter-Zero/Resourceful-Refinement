@@ -1,0 +1,53 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "resourceful_refinement:graphite"
+  },
+  "results": [
+    {
+      "chance": 11.0,
+      "id": "resourceful_refinement:graphene_mesh"
+    },
+    {
+      "chance": 3.0,
+      "id": "minecraft:coal"
+    }
+  ],
+  "loops": 3,
+  "sequence": [
+    {
+      "type": "create:filling",
+      "ingredients": [
+        {
+          "item": "resourceful_refinement:incomplete_graphene_mesh"
+        },
+        {
+          "type": "neoforge:single",
+          "amount": 25,
+          "fluid": "resourceful_refinement:molten_scorchia"
+        }
+      ],
+      "results": [
+        {
+          "id": "resourceful_refinement:incomplete_graphene_mesh"
+        }
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredients": [
+        {
+          "item": "resourceful_refinement:incomplete_graphene_mesh"
+        }
+      ],
+      "results": [
+        {
+          "id": "resourceful_refinement:incomplete_graphene_mesh"
+        }
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "resourceful_refinement:incomplete_graphene_mesh"
+  }
+}

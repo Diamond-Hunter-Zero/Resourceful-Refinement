@@ -11,6 +11,8 @@
     "resourceful_refinement:fracking_pump_outlet",
     "resourceful_refinement:fracking_pump_proxy",
     "resourceful_refinement:fluid_refill_station",
-    "resourceful_refinement:paint_nozzle"
+    "resourceful_refinement:fuel_tank",
+    "resourceful_refinement:paint_nozzle",
+    "resourceful_refinement:milking_station"
   ]
 }

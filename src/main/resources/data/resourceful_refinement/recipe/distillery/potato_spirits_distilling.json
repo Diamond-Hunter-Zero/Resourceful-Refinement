@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 3,
+  "processing_time": 8400,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:liquid_syrup",
+      "amount": 250
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "minecraft:potato",
+      "count": 28
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_spirits",
+      "amount": 500
+    }
+  ]
+}

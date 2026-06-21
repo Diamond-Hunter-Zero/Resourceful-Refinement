@@ -1,17 +1,23 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.brewers_tap.DrinkItem;
 import com.resourceful_refinement.content.casting_depot.CastingDepotItem;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberItem;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
+import com.resourceful_refinement.content.milking_station.MilkingStationItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
+import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
@@ -75,6 +81,23 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);
 
+    public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
+
+    public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
+
+    public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
+            () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
+
+    public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
+
+    public static final DeferredItem<MilkingStationItem> MILKING_STATION_ITEM = ITEMS.register("milking_station",
+            () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
+
+
     // -------------------------------------------------------------------------
     // Gel Items
     // -------------------------------------------------------------------------
@@ -95,10 +118,8 @@ public class ModItems {
     public static final DeferredItem<Item> DURASTEEL_INGOT = ITEMS.registerItem("durasteel_ingot", Item::new, new Item.Properties());
     public static final DeferredItem<Item> DURASTEEL_SHEET = ITEMS.registerItem("durasteel_sheet", Item::new, new Item.Properties());
 
-    public static final DeferredItem<MouldItem> INGOT_MOULD = ITEMS.registerItem("ingot_mould",
-            MouldItem::new);
-    public static final DeferredItem<MouldItem> SHAFT_MOULD = ITEMS.registerItem("shaft_mould",
-            MouldItem::new);
+    public static final DeferredItem<MouldItem> INGOT_MOULD = ITEMS.registerItem("ingot_mould", MouldItem::new);
+    public static final DeferredItem<MouldItem> SHAFT_MOULD = ITEMS.registerItem("shaft_mould", MouldItem::new);
 
     public static final DeferredItem<com.resourceful_refinement.content.hosegun.HosegunItem> HOSEGUN = ITEMS.register("hosegun",
             () -> new com.resourceful_refinement.content.hosegun.HosegunItem(new Item.Properties()));
@@ -108,21 +129,81 @@ public class ModItems {
 
     public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
 
+    public static final DeferredItem<Item> DRINKS_GLASS = ITEMS.registerItem("drinks_glass", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> COMPACTED_BIOMATTER = ITEMS.registerItem("compacted_biomatter", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> POLYMER_RESIDUE = ITEMS.registerItem("polymer_residue", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> GRAPHITE = ITEMS.registerItem("graphite", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> GRAPHENE_MESH = ITEMS.registerItem("graphene_mesh", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> INCOMPLETE_GRAPHENE_MESH = ITEMS.registerItem("incomplete_graphene_mesh", SequencedAssemblyItem::new, new Item.Properties());
+
 
     // -------------------------------------------------------------------------
-    // Foods?...
+    // Foods Properties
     // -------------------------------------------------------------------------
+
+    // Actual saturation is calculated as = (2 x nutrition x saturationModifier)
 
     public static final FoodProperties GLUE_POT_FOOD = new FoodProperties.Builder()
-            .nutrition(0)                             // Hunger restored
-            .saturationModifier(0.3F)                 // Saturation multiplier
+            .nutrition(1)                             // Hunger restored
+            .saturationModifier(2F)                 // Saturation multiplier
             .alwaysEdible()                           // Allow eating even when full
             .effect(() -> new MobEffectInstance(MobEffects.CONFUSION, 200, 0), 1.0F)
             .effect(() -> new MobEffectInstance(MobEffects.WEAKNESS, 200, 1), 1.0F)
             .build();
 
-    public static final DeferredItem<Item> GLUE_POT = ITEMS.registerItem("glue_pot", Item::new, new Item.Properties()
+    public static final FoodProperties MILKSHAKE_FOOD = new FoodProperties.Builder()
+            .nutrition(2)
+            .saturationModifier(0.5F)
+            .alwaysEdible()
+            .build();
+
+    public static final FoodProperties HOT_CHOCOLATE_FOOD = new FoodProperties.Builder()
+            .nutrition(3)
+            .saturationModifier(1F)
+            .alwaysEdible()
+            .build();
+
+    public static final FoodProperties ENERGY_DRINK_FOOD = new FoodProperties.Builder()
+            .nutrition(3)
+            .saturationModifier(2F)
+            .alwaysEdible()
+            .build();
+
+    public static final FoodProperties MEAD_FOOD = new FoodProperties.Builder()
+            .nutrition(4)
+            .saturationModifier(0.6F)
+            .alwaysEdible()
+            .build();
+
+    public static final FoodProperties SPIRITS_FOOD = new FoodProperties.Builder()
+            .nutrition(3)
+            .saturationModifier(0.4F)
+            .alwaysEdible()
+            .build();
+
+
+    // -------------------------------------------------------------------------
+    // Foods Items
+    // -------------------------------------------------------------------------
+
+    public static final DeferredItem<Item> GLUE_POT = ITEMS.registerItem("glue_pot", DrinkItem::new, new Item.Properties()
             .food(GLUE_POT_FOOD));
+
+    public static final DeferredItem<Item> MILKSHAKE_DRINK = ITEMS.registerItem("milkshake", DrinkItem::new, new Item.Properties()
+            .food(MILKSHAKE_FOOD));
+
+    public static final DeferredItem<Item> HOT_CHOCOLATE_DRINK = ITEMS.registerItem("hot_chocolate_mug", DrinkItem::new, new Item.Properties()
+            .food(HOT_CHOCOLATE_FOOD));
+
+    public static final DeferredItem<Item> ENERGY_DRINK = ITEMS.registerItem("energy_drink", DrinkItem::new, new Item.Properties()
+            .food(ENERGY_DRINK_FOOD));
+
+    public static final DeferredItem<Item> MEAD_DRINK = ITEMS.registerItem("mead_tankard", DrinkItem::new, new Item.Properties()
+            .food(MEAD_FOOD));
+
+    public static final DeferredItem<Item> SPIRITS_DRINK = ITEMS.registerItem("spirits_bottle", DrinkItem::new, new Item.Properties()
+            .food(SPIRITS_FOOD));
+
 
     // -------------------------------------------------------------------------
     // Buckets (Handled by FluidEntry)

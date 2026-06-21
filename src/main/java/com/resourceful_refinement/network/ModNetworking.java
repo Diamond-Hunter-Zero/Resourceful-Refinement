@@ -26,6 +26,16 @@ public final class ModNetworking {
                         ConfigureGlareTransceiverPayload.TYPE,
                         ConfigureGlareTransceiverPayload.STREAM_CODEC,
                         ModNetworking::handleConfigureTransceiver
+                )
+                .playToServer(
+                        TelemetryTerminalActionPayload.TYPE,
+                        TelemetryTerminalActionPayload.STREAM_CODEC,
+                        ModNetworking::handleTelemetryTerminalAction
+                )
+                .playToClient(
+                        TelemetryTerminalStatePayload.TYPE,
+                        TelemetryTerminalStatePayload.STREAM_CODEC,
+                        ModNetworking::handleTelemetryTerminalState
                 );
     }
 
@@ -47,5 +57,15 @@ public final class ModNetworking {
                 ConfigureGlareTransceiverPayload.handle(payload, serverPlayer);
             }
         });
+    }
+
+    private static void handleTelemetryTerminalAction(TelemetryTerminalActionPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) TelemetryTerminalActionPayload.handle(payload, serverPlayer);
+        });
+    }
+
+    private static void handleTelemetryTerminalState(TelemetryTerminalStatePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> TelemetryTerminalStatePayload.handleClient(payload));
     }
 }

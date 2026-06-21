@@ -68,6 +68,9 @@ public class ModItems {
     public static final DeferredItem<GlareNodeBlockItem> GLARE_CHROMATIC_TRANSCEIVER = ITEMS.register("glare_chromatic_transceiver",
             () -> new GlareNodeBlockItem(ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get(), new Item.Properties()));
 
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_TELEMETRY_TERMINAL = ITEMS.register("glare_telemetry_terminal",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_TELEMETRY_TERMINAL.get(), new Item.Properties()));
+
     public static final DeferredItem<BlockItem> RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("resonance_crystal", ModBlocks.RESONANCE_CRYSTAL);
 
     public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);

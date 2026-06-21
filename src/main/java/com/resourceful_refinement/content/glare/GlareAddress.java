@@ -6,7 +6,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
+import java.util.Objects;
+
 public record GlareAddress(ResourceLocation first, ResourceLocation second, ResourceLocation third) {
+    public GlareAddress {
+        first = Objects.requireNonNull(first, "first");
+        second = Objects.requireNonNull(second, "second");
+        third = Objects.requireNonNull(third, "third");
+    }
     public static GlareAddress empty() {
         ResourceLocation air = BuiltInRegistries.ITEM.getKey(Items.AIR);
         return new GlareAddress(air, air, air);
@@ -14,6 +21,11 @@ public record GlareAddress(ResourceLocation first, ResourceLocation second, Reso
 
     public static GlareAddress of(Item first, Item second, Item third) {
         return new GlareAddress(BuiltInRegistries.ITEM.getKey(first), BuiltInRegistries.ITEM.getKey(second), BuiltInRegistries.ITEM.getKey(third));
+    }
+
+    public boolean isComplete() {
+        ResourceLocation air = BuiltInRegistries.ITEM.getKey(Items.AIR);
+        return !first.equals(air) && !second.equals(air) && !third.equals(air);
     }
 
     public CompoundTag save() {

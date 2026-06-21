@@ -12,6 +12,7 @@ import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
@@ -123,6 +124,13 @@ public class ModBlocks {
 
     public static final DeferredBlock<GlareChromaticTransceiverBlock> GLARE_CHROMATIC_TRANSCEIVER = BLOCKS.register("glare_chromatic_transceiver",
             () -> new GlareChromaticTransceiverBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<TelemetryTerminalBlock> GLARE_TELEMETRY_TERMINAL = BLOCKS.register("glare_telemetry_terminal",
+            () -> new TelemetryTerminalBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()

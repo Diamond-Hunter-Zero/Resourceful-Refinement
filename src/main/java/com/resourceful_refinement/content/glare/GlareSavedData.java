@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.glare;
 
+import com.resourceful_refinement.ResourcefulRefinementMain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -22,11 +23,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class GlareSavedData extends SavedData {
     private static final String DATA_NAME = "resourceful_refinement_glare_networks";
@@ -35,6 +38,8 @@ public class GlareSavedData extends SavedData {
     private final Set<GlareLink> links = new LinkedHashSet<>();
     private final Map<GlareLink, LinkValidity> linkValidity = new HashMap<>();
     private final Map<UUID, NetworkRecord> networks = new HashMap<>();
+    private final Map<Long, TelemetrySubscriber> telemetrySubscribers = new HashMap<>();
+    private long nextTelemetrySubscriberId;
 
     public static SavedData.Factory<GlareSavedData> factory() {
         return new SavedData.Factory<>(GlareSavedData::new, GlareSavedData::load);
@@ -137,6 +142,79 @@ public class GlareSavedData extends SavedData {
 
     public Optional<NetworkRecord> getNetwork(UUID id) {
         return Optional.ofNullable(networks.get(id));
+    }
+
+    Optional<UUID> getNetworkId(GlareNodePos node) {
+        NodeRecord record = nodes.get(node);
+        return record == null ? Optional.empty() : Optional.ofNullable(record.networkId);
+    }
+
+    boolean sendTelemetry(UUID networkId, GlareMessage message) {
+        NetworkRecord network = networks.get(networkId);
+        if (network == null) {
+            return false;
+        }
+        List<GlareMessage> inbox = network.telemetryInboxes.computeIfAbsent(message.to(), ignored -> new ArrayList<>());
+        inbox.add(message);
+        while (inbox.size() > TelemetryService.MAX_MESSAGES) {
+            inbox.removeFirst();
+        }
+        setDirty();
+        notifyTelemetrySubscribers(networkId, message.to(), TelemetryService.Mutation.SENT, message);
+        return true;
+    }
+
+    List<GlareMessage> readTelemetry(UUID networkId, GlareAddress address) {
+        NetworkRecord network = networks.get(networkId);
+        if (network == null) {
+            return List.of();
+        }
+        return List.copyOf(network.telemetryInboxes.getOrDefault(address, List.of()));
+    }
+
+    Optional<GlareMessage> discardTelemetry(UUID networkId, GlareAddress address, UUID messageId) {
+        NetworkRecord network = networks.get(networkId);
+        if (network == null) {
+            return Optional.empty();
+        }
+        List<GlareMessage> inbox = network.telemetryInboxes.get(address);
+        if (inbox == null) {
+            return Optional.empty();
+        }
+        for (int i = 0; i < inbox.size(); i++) {
+            if (inbox.get(i).id().equals(messageId)) {
+                return discardTelemetryAt(networkId, address, i);
+            }
+        }
+        return Optional.empty();
+    }
+
+    Optional<GlareMessage> discardTelemetryAt(UUID networkId, GlareAddress address, int index) {
+        NetworkRecord network = networks.get(networkId);
+        if (network == null) {
+            return Optional.empty();
+        }
+        List<GlareMessage> inbox = network.telemetryInboxes.get(address);
+        if (inbox == null || index < 0 || index >= inbox.size()) {
+            return Optional.empty();
+        }
+        GlareMessage removed = inbox.remove(index);
+        if (inbox.isEmpty()) {
+            network.telemetryInboxes.remove(address);
+        }
+        setDirty();
+        notifyTelemetrySubscribers(networkId, address, TelemetryService.Mutation.DISCARDED, removed);
+        return Optional.of(removed);
+    }
+
+    long subscribeTelemetry(GlareNodePos owner, GlareAddress address, Consumer<TelemetryService.InboxUpdate> listener) {
+        long id = nextTelemetrySubscriberId++;
+        telemetrySubscribers.put(id, new TelemetrySubscriber(owner, address, listener));
+        return id;
+    }
+
+    void unsubscribeTelemetry(long id) {
+        telemetrySubscribers.remove(id);
     }
 
     public List<GlareLink> getLinksFor(GlareNodePos pos) {
@@ -248,6 +326,9 @@ public class GlareSavedData extends SavedData {
             record.luxAllocated = Math.max(0, receiver.getAllocatedLux());
             record.status = receiver.getGlareOperationStatus();
         }
+        record.telemetryAddress = glareNode instanceof IGlareTelemetryEndpoint endpoint
+                ? endpoint.getTelemetryAddress()
+                : GlareAddress.empty();
     }
 
     public LinkResult tryAddLink(ServerLevel level, GlareNodePos a, GlareNodePos b) {
@@ -429,6 +510,7 @@ public class GlareSavedData extends SavedData {
         }
 
         Set<GlareNodePos> visited = new HashSet<>();
+        Set<UUID> claimedNetworkIds = new HashSet<>();
         for (GlareNodePos start : nodes.keySet()) {
             if (!visited.add(start)) {
                 continue;
@@ -446,15 +528,28 @@ public class GlareSavedData extends SavedData {
                 }
             }
 
-            UUID id = chooseNetworkId(component, oldNetworks);
+            UUID id = chooseNetworkId(component, oldNetworks, claimedNetworkIds);
+            claimedNetworkIds.add(id);
+            boolean preserveOverload = shouldPreserveOverload(component, oldNetworks);
             NetworkRecord oldNetwork = oldNetworks.get(id);
-            NetworkRecord network = oldNetwork == null ? new NetworkRecord(id) : oldNetwork.copyForRebuild(shouldPreserveOverload(component, oldNetworks));
+            NetworkRecord network = oldNetwork == null ? new NetworkRecord(id) : oldNetwork.copyForRebuild(preserveOverload);
+            if (oldNetwork == null) {
+                network.overloaded = preserveOverload;
+            }
+            for (NetworkRecord candidate : oldNetworks.values()) {
+                if (candidate.nodes.stream().anyMatch(component::contains)) {
+                    network.mergeTelemetryFrom(candidate);
+                }
+            }
             network.nodes.addAll(component);
             for (GlareNodePos current : component) {
                 NodeRecord node = nodes.get(current);
                 if (node != null) {
                     node.networkId = id;
                     applyLux(network, node);
+                    if (node.telemetryAddress.isComplete()) {
+                        network.registeredTelemetryAddresses.add(node.telemetryAddress);
+                    }
                 }
             }
             if (network.luxAllocated > network.luxCapacity || network.overloaded) {
@@ -464,6 +559,7 @@ public class GlareSavedData extends SavedData {
             }
             networks.put(id, network);
         }
+        notifyTelemetryRebuildChanges(oldNetworks);
     }
 
     private static boolean shouldPreserveOverload(Set<GlareNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
@@ -480,12 +576,61 @@ public class GlareSavedData extends SavedData {
         return false;
     }
 
-    private static UUID chooseNetworkId(Set<GlareNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
+    private static UUID chooseNetworkId(Set<GlareNodePos> component, Map<UUID, NetworkRecord> oldNetworks, Set<UUID> claimedIds) {
         return oldNetworks.values().stream()
+                .filter(network -> !claimedIds.contains(network.id))
                 .filter(network -> network.nodes.stream().anyMatch(component::contains))
                 .max(Comparator.comparingInt(network -> overlapCount(component, network.nodes)))
                 .map(network -> network.id)
                 .orElseGet(UUID::randomUUID);
+    }
+
+    private void notifyTelemetrySubscribers(UUID networkId, GlareAddress address, TelemetryService.Mutation mutation,
+            @Nullable GlareMessage changedMessage) {
+        List<GlareMessage> snapshot = readTelemetry(networkId, address);
+        for (Map.Entry<Long, TelemetrySubscriber> entry : List.copyOf(telemetrySubscribers.entrySet())) {
+            TelemetrySubscriber subscriber = entry.getValue();
+            NodeRecord owner = nodes.get(subscriber.owner);
+            if (owner == null) {
+                telemetrySubscribers.remove(entry.getKey());
+                continue;
+            }
+            if (networkId.equals(owner.networkId) && address.equals(subscriber.address)) {
+                notifyTelemetrySubscriber(subscriber, new TelemetryService.InboxUpdate(networkId, address, snapshot, mutation, changedMessage));
+            }
+        }
+    }
+
+    private void notifyTelemetryRebuildChanges(Map<UUID, NetworkRecord> oldNetworks) {
+        for (Map.Entry<Long, TelemetrySubscriber> entry : List.copyOf(telemetrySubscribers.entrySet())) {
+            TelemetrySubscriber subscriber = entry.getValue();
+            NodeRecord owner = nodes.get(subscriber.owner);
+            if (owner == null || owner.networkId == null) {
+                telemetrySubscribers.remove(entry.getKey());
+                continue;
+            }
+            NetworkRecord oldNetwork = oldNetworks.values().stream()
+                    .filter(network -> network.nodes.contains(subscriber.owner))
+                    .findFirst()
+                    .orElse(null);
+            List<GlareMessage> before = oldNetwork == null
+                    ? List.of()
+                    : List.copyOf(oldNetwork.telemetryInboxes.getOrDefault(subscriber.address, List.of()));
+            List<GlareMessage> after = readTelemetry(owner.networkId, subscriber.address);
+            if (oldNetwork == null || !oldNetwork.id.equals(owner.networkId) || !before.equals(after)) {
+                notifyTelemetrySubscriber(subscriber, new TelemetryService.InboxUpdate(
+                        owner.networkId, subscriber.address, after, TelemetryService.Mutation.NETWORK_REBUILT, null));
+            }
+        }
+    }
+
+    private static void notifyTelemetrySubscriber(TelemetrySubscriber subscriber, TelemetryService.InboxUpdate update) {
+        try {
+            subscriber.listener.accept(update);
+        } catch (RuntimeException exception) {
+            ResourcefulRefinementMain.LOGGER.error("GLARE telemetry subscriber at {} failed while handling {}",
+                    subscriber.owner.toShortString(), update.mutation(), exception);
+        }
     }
 
     private static int overlapCount(Set<GlareNodePos> component, Set<GlareNodePos> previousNodes) {
@@ -649,6 +794,9 @@ public class GlareSavedData extends SavedData {
 
     public record LinkRenderRecord(GlareNodePos a, GlareNodePos b, LinkValidity validity) {}
 
+    private record TelemetrySubscriber(GlareNodePos owner, GlareAddress address,
+            Consumer<TelemetryService.InboxUpdate> listener) {}
+
     public static class NodeRecord {
         public final GlareNodePos pos;
         public int maxLinks = 0;
@@ -660,6 +808,7 @@ public class GlareSavedData extends SavedData {
         public int luxAllocated;
         public DyeColor colour = DyeColor.WHITE;
         public GlareOperationStatus status = GlareOperationStatus.ONLINE;
+        public GlareAddress telemetryAddress = GlareAddress.empty();
         public final List<GlareNodePos> lastKnownLinks = new ArrayList<>();
         @Nullable
         public UUID networkId;
@@ -680,6 +829,7 @@ public class GlareSavedData extends SavedData {
             tag.putInt("LuxAllocated", luxAllocated);
             tag.putString("Colour", colour.getName());
             tag.putString("Status", status.name());
+            tag.put("TelemetryAddress", telemetryAddress.save());
             if (networkId != null) {
                 tag.putUUID("Network", networkId);
             }
@@ -709,6 +859,9 @@ public class GlareSavedData extends SavedData {
             } catch (IllegalArgumentException ignored) {
                 record.status = GlareOperationStatus.ONLINE;
             }
+            if (tag.contains("TelemetryAddress", Tag.TAG_COMPOUND)) {
+                record.telemetryAddress = GlareAddress.load(tag.getCompound("TelemetryAddress"));
+            }
             if (tag.hasUUID("Network")) {
                 record.networkId = tag.getUUID("Network");
             }
@@ -725,6 +878,7 @@ public class GlareSavedData extends SavedData {
         public final Set<GlareNodePos> nodes = new LinkedHashSet<>();
         public final Map<DyeColor, Integer> colourCharges = new HashMap<>();
         public final Map<GlareAddress, List<GlareMessage>> telemetryInboxes = new HashMap<>();
+        public final Set<GlareAddress> registeredTelemetryAddresses = new LinkedHashSet<>();
         public int luxCapacity;
         public int luxAllocated;
         public boolean overloaded;
@@ -736,8 +890,24 @@ public class GlareSavedData extends SavedData {
         NetworkRecord copyForRebuild(boolean preserveOverload) {
             NetworkRecord copy = new NetworkRecord(id);
             copy.overloaded = preserveOverload;
-            copy.telemetryInboxes.putAll(telemetryInboxes);
             return copy;
+        }
+
+        void mergeTelemetryFrom(NetworkRecord source) {
+            for (Map.Entry<GlareAddress, List<GlareMessage>> entry : source.telemetryInboxes.entrySet()) {
+                List<GlareMessage> combined = new ArrayList<>(telemetryInboxes.getOrDefault(entry.getKey(), List.of()));
+                Map<UUID, GlareMessage> unique = new LinkedHashMap<>();
+                for (GlareMessage message : combined) {
+                    unique.put(message.id(), message);
+                }
+                for (GlareMessage message : entry.getValue()) {
+                    unique.putIfAbsent(message.id(), message);
+                }
+                combined.clear();
+                combined.addAll(unique.values());
+                combined.sort(Comparator.comparingLong(GlareMessage::gameTime).thenComparing(GlareMessage::id));
+                telemetryInboxes.put(entry.getKey(), combined);
+            }
         }
 
         CompoundTag save() {

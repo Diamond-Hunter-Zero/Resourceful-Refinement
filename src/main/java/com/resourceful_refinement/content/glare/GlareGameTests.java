@@ -1,15 +1,20 @@
 package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMode;
+import com.resourceful_refinement.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @GameTestHolder(ResourcefulRefinementMain.MOD_ID)
 public final class GlareGameTests {
@@ -361,6 +366,163 @@ public final class GlareGameTests {
         require(charges[DyeColor.MAGENTA.ordinal()] == 7, "unloaded emitter should retain its persisted magenta charge");
         require(GlareChromaticTransceiverBlockEntity.matchesFilters(GlareLogicMode.AND, filters, charges), "transceiver gate should include unloaded emitter charge");
         helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void telemetrySendReadDiscardCapAndCleanup(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos node = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 170)));
+        data.registerNode(level, new TestNode(node, 1));
+        UUID networkId = requireNetwork(data, node);
+        GlareAddress sender = GlareAddress.of(Items.REDSTONE, Items.IRON_INGOT, Items.GLASS);
+        GlareAddress destination = GlareAddress.of(Items.BLUE_DYE, Items.COPPER_INGOT, Items.ENDER_PEARL);
+
+        for (int i = 0; i < 18; i++) {
+            String body = i == 17 ? "x".repeat(600) : "message-" + i;
+            require(data.sendTelemetry(networkId, new GlareMessage(sender, destination, body, i)), "send should find the network");
+        }
+        java.util.List<GlareMessage> inbox = data.readTelemetry(networkId, destination);
+        require(inbox.size() == TelemetryService.MAX_MESSAGES, "normal insertion should cap an inbox at 16 messages");
+        require(inbox.getFirst().body().equals("message-2"), "new messages should evict the oldest message first");
+        require(inbox.getLast().body().length() == GlareMessage.MAX_BODY_LENGTH, "message bodies should be truncated to 512 characters");
+
+        GlareMessage exact = inbox.get(4);
+        require(data.discardTelemetry(networkId, destination, exact.id()).orElseThrow().equals(exact), "discard by id should remove the exact message");
+        require(data.readTelemetry(networkId, destination).stream().noneMatch(message -> message.id().equals(exact.id())), "discarded message should no longer be readable");
+        while (!data.readTelemetry(networkId, destination).isEmpty()) {
+            data.discardTelemetryAt(networkId, destination, 0);
+        }
+        require(!requireNetworkRecord(data, node).telemetryInboxes.containsKey(destination), "empty inboxes should be cleaned up");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void telemetryMergeTemporarilyExceedsCapThenInsertionTrims(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 180)));
+        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 180)));
+        data.registerNode(level, new TestNode(a, 1));
+        data.registerNode(level, new TestNode(b, 1));
+        GlareAddress address = GlareAddress.of(Items.RED_DYE, Items.GREEN_DYE, Items.BLUE_DYE);
+        GlareAddress sender = GlareAddress.empty();
+        UUID firstNetwork = requireNetwork(data, a);
+        UUID secondNetwork = requireNetwork(data, b);
+        for (int i = 0; i < 10; i++) {
+            data.sendTelemetry(firstNetwork, new GlareMessage(sender, address, "a-" + i, i));
+            data.sendTelemetry(secondNetwork, new GlareMessage(sender, address, "b-" + i, 10 + i));
+        }
+
+        data.tryAddLink(level, a, b);
+        UUID mergedId = requireNetwork(data, a);
+        require(mergedId.equals(requireNetwork(data, b)), "linked telemetry networks should merge");
+        require(data.readTelemetry(mergedId, address).size() == 20, "network merge should temporarily preserve messages above the normal cap");
+
+        data.sendTelemetry(mergedId, new GlareMessage(sender, address, "after-merge", 30));
+        java.util.List<GlareMessage> trimmed = data.readTelemetry(mergedId, address);
+        require(trimmed.size() == TelemetryService.MAX_MESSAGES, "first normal insertion after merge should restore the cap");
+        require(trimmed.getLast().body().equals("after-merge"), "post-merge insertion should retain the new message");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void telemetrySplitCopiesAcrossUnloadedNodeAndSurvivesReload(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos local = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 190)));
+        GlareNodePos remote = new GlareNodePos(level.dimension(), new BlockPos(30_000_000, 80, 29_999_984));
+        data.registerNode(level, new TestNode(local, 1));
+        data.registerNode(level, new TestNode(remote, 1));
+        data.tryAddLink(level, local, remote);
+        GlareAddress address = GlareAddress.of(Items.COMPASS, Items.CLOCK, Items.PAPER);
+        UUID joined = requireNetwork(data, local);
+        GlareMessage original = new GlareMessage(GlareAddress.empty(), address, "persist me", 40);
+        data.sendTelemetry(joined, original);
+
+        GlareLink link = new GlareLink(local, remote);
+        data.setLinkValidityForTests(link, GlareSavedData.LinkValidity.BLOCKED);
+        UUID localNetwork = requireNetwork(data, local);
+        UUID remoteNetwork = requireNetwork(data, remote);
+        require(!localNetwork.equals(remoteNetwork), "split components must receive distinct network ids");
+        require(data.readTelemetry(localNetwork, address).equals(java.util.List.of(original)), "local split should retain a telemetry copy");
+        require(data.readTelemetry(remoteNetwork, address).equals(java.util.List.of(original)), "unloaded remote split should retain a telemetry copy");
+
+        CompoundTag saved = data.save(new CompoundTag(), level.registryAccess());
+        GlareSavedData loaded = GlareSavedData.loadForTests(saved);
+        require(loaded.readTelemetry(requireNetwork(loaded, local), address).equals(java.util.List.of(original)), "local telemetry should survive saved-data reload");
+        require(loaded.readTelemetry(requireNetwork(loaded, remote), address).equals(java.util.List.of(original)), "unloaded telemetry should survive saved-data reload");
+
+        loaded.setLinkValidityForTests(link, GlareSavedData.LinkValidity.VALID);
+        java.util.List<GlareMessage> remerged = loaded.readTelemetry(requireNetwork(loaded, local), address);
+        require(remerged.size() == 1 && remerged.getFirst().id().equals(original.id()), "remerging split copies must not duplicate messages");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void telemetrySubscribersReceiveExactMutations(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos node = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 200)));
+        data.registerNode(level, new TestNode(node, 1));
+        UUID networkId = requireNetwork(data, node);
+        GlareAddress address = GlareAddress.of(Items.BOOK, Items.FEATHER, Items.INK_SAC);
+        AtomicInteger sends = new AtomicInteger();
+        AtomicInteger discards = new AtomicInteger();
+        long subscription = data.subscribeTelemetry(node, address, update -> {
+            if (update.mutation() == TelemetryService.Mutation.SENT) sends.incrementAndGet();
+            if (update.mutation() == TelemetryService.Mutation.DISCARDED) discards.incrementAndGet();
+        });
+
+        GlareMessage message = new GlareMessage(GlareAddress.empty(), address, "notify", 50);
+        data.sendTelemetry(networkId, message);
+        data.discardTelemetry(networkId, address, message.id());
+        data.unsubscribeTelemetry(subscription);
+        data.sendTelemetry(networkId, new GlareMessage(GlareAddress.empty(), address, "silent", 51));
+        require(sends.get() == 1, "subscriber should receive one send mutation before unsubscribe");
+        require(discards.get() == 1, "subscriber should receive the exact discard mutation");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 40)
+    public static void telemetryTerminalManualAndAutomaticOperations(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos senderRelative = new BlockPos(1, 2, 1);
+        BlockPos receiverRelative = new BlockPos(3, 2, 1);
+        helper.setBlock(senderRelative, ModBlocks.GLARE_TELEMETRY_TERMINAL.get());
+        helper.setBlock(receiverRelative, ModBlocks.GLARE_TELEMETRY_TERMINAL.get());
+        TelemetryTerminalBlockEntity sender = (TelemetryTerminalBlockEntity) level.getBlockEntity(helper.absolutePos(senderRelative));
+        TelemetryTerminalBlockEntity receiver = (TelemetryTerminalBlockEntity) level.getBlockEntity(helper.absolutePos(receiverRelative));
+        require(sender != null && receiver != null, "terminal block entities should be created");
+        sender.setAddressSlot(0, new net.minecraft.world.item.ItemStack(Items.REDSTONE));
+        sender.setAddressSlot(1, new net.minecraft.world.item.ItemStack(Items.IRON_INGOT));
+        sender.setAddressSlot(2, new net.minecraft.world.item.ItemStack(Items.PAPER));
+        receiver.setAddressSlot(0, new net.minecraft.world.item.ItemStack(Items.BLUE_DYE));
+        receiver.setAddressSlot(1, new net.minecraft.world.item.ItemStack(Items.COPPER_INGOT));
+        receiver.setAddressSlot(2, new net.minecraft.world.item.ItemStack(Items.BOOK));
+        GlareSavedData data = GlareSavedData.get(level);
+        data.tryAddLink(level, sender.getGlareNodePos(), receiver.getGlareNodePos());
+        require(requireNetwork(data, sender.getGlareNodePos()).equals(requireNetwork(data, receiver.getGlareNodePos())), "terminals should share a network");
+        require(requireNetworkRecord(data, sender.getGlareNodePos()).registeredTelemetryAddresses.contains(receiver.getTelemetryAddress()),
+                "terminal address should register with its network even before receiving mail");
+
+        sender.setDraft(false, receiver.getTelemetryAddress(), "manual hello");
+        sender.sendManual();
+        require(TelemetryService.readFromNode(level, receiver.getGlareNodePos(), receiver.getTelemetryAddress()).stream()
+                .anyMatch(message -> message.body().equals("manual hello")), "manual send should deliver to a registered terminal address");
+
+        receiver.setMode(TelemetryTerminalMode.AUTO_RECEIVE);
+        receiver.addFilter("ALERT");
+        receiver.setDiscardMatchingMessages(true);
+        TelemetryService.sendFromNode(level, sender.getGlareNodePos(), sender.getTelemetryAddress(), receiver.getTelemetryAddress(), "system alert");
+        helper.runAfterDelay(3, () -> {
+            require(receiver.getLastPulseGameTime() > Long.MIN_VALUE, "matching auto-receive message should trigger a redstone pulse");
+            require(TelemetryService.readFromNode(level, receiver.getGlareNodePos(), receiver.getTelemetryAddress()).stream()
+                    .noneMatch(message -> message.body().equals("system alert")), "discard mode should remove the triggering message after subscribers run");
+            helper.destroyBlock(senderRelative);
+            helper.destroyBlock(receiverRelative);
+            helper.succeed();
+        });
     }
 
     private static UUID requireNetwork(GlareSavedData data, GlareNodePos pos) {

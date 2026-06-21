@@ -14,7 +14,7 @@ public class VerticalScrollBar extends AbstractSimiWidget {
     private static final int THUMB_COLOUR = 0xFF8C969B;
     private static final int THUMB_HOVERED_COLOUR = 0xFFBCC4C7;
 
-    private final int totalItems;
+    private int totalItems;
     private final int visibleItems;
     private final IntConsumer onOffsetChanged;
     private int offset;
@@ -47,6 +47,12 @@ public class VerticalScrollBar extends AbstractSimiWidget {
 
     public boolean scrollBy(int rows) {
         return setOffset(offset + rows);
+    }
+
+    public void setTotalItems(int totalItems) {
+        this.totalItems = Math.max(0, totalItems);
+        this.active = maxOffset() > 0;
+        setOffset(offset);
     }
 
     public boolean isDraggingThumb() {

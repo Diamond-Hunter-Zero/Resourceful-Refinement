@@ -42,6 +42,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationLayer
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverScreen;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
@@ -64,7 +65,12 @@ public class ResourcefulRefinementMain {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        event.enqueueWork(ModStressValues::register);
+        event.enqueueWork(() -> {
+            ModStressValues.register();
+            com.simibubi.create.api.behaviour.display.DisplayTarget.BY_BLOCK_ENTITY.register(
+                    ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
+                    new com.resourceful_refinement.content.glare.terminal.TelemetryTerminalDisplayTarget());
+        });
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -209,6 +215,7 @@ public class ResourcefulRefinementMain {
         public static void registerMenuScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
             event.register(ModMenus.GLARE_CHROMATIC_TRANSCEIVER.get(), GlareChromaticTransceiverScreen::new);
+            event.register(ModMenus.GLARE_TELEMETRY_TERMINAL.get(), TelemetryTerminalScreen::new);
         }
 
         @SubscribeEvent
@@ -224,6 +231,8 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
+                    com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);

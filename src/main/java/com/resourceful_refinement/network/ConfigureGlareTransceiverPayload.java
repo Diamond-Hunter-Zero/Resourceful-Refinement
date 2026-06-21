@@ -3,6 +3,7 @@ package com.resourceful_refinement.network;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareLogicMode;
+import com.resourceful_refinement.content.glare.GlareComparison;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -35,9 +36,17 @@ public record ConfigureGlareTransceiverPayload(BlockPos pos, GlareLogicMode mode
     @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
 
     public static void handle(ConfigureGlareTransceiverPayload payload, ServerPlayer player) {
-        if (!player.level().isLoaded(payload.pos) || payload.thresholds.length != 16 || payload.comparisons.length != 16) return;
-        if (!(player.level().getBlockEntity(payload.pos) instanceof GlareChromaticTransceiverBlockEntity transceiver)) return;
-        if (!transceiver.isWithinUsableDistance(player)) return;
+        if (payload.thresholds.length != 16 || payload.comparisons.length != 16) return;
+        for (int threshold : payload.thresholds) {
+            if (threshold < GlareChromaticTransceiverBlockEntity.DISABLED_FILTER
+                    || threshold > GlareChromaticTransceiverBlockEntity.MAX_THRESHOLD) return;
+        }
+        for (int comparison : payload.comparisons) {
+            if (comparison < 0 || comparison >= GlareComparison.values().length) return;
+        }
+        GlareChromaticTransceiverBlockEntity transceiver = ServerPayloadGuard.loadedNearbyBlockEntity(
+                player, payload.pos, GlareChromaticTransceiverBlockEntity.class);
+        if (transceiver == null) return;
         transceiver.applyConfiguration(payload.mode, payload.thresholds, payload.comparisons);
     }
 }

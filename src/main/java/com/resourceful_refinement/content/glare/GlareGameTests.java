@@ -301,6 +301,32 @@ public final class GlareGameTests {
     }
 
     @GameTest(template = "empty")
+    public static void relayWrenchCapacityAndBulkUnlinkSemantics(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos center = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(2, 2, 18)));
+        GlareNodePos first = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(4, 2, 18)));
+        GlareNodePos second = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(6, 2, 18)));
+        data.registerNode(level, new TestNode(center, 2));
+        data.registerNode(level, new TestNode(first, 1));
+        data.registerNode(level, new TestNode(second, 1));
+        data.tryAddLink(level, center, first);
+
+        require(!data.canAcceptLink(first), "a node at its limit must not be a valid wrench target");
+        require(data.canAcceptLink(center), "a node below its limit should remain selectable");
+        data.tryAddLink(level, center, second);
+        require(!data.canAcceptLink(center), "the center should become invalid once its final slot is used");
+
+        int removed = data.removeAllLinks(level, center);
+        require(removed == 2, "bulk unlink should report every removed incident link");
+        require(data.getLinksFor(center).isEmpty() && data.getLinksFor(first).isEmpty()
+                && data.getLinksFor(second).isEmpty(), "bulk unlink must update every adjacency index");
+        require(!requireNetwork(data, center).equals(requireNetwork(data, first)),
+                "bulk unlink must rebuild and split the former network");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void chromaticTransceiverLogicModesAndThresholds(GameTestHelper helper) {
         int[] filters = new int[DyeColor.values().length];
         java.util.Arrays.fill(filters, GlareChromaticTransceiverBlockEntity.DISABLED_FILTER);
@@ -548,6 +574,53 @@ public final class GlareGameTests {
         require(record.remoteAddress.equals(address), "endpoint address should persist");
         require(record.remoteMode == RemoteEntanglementMode.TRANSPORTER_RECEIVE_ONLY, "endpoint mode should persist");
         require(record.remoteAssembled, "assembly validity should persist while unloaded");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void stateOnlyRefreshPreservesTopologyAndNetworkIdentity(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos emitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 12)));
+        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 12)));
+        data.registerNode(level, new TestEmitterNode(emitter, 1, 8, DyeColor.RED, true));
+        data.registerNode(level, new TestReceiverNode(receiver, 1, 1, GlareOperationStatus.ONLINE));
+        data.tryAddLink(level, emitter, receiver);
+        UUID originalNetwork = requireNetwork(data, emitter);
+
+        data.updateNodeState(level, new TestEmitterNode(emitter, 1, 12, DyeColor.BLUE, true));
+
+        GlareSavedData.NetworkRecord refreshed = requireNetworkRecord(data, receiver);
+        require(originalNetwork.equals(requireNetwork(data, emitter)), "state refresh must preserve the network id");
+        require(data.getLinksFor(emitter).size() == 1, "state refresh must preserve indexed topology");
+        require(refreshed.luxCapacity == 12 && refreshed.luxAllocated == 1, "state refresh should update Lux locally");
+        require(refreshed.colourCharges.getOrDefault(DyeColor.BLUE, 0) == 12,
+                "state refresh should update colour aggregates locally");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void boundedLosValidationAdvancesRoundRobin(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 14)));
+        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 14)));
+        GlareNodePos c = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 14)));
+        GlareNodePos d = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(7, 2, 14)));
+        for (GlareNodePos pos : List.of(a, b, c, d)) data.registerNode(level, new TestNode(pos, 2));
+        List<GlareLink> testLinks = List.of(new GlareLink(a, b), new GlareLink(b, c), new GlareLink(c, d));
+        for (GlareLink link : testLinks) {
+            data.tryAddLink(level, link.a(), link.b());
+            data.setLinkValidityForTests(link, GlareSavedData.LinkValidity.UNKNOWN);
+        }
+
+        require(data.validateLoadedLinks(level, 1) <= 1, "one-link budget must bound the first validation tick");
+        require(data.validateLoadedLinks(level, 1) <= 1, "one-link budget must bound the second validation tick");
+        require(data.validateLoadedLinks(level, 1) <= 1, "one-link budget must bound the third validation tick");
+        for (GlareLink link : testLinks) {
+            require(data.getLinkValidity(link) == GlareSavedData.LinkValidity.VALID,
+                    "round-robin validation should eventually visit every loaded link");
+        }
         helper.succeed();
     }
 

@@ -5,6 +5,8 @@ import com.resourceful_refinement.content.glare.GlareAddress;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMenu;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMode;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalSnapshot;
+import com.resourceful_refinement.content.glare.GlareMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -46,10 +48,12 @@ public record TelemetryTerminalActionPayload(BlockPos pos, Action action, Teleme
     @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
 
     public static void handle(TelemetryTerminalActionPayload payload, ServerPlayer player) {
-        if (!player.level().isLoaded(payload.pos) || !(player.containerMenu instanceof TelemetryTerminalMenu menu)
+        if (!(player.containerMenu instanceof TelemetryTerminalMenu menu)
                 || !menu.getBlockPos().equals(payload.pos)
-                || !(player.level().getBlockEntity(payload.pos) instanceof TelemetryTerminalBlockEntity terminal)
-                || !terminal.isWithinUsableDistance(player) || !validAddress(payload.address)) return;
+                || !validAddress(payload.address) || !validText(payload)) return;
+        TelemetryTerminalBlockEntity terminal = ServerPayloadGuard.loadedNearbyBlockEntity(
+                player, payload.pos, TelemetryTerminalBlockEntity.class);
+        if (terminal == null) return;
         switch (payload.action) {
             case SET_MODE -> terminal.setMode(payload.mode);
             case SET_MANUAL_VIEW -> terminal.setManualComposeOpen(payload.flag);
@@ -70,6 +74,15 @@ public record TelemetryTerminalActionPayload(BlockPos pos, Action action, Teleme
         return BuiltInRegistries.ITEM.containsKey(address.first())
                 && BuiltInRegistries.ITEM.containsKey(address.second())
                 && BuiltInRegistries.ITEM.containsKey(address.third());
+    }
+
+    private static boolean validText(TelemetryTerminalActionPayload payload) {
+        int max = switch (payload.action) {
+            case ADD_FILTER, SAVE_FILTER_DRAFT, REMOVE_FILTER -> TelemetryTerminalSnapshot.MAX_FILTER_LENGTH;
+            case SAVE_MANUAL_DRAFT, SAVE_AUTO_DRAFT -> GlareMessage.MAX_BODY_LENGTH;
+            default -> 0;
+        };
+        return payload.text != null && (max > 0 ? payload.text.length() <= max : payload.text.isEmpty());
     }
 
     public enum Action {

@@ -49,6 +49,14 @@ public final class GlareService {
         return GlareSavedData.get(server).getLinksFor(pos);
     }
 
+    public static boolean canAcceptLink(Level level, GlareNodePos pos) {
+        return level instanceof ServerLevel server && GlareSavedData.get(server).canAcceptLink(pos);
+    }
+
+    public static int removeAllLinks(ServerLevel level, GlareNodePos pos) {
+        return GlareSavedData.get(level).removeAllLinks(level, pos);
+    }
+
     public static List<GlareSavedData.LinkRenderRecord> getRenderableLinks(ServerPlayer player) {
         return GlareSavedData.get((ServerLevel) player.level()).getRenderableLinksFor(player);
     }
@@ -69,16 +77,33 @@ public final class GlareService {
         GlareSavedData.get(level).validateLoadedLinks(level);
     }
 
+    public static int validateLoadedLinks(ServerLevel level, int maxChecks) {
+        return GlareSavedData.get(level).validateLoadedLinks(level, maxChecks);
+    }
+
+    public static GlareSavedData.Diagnostics diagnostics(ServerLevel level) {
+        return GlareSavedData.get(level).diagnostics(level);
+    }
+
+    public static void forceRebuild(ServerLevel level) {
+        GlareSavedData.get(level).forceRebuild(level);
+    }
+
     public static Optional<IGlareNode> ensureLiveNodeRegistered(Level level, BlockPos pos) {
         if (!(level instanceof ServerLevel server)) {
             return Optional.empty();
         }
+        if (!server.isLoaded(pos)) return Optional.empty();
         BlockEntity be = server.getBlockEntity(pos);
         if (!(be instanceof IGlareNode node)) {
             return Optional.empty();
         }
         GlareSavedData.get(server).registerNode(server, node);
         return Optional.of(node);
+    }
+
+    public static void markChunkUnloaded(ServerLevel level, BlockPos chunkOrigin) {
+        GlareSavedData.get(level).markChunkUnloaded(level, chunkOrigin);
     }
 
     public static boolean tryAddTarget(ItemStack stack, Level level, BlockPos pos, Player player) {

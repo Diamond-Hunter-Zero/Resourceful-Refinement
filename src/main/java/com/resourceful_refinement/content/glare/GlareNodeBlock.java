@@ -69,6 +69,10 @@ public class GlareNodeBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof RelayWrenchItem wrench) {
+            wrench.interactWithNode(stack, level, pos, player);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
         if (stack.getItem() instanceof GlareNodeBlockItem) {
             if (level.isClientSide) {
                 return ItemInteractionResult.SUCCESS;

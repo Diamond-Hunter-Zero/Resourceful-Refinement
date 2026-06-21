@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.glare.terminal;
 
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
+import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
@@ -37,7 +38,9 @@ public class TelemetryAddressBehaviour extends FilteringBehaviour {
     }
 
     @Override public boolean canShortInteract(ItemStack stack) {
-        return !(stack.getItem() instanceof GlareNodeBlockItem) && super.canShortInteract(stack);
+        return !(stack.getItem() instanceof GlareNodeBlockItem)
+                && !(stack.getItem() instanceof RelayWrenchItem)
+                && super.canShortInteract(stack);
     }
 
     @Override public boolean bypassesInput(ItemStack stack) {

@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
 import com.resourceful_refinement.content.glare.GlareNodePos;
 import com.resourceful_refinement.content.glare.GlareService;
+import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.depot.DepotBlock;
@@ -54,6 +55,10 @@ public class RemoteEntanglerDepotBlock extends DepotBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.getItem() instanceof RelayWrenchItem wrench) {
+            wrench.interactWithNode(stack, level, pos, player);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
         if (stack.getItem() instanceof GlareNodeBlockItem) {
             if (level.isClientSide) return ItemInteractionResult.SUCCESS;
             return GlareService.tryAddTarget(stack, level, pos, player)

@@ -510,5 +510,14 @@
   "message.resourceful_refinement.remote_depot.send": "Remote Entangler Depot: Send",
   "message.resourceful_refinement.remote_depot.receive": "Remote Entangler Depot: Receive",
   "message.resourceful_refinement.remote_transporter.mode": "Transporter mode: %s",
-  "message.resourceful_refinement.remote_transporter.incomplete": "Transporter incomplete: clear the block above and the two blocks in front"
+  "message.resourceful_refinement.remote_transporter.incomplete": "Transporter incomplete: clear the block above and the two blocks in front",
+  "item.resourceful_refinement.relay_wrench": "Relay Wrench",
+  "tooltip.resourceful_refinement.relay_wrench.selected": "Selected: %s",
+  "message.resourceful_refinement.relay_wrench.selected": "Selected GLARE node: %s",
+  "message.resourceful_refinement.relay_wrench.cancelled": "Relay connection cancelled",
+  "message.resourceful_refinement.relay_wrench.at_limit": "That GLARE node is already at its link limit",
+  "message.resourceful_refinement.relay_wrench.target_missing": "The selected GLARE node is no longer recorded",
+  "message.resourceful_refinement.relay_wrench.connected": "GLARE nodes connected",
+  "message.resourceful_refinement.relay_wrench.already_linked": "Those GLARE nodes are already linked",
+  "message.resourceful_refinement.relay_wrench.links_removed": "Removed %s GLARE link(s)"
 }

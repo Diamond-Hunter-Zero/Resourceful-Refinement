@@ -5,6 +5,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.glare.GlareTargetsData;
+import com.resourceful_refinement.content.glare.GlareNodePos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -49,6 +50,12 @@ public class ModDataComponents {
                     .networkSynchronized(GlareTargetsData.STREAM_CODEC)
                     .build()
     );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlareNodePos>> RELAY_WRENCH_TARGET = DATA_COMPONENTS.register(
+            "relay_wrench_target", () -> DataComponentType.<GlareNodePos>builder()
+                    .persistent(GlareNodePos.CODEC)
+                    .networkSynchronized(GlareNodePos.STREAM_CODEC)
+                    .build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<FlavourType>> FLAVOUR = DATA_COMPONENTS.register("flavour",
             () -> DataComponentType.<FlavourType>builder()

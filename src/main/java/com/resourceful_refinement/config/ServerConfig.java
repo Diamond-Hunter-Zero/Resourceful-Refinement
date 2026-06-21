@@ -13,6 +13,9 @@ public class ServerConfig {
     public static final ModConfigSpec.DoubleValue PASSIVE_COOLANT_CONSUMPTION;
     public static final ModConfigSpec.DoubleValue HEATED_COOLANT_CONSUMPTION;
     public static final ModConfigSpec.DoubleValue SUPERHEATED_COOLANT_CONSUMPTION;
+    public static final ModConfigSpec.BooleanValue GLARE_DEBUG_LOGGING;
+    public static final ModConfigSpec.IntValue GLARE_LOS_CHECKS_PER_TICK;
+    public static final ModConfigSpec.IntValue GLARE_LINK_SYNC_INTERVAL;
 
 
     static {
@@ -51,6 +54,18 @@ public class ServerConfig {
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
                 .defineInRange("superheated_coolant_consumption", 0.5f, 0f, 1000f);
 
+        CONFIG_BUILDER.pop();
+
+        CONFIG_BUILDER.push("GLARE Networks");
+        GLARE_DEBUG_LOGGING = CONFIG_BUILDER
+                .comment("Logs GLARE topology, reconciliation, and line-of-sight mutations for diagnostics")
+                .define("debug_logging", false);
+        GLARE_LOS_CHECKS_PER_TICK = CONFIG_BUILDER
+                .comment("Maximum GLARE links examined for line-of-sight changes per dimension tick")
+                .defineInRange("los_checks_per_tick", 32, 1, 4096);
+        GLARE_LINK_SYNC_INTERVAL = CONFIG_BUILDER
+                .comment("Ticks between GLARE link render synchronization packets")
+                .defineInRange("link_sync_interval", 20, 1, 200);
         CONFIG_BUILDER.pop();
 
         SPEC = CONFIG_BUILDER.build();

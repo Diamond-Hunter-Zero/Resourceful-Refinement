@@ -8,6 +8,7 @@ import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
+import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.content.milking_station.MilkingStationItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
@@ -121,6 +122,8 @@ public class ModItems {
 
     public static final DeferredItem<Item> FERROUS_CRYSTAL = ITEMS.registerItem("ferrous_crystal", Item::new, new Item.Properties());
     public static final DeferredItem<Item> FLUX_DUST = ITEMS.registerItem("flux_dust", Item::new, new Item.Properties());
+    public static final DeferredItem<RelayWrenchItem> RELAY_WRENCH = ITEMS.register("relay_wrench",
+            () -> new RelayWrenchItem(new Item.Properties()));
 
     public static final DeferredItem<Item> DURASTEEL_INGOT = ITEMS.registerItem("durasteel_ingot", Item::new, new Item.Properties());
     public static final DeferredItem<Item> DURASTEEL_SHEET = ITEMS.registerItem("durasteel_sheet", Item::new, new Item.Properties());

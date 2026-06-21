@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.network.GlareLinkSyncPayload;
+import com.resourceful_refinement.config.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,16 +26,25 @@ public final class ModGlareEvents {
         int runAt = serverLevel.getServer().getTickCount() + 1;
         serverLevel.getServer().tell(new net.minecraft.server.TickTask(runAt, () -> {
             GlareService.reconcileLoadedChunk(serverLevel, origin);
-            GlareService.validateLoadedLinks(serverLevel);
+            GlareService.validateLoadedLinks(serverLevel, ServerConfig.GLARE_LOS_CHECKS_PER_TICK.get());
         }));
     }
 
     @SubscribeEvent
+    public static void onChunkUnload(ChunkEvent.Unload event) {
+        if (!(event.getLevel() instanceof ServerLevel serverLevel)) return;
+        BlockPos origin = new BlockPos(event.getChunk().getPos().getMinBlockX(), serverLevel.getMinBuildHeight(),
+                event.getChunk().getPos().getMinBlockZ());
+        GlareService.markChunkUnloaded(serverLevel, origin);
+    }
+
+    @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel serverLevel) || serverLevel.getGameTime() % 20L != 0L) {
+        if (!(event.getLevel() instanceof ServerLevel serverLevel)) {
             return;
         }
-        GlareService.validateLoadedLinks(serverLevel);
+        GlareService.validateLoadedLinks(serverLevel, ServerConfig.GLARE_LOS_CHECKS_PER_TICK.get());
+        if (serverLevel.getGameTime() % ServerConfig.GLARE_LINK_SYNC_INTERVAL.get() != 0L) return;
         for (ServerPlayer player : serverLevel.players()) {
             PacketDistributor.sendToPlayer(player, GlareLinkSyncPayload.of(serverLevel.dimension().location(), GlareService.getRenderableLinks(player)));
         }

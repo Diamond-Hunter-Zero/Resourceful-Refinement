@@ -8,14 +8,32 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import java.util.List;
+
 public class GlareNodeBlockItem extends BlockItem {
     public GlareNodeBlockItem(Block block, Properties properties) {
         super(block, properties);
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return !stack.getOrDefault(ModDataComponents.GLARE_TARGETS.get(), GlareTargetsData.EMPTY).isEmpty()
+                || super.isFoil(stack);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
+        int targets = stack.getOrDefault(ModDataComponents.GLARE_TARGETS.get(), GlareTargetsData.EMPTY).targets().size();
+        if (targets > 0) {
+            tooltip.add(Component.translatable("tooltip.resourceful_refinement.glare.linking_targets", targets));
+        }
     }
 
     @Override

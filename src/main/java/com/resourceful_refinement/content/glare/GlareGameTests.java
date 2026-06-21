@@ -3,6 +3,10 @@ package com.resourceful_refinement.content.glare;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMode;
+import com.resourceful_refinement.content.glare.remote.IRemoteEntanglementEndpoint;
+import com.resourceful_refinement.content.glare.remote.RemoteEndpointKind;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementMode;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementService;
 import com.resourceful_refinement.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -14,6 +18,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @GameTestHolder(ResourcefulRefinementMain.MOD_ID)
@@ -525,6 +530,59 @@ public final class GlareGameTests {
         });
     }
 
+    @GameTest(template = "empty")
+    public static void remoteEndpointMetadataSurvivesSavedDataReload(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = new GlareSavedData();
+        GlareAddress address = GlareAddress.of(Items.GRASS_BLOCK, Items.REDSTONE, Items.ENDER_PEARL);
+        GlareNodePos pos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 90)));
+        data.registerNode(level, new TestRemoteNode(pos, RemoteEndpointKind.TRANSPORTER, address,
+                RemoteEntanglementMode.TRANSPORTER_RECEIVE_ONLY, true));
+
+        CompoundTag saved = new CompoundTag();
+        data.save(saved, level.registryAccess());
+        GlareSavedData reloaded = GlareSavedData.loadForTests(saved);
+        GlareSavedData.NodeRecord record = reloaded.getNode(pos).orElseThrow();
+
+        require(record.remoteEndpointKind == RemoteEndpointKind.TRANSPORTER, "endpoint kind should persist");
+        require(record.remoteAddress.equals(address), "endpoint address should persist");
+        require(record.remoteMode == RemoteEntanglementMode.TRANSPORTER_RECEIVE_ONLY, "endpoint mode should persist");
+        require(record.remoteAssembled, "assembly validity should persist while unloaded");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void remoteCandidateDiscoveryUsesNetworkAddressAndMode(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        GlareSavedData data = GlareSavedData.get(level);
+        GlareAddress address = GlareAddress.of(Items.GRASS_BLOCK, Items.REDSTONE, Items.ENDER_PEARL);
+        GlareNodePos sourcePos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 92)));
+        GlareNodePos receiverPos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 92)));
+        GlareNodePos sendOnlyPos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 92)));
+        data.unregisterLoadedNode(sourcePos);
+        data.unregisterLoadedNode(receiverPos);
+        data.unregisterLoadedNode(sendOnlyPos);
+
+        data.registerNode(level, new TestRemoteNode(sourcePos, RemoteEndpointKind.TRANSPORTER, address,
+                RemoteEntanglementMode.TRANSPORTER_AUTO, true));
+        data.registerNode(level, new TestRemoteNode(receiverPos, RemoteEndpointKind.TRANSPORTER, address,
+                RemoteEntanglementMode.TRANSPORTER_RECEIVE_ONLY, true));
+        data.registerNode(level, new TestRemoteNode(sendOnlyPos, RemoteEndpointKind.TRANSPORTER, address,
+                RemoteEntanglementMode.TRANSPORTER_SEND_ONLY, true));
+        data.tryAddLink(level, sourcePos, receiverPos);
+        data.tryAddLink(level, receiverPos, sendOnlyPos);
+
+        List<GlareSavedData.NodeRecord> candidates = RemoteEntanglementService.findCandidates(level, sourcePos,
+                RemoteEndpointKind.TRANSPORTER, address);
+        require(candidates.size() == 1 && candidates.getFirst().pos.equals(receiverPos),
+                "only an assembled receive-capable endpoint with the exact address should match");
+
+        data.unregisterLoadedNode(sourcePos);
+        data.unregisterLoadedNode(receiverPos);
+        data.unregisterLoadedNode(sendOnlyPos);
+        helper.succeed();
+    }
+
     private static UUID requireNetwork(GlareSavedData data, GlareNodePos pos) {
         return data.getNode(pos)
                 .flatMap(node -> java.util.Optional.ofNullable(node.networkId))
@@ -604,6 +662,16 @@ public final class GlareGameTests {
 
         @Override
         public void setGlareOperationStatus(GlareOperationStatus status) {}
+    }
+
+    private record TestRemoteNode(GlareNodePos pos, RemoteEndpointKind kind, GlareAddress address,
+            RemoteEntanglementMode mode, boolean assembled) implements IGlareNode, IRemoteEntanglementEndpoint {
+        @Override public int getMaxGlareLinks() { return 8; }
+        @Override public GlareNodePos getGlareNodePos() { return pos; }
+        @Override public RemoteEndpointKind getRemoteEndpointKind() { return kind; }
+        @Override public GlareAddress getRemoteAddress() { return address; }
+        @Override public RemoteEntanglementMode getRemoteMode() { return mode; }
+        @Override public boolean isRemoteEndpointAssembled() { return assembled; }
     }
 
     private record TestNodes(TestNode a, TestNode b, TestNode c) {

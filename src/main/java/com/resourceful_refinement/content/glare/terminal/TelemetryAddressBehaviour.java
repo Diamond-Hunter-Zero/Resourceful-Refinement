@@ -3,6 +3,7 @@ package com.resourceful_refinement.content.glare.terminal;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
+import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -15,7 +16,7 @@ public class TelemetryAddressBehaviour extends FilteringBehaviour {
     private static final BehaviourType<TelemetryAddressBehaviour> THIRD = new BehaviourType<>();
     private final int slot;
 
-    public TelemetryAddressBehaviour(SmartBlockEntity blockEntity, TelemetryAddressSlot transform, int slot) {
+    public TelemetryAddressBehaviour(SmartBlockEntity blockEntity, ValueBoxTransform transform, int slot) {
         super(blockEntity, transform);
         this.slot = slot;
         this.customLabel = Component.literal("Frequency #" + (slot+1));

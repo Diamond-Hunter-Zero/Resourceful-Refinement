@@ -499,5 +499,16 @@
   "tag.item.resourceful_refinement:veg_flavour": "Veg Flavour",
   "tag.item.resourceful_refinement:yeast_flavour": "Yeast Flavour",
   "tag.item.resourceful_refinement:chilled_flavour": "Chilled Flavour",
-  "tag.item.resourceful_refinement:cosmic_flavour": "Cosmic Flavour"
+  "tag.item.resourceful_refinement:cosmic_flavour": "Cosmic Flavour",
+  "block.resourceful_refinement.remote_entangler_depot": "Remote Entangler Depot",
+  "block.resourceful_refinement.remote_entanglement_transporter": "Remote Entanglement Transporter",
+  "item.resourceful_refinement.remote_entangler_depot": "Remote Entangler Depot",
+  "item.resourceful_refinement.remote_entanglement_transporter": "Remote Entanglement Transporter",
+  "item.resourceful_refinement.liquid_chorus_bucket": "Liquid Chorus Bucket",
+  "fluid_type.resourceful_refinement.liquid_chorus": "Liquid Chorus",
+  "effect.resourceful_refinement.teleportation_sickness": "Teleportation Sickness",
+  "message.resourceful_refinement.remote_depot.send": "Remote Entangler Depot: Send",
+  "message.resourceful_refinement.remote_depot.receive": "Remote Entangler Depot: Receive",
+  "message.resourceful_refinement.remote_transporter.mode": "Transporter mode: %s",
+  "message.resourceful_refinement.remote_transporter.incomplete": "Transporter incomplete: clear the block above and the two blocks in front"
 }

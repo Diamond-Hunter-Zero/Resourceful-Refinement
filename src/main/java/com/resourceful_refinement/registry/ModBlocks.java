@@ -18,6 +18,9 @@ import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
@@ -142,6 +145,22 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<RemoteEntanglerDepotBlock> REMOTE_ENTANGLER_DEPOT = BLOCKS.register("remote_entangler_depot",
+            () -> new RemoteEntanglerDepotBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.DEPOT.get())
+                    .requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<RemoteEntanglementTransporterBlock> REMOTE_ENTANGLEMENT_TRANSPORTER = BLOCKS.register(
+            "remote_entanglement_transporter", () -> new RemoteEntanglementTransporterBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<RemoteTransporterProxyBlock> REMOTE_ENTANGLEMENT_TRANSPORTER_TANK = BLOCKS.register(
+            "remote_entanglement_transporter_tank", () -> new RemoteTransporterProxyBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.COPPER).noOcclusion().noLootTable(), true));
+
+    public static final DeferredBlock<RemoteTransporterProxyBlock> REMOTE_ENTANGLEMENT_TRANSPORTER_CASING = BLOCKS.register(
+            "remote_entanglement_transporter_casing", () -> new RemoteTransporterProxyBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.GLASS).noOcclusion().noLootTable(), false));
 
     public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
             () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)

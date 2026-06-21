@@ -1,6 +1,9 @@
 package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.glare.remote.IRemoteEntanglementEndpoint;
+import com.resourceful_refinement.content.glare.remote.RemoteEndpointKind;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -329,6 +332,17 @@ public class GlareSavedData extends SavedData {
         record.telemetryAddress = glareNode instanceof IGlareTelemetryEndpoint endpoint
                 ? endpoint.getTelemetryAddress()
                 : GlareAddress.empty();
+        if (glareNode instanceof IRemoteEntanglementEndpoint endpoint) {
+            record.remoteEndpointKind = endpoint.getRemoteEndpointKind();
+            record.remoteAddress = endpoint.getRemoteAddress();
+            record.remoteMode = endpoint.getRemoteMode();
+            record.remoteAssembled = endpoint.isRemoteEndpointAssembled();
+        } else {
+            record.remoteEndpointKind = RemoteEndpointKind.NONE;
+            record.remoteAddress = GlareAddress.empty();
+            record.remoteMode = RemoteEntanglementMode.DEPOT_SEND;
+            record.remoteAssembled = false;
+        }
     }
 
     public LinkResult tryAddLink(ServerLevel level, GlareNodePos a, GlareNodePos b) {
@@ -809,6 +823,10 @@ public class GlareSavedData extends SavedData {
         public DyeColor colour = DyeColor.WHITE;
         public GlareOperationStatus status = GlareOperationStatus.ONLINE;
         public GlareAddress telemetryAddress = GlareAddress.empty();
+        public RemoteEndpointKind remoteEndpointKind = RemoteEndpointKind.NONE;
+        public GlareAddress remoteAddress = GlareAddress.empty();
+        public RemoteEntanglementMode remoteMode = RemoteEntanglementMode.DEPOT_SEND;
+        public boolean remoteAssembled;
         public final List<GlareNodePos> lastKnownLinks = new ArrayList<>();
         @Nullable
         public UUID networkId;
@@ -830,6 +848,10 @@ public class GlareSavedData extends SavedData {
             tag.putString("Colour", colour.getName());
             tag.putString("Status", status.name());
             tag.put("TelemetryAddress", telemetryAddress.save());
+            tag.putString("RemoteEndpointKind", remoteEndpointKind.name());
+            tag.put("RemoteAddress", remoteAddress.save());
+            tag.putString("RemoteMode", remoteMode.name());
+            tag.putBoolean("RemoteAssembled", remoteAssembled);
             if (networkId != null) {
                 tag.putUUID("Network", networkId);
             }
@@ -862,6 +884,20 @@ public class GlareSavedData extends SavedData {
             if (tag.contains("TelemetryAddress", Tag.TAG_COMPOUND)) {
                 record.telemetryAddress = GlareAddress.load(tag.getCompound("TelemetryAddress"));
             }
+            try {
+                record.remoteEndpointKind = RemoteEndpointKind.valueOf(tag.getString("RemoteEndpointKind"));
+            } catch (IllegalArgumentException ignored) {
+                record.remoteEndpointKind = RemoteEndpointKind.NONE;
+            }
+            if (tag.contains("RemoteAddress", Tag.TAG_COMPOUND)) {
+                record.remoteAddress = GlareAddress.load(tag.getCompound("RemoteAddress"));
+            }
+            try {
+                record.remoteMode = RemoteEntanglementMode.valueOf(tag.getString("RemoteMode"));
+            } catch (IllegalArgumentException ignored) {
+                record.remoteMode = RemoteEntanglementMode.DEPOT_SEND;
+            }
+            record.remoteAssembled = tag.getBoolean("RemoteAssembled");
             if (tag.hasUUID("Network")) {
                 record.networkId = tag.getUUID("Network");
             }

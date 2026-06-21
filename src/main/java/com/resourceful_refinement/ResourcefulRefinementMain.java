@@ -204,6 +204,23 @@ public class ResourcefulRefinementMain {
         // --- Casting Depot ---
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CASTING_DEPOT_BE.get(), (be, side) -> be.getItemHandler());
 
+        // --- Remote Entanglement ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(),
+                (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(),
+                (be, side) -> {
+                    Direction facing = be.getBlockState().getValue(
+                            com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock.FACING);
+                    return side == facing.getOpposite() ? be.getTank() : null;
+                });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_PROXY_BE.get(),
+                (be, side) -> {
+                    if (!be.getBlockState().is(ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get()) || side != Direction.UP) return null;
+                    com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getTank();
+                });
+
         // --- Fracking Pump ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), (be, side) -> {
             if (!be.isAssembled()) {
@@ -359,6 +376,10 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
                     com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(),
+                    com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(),
+                    com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);

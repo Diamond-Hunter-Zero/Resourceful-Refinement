@@ -25,6 +25,9 @@ import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEn
 import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlockEntity;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -90,6 +93,20 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<TelemetryTerminalBlockEntity>> GLARE_TELEMETRY_TERMINAL_BE = BLOCK_ENTITIES.register("glare_telemetry_terminal",
             () -> BlockEntityType.Builder.of(TelemetryTerminalBlockEntity::new, ModBlocks.GLARE_TELEMETRY_TERMINAL.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteEntanglerDepotBlockEntity>> REMOTE_ENTANGLER_DEPOT_BE = BLOCK_ENTITIES.register(
+            "remote_entangler_depot", () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new RemoteEntanglerDepotBlockEntity(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), pos, state),
+                    ModBlocks.REMOTE_ENTANGLER_DEPOT.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteEntanglementTransporterBlockEntity>> REMOTE_ENTANGLEMENT_TRANSPORTER_BE = BLOCK_ENTITIES.register(
+            "remote_entanglement_transporter", () -> BlockEntityType.Builder.of(RemoteEntanglementTransporterBlockEntity::new,
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteTransporterProxyBlockEntity>> REMOTE_ENTANGLEMENT_TRANSPORTER_PROXY_BE = BLOCK_ENTITIES.register(
+            "remote_entanglement_transporter_proxy", () -> BlockEntityType.Builder.of(RemoteTransporterProxyBlockEntity::new,
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get(),
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get()).build(null));
 
     public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
             () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));

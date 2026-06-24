@@ -29,6 +29,8 @@ import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity;
 import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlockEntity;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
+import com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity;
+import com.resourceful_refinement.content.pug.LaunchpadProxyBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -107,6 +109,14 @@ public class ModBlockEntities {
             "remote_entanglement_transporter_proxy", () -> BlockEntityType.Builder.of(RemoteTransporterProxyBlockEntity::new,
                     ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get(),
                     ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LaunchpadControllerBlockEntity>> LAUNCHPAD_CONTROLLER_BE = BLOCK_ENTITIES.register(
+            "launchpad_controller", () -> BlockEntityType.Builder.of(LaunchpadControllerBlockEntity::new,
+                    ModBlocks.LAUNCHPAD_CONTROLLER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LaunchpadProxyBlockEntity>> LAUNCHPAD_PROXY_BE = BLOCK_ENTITIES.register(
+            "launchpad_proxy", () -> BlockEntityType.Builder.of(LaunchpadProxyBlockEntity::new,
+                    ModBlocks.LAUNCHPAD_PROXY.get()).build(null));
 
     public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
             () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));

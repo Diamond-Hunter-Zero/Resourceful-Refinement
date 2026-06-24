@@ -80,12 +80,10 @@ public record TelemetryTerminalSnapshot(int revision, TelemetryTerminalMode mode
     }
 
     private static void writeAddress(RegistryFriendlyByteBuf buf, GlareAddress address) {
-        buf.writeResourceLocation(address.first());
-        buf.writeResourceLocation(address.second());
-        buf.writeResourceLocation(address.third());
+        address.write(buf);
     }
 
     private static GlareAddress readAddress(RegistryFriendlyByteBuf buf) {
-        return new GlareAddress(buf.readResourceLocation(), buf.readResourceLocation(), buf.readResourceLocation());
+        return GlareAddress.read(buf);
     }
 }

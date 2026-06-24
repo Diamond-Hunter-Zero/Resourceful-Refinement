@@ -16,6 +16,15 @@ public class ServerConfig {
     public static final ModConfigSpec.BooleanValue GLARE_DEBUG_LOGGING;
     public static final ModConfigSpec.IntValue GLARE_LOS_CHECKS_PER_TICK;
     public static final ModConfigSpec.IntValue GLARE_LINK_SYNC_INTERVAL;
+    public static final ModConfigSpec.IntValue PUG_TANK_CAPACITY_MB;
+    public static final ModConfigSpec.IntValue PUG_BASE_FUEL_MB;
+    public static final ModConfigSpec.IntValue PUG_FUEL_PER_STEP_MB;
+    public static final ModConfigSpec.IntValue PUG_FUEL_STEP_BLOCKS;
+    public static final ModConfigSpec.IntValue PUG_CROSS_DIMENSION_FUEL_MB;
+    public static final ModConfigSpec.IntValue PUG_BASE_TRAVEL_TICKS;
+    public static final ModConfigSpec.IntValue PUG_TRAVEL_TICKS_PER_STEP;
+    public static final ModConfigSpec.IntValue PUG_TRAVEL_STEP_BLOCKS;
+    public static final ModConfigSpec.IntValue PUG_CROSS_DIMENSION_TRAVEL_TICKS;
 
 
     static {
@@ -66,6 +75,36 @@ public class ServerConfig {
         GLARE_LINK_SYNC_INTERVAL = CONFIG_BUILDER
                 .comment("Ticks between GLARE link render synchronization packets")
                 .defineInRange("link_sync_interval", 20, 1, 200);
+        CONFIG_BUILDER.pop();
+
+        CONFIG_BUILDER.push("PUG Logistics");
+        PUG_TANK_CAPACITY_MB = CONFIG_BUILDER
+                .comment("Launchpad fuel tank capacity in millibuckets")
+                .defineInRange("tank_capacity_mb", 16_000, 1_000, 1_000_000);
+        PUG_BASE_FUEL_MB = CONFIG_BUILDER
+                .comment("Fuel charged for every launch before distance and dimension costs")
+                .defineInRange("base_fuel_mb", 500, 0, 1_000_000);
+        PUG_FUEL_PER_STEP_MB = CONFIG_BUILDER
+                .comment("Fuel charged for each started distance step")
+                .defineInRange("fuel_per_step_mb", 500, 0, 1_000_000);
+        PUG_FUEL_STEP_BLOCKS = CONFIG_BUILDER
+                .comment("Horizontal blocks in one fuel distance step")
+                .defineInRange("fuel_step_blocks", 1_000, 1, 30_000_000);
+        PUG_CROSS_DIMENSION_FUEL_MB = CONFIG_BUILDER
+                .comment("Additional fuel charged when source and destination dimensions differ")
+                .defineInRange("cross_dimension_fuel_mb", 2_000, 0, 1_000_000);
+        PUG_BASE_TRAVEL_TICKS = CONFIG_BUILDER
+                .comment("Base flight duration in ticks (400 ticks = 20 seconds)")
+                .defineInRange("base_travel_ticks", 400, 0, Integer.MAX_VALUE);
+        PUG_TRAVEL_TICKS_PER_STEP = CONFIG_BUILDER
+                .comment("Ticks added for each started travel distance step")
+                .defineInRange("travel_ticks_per_step", 20, 0, Integer.MAX_VALUE);
+        PUG_TRAVEL_STEP_BLOCKS = CONFIG_BUILDER
+                .comment("Horizontal blocks in one travel-time distance step")
+                .defineInRange("travel_step_blocks", 50, 1, 30_000_000);
+        PUG_CROSS_DIMENSION_TRAVEL_TICKS = CONFIG_BUILDER
+                .comment("Additional flight duration when dimensions differ (2400 ticks = 120 seconds)")
+                .defineInRange("cross_dimension_travel_ticks", 2_400, 0, Integer.MAX_VALUE);
         CONFIG_BUILDER.pop();
 
         SPEC = CONFIG_BUILDER.build();

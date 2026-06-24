@@ -85,6 +85,9 @@ public class ModItems {
             "remote_entanglement_transporter",
             () -> new GlareNodeBlockItem(ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> LAUNCHPAD_CONTROLLER = ITEMS.registerSimpleBlockItem(
+            "launchpad_controller", ModBlocks.LAUNCHPAD_CONTROLLER);
+
     public static final DeferredItem<BlockItem> RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("resonance_crystal", ModBlocks.RESONANCE_CRYSTAL);
 
     public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);

@@ -4,6 +4,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatEntity;
 import com.resourceful_refinement.content.plunger.ThrownPlunger;
 import com.resourceful_refinement.content.hosegun.GelBlobEntity;
+import com.resourceful_refinement.content.pug.PugEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -36,5 +37,13 @@ public class ModEntities {
                     .updateInterval(20)
                     .noSave()
                     .build("milking_station_seat")
+    );
+
+    public static final DeferredHolder<EntityType<?>, EntityType<PugEntity>> PUG = ENTITY_TYPES.register("pug",
+            () -> EntityType.Builder.<PugEntity>of(PugEntity::new, MobCategory.MISC)
+                    .sized(1.95F, 1.9F)
+                    .clientTrackingRange(8)
+                    .updateInterval(1)
+                    .build("pug")
     );
 }

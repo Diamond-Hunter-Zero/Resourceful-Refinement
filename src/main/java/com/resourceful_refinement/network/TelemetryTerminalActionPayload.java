@@ -31,9 +31,7 @@ public record TelemetryTerminalActionPayload(BlockPos pos, Action action, Teleme
         buf.writeBlockPos(payload.pos);
         buf.writeEnum(payload.action);
         buf.writeEnum(payload.mode);
-        buf.writeResourceLocation(payload.address.first());
-        buf.writeResourceLocation(payload.address.second());
-        buf.writeResourceLocation(payload.address.third());
+        payload.address.write(buf);
         buf.writeUtf(payload.text, 512);
         buf.writeBoolean(payload.flag);
         buf.writeUUID(payload.messageId);
@@ -41,7 +39,7 @@ public record TelemetryTerminalActionPayload(BlockPos pos, Action action, Teleme
 
     private static TelemetryTerminalActionPayload read(RegistryFriendlyByteBuf buf) {
         return new TelemetryTerminalActionPayload(buf.readBlockPos(), buf.readEnum(Action.class),
-                buf.readEnum(TelemetryTerminalMode.class), new GlareAddress(buf.readResourceLocation(), buf.readResourceLocation(), buf.readResourceLocation()),
+                buf.readEnum(TelemetryTerminalMode.class), GlareAddress.read(buf),
                 buf.readUtf(512), buf.readBoolean(), buf.readUUID());
     }
 

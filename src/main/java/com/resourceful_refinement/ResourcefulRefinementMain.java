@@ -17,12 +17,17 @@ import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotRenderer;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
+import com.resourceful_refinement.content.pug.LaunchpadControllerRenderer;
+import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.simibubi.create.AllBlocks;
@@ -88,6 +93,7 @@ public class ResourcefulRefinementMain {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(ModNetworking::registerPayloadHandlers);
+        modEventBus.addListener(com.resourceful_refinement.content.pug.PugChunkLoading::registerTicketController);
 
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
@@ -219,6 +225,20 @@ public class ResourcefulRefinementMain {
                     com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity controller =
                             be.getController(be.getLevel());
                     return controller == null ? null : controller.getTank();
+                });
+
+        // --- PUG Launchpad proxies ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.LAUNCHPAD_PROXY_BE.get(),
+                (be, side) -> {
+                    com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getItemHandlerForProxy(be, side);
+                });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.LAUNCHPAD_PROXY_BE.get(),
+                (be, side) -> {
+                    com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getFuelHandlerForProxy(be, side);
                 });
 
         // --- Fracking Pump ---
@@ -353,6 +373,7 @@ public class ResourcefulRefinementMain {
             event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
             event.register(ModMenus.GLARE_CHROMATIC_TRANSCEIVER.get(), GlareChromaticTransceiverScreen::new);
             event.register(ModMenus.GLARE_TELEMETRY_TERMINAL.get(), TelemetryTerminalScreen::new);
+            event.register(ModMenus.LAUNCHPAD.get(), com.resourceful_refinement.content.pug.LaunchpadScreen::new);
         }
 
         @SubscribeEvent
@@ -374,17 +395,17 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.MILKING_STATION_BE.get(), MilkingStationRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FUEL_TANK_BE.get(), FuelTankRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
-                    com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(),
-                    com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(),
-                    com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), RemoteEntanglerDepotRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LAUNCHPAD_CONTROLLER_BE.get(), LaunchpadControllerRenderer::new);
 
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
             event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
+            event.registerEntityRenderer(ModEntities.PUG.get(),
+                    com.resourceful_refinement.content.pug.PugEntityRenderer::new);
         }
 
         @SubscribeEvent
@@ -443,6 +464,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+            event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
         }
     }
 

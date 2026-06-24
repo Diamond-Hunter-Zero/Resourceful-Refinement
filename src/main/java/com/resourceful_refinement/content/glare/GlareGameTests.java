@@ -142,10 +142,10 @@ public final class GlareGameTests {
     @GameTest(template = "empty")
     public static void maxLinkLimitEvictsOldestLink(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        GlareSavedData data = GlareSavedData.get(level);
-        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 60)));
-        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 60)));
-        GlareNodePos c = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 60)));
+        GlareSavedData data = new GlareSavedData();
+        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 6)));
+        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 6)));
+        GlareNodePos c = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 6)));
         data.unregisterLoadedNode(a);
         data.unregisterLoadedNode(b);
         data.unregisterLoadedNode(c);

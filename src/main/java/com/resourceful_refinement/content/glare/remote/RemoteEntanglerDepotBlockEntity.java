@@ -7,8 +7,9 @@ import com.resourceful_refinement.content.glare.GlareSavedData;
 import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.content.glare.IGlareNode;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
+import com.resourceful_refinement.content.glare.common.TrioAddressSlot;
 import com.resourceful_refinement.content.glare.terminal.TelemetryAddressBehaviour;
-import com.resourceful_refinement.content.glare.terminal.Trio;
+import com.resourceful_refinement.content.glare.common.Trio;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.logistics.depot.DepotBehaviour;
 import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
@@ -50,7 +51,7 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
 
     @Override public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         super.addBehaviours(behaviours);
-        List<RemoteAddressSlot> transforms = Trio.makeSlots(RemoteAddressSlot::new);
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 8f, 15.9f, 0f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);

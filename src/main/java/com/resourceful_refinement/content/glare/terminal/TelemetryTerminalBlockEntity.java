@@ -8,6 +8,8 @@ import com.resourceful_refinement.content.glare.GlareOperationStatus;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.IGlareTelemetryEndpoint;
 import com.resourceful_refinement.content.glare.TelemetryService;
+import com.resourceful_refinement.content.glare.common.Trio;
+import com.resourceful_refinement.content.glare.common.TrioAddressSlot;
 import com.resourceful_refinement.network.TelemetryTerminalStatePayload;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -77,7 +79,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        List<TelemetryAddressSlot> transforms = Trio.makeSlots(TelemetryAddressSlot::new);
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15.9f, 8f, 90f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);

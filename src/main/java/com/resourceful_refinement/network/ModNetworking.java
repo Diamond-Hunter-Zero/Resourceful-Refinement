@@ -32,10 +32,20 @@ public final class ModNetworking {
                         TelemetryTerminalActionPayload.STREAM_CODEC,
                         ModNetworking::handleTelemetryTerminalAction
                 )
+                .playToServer(
+                        ConfigureLaunchpadPayload.TYPE,
+                        ConfigureLaunchpadPayload.STREAM_CODEC,
+                        ModNetworking::handleConfigureLaunchpad
+                )
                 .playToClient(
                         TelemetryTerminalStatePayload.TYPE,
                         TelemetryTerminalStatePayload.STREAM_CODEC,
                         ModNetworking::handleTelemetryTerminalState
+                )
+                .playToClient(
+                        LaunchpadStatePayload.TYPE,
+                        LaunchpadStatePayload.STREAM_CODEC,
+                        ModNetworking::handleLaunchpadState
                 );
     }
 
@@ -67,5 +77,17 @@ public final class ModNetworking {
 
     private static void handleTelemetryTerminalState(TelemetryTerminalStatePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> TelemetryTerminalStatePayload.handleClient(payload));
+    }
+
+    private static void handleLaunchpadState(LaunchpadStatePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> LaunchpadStatePayload.handleClient(payload));
+    }
+
+    private static void handleConfigureLaunchpad(ConfigureLaunchpadPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                ConfigureLaunchpadPayload.handle(payload, serverPlayer);
+            }
+        });
     }
 }

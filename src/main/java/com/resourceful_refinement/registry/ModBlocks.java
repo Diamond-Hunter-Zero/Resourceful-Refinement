@@ -22,6 +22,8 @@ import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
 import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
+import com.resourceful_refinement.content.pug.LaunchpadControllerBlock;
+import com.resourceful_refinement.content.pug.LaunchpadProxyBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.radiator.RadiatorBlock;
@@ -161,6 +163,16 @@ public class ModBlocks {
     public static final DeferredBlock<RemoteTransporterProxyBlock> REMOTE_ENTANGLEMENT_TRANSPORTER_CASING = BLOCKS.register(
             "remote_entanglement_transporter_casing", () -> new RemoteTransporterProxyBlock(BlockBehaviour.Properties.of()
                     .strength(2.5F).sound(SoundType.GLASS).noOcclusion().noLootTable(), false));
+
+    public static final DeferredBlock<LaunchpadControllerBlock> LAUNCHPAD_CONTROLLER = BLOCKS.register(
+            "launchpad_controller", () -> new LaunchpadControllerBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK).strength(2.5F).sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<LaunchpadProxyBlock> LAUNCHPAD_PROXY = BLOCKS.register(
+            "launchpad_proxy", () -> new LaunchpadProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK).strength(2.5F).sound(SoundType.COPPER)
+                    .noOcclusion().noLootTable()));
 
     public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
             () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)

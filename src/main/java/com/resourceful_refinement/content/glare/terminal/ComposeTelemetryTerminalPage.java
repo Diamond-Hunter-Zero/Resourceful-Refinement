@@ -2,13 +2,12 @@ package com.resourceful_refinement.content.glare.terminal;
 
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
 import com.resourceful_refinement.client.gui.widget.WrappedTextArea;
+import com.resourceful_refinement.client.gui.widget.GlareAddressEditor;
 import com.resourceful_refinement.content.glare.GlareAddress;
 import com.resourceful_refinement.network.TelemetryTerminalActionPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +18,7 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     private final boolean automatic;
     private final int topOffset;
     private GlareAddress destination;
+    private GlareAddressEditor addressEditor;
     private WrappedTextArea bodyEditor;
     private VerticalScrollBar contactsScroll;
     private int contactOffset;
@@ -36,10 +36,8 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     @Override public void init() {
         int x = screen.contentLeft();
         int y = screen.contentTop() + topOffset;
-        for (int slot = 0; slot < 3; slot++) {
-            int index = slot;
-            screen.addPageWidget(Button.builder(Component.empty(), b -> openPicker(index)).bounds(x + 86 + slot * 25, y + 2, 22, 22).build());
-        }
+        addressEditor = screen.addPageWidget(new GlareAddressEditor(screen, x + 86, y + 2, 22, 25, destination,
+                this::setDestination));
         screen.addPageWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.save_contact"), b -> saveContact())
                 .bounds(x + 164, y + 2, 48, 22).build());
         bodyEditor = screen.addPageWidget(new WrappedTextArea(screen.getMinecraft().font, x + 84, y + 29, 210, 117,
@@ -59,17 +57,8 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
                 screen.snapshot().contacts().size(), 6, contactOffset, offset -> contactOffset = offset));
     }
 
-    private void openPicker(int slot) {
-        screen.getMinecraft().setScreen(new TelemetryItemPickerScreen(screen, item -> setAddressPart(slot, item)));
-    }
-
-    private void setAddressPart(int slot, Item item) {
-        var id = BuiltInRegistries.ITEM.getKey(item);
-        destination = switch (slot) {
-            case 0 -> new GlareAddress(id, destination.second(), destination.third());
-            case 1 -> new GlareAddress(destination.first(), id, destination.third());
-            default -> new GlareAddress(destination.first(), destination.second(), id);
-        };
+    private void setDestination(GlareAddress address) {
+        destination = address;
         dirty = true;
         saveDelay = 0;
         flush();
@@ -99,6 +88,7 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     @Override public void snapshotUpdated(TelemetryTerminalSnapshot snapshot) {
         if (!dirty) {
             destination = automatic ? snapshot.autoSendDestination() : snapshot.manualDestination();
+            if (addressEditor != null) addressEditor.setAddress(destination);
             if (bodyEditor != null) bodyEditor.setValue(automatic ? snapshot.autoSendBody() : snapshot.manualBody());
         }
     }
@@ -111,7 +101,6 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
         if (automatic && screen.snapshot().displayLinkActive()) {
             graphics.drawString(screen.getMinecraft().font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.display_link_readout"), x + 84, y + 27, 0xFF9FC4D0, false);
         }
-        TelemetryAddressRenderer.render(graphics, destination, x + 89, y + 5, 25, 1);
         List<GlareAddress> contacts = screen.snapshot().contacts();
         for (int row = 0; row < 6 && contactOffset + row < contacts.size(); row++) {
             int rowY = y + 27 + row * 21;

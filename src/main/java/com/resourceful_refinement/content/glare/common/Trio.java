@@ -1,4 +1,4 @@
-package com.resourceful_refinement.content.glare.terminal;
+package com.resourceful_refinement.content.glare.common;
 
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
 import net.minecraft.core.BlockPos;

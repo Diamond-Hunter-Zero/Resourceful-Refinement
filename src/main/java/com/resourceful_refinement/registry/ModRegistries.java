@@ -17,6 +17,7 @@ public class ModRegistries {
         ModStructureTypes.STRUCTURE_TYPES.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
+        ModSounds.SOUND_EVENTS.register(modEventBus);
         ModDisplaySources.init(modEventBus);
     }
 }

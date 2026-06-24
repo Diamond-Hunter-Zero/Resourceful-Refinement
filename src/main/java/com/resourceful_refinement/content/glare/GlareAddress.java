@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.glare;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -34,6 +35,16 @@ public record GlareAddress(ResourceLocation first, ResourceLocation second, Reso
         tag.putString("Second", second.toString());
         tag.putString("Third", third.toString());
         return tag;
+    }
+
+    public void write(RegistryFriendlyByteBuf buf) {
+        buf.writeResourceLocation(first);
+        buf.writeResourceLocation(second);
+        buf.writeResourceLocation(third);
+    }
+
+    public static GlareAddress read(RegistryFriendlyByteBuf buf) {
+        return new GlareAddress(buf.readResourceLocation(), buf.readResourceLocation(), buf.readResourceLocation());
     }
 
     public static GlareAddress load(CompoundTag tag) {

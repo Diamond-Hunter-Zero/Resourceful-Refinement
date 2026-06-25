@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:fluid_refinery",
+  "processing_time": 800,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:polymer_sludge",
+      "amount": 300
+    },
+    {
+      "item": "resourceful_refinement:polymer_residue",
+      "count": 1
+    },
+    {
+      "item": "minecraft:packed_ice",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:coolant",
+      "amount": 1000
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:brewers_tap",
+  "processing_time": 60,
+  "ingredients": [
+    { "item": "resourceful_refinement:drinks_glass" },
+    { "type": "neoforge:single", "fluid": "resourceful_refinement:hot_chocolate", "amount": 250 }
+  ],
+  "flavour_tags": ["cosmic_flavour", "sweet_flavour", "chilled_flavour", "spice_flavour"],
+  "results": [
+    { "id": "resourceful_refinement:hot_chocolate_mug", "count": 1 }
+  ]
+}

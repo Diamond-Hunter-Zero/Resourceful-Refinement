@@ -162,7 +162,7 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
             // Use top block's filter for matching
             if (recipe.isEmpty() || !recipe.get().value().matchesFilter(getTopBlock().getFiltering())) {
-                timer = 100; // wait before checking again
+                timer = 20; // wait before checking again
                 lastRecipe = null;
                 displayedRecipeId = null;
                 sendData();
@@ -172,7 +172,7 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
             lastRecipe = recipe.get().value();
             displayedRecipeId = recipe.get().id();
             timer = scaledProcessingDuration(lastRecipe.getProcessingDuration(), stackSize);
-            if (timer <= 0) timer = 200;
+            if (timer <= 0) timer = 20;
             sendData();
             return;
         }
@@ -346,7 +346,7 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
     private void preserveRecipeProgress(MechanicalFluidSieveBlockEntity controller, int oldStackSize, int newStackSize) {
         int baseDuration = controller.lastRecipe.getProcessingDuration();
         if (baseDuration <= 0) {
-            baseDuration = 200;
+            baseDuration = 1;
         }
 
         int oldTotalDuration = scaledProcessingDuration(baseDuration, oldStackSize);

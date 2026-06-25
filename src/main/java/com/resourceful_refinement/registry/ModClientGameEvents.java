@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +23,11 @@ public class ModClientGameEvents {
                 name = name.substring(0, 1).toUpperCase() + name.substring(1);
                 event.getToolTip().add(Component.literal("Coating: " + name + " (" + data.integrity() + "/" + data.type().getMaxDurability() + ")").withColor(data.type().getColor()));
             }
+        }
+
+        FlavourType flavour = stack.get(ModDataComponents.FLAVOUR.get());
+        if (flavour != null) {
+            event.getToolTip().add(Component.literal(flavour.getDisplayName() + " flavour").withColor(flavour.getColor()));
         }
     }
 }

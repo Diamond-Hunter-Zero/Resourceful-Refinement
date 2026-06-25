@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:milking_station",
+  "entity": "minecraft:snow_golem",
+  "processing_time": 200,
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:snowball",
+      "count": 1
+    }
+  ]
+}

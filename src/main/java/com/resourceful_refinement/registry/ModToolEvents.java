@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.coating.CoatingType;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
@@ -10,6 +11,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LightningBolt;
@@ -26,6 +28,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -34,6 +37,23 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public class ModToolEvents {
 
     private static final ResourceLocation COATING_DAMAGE_MODIFIER = ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "coating_damage");
+
+    @SubscribeEvent
+    public static void onItemConsumed(LivingEntityUseItemEvent.Finish event) {
+        LivingEntity entity = event.getEntity();
+        if (entity.level().isClientSide()) {
+            return;
+        }
+
+        FlavourType flavour = event.getItem().get(ModDataComponents.FLAVOUR.get());
+        if (flavour == null) {
+            return;
+        }
+
+        MobEffectInstance flavourEffect = flavour.createEffect();
+        if (flavourEffect != null)
+            entity.addEffect(flavourEffect);
+    }
 
     @SubscribeEvent
     public static void onAttribute(ItemAttributeModifierEvent event) {

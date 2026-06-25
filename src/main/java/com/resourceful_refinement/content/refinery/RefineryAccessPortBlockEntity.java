@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.refinery;
 
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.registry.ModStressValues;
+import com.resourceful_refinement.utilities.GoggleUtilities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,10 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -84,6 +87,19 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         @Override
         protected void onContentsChanged(int slot) {
             syncData();
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+            for (int i = 0; i < getSlots(); i++) {
+                if (i != slot) {
+                    ItemStack otherStack = getStackInSlot(i);
+                    if (!otherStack.isEmpty() && ItemStack.isSameItem(otherStack, stack)) {
+                        return false;
+                    }
+                }
+            }
+            return super.isItemValid(slot, stack);
         }
     };
     public final ItemStackHandler fuelSlot  = new ItemStackHandler(FUEL_SLOTS) {
@@ -264,7 +280,6 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         return null;
     }
 
-    // ... (rest of class)
 
     // -------------------------------------------------------------------------
     // Server tick (called from RefineryAccessPortBlock.getTicker)
@@ -433,16 +448,23 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         int duration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());
         if (duration <= 0) duration = 100;
 
+        // On progress finish, consume inputs and produce output
         if (craftingProgress >= duration) {
             outputTank.fill(resultFluid.copy(), net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
 
-            for (int i = 0; i < currentRecipe.value().getIngredients().size(); i++) {
-                net.minecraft.world.item.crafting.Ingredient ingredient = currentRecipe.value().getIngredients().get(i);
+            for (int i = 0; i < currentRecipe.value().getCombinedIngredients().size(); i++) {
+                SizedIngredient sizedIngredient = currentRecipe.value().getCombinedIngredients().get(i);
+                int amountToDrain = sizedIngredient.count();
+
                 for (int slot = 0; slot < itemInput.getSlots(); slot++) {
-                    net.minecraft.world.item.ItemStack slotStack = itemInput.getStackInSlot(slot);
-                    if (ingredient.test(slotStack)) {
-                        itemInput.extractItem(slot, 1, false);
-                        break;
+                    ItemStack slotStack = itemInput.getStackInSlot(slot);
+                    if (sizedIngredient.test(slotStack)) {
+                        int drainedAmount = Math.min(amountToDrain, slotStack.getCount());
+                        itemInput.extractItem(slot, drainedAmount, false);
+                        amountToDrain -= drainedAmount;
+
+                        if (amountToDrain <= 0)
+                            break;
                     }
                 }
             }
@@ -697,16 +719,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                     tooltip.add(Component.literal("§cRefinery must be SUPERHEATED"));
             }
             else
-            {
-                float progress = Math.min(1.0f, craftingProgress / (float) activeRecipeDuration);
-                int filledBlocks = (int) (progress * 8);
-                StringBuilder bar = new StringBuilder("Progress: ");
-                for (int i = 0; i < 8; i++) {
-                    if (i < filledBlocks) bar.append("█");
-                    else bar.append(" _");
-                }
-                tooltip.add(Component.literal("§c" + bar.toString()));
-            }
+                tooltip.add(Component.literal("§c" + GoggleUtilities.BuildTextProgressBar(craftingProgress, activeRecipeDuration)));
         }
 
         return true;

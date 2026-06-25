@@ -72,10 +72,10 @@ public class FluidRefineryRecipeCategory implements IRecipeCategory<FluidRefiner
 
         if (!recipe.getIngredients().isEmpty())
         {
-            if (recipe.getIngredients().size() > 0 && !recipe.getIngredients().get(0).isEmpty())
-                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos-60, 39).addIngredients(recipe.getIngredients().getFirst());
-            if (recipe.getIngredients().size() > 1 && !recipe.getIngredients().get(1).isEmpty())
-                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos+60, 39).addIngredients(recipe.getIngredients().get(1));
+            if (recipe.getCombinedIngredients().size() > 0 && !recipe.getCombinedIngredients().get(0).ingredient().isEmpty())
+                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos-60, 39).addItemStack(recipe.getCombinedIngredients().get(0).getItems()[0]);
+            if (recipe.getCombinedIngredients().size() > 1 && !recipe.getCombinedIngredients().get(1).ingredient().isEmpty())
+                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos+60, 39).addItemStack(recipe.getCombinedIngredients().get(1).getItems()[0]);
         }
 
         if (!recipe.getFluidIngredients().isEmpty())

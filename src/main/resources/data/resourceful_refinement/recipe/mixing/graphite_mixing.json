@@ -1,0 +1,23 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:coal"
+    },
+    {
+      "type": "neoforge:single",
+      "amount": 50,
+      "fluid": "resourceful_refinement:catalysed_sparkpowder"
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:graphite"
+    },
+    {
+      "id": "resourceful_refinement:graphite"
+    }
+  ],
+  "processingTime": 400,
+  "heat_requirement": "superheated"
+}

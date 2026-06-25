@@ -14,6 +14,7 @@ import com.resourceful_refinement.registry.ModItems;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -309,7 +310,55 @@ public class GelBlobEntity extends ThrowableItemProjectile {
             return;
         }
 
-        // Try creating/extending Gel Splatters at the impact face and reachable neighbours
+        if (type == GelType.FROZEN)
+        {
+            // Frozen gels create snow and ice, depending on placement conditions
+            BlockPos targetPos;
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    targetPos = placePos.offset(x,0,z);
+                    BlockState placeState = this.level().getBlockState(targetPos);
+                    if (placeState.getFluidState().is(Fluids.WATER) && this.level().getFluidState(targetPos).isSource() &&
+                            (!placeState.hasProperty(BlockStateProperties.WATERLOGGED) || !placeState.getValue(BlockStateProperties.WATERLOGGED)))
+                    {
+                        this.level().setBlock(targetPos, Blocks.ICE.defaultBlockState(), 3);
+                    }
+                    else if (placeState.getFluidState().is(Fluids.WATER) && !this.level().getFluidState(targetPos).isSource() &&
+                            (!placeState.hasProperty(BlockStateProperties.WATERLOGGED) || !placeState.getValue(BlockStateProperties.WATERLOGGED)))
+                    {
+                        this.level().setBlock(targetPos, Blocks.POWDER_SNOW.defaultBlockState(), 3);
+                    }
+                    else if (placeState.getFluidState().is(Fluids.LAVA) && this.level().getFluidState(targetPos).isSource())
+                    {
+                        this.level().setBlock(targetPos, Blocks.DEEPSLATE.defaultBlockState(), 3);
+                    }
+                    else if (placeState.canBeReplaced() && this.level().getBlockState(targetPos.below()).isFaceSturdy(this.level(), targetPos.below(), Direction.DOWN))
+                    {
+                        this.level().setBlock(targetPos, Blocks.SNOW.defaultBlockState(), 3);
+                    }
+                }
+            }
+            return;
+        }
+
+        if (type == GelType.CONCRETE)
+        {
+            // Concrete places light grey concrete
+            BlockPos targetPos;
+            for (int x = -1; x <= 1; x++) {
+                for (int z = -1; z <= 1; z++) {
+                    targetPos = placePos.offset(x,0,z);
+                    BlockState placeState = this.level().getBlockState(targetPos);
+                    if (placeState.canBeReplaced()) {
+                        this.level().setBlock(targetPos, Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState(), 3);
+                    }
+                }
+            }
+            return;
+        }
+
+        // Get the block state we've impacted
+        // Then try creating/extending Gel Splatters at the impact face and reachable neighbours
         BlockState hitState = this.level().getBlockState(impactPos);
         boolean hitGelSplatter = GelSplatterBlocks.is(hitState);
 

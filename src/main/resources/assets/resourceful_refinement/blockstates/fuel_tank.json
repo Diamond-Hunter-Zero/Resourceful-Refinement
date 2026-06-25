@@ -1,0 +1,23 @@
+{
+    "multipart":  [
+      {
+        "apply": { "model": "resourceful_refinement:block/fuel_tank/fuel_tank" }
+      },
+      {
+        "when":  {"front_port":  "true"},
+        "apply":  {"model":  "resourceful_refinement:block/fuel_tank/fuel_tank_front_port"}
+      },
+      {
+        "when":  {"east_port":  "true"},
+        "apply":  {"model":  "resourceful_refinement:block/fuel_tank/fuel_tank_east_port"}
+      },
+      {
+        "when":  {"south_port":  "true"},
+        "apply":  {"model":  "resourceful_refinement:block/fuel_tank/fuel_tank_south_port"}
+      },
+      {
+        "when":  {"west_port":  "true"},
+        "apply":  {"model":  "resourceful_refinement:block/fuel_tank/fuel_tank_west_port"}
+      }
+    ]
+}

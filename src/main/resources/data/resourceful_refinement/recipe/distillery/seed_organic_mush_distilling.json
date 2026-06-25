@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "passive",
+  "distillery_height": 2,
+  "processing_time": 2400,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 3000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "tag": "c:seeds",
+      "count": 28
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:organic_slush",
+      "amount": 750
+    }
+  ]
+}

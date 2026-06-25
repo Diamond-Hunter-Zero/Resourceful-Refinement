@@ -5,17 +5,15 @@ import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.api.boiler.BoilerHeater;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
 import com.simibubi.create.content.fluids.PipeConnection;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.content.processing.recipe.HeatCondition;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.resourceful_refinement.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -36,8 +34,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEvent.Context;
 
 import static com.resourceful_refinement.content.radiator.RadiatorBlock.HEAT_STATE;
+import static net.minecraft.world.level.block.DirectionalBlock.FACING;
 
 public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, BoilerHeater {
 
@@ -49,12 +61,17 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
 
     public static final int HEAT_STATE_OFFSET = 3;
 
-    private int heatLevel = 0; // Visual/internal heat level (-1000 to 1000)
+    private int heatTemperature = 0; // Visual/internal heat energy (-1000 to 1000)
 
     // Flow rate limiting fields (transient / tick-by-tick)
     private int fluidReceivedCurrentTick = 0;
     private int fluidReceivedLastTick = 0;
     private int fluidDrainedCurrentTick = 0;
+
+    private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
+    private final int[] cookingProgress = new int[4];
+    private final int[] cookingTime = new int[4];
+    private final RecipeManager.CachedCheck<SingleRecipeInput, SmokingRecipe> quickCheck = RecipeManager.createCheck(RecipeType.SMOKING);
 
     public final FluidTank tank = new FluidTank(TANK_CAPACITY) {
         @Override
@@ -117,13 +134,13 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     {
         if (energy <= ExtendedHeatCondition.CHILLED.getMaxHeatEnergy())
             return ExtendedHeatCondition.CHILLED;
-        else if (energy < ExtendedHeatCondition.COOLED.getMaxHeatEnergy())
+        else if (energy <= ExtendedHeatCondition.COOLED.getMaxHeatEnergy())
             return ExtendedHeatCondition.COOLED;
-        else if (energy < ExtendedHeatCondition.NONE.getMaxHeatEnergy())
+        else if (energy <= ExtendedHeatCondition.NONE.getMaxHeatEnergy())
             return ExtendedHeatCondition.NONE;
-        else if (energy < ExtendedHeatCondition.PASSIVE.getMaxHeatEnergy())
+        else if (energy <= ExtendedHeatCondition.PASSIVE.getMaxHeatEnergy())
             return ExtendedHeatCondition.PASSIVE;
-        else if (energy < ExtendedHeatCondition.HEATED.getMaxHeatEnergy())
+        else if (energy <= ExtendedHeatCondition.HEATED.getMaxHeatEnergy())
             return ExtendedHeatCondition.HEATED;
         else
             return ExtendedHeatCondition.SUPERHEATED;
@@ -168,7 +185,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
                 // Deduct flat rate directly from the tank
                 be.tank.drain(coolantConsumption, IFluidHandler.FluidAction.EXECUTE);
 
-                be.heatLevel += getHeatGainDelta(be.heatLevel, targetState);
+                be.heatTemperature += getHeatGainDelta(be.heatTemperature, targetState);
                 be.setChanged();
             } else {
                 // Cannot afford the flat rate, do not consume anything and decay instead
@@ -180,7 +197,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
 
         // Map to block state (HEAT_STATE for visuals, HEAT_LEVEL for basin/boiler compat)
         int currentHeatState = state.getValue(HEAT_STATE) + HEAT_STATE_OFFSET;
-        ExtendedHeatCondition currentHeatCondition = getHeatConditionFromEnergy(be.heatLevel);
+        ExtendedHeatCondition currentHeatCondition = getHeatConditionFromEnergy(be.heatTemperature);
         int targetHeatState = currentHeatCondition.getBlazeHeatEnergy() + HEAT_STATE_OFFSET;
         BlazeBurnerBlock.HeatLevel targetBlazeLevel = getBlazeHeatLevelForCondition(currentHeatCondition);
         BlazeBurnerBlock.HeatLevel currentBlazeLevel = state.getValue(BlazeBurnerBlock.HEAT_LEVEL);
@@ -218,15 +235,109 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
 
         // Run block freezing logic
         freezeTick(state, level, pos, level.random);
+
+        // Cook items sitting on the radiator
+        be.cookTick();
     }
 
     private void decayHeat(Level level) {
-        if (heatLevel != 0 && level.random.nextInt(4) == 0) {
-            heatLevel = (int)(Math.signum(heatLevel) * Math.max(Math.abs(heatLevel) - HEAT_DECAY, 0));
+        if (heatTemperature != 0 && level.random.nextInt(4) == 0) {
+            heatTemperature = (int)(Math.signum(heatTemperature) * Math.max(Math.abs(heatTemperature) - HEAT_DECAY, 0));
             setChanged();
             syncData();
         }
     }
+
+    public boolean isHeated() {
+        // Passive, Heated, or Superheated
+        return this.heatTemperature > ExtendedHeatCondition.NONE.getMaxHeatEnergy();
+    }
+
+    public NonNullList<ItemStack> getItems() {
+        return this.items;
+    }
+
+    public Optional<RecipeHolder<SmokingRecipe>> getCookableRecipe(ItemStack stack) {
+        return this.items.stream().noneMatch(ItemStack::isEmpty) ? Optional.empty() : this.quickCheck.getRecipeFor(new SingleRecipeInput(stack), this.level);
+    }
+
+    public boolean placeFood(@Nullable LivingEntity entity, ItemStack food, int cookTime) {
+        for (int i = 0; i < this.items.size(); ++i) {
+            ItemStack itemstack = this.items.get(i);
+            if (itemstack.isEmpty()) {
+                this.cookingTime[i] = cookTime * 8;
+                this.cookingProgress[i] = 0;
+                this.items.set(i, food.consumeAndReturn(1, entity));
+                this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), Context.of(entity, this.getBlockState()));
+                this.syncData();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void cookTick() {
+        if (level == null || level.isClientSide) return;
+
+        boolean isHeated = isHeated();
+        if (!isHeated) {
+            return;
+        }
+
+        boolean changed = false;
+        boolean cookedFood = false;
+        for (int i = 0; i < items.size(); ++i) {
+            ItemStack itemstack = items.get(i);
+            if (!itemstack.isEmpty()) {
+                cookedFood = true;
+                cookingProgress[i]++;
+                if (cookingProgress[i] >= cookingTime[i]) {
+                    SingleRecipeInput recipeInput = new SingleRecipeInput(itemstack);
+                    ItemStack resultStack = quickCheck.getRecipeFor(recipeInput, level)
+                            .map(recipe -> recipe.value().assemble(recipeInput, level.registryAccess()))
+                            .orElse(itemstack);
+
+                    if (resultStack.isItemEnabled(level.enabledFeatures())) {
+                        Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, resultStack.copy());
+                        items.set(i, ItemStack.EMPTY);
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        if (cookedFood)
+            particleTick(level, getBlockPos(), getBlockState(), this);
+
+
+        if (changed) {
+            syncData();
+        }
+    }
+
+    public static void particleTick(Level level, BlockPos pos, BlockState state, RadiatorBlockEntity blockEntity) {
+        RandomSource randomsource = level.random;
+        if (randomsource.nextFloat() < 0.75f)
+            return;
+
+        if (level instanceof ServerLevel serverLevel)
+        {
+            int l = ((Direction)state.getValue(FACING)).get2DDataValue();
+            for(int j = 0; j < blockEntity.items.size(); ++j) {
+                if (!((ItemStack)blockEntity.items.get(j)).isEmpty() && randomsource.nextFloat() < 0.2F) {
+                    Direction direction = Direction.from2DDataValue(Math.floorMod(j + l, 4));
+                    double d0 = (double)pos.getX() + (double)0.5F - (double)((float)direction.getStepX() * 0.25F) + (double)((float)direction.getClockWise().getStepX() * 0.25F);
+                    double d1 = (double)pos.getY() + (double)1F;
+                    double d2 = (double)pos.getZ() + (double)0.5F - (double)((float)direction.getStepZ() * 0.25F) + (double)((float)direction.getClockWise().getStepZ() * 0.25F);
+
+                    serverLevel.sendParticles(ParticleTypes.SMOKE,
+                            d0, d1, d2,
+                            0, 0, 0.25, 0, 5.0E-4);
+                }
+            }
+        }
+    }
+
 
     // Exposes a contextual capability handler tailored to the accessed face.
     @Nullable
@@ -280,7 +391,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     // Returns heat level for fluid-tank boilers (0 = passive, 1 = heated, 2 = superheated, -1 = none)
     @Override
     public float getHeat(Level level, BlockPos blockPos, BlockState blockState) {
-        ExtendedHeatCondition condition = getHeatConditionFromEnergy(heatLevel);
+        ExtendedHeatCondition condition = getHeatConditionFromEnergy(heatTemperature);
         return switch (condition) {
             case CHILLED     -> -3;
             case COOLED      -> -2;
@@ -303,8 +414,8 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
 
         BlockState state = getBlockState();
 
-        ExtendedHeatCondition radiatorHeat = getHeatConditionFromEnergy(heatLevel);
-        tooltip.add(Component.literal("§7Heat: ").append(Component.literal(radiatorHeat.getSerializedName()).withColor(radiatorHeat.getColor())).append(" §8(" + heatLevel + "° H)"));
+        ExtendedHeatCondition radiatorHeat = getHeatConditionFromEnergy(heatTemperature);
+        tooltip.add(Component.literal("§7Heat: ").append(Component.literal(radiatorHeat.getSerializedName()).withColor(radiatorHeat.getColor())).append(" §8(" + heatTemperature + "° H)"));
         tooltip.add(Component.literal("§7Flow Status: §8" + (fluidReceivedLastTick != 1 ? "Operational" : "Stagnant")));
 
         return true;
@@ -317,19 +428,32 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-        tag.putInt("HeatLevel", heatLevel);
+        tag.putInt("HeatLevel", heatTemperature);
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putInt("FluidReceivedLastTick", fluidReceivedLastTick);
+        ContainerHelper.saveAllItems(tag, this.items, true, registries);
+        tag.putIntArray("CookingTimes", this.cookingProgress);
+        tag.putIntArray("CookingTotalTimes", this.cookingTime);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-        heatLevel = tag.getInt("HeatLevel");
+        heatTemperature = tag.getInt("HeatLevel");
         if (tag.contains("Tank")) {
             tank.readFromNBT(registries, tag.getCompound("Tank"));
         }
         fluidReceivedLastTick = tag.getInt("FluidReceivedLastTick");
+        this.items.clear();
+        ContainerHelper.loadAllItems(tag, this.items, registries);
+        if (tag.contains("CookingTimes", 11)) {
+            int[] aint = tag.getIntArray("CookingTimes");
+            System.arraycopy(aint, 0, this.cookingProgress, 0, Math.min(this.cookingTime.length, aint.length));
+        }
+        if (tag.contains("CookingTotalTimes", 11)) {
+            int[] aint1 = tag.getIntArray("CookingTotalTimes");
+            System.arraycopy(aint1, 0, this.cookingTime, 0, Math.min(this.cookingTime.length, aint1.length));
+        }
     }
 
     private void syncData() {

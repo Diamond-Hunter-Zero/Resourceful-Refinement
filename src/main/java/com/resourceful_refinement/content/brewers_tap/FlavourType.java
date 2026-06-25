@@ -26,7 +26,8 @@ public enum FlavourType implements StringRepresentable {
     VEG("veg_flavour", "Vegetal", 0x6FBD55, () -> new MobEffectInstance(MobEffects.JUMP, 300, 1)),
     YEAST("spice_flavour", "Spicy", 0xD6B77B, () -> new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 400, 0)),
     CHILLED("chilled_flavour", "Chilled", 0x67CFE8, () -> new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 200, 0)),
-    COSMIC("cosmic_flavour", "Cosmic", 0xA66BFF, () -> new MobEffectInstance(MobEffects.ABSORPTION, 400, 1));
+    COSMIC("cosmic_flavour", "Cosmic", 0xA66BFF, () -> new MobEffectInstance(MobEffects.ABSORPTION, 400, 1)),
+    UNKNOWN("unknown_flavour", "Unknown", 0x252a35, () -> {return null;});
 
     public static TagKey<Item> ALL_FLAVOURS_ITEM_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "all_flavour_tags"));
 
@@ -67,6 +68,17 @@ public enum FlavourType implements StringRepresentable {
 
     public TagKey<Item> getItemTag() {
         return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, tagName));
+    }
+
+    public static FlavourType unsafeFromTagName(String tagName)
+    {
+        String normalized = tagName.contains(":") ? tagName.substring(tagName.indexOf(':') + 1) : tagName;
+        for (FlavourType flavour : values()) {
+            if (flavour.tagName.equals(normalized)) {
+                return flavour;
+            }
+        }
+        return UNKNOWN;
     }
 
     public static Optional<FlavourType> fromTagName(String tagName) {

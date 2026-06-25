@@ -34,6 +34,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.Containers;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SmokingRecipe;
 
 public class RadiatorBlock extends WrenchableDirectionalBlock implements EntityBlock, SimpleWaterloggedBlock {
 
@@ -158,8 +167,40 @@ public class RadiatorBlock extends WrenchableDirectionalBlock implements EntityB
     }
 
     @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof RadiatorBlockEntity radiator) {
+            if (radiator.isHeated()) {
+                BlockPos abovePos = pos.above();
+                BlockState aboveState = level.getBlockState(abovePos);
+                boolean isAboveEmptyOrNonSolid = aboveState.isAir() || !aboveState.isSolidRender(level, abovePos);
+
+                if (isAboveEmptyOrNonSolid) {
+                    ItemStack handStack = player.getItemInHand(hand);
+                    Optional<RecipeHolder<SmokingRecipe>> recipeOpt = radiator.getCookableRecipe(handStack);
+                    if (recipeOpt.isPresent()) {
+                        if (!level.isClientSide) {
+                            int cookingTime = recipeOpt.get().value().getCookingTime();
+                            if (radiator.placeFood(player, handStack, cookingTime)) {
+                                return ItemInteractionResult.SUCCESS;
+                            }
+                        } else {
+                            return ItemInteractionResult.CONSUME;
+                        }
+                    }
+                }
+            }
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!level.isClientSide() && state.getBlock() != newState.getBlock()) {
+            BlockEntity blockentity = level.getBlockEntity(pos);
+            if (blockentity instanceof RadiatorBlockEntity radiator) {
+                Containers.dropContents(level, pos, radiator.getItems());
+            }
             level.updateNeighborsAt(pos, this);
             FluidPropagator.propagateChangedPipe(level, pos, state);
         }

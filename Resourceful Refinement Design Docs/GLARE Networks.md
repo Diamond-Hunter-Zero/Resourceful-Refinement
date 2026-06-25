@@ -21,6 +21,14 @@ If a targeted node is already at the limit of links it can support, existing lin
 Links between GLARE nodes visually appear as a laser-beam-like line-renderer, similar to the beam produced by Guardians and Elder Guardians. It tiles between its two end-points, and uses a distinct texture while LoS is broken.
 
 
+<<<<<<< Updated upstream
+=======
+
+### Implementation Protocols
+Because the GLARE system is widely used and very versatile, it's code implementation should be made as generalised and universal as possible, taking full advantage of class inheritance, shared utility classes, and interfaces where possible. There are likely to be many kinds of emitters, receivers, and nodes.
+
+
+>>>>>>> Stashed changes
 ### Server Protocol
 GLARE networks need to be persistent across sessions and clients. Therefore, they need to function as data structures on the server. Each network should have an identifiable slug/GUID, and contain the previously discussed information. Server management should also exist for cleaning up empty or stale network objects.
 

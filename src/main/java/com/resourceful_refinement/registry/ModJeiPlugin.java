@@ -1,6 +1,8 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
+import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipeCategory;
 import com.resourceful_refinement.content.coating.CoatingRecipeCategory;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipeCategory;
@@ -47,6 +49,7 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(new RadiatorVirtualHeatingCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new DistilleryRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new MilkingStationRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        registration.addRecipeCategories(new BrewersTapRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -112,6 +115,14 @@ public class ModJeiPlugin implements IModPlugin {
                 .toList();
 
         registration.addRecipes(MilkingStationRecipeCategory.TYPE, milkingRecipes);
+
+        // Brewer's Tap
+        List<BrewersTapRecipe> brewersTapRecipes = rm.getAllRecipesFor(ModRecipeTypes.BREWERS_TAP_TYPE.get())
+                .stream()
+                .map(RecipeHolder::value)
+                .toList();
+
+        registration.addRecipes(BrewersTapRecipeCategory.TYPE, brewersTapRecipes);
     }
 
     @Override
@@ -128,5 +139,6 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.RADIATOR_PIPE.get()), RadiatorVirtualHeatingCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.DISTILLERY.get()), DistilleryRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.MILKING_STATION.get()), MilkingStationRecipeCategory.TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.BREWERS_TAP.get()), BrewersTapRecipeCategory.TYPE);
     }
 }

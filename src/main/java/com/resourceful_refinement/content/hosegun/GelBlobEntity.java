@@ -323,6 +323,11 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                     {
                         this.level().setBlock(targetPos, Blocks.ICE.defaultBlockState(), 3);
                     }
+                    else if (placeState.getFluidState().is(Fluids.WATER) && !this.level().getFluidState(targetPos).isSource() &&
+                            (!placeState.hasProperty(BlockStateProperties.WATERLOGGED) || !placeState.getValue(BlockStateProperties.WATERLOGGED)))
+                    {
+                        this.level().setBlock(targetPos, Blocks.POWDER_SNOW.defaultBlockState(), 3);
+                    }
                     else if (placeState.getFluidState().is(Fluids.LAVA) && this.level().getFluidState(targetPos).isSource())
                     {
                         this.level().setBlock(targetPos, Blocks.DEEPSLATE.defaultBlockState(), 3);

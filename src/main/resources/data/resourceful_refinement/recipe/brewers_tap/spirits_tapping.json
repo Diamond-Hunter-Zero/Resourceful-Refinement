@@ -7,6 +7,6 @@
   ],
   "flavour_tags": ["cosmic_flavour", "fruit_flavour", "spice_flavour", "veg_flavour"],
   "results": [
-    { "id": "resourceful_refinement:mead_tankard", "count": 1 }
+    { "id": "resourceful_refinement:spirits_bottle", "count": 1 }
   ]
 }

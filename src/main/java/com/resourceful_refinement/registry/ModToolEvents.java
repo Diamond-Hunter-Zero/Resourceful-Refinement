@@ -50,7 +50,9 @@ public class ModToolEvents {
             return;
         }
 
-        entity.addEffect(flavour.createEffect());
+        MobEffectInstance flavourEffect = flavour.createEffect();
+        if (flavourEffect != null)
+            entity.addEffect(flavourEffect);
     }
 
     @SubscribeEvent

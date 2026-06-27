@@ -111,15 +111,24 @@ public class BucketExcavatorBlock extends KineticBlock implements IBE<BucketExca
         super.setPlacedBy(level, pos, state, placer, stack);
 
         if (level instanceof ServerLevel server)
-            ExcavatorRegionSavedData.RegisterOrUpdateExcavator(server, DimensionalNodePos.of(server, pos), state.getValue(FACING));
-
+        {
+            ExcavatorRegionSavedData.ExcavatorRecord newRecord = ExcavatorRegionSavedData.RegisterOrUpdateExcavator(server, DimensionalNodePos.of(server, pos), state.getValue(FACING));
+            BucketExcavatorBlockEntity excavatorBe = getBlockEntity(server, pos);
+            if (excavatorBe != null)
+                excavatorBe .excavationData = newRecord;
+        }
     }
 
     @Override
     public BlockState updateAfterWrenched(BlockState newState, UseOnContext context) {
 
         if (context.getLevel() instanceof ServerLevel server)
-            ExcavatorRegionSavedData.RegisterOrUpdateExcavator(server, DimensionalNodePos.of(server, context.getClickedPos()), newState.getValue(FACING));
+        {
+            ExcavatorRegionSavedData.ExcavatorRecord newRecord = ExcavatorRegionSavedData.RegisterOrUpdateExcavator(server, DimensionalNodePos.of(server, context.getClickedPos()), newState.getValue(FACING));
+            BucketExcavatorBlockEntity excavatorBe = getBlockEntity(server, context.getClickedPos());
+            if (excavatorBe != null)
+                excavatorBe .excavationData = newRecord;
+        }
 
         return super.updateAfterWrenched(newState, context);
     }

@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
 import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapRenderer;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorModel;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorRenderer;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
@@ -345,6 +346,16 @@ public class ResourcefulRefinementMain {
 
             Direction facing = be.getBlockState().getValue(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING);
             return side == facing.getOpposite() ? be.outputFluidHandler : null;
+        });
+
+        // --- Excavator ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(BucketExcavatorBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(BucketExcavatorBlock.FACING);
+            return side == facing.getOpposite() ? be.outputInv : null;
         });
 
     }

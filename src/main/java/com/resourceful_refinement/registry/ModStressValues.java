@@ -14,7 +14,7 @@ public class ModStressValues {
     public static final double ADVANCED_PUMP_STRESS = 8;
     public static final double MILKING_STATION_STRESS = 4;
     public static final double GLARE_EMITTER_STRESS = 8;
-    public static final double BUCKET_EXCAVATOR_STRESS = 8;
+    public static final double BUCKET_EXCAVATOR_STRESS = 16;
 
 
     public static void register() {

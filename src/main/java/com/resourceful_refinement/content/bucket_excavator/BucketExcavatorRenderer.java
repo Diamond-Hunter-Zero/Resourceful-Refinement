@@ -47,7 +47,10 @@ public class BucketExcavatorRenderer extends SafeBlockEntityRenderer<BucketExcav
         ms.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
 
         // --- Render Wheel Animation ---
-        model.animateWheel((long) ((be.getLevel().getGameTime() + partialTicks) * 50f));
+        if (be.isOperational())
+            model.animateWheel((long) ((be.getLevel().getGameTime() + partialTicks) * 50f));
+        else
+            model.animateWheel(0);
 
         // --- Render Block Model ---
         model.render(ms, casingBuffer, light, overlay);

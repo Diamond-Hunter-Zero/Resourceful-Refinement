@@ -44,7 +44,7 @@ public class ExcavatorRegionSavedData extends SavedData {
     // -------------------------------------------------------------------------
     // System Utilities & Logic
     // -------------------------------------------------------------------------
-    public static void RegisterOrUpdateExcavator(ServerLevel level, DimensionalNodePos pos, Direction facingDirection) {
+    public static ExcavatorRecord RegisterOrUpdateExcavator(ServerLevel level, DimensionalNodePos pos, Direction facingDirection) {
         ExcavatorRegionSavedData data = get(level);
         ExcavatorRecord record = data.excavators.get(pos);
 
@@ -76,6 +76,8 @@ public class ExcavatorRegionSavedData extends SavedData {
 
         data.refreshClearFlags(level.getServer(), affected);
         data.setDirty();
+
+        return record;
     }
 
     public static void RemoveExcavator(ServerLevel level, DimensionalNodePos pos) {

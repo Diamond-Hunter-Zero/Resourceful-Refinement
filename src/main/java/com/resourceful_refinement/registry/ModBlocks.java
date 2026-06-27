@@ -36,6 +36,7 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.simibubi.create.AllBlocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -177,6 +178,11 @@ public class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<Block> MINERAL_DEPOSIT = BLOCKS.register("mineral_deposit",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(2f)
+                    .sound(SoundType.STONE)));
 
 
     // -------------------------------------------------------------------------

@@ -38,7 +38,6 @@ public class ModItems {
             () -> new BlenderBladeItem(ModBlocks.BLENDER_BLADE.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> REFINERY_ACCESS_PORT = ITEMS.registerSimpleBlockItem("refinery_access_port", ModBlocks.REFINERY_ACCESS_PORT);
-    // REFINERY_PROXY has no player-obtainable item — it is only placed programmatically during assembly.
 
     public static final DeferredItem<BlockItem> MECHANICAL_SIEVE_ITEM = ITEMS.register("mechanical_sieve",
             ()-> new MechanicalSieveItem(ModBlocks.MECHANICAL_SIEVE.get(), new Item.Properties()));
@@ -82,8 +81,10 @@ public class ModItems {
     public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
 
 
-    // v0.3 Content
+    // v0.4 Content
     public static final DeferredItem<BlockItem> BUCKET_EXCAVATOR_ITEM = ITEMS.registerSimpleBlockItem("bucket_excavator", ModBlocks.BUCKET_EXCAVATOR);
+
+    public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", ModBlocks.MINERAL_DEPOSIT);
 
 
     // GLARE Content

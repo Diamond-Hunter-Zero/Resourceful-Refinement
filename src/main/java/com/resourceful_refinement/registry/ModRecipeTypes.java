@@ -2,6 +2,7 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
+import com.resourceful_refinement.content.bucket_excavator.recipe.ExcavationRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
@@ -94,6 +95,14 @@ public class ModRecipeTypes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<BrewersTapRecipe>> BREWERS_TAP_SERIALIZER =
             RECIPE_SERIALIZERS.register("brewers_tap", BrewersTapRecipe.Serializer::new);
 
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ExcavationRecipe>> EXCAVATION_TYPE =
+            RECIPE_TYPES.register("excavation", () -> {
+                return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "excavation"));
+            });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ExcavationRecipe>> EXCAVATION_SERIALIZER =
+            RECIPE_SERIALIZERS.register("excavation", ExcavationRecipe.Serializer::new);
+
 
 
     public record RefinementRecipeTypeInfo(ResourceLocation id,
@@ -156,5 +165,11 @@ public class ModRecipeTypes {
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "brewers_tap"),
             BREWERS_TAP_SERIALIZER::get,
             BREWERS_TAP_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo EXCAVATION_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "excavation"),
+            EXCAVATION_SERIALIZER::get,
+            EXCAVATION_TYPE::get
     );
 }

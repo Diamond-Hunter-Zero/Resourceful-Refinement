@@ -1,7 +1,7 @@
 package com.resourceful_refinement.content.glare.remote;
 
 import com.resourceful_refinement.content.glare.GlareAddress;
-import com.resourceful_refinement.content.glare.GlareNodePos;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareSavedData;
 import com.resourceful_refinement.content.glare.GlareService;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +15,7 @@ import java.util.UUID;
 public final class RemoteEntanglementService {
     private RemoteEntanglementService() {}
 
-    public static List<GlareSavedData.NodeRecord> findCandidates(ServerLevel level, GlareNodePos source,
+    public static List<GlareSavedData.NodeRecord> findCandidates(ServerLevel level, DimensionalNodePos source,
             RemoteEndpointKind kind, GlareAddress address) {
         UUID networkId = RemoteEntanglementUtil.networkId(level, source);
         if (networkId == null || !address.isComplete()) return List.of();
@@ -23,7 +23,7 @@ public final class RemoteEntanglementService {
         if (network == null) return List.of();
 
         List<GlareSavedData.NodeRecord> result = new ArrayList<>();
-        for (GlareNodePos candidatePos : network.nodes) {
+        for (DimensionalNodePos candidatePos : network.nodes) {
             if (candidatePos.equals(source)) continue;
             GlareSavedData.NodeRecord candidate = GlareService.getNode(level, candidatePos).orElse(null);
             if (candidate == null || candidate.remoteEndpointKind != kind || !candidate.remoteAssembled) continue;

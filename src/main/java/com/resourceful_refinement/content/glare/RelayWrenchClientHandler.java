@@ -43,7 +43,7 @@ public final class RelayWrenchClientHandler {
         }
     }
 
-    private static void showTarget(LocalPlayer player, GlareNodePos target, String source, int colour) {
+    private static void showTarget(LocalPlayer player, DimensionalNodePos target, String source, int colour) {
         if (target == null || !target.levelKey().equals(player.level().dimension())
                 || !player.level().isLoaded(target.pos())) return;
         if (!(player.level().getBlockEntity(target.pos()) instanceof IGlareNode)) return;
@@ -69,5 +69,5 @@ public final class RelayWrenchClientHandler {
         return ItemStack.EMPTY;
     }
 
-    private record OutlineKey(String source, GlareNodePos target, int boxIndex) {}
+    private record OutlineKey(String source, DimensionalNodePos target, int boxIndex) {}
 }

@@ -6,7 +6,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +32,8 @@ public class RelayWrenchItem extends Item {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         ServerLevel server = (ServerLevel) level;
         GlareService.ensureLiveNodeRegistered(server, pos);
-        GlareNodePos clicked = node.getGlareNodePos();
-        GlareNodePos selected = stack.get(ModDataComponents.RELAY_WRENCH_TARGET.get());
+        DimensionalNodePos clicked = node.getGlareNodePos();
+        DimensionalNodePos selected = stack.get(ModDataComponents.RELAY_WRENCH_TARGET.get());
 
         if (player.isShiftKeyDown()) {
             if (clicked.equals(selected)) {
@@ -110,7 +109,7 @@ public class RelayWrenchItem extends Item {
 
     @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        GlareNodePos selected = stack.get(ModDataComponents.RELAY_WRENCH_TARGET.get());
+        DimensionalNodePos selected = stack.get(ModDataComponents.RELAY_WRENCH_TARGET.get());
         if (selected != null) tooltip.add(Component.translatable("tooltip.resourceful_refinement.relay_wrench.selected",
                 selected.toShortString()));
     }

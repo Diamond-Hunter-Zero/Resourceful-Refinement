@@ -3,7 +3,7 @@ package com.resourceful_refinement.content.glare.remote;
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
-import com.resourceful_refinement.content.glare.GlareNodePos;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.AllItems;
@@ -71,7 +71,7 @@ public class RemoteEntanglementTransporterBlock extends GlareNodeBlock {
             controller.removeAssemblyProxies();
         }
         if (!state.is(newState.getBlock()) && level instanceof ServerLevel server) {
-            GlareService.onNodeRemoved(server, GlareNodePos.of(server, pos));
+            GlareService.onNodeRemoved(server, DimensionalNodePos.of(server, pos));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

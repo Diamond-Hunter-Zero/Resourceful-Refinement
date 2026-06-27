@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
@@ -80,6 +81,12 @@ public class ModBlockEntities {
                     (pos, state) -> new FluidRefillStationBlockEntity(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), pos, state),
                     ModBlocks.FLUID_REFILL_STATION.get()
             ).build(null));
+
+    public static final Supplier<BlockEntityType<BucketExcavatorBlockEntity>> BUCKET_EXCAVATOR_BE = BLOCK_ENTITIES.register("bucket_excavator",
+            () -> BlockEntityType.Builder.of((pos, state) -> new BucketExcavatorBlockEntity(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), pos, state), ModBlocks.BUCKET_EXCAVATOR.get()).build(null));
+
+
+    // GLARE blocks
 
     public static final Supplier<BlockEntityType<GlareRelayBlockEntity>> GLARE_RELAY_BE = BLOCK_ENTITIES.register("glare_relay",
             () -> BlockEntityType.Builder.of(GlareRelayBlockEntity::new, ModBlocks.GLARE_RELAY.get()).build(null));

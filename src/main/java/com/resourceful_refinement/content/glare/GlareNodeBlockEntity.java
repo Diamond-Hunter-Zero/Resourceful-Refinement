@@ -43,8 +43,8 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
     }
 
     @Override
-    public GlareNodePos getGlareNodePos() {
-        return GlareNodePos.of(level, worldPosition);
+    public DimensionalNodePos getGlareNodePos() {
+        return DimensionalNodePos.of(level, worldPosition);
     }
 
     public UUID getNetworkId() {
@@ -74,7 +74,7 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
     }
 
     private void refreshSyncedGlareSummary(ServerLevel server) {
-        GlareNodePos pos = GlareNodePos.of(server, worldPosition);
+        DimensionalNodePos pos = DimensionalNodePos.of(server, worldPosition);
         syncedLinkCount = GlareService.getLinks(server, pos).size();
         syncedLuxCapacity = 0;
         syncedLuxAllocated = 0;

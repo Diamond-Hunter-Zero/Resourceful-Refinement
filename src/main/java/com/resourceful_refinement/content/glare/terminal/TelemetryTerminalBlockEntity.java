@@ -3,7 +3,7 @@ package com.resourceful_refinement.content.glare.terminal;
 import com.resourceful_refinement.content.glare.GlareAddress;
 import com.resourceful_refinement.content.glare.GlareMessage;
 import com.resourceful_refinement.content.glare.GlareSmartNodeBlockEntity;
-import com.resourceful_refinement.content.glare.GlareNodePos;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareOperationStatus;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.IGlareTelemetryEndpoint;
@@ -288,7 +288,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     private void refreshSubscription(ServerLevel server) {
         closeSubscription();
         if (!getTelemetryAddress().isComplete()) return;
-        inboxSubscription = TelemetryService.subscribe(server, GlareNodePos.of(server, worldPosition), getTelemetryAddress(), this::onInboxUpdate);
+        inboxSubscription = TelemetryService.subscribe(server, DimensionalNodePos.of(server, worldPosition), getTelemetryAddress(), this::onInboxUpdate);
     }
 
     private void closeSubscription() {

@@ -64,8 +64,8 @@ public class GlareNodeBlockItem extends BlockItem {
         if (result.consumesAction() && !context.getLevel().isClientSide && context.getLevel() instanceof ServerLevel server && !targets.isEmpty()) {
             BlockPos placedPos = findPlacedNodePos(context, server);
             if (placedPos != null && GlareService.ensureLiveNodeRegistered(server, placedPos).orElse(null) instanceof IGlareNode node) {
-                GlareNodePos from = node.getGlareNodePos();
-                for (GlareNodePos target : targets.targets()) {
+                DimensionalNodePos from = node.getGlareNodePos();
+                for (DimensionalNodePos target : targets.targets()) {
                     GlareSavedData.LinkResult linkResult = GlareService.tryLink(server, from, target);
                     if (context.getPlayer() != null && linkResult != GlareSavedData.LinkResult.CREATED && linkResult != GlareSavedData.LinkResult.ALREADY_LINKED) {
                         context.getPlayer().displayClientMessage(Component.translatable("message.resourceful_refinement.glare.link_failed." + linkResult.name().toLowerCase(java.util.Locale.ROOT)), true);

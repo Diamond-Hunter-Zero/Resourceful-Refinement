@@ -2,7 +2,7 @@ package com.resourceful_refinement.content.glare.remote;
 
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
-import com.resourceful_refinement.content.glare.GlareNodePos;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.registry.ModBlockEntities;
@@ -83,7 +83,7 @@ public class RemoteEntanglerDepotBlock extends DepotBlock {
 
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level instanceof ServerLevel server) {
-            GlareService.onNodeRemoved(server, GlareNodePos.of(server, pos));
+            GlareService.onNodeRemoved(server, DimensionalNodePos.of(server, pos));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

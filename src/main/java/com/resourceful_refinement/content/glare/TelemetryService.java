@@ -20,8 +20,8 @@ public final class TelemetryService {
         return GlareSavedData.get(level).sendTelemetry(networkId, message) ? SendResult.SENT : SendResult.NETWORK_MISSING;
     }
 
-    public static SendResult sendFromNode(ServerLevel level, GlareNodePos senderNode, GlareAddress from,
-            GlareAddress to, String body) {
+    public static SendResult sendFromNode(ServerLevel level, DimensionalNodePos senderNode, GlareAddress from,
+                                          GlareAddress to, String body) {
         GlareSavedData data = GlareSavedData.get(level);
         Optional<UUID> networkId = data.getNetworkId(senderNode);
         if (networkId.isEmpty()) {
@@ -42,7 +42,7 @@ public final class TelemetryService {
                 .orElse(false);
     }
 
-    public static boolean addressExistsFromNode(ServerLevel level, GlareNodePos node, GlareAddress address) {
+    public static boolean addressExistsFromNode(ServerLevel level, DimensionalNodePos node, GlareAddress address) {
         GlareSavedData data = GlareSavedData.get(level);
         return data.getNetworkId(node)
                 .flatMap(data::getNetwork)
@@ -51,7 +51,7 @@ public final class TelemetryService {
                 .orElse(false);
     }
 
-    public static List<GlareMessage> readFromNode(ServerLevel level, GlareNodePos node, GlareAddress address) {
+    public static List<GlareMessage> readFromNode(ServerLevel level, DimensionalNodePos node, GlareAddress address) {
         GlareSavedData data = GlareSavedData.get(level);
         return data.getNetworkId(node).map(id -> data.readTelemetry(id, address)).orElseGet(List::of);
     }
@@ -64,15 +64,15 @@ public final class TelemetryService {
         return GlareSavedData.get(level).discardTelemetryAt(networkId, address, index);
     }
 
-    public static Optional<GlareMessage> discardFromNode(ServerLevel level, GlareNodePos node,
+    public static Optional<GlareMessage> discardFromNode(ServerLevel level, DimensionalNodePos node,
             GlareAddress address, UUID messageId) {
         GlareSavedData data = GlareSavedData.get(level);
         return data.getNetworkId(node)
                 .flatMap(networkId -> data.discardTelemetry(networkId, address, messageId));
     }
 
-    public static Subscription subscribe(ServerLevel level, GlareNodePos owner, GlareAddress address,
-            Consumer<InboxUpdate> listener) {
+    public static Subscription subscribe(ServerLevel level, DimensionalNodePos owner, GlareAddress address,
+                                         Consumer<InboxUpdate> listener) {
         Objects.requireNonNull(owner, "owner");
         Objects.requireNonNull(address, "address");
         Objects.requireNonNull(listener, "listener");

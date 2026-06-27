@@ -37,9 +37,9 @@ import java.util.function.Consumer;
 public class GlareSavedData extends SavedData {
     private static final String DATA_NAME = "resourceful_refinement_glare_networks";
 
-    private final Map<GlareNodePos, NodeRecord> nodes = new HashMap<>();
+    private final Map<DimensionalNodePos, NodeRecord> nodes = new HashMap<>();
     private final Set<GlareLink> links = new LinkedHashSet<>();
-    private final Map<GlareNodePos, LinkedHashSet<GlareLink>> linksByNode = new HashMap<>();
+    private final Map<DimensionalNodePos, LinkedHashSet<GlareLink>> linksByNode = new HashMap<>();
     private final Map<ResourceKey<Level>, ArrayList<GlareLink>> linksByDimension = new HashMap<>();
     private final Map<GlareLink, LinkValidity> linkValidity = new HashMap<>();
     private final Map<UUID, NetworkRecord> networks = new HashMap<>();
@@ -55,9 +55,9 @@ public class GlareSavedData extends SavedData {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
     }
 
-    public static GlareSavedData get(MinecraftServer server) {
+    /*public static GlareSavedData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
-    }
+    }*/
 
     private static GlareSavedData load(CompoundTag tag, HolderLookup.Provider provider) {
         GlareSavedData data = new GlareSavedData();
@@ -84,8 +84,8 @@ public class GlareSavedData extends SavedData {
         ListTag linkList = new ListTag();
         for (GlareLink link : links) {
             CompoundTag linkTag = new CompoundTag();
-            writePos(linkTag, "A", link.a());
-            writePos(linkTag, "B", link.b());
+            DimensionalNodePos.writePos(linkTag, "A", link.a());
+            DimensionalNodePos.writePos(linkTag, "B", link.b());
             linkTag.putString("Validity", getLinkValidity(link).name());
             linkList.add(linkTag);
         }
@@ -116,8 +116,8 @@ public class GlareSavedData extends SavedData {
         ListTag linkList = tag.getList("Links", Tag.TAG_COMPOUND);
         for (int i = 0; i < linkList.size(); i++) {
             CompoundTag linkTag = linkList.getCompound(i);
-            Optional<GlareNodePos> a = readPos(linkTag, "A");
-            Optional<GlareNodePos> b = readPos(linkTag, "B");
+            Optional<DimensionalNodePos> a = DimensionalNodePos.readPos(linkTag, "A");
+            Optional<DimensionalNodePos> b = DimensionalNodePos.readPos(linkTag, "B");
             if (a.isPresent() && b.isPresent() && !a.get().equals(b.get())) {
                 GlareLink link = new GlareLink(a.get(), b.get());
                 links.add(link);
@@ -171,7 +171,7 @@ public class GlareSavedData extends SavedData {
         GlareDebug.log("Forced full rebuild: {} nodes, {} links, {} networks", nodes.size(), links.size(), networks.size());
     }
 
-    public Optional<NodeRecord> getNode(GlareNodePos pos) {
+    public Optional<NodeRecord> getNode(DimensionalNodePos pos) {
         return Optional.ofNullable(nodes.get(pos));
     }
 
@@ -179,7 +179,7 @@ public class GlareSavedData extends SavedData {
         return Optional.ofNullable(networks.get(id));
     }
 
-    Optional<UUID> getNetworkId(GlareNodePos node) {
+    Optional<UUID> getNetworkId(DimensionalNodePos node) {
         NodeRecord record = nodes.get(node);
         return record == null ? Optional.empty() : Optional.ofNullable(record.networkId);
     }
@@ -242,7 +242,7 @@ public class GlareSavedData extends SavedData {
         return Optional.of(removed);
     }
 
-    long subscribeTelemetry(GlareNodePos owner, GlareAddress address, Consumer<TelemetryService.InboxUpdate> listener) {
+    long subscribeTelemetry(DimensionalNodePos owner, GlareAddress address, Consumer<TelemetryService.InboxUpdate> listener) {
         long id = nextTelemetrySubscriberId++;
         telemetrySubscribers.put(id, new TelemetrySubscriber(owner, address, listener));
         return id;
@@ -252,16 +252,16 @@ public class GlareSavedData extends SavedData {
         telemetrySubscribers.remove(id);
     }
 
-    public List<GlareLink> getLinksFor(GlareNodePos pos) {
+    public List<GlareLink> getLinksFor(DimensionalNodePos pos) {
         LinkedHashSet<GlareLink> indexed = linksByNode.get(pos);
         return indexed == null ? List.of() : List.copyOf(indexed);
     }
 
-    public List<GlareNodePos> getNeighbours(GlareNodePos pos) {
+    public List<DimensionalNodePos> getNeighbours(DimensionalNodePos pos) {
         return getLinksFor(pos).stream().map(link -> link.other(pos)).toList();
     }
 
-    private List<GlareNodePos> getActiveNeighbours(GlareNodePos pos) {
+    private List<DimensionalNodePos> getActiveNeighbours(DimensionalNodePos pos) {
         return getLinksFor(pos).stream()
                 .filter(this::isActiveNetworkLink)
                 .map(link -> link.other(pos))
@@ -291,10 +291,10 @@ public class GlareSavedData extends SavedData {
     }
 
     public void registerNode(ServerLevel level, IGlareNode glareNode) {
-        GlareNodePos pos = glareNode.getGlareNodePos();
+        DimensionalNodePos pos = glareNode.getGlareNodePos();
         NodeRecord record = nodes.get(pos);
         boolean topologyChanged = record == null;
-        Set<GlareNodePos> topologyAffected = topologyChanged ? new LinkedHashSet<>(Set.of(pos))
+        Set<DimensionalNodePos> topologyAffected = topologyChanged ? new LinkedHashSet<>(Set.of(pos))
                 : getNetworkNodesFor(pos);
         if (record == null) {
             record = new NodeRecord(pos);
@@ -315,7 +315,7 @@ public class GlareSavedData extends SavedData {
         notifyRecordNetworkOrNode(level, record);
     }
 
-    public void markLoaded(ServerLevel level, GlareNodePos pos) {
+    public void markLoaded(ServerLevel level, DimensionalNodePos pos) {
         NodeRecord record = nodes.get(pos);
         if (record != null) {
             record.loaded = true;
@@ -325,7 +325,7 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    public void unregisterLoadedNode(GlareNodePos pos) {
+    public void unregisterLoadedNode(DimensionalNodePos pos) {
         NodeRecord removed = nodes.remove(pos);
         if (removed != null) {
             removeLinksIf(link -> link.contains(pos));
@@ -333,13 +333,13 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    public void unregisterLoadedNode(ServerLevel level, GlareNodePos pos) {
+    public void unregisterLoadedNode(ServerLevel level, DimensionalNodePos pos) {
         NodeRecord removed = nodes.remove(pos);
         if (removed == null) {
             return;
         }
 
-        Set<GlareNodePos> affected = new LinkedHashSet<>();
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
         affected.add(pos);
         for (GlareLink link : getLinksFor(pos)) {
             affected.add(link.other(pos));
@@ -350,10 +350,10 @@ public class GlareSavedData extends SavedData {
     }
 
     public void updateNodeState(ServerLevel level, IGlareNode glareNode) {
-        GlareNodePos pos = glareNode.getGlareNodePos();
+        DimensionalNodePos pos = glareNode.getGlareNodePos();
         NodeRecord record = nodes.get(pos);
         boolean topologyChanged = record == null;
-        Set<GlareNodePos> topologyAffected = topologyChanged ? new LinkedHashSet<>(Set.of(pos))
+        Set<DimensionalNodePos> topologyAffected = topologyChanged ? new LinkedHashSet<>(Set.of(pos))
                 : getNetworkNodesFor(pos);
         if (record == null) {
             record = new NodeRecord(pos);
@@ -406,7 +406,7 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    public LinkResult tryAddLink(ServerLevel level, GlareNodePos a, GlareNodePos b) {
+    public LinkResult tryAddLink(ServerLevel level, DimensionalNodePos a, DimensionalNodePos b) {
         if (a.equals(b)) {
             return LinkResult.FAIL_SAME_NODE;
         }
@@ -431,7 +431,7 @@ public class GlareSavedData extends SavedData {
             return LinkResult.FAIL_LINE_OF_SIGHT;
         }
 
-        Set<GlareNodePos> affected = new LinkedHashSet<>();
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
         affected.add(a);
         affected.add(b);
         affected.addAll(evictOldestIfFull(first));
@@ -452,8 +452,8 @@ public class GlareSavedData extends SavedData {
         return LinkResult.CREATED;
     }
 
-    private Set<GlareNodePos> evictOldestIfFull(NodeRecord record) {
-        Set<GlareNodePos> affected = new LinkedHashSet<>();
+    private Set<DimensionalNodePos> evictOldestIfFull(NodeRecord record) {
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
         while (record.maxLinks >= 0 && getLinksFor(record.pos).size() >= record.maxLinks && record.maxLinks > 0) {
             GlareLink oldest = getLinksFor(record.pos).get(0);
             affected.add(oldest.a());
@@ -478,7 +478,7 @@ public class GlareSavedData extends SavedData {
         return changed;
     }
 
-    public boolean removeLink(GlareNodePos a, GlareNodePos b) {
+    public boolean removeLink(DimensionalNodePos a, DimensionalNodePos b) {
         GlareLink link = new GlareLink(a, b);
         boolean removed = links.remove(link);
         if (removed) {
@@ -502,7 +502,7 @@ public class GlareSavedData extends SavedData {
         boolean changed = false;
         int validated = 0;
         int examined = 0;
-        Set<GlareNodePos> affected = new LinkedHashSet<>();
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
         int start = Math.floorMod(linkValidationCursors.getOrDefault(level.dimension(), 0), dimensionLinks.size());
         int examinationBudget = Math.min(maxChecks, dimensionLinks.size());
         while (examined < examinationBudget) {
@@ -525,7 +525,7 @@ public class GlareSavedData extends SavedData {
         linkValidationCursors.put(level.dimension(), (start + examined) % dimensionLinks.size());
         if (changed) {
             setDirtyAndRebuild();
-            for (GlareNodePos pos : new ArrayList<>(affected)) {
+            for (DimensionalNodePos pos : new ArrayList<>(affected)) {
                 affected.addAll(getNetworkNodesFor(pos));
             }
             notifyLoadedEndpoints(level, affected);
@@ -548,7 +548,7 @@ public class GlareSavedData extends SavedData {
             setDirty();
             return false;
         }
-        for (GlareNodePos pos : network.nodes) {
+        for (DimensionalNodePos pos : network.nodes) {
             NodeRecord node = nodes.get(pos);
             if (node != null && node.receiver) {
                 node.status = GlareOperationStatus.ONLINE;
@@ -576,7 +576,7 @@ public class GlareSavedData extends SavedData {
         boolean topologyChanged = false;
         boolean stateChanged = false;
         Set<UUID> networksToRefresh = new LinkedHashSet<>();
-        Set<GlareNodePos> affected = new LinkedHashSet<>();
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
         for (NodeRecord record : new ArrayList<>(nodes.values())) {
             BlockPos pos = record.pos.pos();
             if (!record.pos.levelKey().equals(level.dimension()) || pos.getX() < minX || pos.getX() > maxX || pos.getZ() < minZ || pos.getZ() > maxZ) {
@@ -652,19 +652,19 @@ public class GlareSavedData extends SavedData {
             }
         }
 
-        Set<GlareNodePos> visited = new HashSet<>();
+        Set<DimensionalNodePos> visited = new HashSet<>();
         Set<UUID> claimedNetworkIds = new HashSet<>();
-        for (GlareNodePos start : nodes.keySet()) {
+        for (DimensionalNodePos start : nodes.keySet()) {
             if (!visited.add(start)) {
                 continue;
             }
-            Set<GlareNodePos> component = new LinkedHashSet<>();
-            ArrayDeque<GlareNodePos> queue = new ArrayDeque<>();
+            Set<DimensionalNodePos> component = new LinkedHashSet<>();
+            ArrayDeque<DimensionalNodePos> queue = new ArrayDeque<>();
             queue.add(start);
             while (!queue.isEmpty()) {
-                GlareNodePos current = queue.removeFirst();
+                DimensionalNodePos current = queue.removeFirst();
                 component.add(current);
-                for (GlareNodePos neighbour : getActiveNeighbours(current)) {
+                for (DimensionalNodePos neighbour : getActiveNeighbours(current)) {
                     if (nodes.containsKey(neighbour) && visited.add(neighbour)) {
                         queue.addLast(neighbour);
                     }
@@ -685,7 +685,7 @@ public class GlareSavedData extends SavedData {
                 }
             }
             network.nodes.addAll(component);
-            for (GlareNodePos current : component) {
+            for (DimensionalNodePos current : component) {
                 NodeRecord node = nodes.get(current);
                 if (node != null) {
                     node.networkId = id;
@@ -706,12 +706,12 @@ public class GlareSavedData extends SavedData {
         GlareDebug.log("Rebuilt graph: {} nodes, {} links, {} networks", nodes.size(), links.size(), networks.size());
     }
 
-    private static boolean shouldPreserveOverload(Set<GlareNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
+    private static boolean shouldPreserveOverload(Set<DimensionalNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
         for (NetworkRecord oldNetwork : oldNetworks.values()) {
             if (!oldNetwork.overloaded || oldNetwork.nodes.size() <= 1) {
                 continue;
             }
-            for (GlareNodePos pos : oldNetwork.nodes) {
+            for (DimensionalNodePos pos : oldNetwork.nodes) {
                 if (component.contains(pos)) {
                     return true;
                 }
@@ -720,7 +720,7 @@ public class GlareSavedData extends SavedData {
         return false;
     }
 
-    private static UUID chooseNetworkId(Set<GlareNodePos> component, Map<UUID, NetworkRecord> oldNetworks, Set<UUID> claimedIds) {
+    private static UUID chooseNetworkId(Set<DimensionalNodePos> component, Map<UUID, NetworkRecord> oldNetworks, Set<UUID> claimedIds) {
         return oldNetworks.values().stream()
                 .filter(network -> !claimedIds.contains(network.id))
                 .filter(network -> network.nodes.stream().anyMatch(component::contains))
@@ -777,9 +777,9 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    private static int overlapCount(Set<GlareNodePos> component, Set<GlareNodePos> previousNodes) {
+    private static int overlapCount(Set<DimensionalNodePos> component, Set<DimensionalNodePos> previousNodes) {
         int count = 0;
-        for (GlareNodePos pos : previousNodes) {
+        for (DimensionalNodePos pos : previousNodes) {
             if (component.contains(pos)) {
                 count++;
             }
@@ -804,7 +804,7 @@ public class GlareSavedData extends SavedData {
         network.luxAllocated = 0;
         network.colourCharges.clear();
         network.registeredTelemetryAddresses.clear();
-        for (GlareNodePos pos : network.nodes) {
+        for (DimensionalNodePos pos : network.nodes) {
             NodeRecord node = nodes.get(pos);
             if (node == null) continue;
             applyLux(network, node);
@@ -819,7 +819,7 @@ public class GlareSavedData extends SavedData {
 
     private void markNetworkOverloaded(NetworkRecord network) {
         network.overloaded = true;
-        for (GlareNodePos pos : network.nodes) {
+        for (DimensionalNodePos pos : network.nodes) {
             NodeRecord node = nodes.get(pos);
             if (node != null && node.receiver) {
                 node.status = GlareOperationStatus.OVERLOADED;
@@ -829,7 +829,7 @@ public class GlareSavedData extends SavedData {
 
     private void markNetworkOnline(NetworkRecord network) {
         network.overloaded = false;
-        for (GlareNodePos pos : network.nodes) {
+        for (DimensionalNodePos pos : network.nodes) {
             NodeRecord node = nodes.get(pos);
             if (node != null && node.receiver && node.status == GlareOperationStatus.OVERLOADED) {
                 node.status = GlareOperationStatus.ONLINE;
@@ -842,7 +842,7 @@ public class GlareSavedData extends SavedData {
         setDirty();
     }
 
-    private void notifyLoadedEndpoint(ServerLevel level, GlareNodePos pos) {
+    private void notifyLoadedEndpoint(ServerLevel level, DimensionalNodePos pos) {
         if (!pos.levelKey().equals(level.dimension()) || !level.isLoaded(pos.pos())) {
             return;
         }
@@ -859,8 +859,8 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    private void notifyLoadedEndpoints(ServerLevel level, Collection<GlareNodePos> positions) {
-        for (GlareNodePos pos : positions) {
+    private void notifyLoadedEndpoints(ServerLevel level, Collection<DimensionalNodePos> positions) {
+        for (DimensionalNodePos pos : positions) {
             notifyLoadedEndpoint(level, pos);
         }
     }
@@ -882,8 +882,8 @@ public class GlareSavedData extends SavedData {
         notifyLoadedEndpoints(level, network.nodes);
     }
 
-    private Set<GlareNodePos> getNetworkNodesFor(GlareNodePos pos) {
-        Set<GlareNodePos> positions = new LinkedHashSet<>();
+    private Set<DimensionalNodePos> getNetworkNodesFor(DimensionalNodePos pos) {
+        Set<DimensionalNodePos> positions = new LinkedHashSet<>();
         NodeRecord record = nodes.get(pos);
         if (record == null || record.networkId == null) {
             positions.add(pos);
@@ -919,15 +919,15 @@ public class GlareSavedData extends SavedData {
         return removed;
     }
 
-    public boolean canAcceptLink(GlareNodePos pos) {
+    public boolean canAcceptLink(DimensionalNodePos pos) {
         NodeRecord node = nodes.get(pos);
         return node != null && node.maxLinks > 0 && getLinksFor(pos).size() < node.maxLinks;
     }
 
-    public int removeAllLinks(ServerLevel level, GlareNodePos pos) {
+    public int removeAllLinks(ServerLevel level, DimensionalNodePos pos) {
         List<GlareLink> incident = getLinksFor(pos);
         if (incident.isEmpty()) return 0;
-        Set<GlareNodePos> affected = getNetworkNodesFor(pos);
+        Set<DimensionalNodePos> affected = getNetworkNodesFor(pos);
         for (GlareLink link : incident) {
             affected.add(link.a());
             affected.add(link.b());
@@ -936,7 +936,7 @@ public class GlareSavedData extends SavedData {
             linkValidity.remove(link);
         }
         setDirtyAndRebuild();
-        for (GlareNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
+        for (DimensionalNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
         notifyLoadedEndpoints(level, affected);
         GlareDebug.log("Removed all {} links from {}", incident.size(), pos.toShortString());
         return incident.size();
@@ -958,7 +958,7 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    private void removeIndexedLink(GlareNodePos pos, GlareLink link) {
+    private void removeIndexedLink(DimensionalNodePos pos, GlareLink link) {
         LinkedHashSet<GlareLink> indexed = linksByNode.get(pos);
         if (indexed == null) return;
         indexed.remove(link);
@@ -968,25 +968,6 @@ public class GlareSavedData extends SavedData {
     private static boolean isCloseEnoughToRender(net.minecraft.server.level.ServerPlayer player, GlareLink link, double syncDistanceSq) {
         return player.distanceToSqr(link.a().pos().getX() + 0.5D, link.a().pos().getY() + 0.5D, link.a().pos().getZ() + 0.5D) <= syncDistanceSq
                 || player.distanceToSqr(link.b().pos().getX() + 0.5D, link.b().pos().getY() + 0.5D, link.b().pos().getZ() + 0.5D) <= syncDistanceSq;
-    }
-
-    private static void writePos(CompoundTag tag, String prefix, GlareNodePos pos) {
-        tag.putString(prefix + "Level", pos.levelKey().location().toString());
-        tag.putInt(prefix + "X", pos.pos().getX());
-        tag.putInt(prefix + "Y", pos.pos().getY());
-        tag.putInt(prefix + "Z", pos.pos().getZ());
-    }
-
-    private static Optional<GlareNodePos> readPos(CompoundTag tag, String prefix) {
-        if (!tag.contains(prefix + "Level")) {
-            return Optional.empty();
-        }
-        ResourceLocation levelId = ResourceLocation.tryParse(tag.getString(prefix + "Level"));
-        if (levelId == null) {
-            return Optional.empty();
-        }
-        ResourceKey<Level> levelKey = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, levelId);
-        return Optional.of(new GlareNodePos(levelKey, new BlockPos(tag.getInt(prefix + "X"), tag.getInt(prefix + "Y"), tag.getInt(prefix + "Z"))));
     }
 
     public enum LinkResult {
@@ -1005,16 +986,16 @@ public class GlareSavedData extends SavedData {
         BLOCKED
     }
 
-    public record LinkRenderRecord(GlareNodePos a, GlareNodePos b, LinkValidity validity) {}
+    public record LinkRenderRecord(DimensionalNodePos a, DimensionalNodePos b, LinkValidity validity) {}
 
     public record Diagnostics(int persistedNodes, int loadedNodesInDimension, int links, int validLinks,
             int blockedLinks, int unknownLinks, int networks) {}
 
-    private record TelemetrySubscriber(GlareNodePos owner, GlareAddress address,
-            Consumer<TelemetryService.InboxUpdate> listener) {}
+    private record TelemetrySubscriber(DimensionalNodePos owner, GlareAddress address,
+                                       Consumer<TelemetryService.InboxUpdate> listener) {}
 
     public static class NodeRecord {
-        public final GlareNodePos pos;
+        public final DimensionalNodePos pos;
         public int maxLinks = 0;
         public boolean loaded;
         public boolean removed;
@@ -1029,17 +1010,17 @@ public class GlareSavedData extends SavedData {
         public GlareAddress remoteAddress = GlareAddress.empty();
         public RemoteEntanglementMode remoteMode = RemoteEntanglementMode.DEPOT_SEND;
         public boolean remoteAssembled;
-        public final List<GlareNodePos> lastKnownLinks = new ArrayList<>();
+        public final List<DimensionalNodePos> lastKnownLinks = new ArrayList<>();
         @Nullable
         public UUID networkId;
 
-        NodeRecord(GlareNodePos pos) {
+        NodeRecord(DimensionalNodePos pos) {
             this.pos = pos;
         }
 
         CompoundTag save() {
             CompoundTag tag = new CompoundTag();
-            writePos(tag, "", pos);
+            DimensionalNodePos.writePos(tag, "", pos);
             tag.putInt("MaxLinks", maxLinks);
             tag.putBoolean("Loaded", loaded);
             tag.putBoolean("Removed", removed);
@@ -1058,9 +1039,9 @@ public class GlareSavedData extends SavedData {
                 tag.putUUID("Network", networkId);
             }
             ListTag linkList = new ListTag();
-            for (GlareNodePos link : lastKnownLinks) {
+            for (DimensionalNodePos link : lastKnownLinks) {
                 CompoundTag linkTag = new CompoundTag();
-                writePos(linkTag, "", link);
+                DimensionalNodePos.writePos(linkTag, "", link);
                 linkList.add(linkTag);
             }
             tag.put("LastKnownLinks", linkList);
@@ -1068,7 +1049,7 @@ public class GlareSavedData extends SavedData {
         }
 
         static NodeRecord load(CompoundTag tag) {
-            GlareNodePos pos = readPos(tag, "").orElseThrow();
+            DimensionalNodePos pos = DimensionalNodePos.readPos(tag, "").orElseThrow();
             NodeRecord record = new NodeRecord(pos);
             record.maxLinks = tag.getInt("MaxLinks");
             record.loaded = tag.getBoolean("Loaded");
@@ -1105,7 +1086,7 @@ public class GlareSavedData extends SavedData {
             }
             ListTag linkList = tag.getList("LastKnownLinks", Tag.TAG_COMPOUND);
             for (int i = 0; i < linkList.size(); i++) {
-                readPos(linkList.getCompound(i), "").ifPresent(record.lastKnownLinks::add);
+                DimensionalNodePos.readPos(linkList.getCompound(i), "").ifPresent(record.lastKnownLinks::add);
             }
             return record;
         }
@@ -1113,7 +1094,7 @@ public class GlareSavedData extends SavedData {
 
     public static class NetworkRecord {
         public final UUID id;
-        public final Set<GlareNodePos> nodes = new LinkedHashSet<>();
+        public final Set<DimensionalNodePos> nodes = new LinkedHashSet<>();
         public final Map<DyeColor, Integer> colourCharges = new HashMap<>();
         public final Map<GlareAddress, List<GlareMessage>> telemetryInboxes = new HashMap<>();
         public final Set<GlareAddress> registeredTelemetryAddresses = new LinkedHashSet<>();
@@ -1155,9 +1136,9 @@ public class GlareSavedData extends SavedData {
             tag.putInt("LuxAllocated", luxAllocated);
             tag.putBoolean("Overloaded", overloaded);
             ListTag nodeList = new ListTag();
-            for (GlareNodePos pos : nodes) {
+            for (DimensionalNodePos pos : nodes) {
                 CompoundTag nodeTag = new CompoundTag();
-                writePos(nodeTag, "", pos);
+                DimensionalNodePos.writePos(nodeTag, "", pos);
                 nodeList.add(nodeTag);
             }
             tag.put("Nodes", nodeList);
@@ -1191,7 +1172,7 @@ public class GlareSavedData extends SavedData {
             record.overloaded = tag.getBoolean("Overloaded");
             ListTag nodeList = tag.getList("Nodes", Tag.TAG_COMPOUND);
             for (int i = 0; i < nodeList.size(); i++) {
-                readPos(nodeList.getCompound(i), "").ifPresent(record.nodes::add);
+                DimensionalNodePos.readPos(nodeList.getCompound(i), "").ifPresent(record.nodes::add);
             }
             ListTag colours = tag.getList("Colours", Tag.TAG_COMPOUND);
             for (int i = 0; i < colours.size(); i++) {

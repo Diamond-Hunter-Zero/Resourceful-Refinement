@@ -20,7 +20,7 @@ public final class GlareService {
         GlareSavedData.get(level).registerNode(level, node);
     }
 
-    public static void onNodeRemoved(ServerLevel level, GlareNodePos pos) {
+    public static void onNodeRemoved(ServerLevel level, DimensionalNodePos pos) {
         GlareSavedData.get(level).unregisterLoadedNode(level, pos);
     }
 
@@ -28,7 +28,7 @@ public final class GlareService {
         GlareSavedData.get(level).updateNodeState(level, node);
     }
 
-    public static Optional<GlareSavedData.NodeRecord> getNode(Level level, GlareNodePos pos) {
+    public static Optional<GlareSavedData.NodeRecord> getNode(Level level, DimensionalNodePos pos) {
         if (!(level instanceof ServerLevel server)) {
             return Optional.empty();
         }
@@ -42,18 +42,18 @@ public final class GlareService {
         return GlareSavedData.get(server).getNetwork(networkId);
     }
 
-    public static List<GlareLink> getLinks(Level level, GlareNodePos pos) {
+    public static List<GlareLink> getLinks(Level level, DimensionalNodePos pos) {
         if (!(level instanceof ServerLevel server)) {
             return List.of();
         }
         return GlareSavedData.get(server).getLinksFor(pos);
     }
 
-    public static boolean canAcceptLink(Level level, GlareNodePos pos) {
+    public static boolean canAcceptLink(Level level, DimensionalNodePos pos) {
         return level instanceof ServerLevel server && GlareSavedData.get(server).canAcceptLink(pos);
     }
 
-    public static int removeAllLinks(ServerLevel level, GlareNodePos pos) {
+    public static int removeAllLinks(ServerLevel level, DimensionalNodePos pos) {
         return GlareSavedData.get(level).removeAllLinks(level, pos);
     }
 
@@ -61,7 +61,7 @@ public final class GlareService {
         return GlareSavedData.get((ServerLevel) player.level()).getRenderableLinksFor(player);
     }
 
-    public static GlareSavedData.LinkResult tryLink(ServerLevel level, GlareNodePos from, GlareNodePos to) {
+    public static GlareSavedData.LinkResult tryLink(ServerLevel level, DimensionalNodePos from, DimensionalNodePos to) {
         return GlareSavedData.get(level).tryAddLink(level, from, to);
     }
 
@@ -115,7 +115,7 @@ public final class GlareService {
             return false;
         }
         GlareTargetsData targets = stack.getOrDefault(com.resourceful_refinement.registry.ModDataComponents.GLARE_TARGETS.get(), GlareTargetsData.EMPTY);
-        GlareNodePos target = liveNode.get().getGlareNodePos();
+        DimensionalNodePos target = liveNode.get().getGlareNodePos();
         stack.set(com.resourceful_refinement.registry.ModDataComponents.GLARE_TARGETS.get(), targets.withAdded(target));
         player.displayClientMessage(Component.translatable("message.resourceful_refinement.glare.target_added", target.toShortString()), true);
         return true;

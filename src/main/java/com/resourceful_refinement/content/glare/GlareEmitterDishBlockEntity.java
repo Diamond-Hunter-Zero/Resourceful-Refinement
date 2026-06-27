@@ -57,8 +57,8 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
     }
 
     @Override
-    public GlareNodePos getGlareNodePos() {
-        return GlareNodePos.of(level, worldPosition);
+    public DimensionalNodePos getGlareNodePos() {
+        return DimensionalNodePos.of(level, worldPosition);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
     }
 
     private void refreshSyncedGlareSummary(ServerLevel server) {
-        GlareNodePos pos = GlareNodePos.of(server, worldPosition);
+        DimensionalNodePos pos = DimensionalNodePos.of(server, worldPosition);
         syncedLinkCount = GlareService.getLinks(server, pos).size();
         syncedLuxCapacity = 0;
         syncedLuxAllocated = 0;

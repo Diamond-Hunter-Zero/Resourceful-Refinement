@@ -63,6 +63,30 @@ public class ModItems {
     public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
             () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
 
+
+    // v0.3 Content
+    public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
+
+    public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
+
+    public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
+            () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
+
+    public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
+
+    public static final DeferredItem<MilkingStationItem> MILKING_STATION_ITEM = ITEMS.register("milking_station",
+            () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
+
+
+    // v0.3 Content
+    public static final DeferredItem<BlockItem> BUCKET_EXCAVATOR_ITEM = ITEMS.registerSimpleBlockItem("bucket_excavator", ModBlocks.BUCKET_EXCAVATOR);
+
+
+    // GLARE Content
     public static final DeferredItem<GlareNodeBlockItem> GLARE_RELAY = ITEMS.register("glare_relay",
             () -> new GlareNodeBlockItem(ModBlocks.GLARE_RELAY.get(), new Item.Properties()));
 
@@ -91,22 +115,6 @@ public class ModItems {
     public static final DeferredItem<BlockItem> RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("resonance_crystal", ModBlocks.RESONANCE_CRYSTAL);
 
     public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);
-
-    public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
-
-    public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
-
-    public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
-            () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
-
-    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
-
-    public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
-
-    public static final DeferredItem<MilkingStationItem> MILKING_STATION_ITEM = ITEMS.register("milking_station",
-            () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
-
-    public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
 
 
     // -------------------------------------------------------------------------

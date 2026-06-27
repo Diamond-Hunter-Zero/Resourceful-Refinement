@@ -5,6 +5,8 @@ import com.mojang.logging.LogUtils;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
 import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapRenderer;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorModel;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorRenderer;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
@@ -390,6 +392,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
@@ -397,6 +400,9 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.FUEL_TANK_BE.get(), FuelTankRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.RADIATOR_PIPE_BE.get(), RadiatorRenderer::new);
+
+            event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
+
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), RemoteEntanglerDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
@@ -406,8 +412,7 @@ public class ResourcefulRefinementMain {
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
             event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
-            event.registerEntityRenderer(ModEntities.PUG.get(),
-                    com.resourceful_refinement.content.pug.PugEntityRenderer::new);
+            event.registerEntityRenderer(ModEntities.PUG.get(), com.resourceful_refinement.content.pug.PugEntityRenderer::new);
         }
 
         @SubscribeEvent
@@ -467,6 +472,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
             event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
+            event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
         }
     }
 

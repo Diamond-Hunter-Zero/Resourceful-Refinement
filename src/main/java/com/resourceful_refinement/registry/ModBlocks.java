@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
@@ -46,7 +47,7 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ResourcefulRefinementMain.MOD_ID);
 
     // -------------------------------------------------------------------------
-    // Mechanical Blocks
+    // v0.1 - v0.2 Mechanical Blocks
     // -------------------------------------------------------------------------
     public static final DeferredBlock<BlenderBladeBlock> BLENDER_BLADE = BLOCKS.register("blender_blade",
             () -> new BlenderBladeBlock(BlockBehaviour.Properties.of().strength(1.0f).sound(SoundType.METAL).noOcclusion()));
@@ -112,6 +113,75 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+
+    // -------------------------------------------------------------------------
+    // v0.3 Blocks
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<DistilleryBlock> DISTILLERY = BLOCKS.register("distillery",
+            () -> new DistilleryBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<RadiatorBlock> RADIATOR_PIPE = BLOCKS.register("radiator_pipe",
+            () -> new RadiatorBlock(BlockBehaviour.Properties.of()
+                    .strength(1f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<CombustionChamberBlock> COMBUSTION_CHAMBER = BLOCKS.register("combustion_chamber",
+            () -> new CombustionChamberBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<FuelTankBlock> FUEL_TANK = BLOCKS.register("fuel_tank",
+            () -> new FuelTankBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<AdvancedPumpBlock> ADVANCED_PUMP = BLOCKS.register("advanced_pump",
+            () -> new AdvancedPumpBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.MECHANICAL_PUMP.get())
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<MilkingStationBlock> MILKING_STATION = BLOCKS.register("milking_station",
+            () -> new MilkingStationBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<BrewersTapBlock> BREWERS_TAP = BLOCKS.register("brewers_tap",
+            () -> new BrewersTapBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+
+    // -------------------------------------------------------------------------
+    // v0.4 Blocks
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<BucketExcavatorBlock> BUCKET_EXCAVATOR = BLOCKS.register("bucket_excavator",
+            () -> new BucketExcavatorBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+
+    // -------------------------------------------------------------------------
+    // GLARE Blocks
+    // -------------------------------------------------------------------------
 
     public static final DeferredBlock<GlareNodeBlock> GLARE_RELAY = BLOCKS.register("glare_relay",
             () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
@@ -185,53 +255,6 @@ public class ModBlocks {
                     .strength(2.0f)
                     .requiresCorrectToolForDrops()
                     .noOcclusion(), true));
-
-    public static final DeferredBlock<DistilleryBlock> DISTILLERY = BLOCKS.register("distillery",
-            () -> new DistilleryBlock(BlockBehaviour.Properties.of()
-                    .strength(2.5f)
-                    .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<RadiatorBlock> RADIATOR_PIPE = BLOCKS.register("radiator_pipe",
-            () -> new RadiatorBlock(BlockBehaviour.Properties.of()
-                    .strength(1f)
-                    .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<CombustionChamberBlock> COMBUSTION_CHAMBER = BLOCKS.register("combustion_chamber",
-            () -> new CombustionChamberBlock(BlockBehaviour.Properties.of()
-                    .strength(1.5f)
-                    .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<FuelTankBlock> FUEL_TANK = BLOCKS.register("fuel_tank",
-            () -> new FuelTankBlock(BlockBehaviour.Properties.of()
-                    .strength(1.5f)
-                    .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<AdvancedPumpBlock> ADVANCED_PUMP = BLOCKS.register("advanced_pump",
-            () -> new AdvancedPumpBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.MECHANICAL_PUMP.get())
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<MilkingStationBlock> MILKING_STATION = BLOCKS.register("milking_station",
-            () -> new MilkingStationBlock(BlockBehaviour.Properties.of()
-                    .strength(2.5f)
-                    .sound(SoundType.COPPER)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
-
-    public static final DeferredBlock<BrewersTapBlock> BREWERS_TAP = BLOCKS.register("brewers_tap",
-            () -> new BrewersTapBlock(BlockBehaviour.Properties.of()
-                    .strength(1.5f)
-                    .sound(SoundType.COPPER)
-                    .requiresCorrectToolForDrops()
-                    .noOcclusion()));
 
 
     // -------------------------------------------------------------------------

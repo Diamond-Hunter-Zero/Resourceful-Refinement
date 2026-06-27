@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 public final class GlareLineOfSight {
     private GlareLineOfSight() {}
 
-    public static boolean canValidate(MinecraftServer server, GlareNodePos a, GlareNodePos b) {
+    public static boolean canValidate(MinecraftServer server, DimensionalNodePos a, DimensionalNodePos b) {
         if (!a.levelKey().equals(b.levelKey())) {
             return false;
         }
@@ -18,7 +18,7 @@ public final class GlareLineOfSight {
         return level != null && canValidate(level, a, b);
     }
 
-    public static boolean hasLineOfSight(MinecraftServer server, GlareNodePos a, GlareNodePos b) {
+    public static boolean hasLineOfSight(MinecraftServer server, DimensionalNodePos a, DimensionalNodePos b) {
         ServerLevel level = server.getLevel(a.levelKey());
         if (level == null || !canValidate(level, a, b)) {
             return true;
@@ -48,7 +48,7 @@ public final class GlareLineOfSight {
         return true;
     }
 
-    private static boolean canValidate(ServerLevel level, GlareNodePos a, GlareNodePos b) {
+    private static boolean canValidate(ServerLevel level, DimensionalNodePos a, DimensionalNodePos b) {
         if (!level.isLoaded(a.pos()) || !level.isLoaded(b.pos())) {
             return false;
         }

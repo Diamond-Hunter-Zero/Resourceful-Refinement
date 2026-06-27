@@ -100,7 +100,7 @@ public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && level instanceof net.minecraft.server.level.ServerLevel server) {
-            GlareService.onNodeRemoved(server, GlareNodePos.of(server, pos));
+            GlareService.onNodeRemoved(server, DimensionalNodePos.of(server, pos));
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }

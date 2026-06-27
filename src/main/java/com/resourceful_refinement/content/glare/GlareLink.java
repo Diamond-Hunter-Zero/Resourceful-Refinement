@@ -2,24 +2,24 @@ package com.resourceful_refinement.content.glare;
 
 import java.util.Objects;
 
-public record GlareLink(GlareNodePos a, GlareNodePos b) {
+public record GlareLink(DimensionalNodePos a, DimensionalNodePos b) {
     public GlareLink {
         if (a.equals(b)) {
             throw new IllegalArgumentException("GLARE links require two distinct nodes");
         }
         int order = compare(a, b);
         if (order > 0) {
-            GlareNodePos swap = a;
+            DimensionalNodePos swap = a;
             a = b;
             b = swap;
         }
     }
 
-    public boolean contains(GlareNodePos pos) {
+    public boolean contains(DimensionalNodePos pos) {
         return a.equals(pos) || b.equals(pos);
     }
 
-    public GlareNodePos other(GlareNodePos pos) {
+    public DimensionalNodePos other(DimensionalNodePos pos) {
         if (a.equals(pos)) {
             return b;
         }
@@ -29,7 +29,7 @@ public record GlareLink(GlareNodePos a, GlareNodePos b) {
         throw new IllegalArgumentException("Position is not part of this link");
     }
 
-    private static int compare(GlareNodePos left, GlareNodePos right) {
+    private static int compare(DimensionalNodePos left, DimensionalNodePos right) {
         int level = left.levelKey().location().compareTo(right.levelKey().location());
         if (level != 0) {
             return level;

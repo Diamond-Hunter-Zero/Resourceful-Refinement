@@ -32,7 +32,7 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
     }
 
     @Override public int getMaxGlareLinks() { return maxLinks; }
-    @Override public GlareNodePos getGlareNodePos() { return GlareNodePos.of(level, worldPosition); }
+    @Override public DimensionalNodePos getGlareNodePos() { return DimensionalNodePos.of(level, worldPosition); }
     public UUID getNetworkId() { return networkId; }
 
     @Override public void onLoad() {
@@ -59,7 +59,7 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
     }
 
     private void refreshGlareSummary(ServerLevel server) {
-        syncedLinkCount = GlareService.getLinks(server, GlareNodePos.of(server, worldPosition)).size();
+        syncedLinkCount = GlareService.getLinks(server, DimensionalNodePos.of(server, worldPosition)).size();
         syncedLuxCapacity = 0;
         syncedLuxAllocated = 0;
         syncedOverloaded = false;

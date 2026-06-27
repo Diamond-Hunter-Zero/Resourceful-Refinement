@@ -65,7 +65,7 @@ public final class GlareCommands {
 
     private static int inspect(CommandSourceStack source, BlockPos pos) {
         ServerLevel level = source.getLevel();
-        GlareNodePos nodePos = GlareNodePos.of(level, pos);
+        DimensionalNodePos nodePos = DimensionalNodePos.of(level, pos);
         GlareSavedData.NodeRecord node = GlareService.getNode(level, nodePos).orElse(null);
         if (node == null) {
             source.sendFailure(Component.literal("No persisted GLARE node at " + pos.toShortString()));

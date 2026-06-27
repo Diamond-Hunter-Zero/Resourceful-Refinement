@@ -71,9 +71,9 @@ public final class GlareGameTests {
     public static void blockedLinkSplitsNetworkButRemainsRemembered(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos emitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 35)));
-        GlareNodePos relay = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 35)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 35)));
+        DimensionalNodePos emitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 35)));
+        DimensionalNodePos relay = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 35)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 35)));
 
         data.registerNode(level, new TestEmitterNode(emitter, 8, 8, DyeColor.RED, true));
         data.registerNode(level, new TestNode(relay, 8));
@@ -101,8 +101,8 @@ public final class GlareGameTests {
     public static void unblockedLinkMergesSplitNetworks(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos emitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 37)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 37)));
+        DimensionalNodePos emitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 37)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 37)));
 
         data.registerNode(level, new TestEmitterNode(emitter, 8, 8, DyeColor.BLUE, true));
         data.registerNode(level, new TestReceiverNode(receiver, 8, 1, GlareOperationStatus.ONLINE));
@@ -143,9 +143,9 @@ public final class GlareGameTests {
     public static void maxLinkLimitEvictsOldestLink(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 6)));
-        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 6)));
-        GlareNodePos c = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 6)));
+        DimensionalNodePos a = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 6)));
+        DimensionalNodePos b = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 6)));
+        DimensionalNodePos c = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 6)));
         data.unregisterLoadedNode(a);
         data.unregisterLoadedNode(b);
         data.unregisterLoadedNode(c);
@@ -203,7 +203,7 @@ public final class GlareGameTests {
     public static void unloadedNodesArePreservedDuringOtherChunkReconcile(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos remote = new GlareNodePos(level.dimension(), new BlockPos(30_000_000, 80, 30_000_000));
+        DimensionalNodePos remote = new DimensionalNodePos(level.dimension(), new BlockPos(30_000_000, 80, 30_000_000));
         TestNode remoteNode = new TestNode(remote, 8);
         TestNodes local = TestNodes.create(level, helper, 90);
 
@@ -220,9 +220,9 @@ public final class GlareGameTests {
     public static void luxCapacityAllocationAndColourChargesAreCalculated(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos whiteEmitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 110)));
-        GlareNodePos redEmitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 110)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 110)));
+        DimensionalNodePos whiteEmitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 110)));
+        DimensionalNodePos redEmitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 110)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 110)));
 
         data.registerNode(level, new TestEmitterNode(whiteEmitter, 8, 5, DyeColor.WHITE, true));
         data.registerNode(level, new TestEmitterNode(redEmitter, 8, 3, DyeColor.RED, true));
@@ -242,8 +242,8 @@ public final class GlareGameTests {
     public static void firstReceiverLinkDoesNotLatchTransientPlacementOverload(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos emitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 120)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 120)));
+        DimensionalNodePos emitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 120)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 120)));
 
         data.registerNode(level, new TestEmitterNode(emitter, 1, 8, DyeColor.WHITE, true));
         data.registerNode(level, new TestReceiverNode(receiver, 1, 1, GlareOperationStatus.ONLINE));
@@ -265,9 +265,9 @@ public final class GlareGameTests {
     public static void overloadLatchesUntilReset(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos weakEmitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 130)));
-        GlareNodePos extraEmitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 130)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 130)));
+        DimensionalNodePos weakEmitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 130)));
+        DimensionalNodePos extraEmitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 130)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 130)));
 
         data.registerNode(level, new TestEmitterNode(weakEmitter, 8, 2, DyeColor.WHITE, true));
         data.registerNode(level, new TestEmitterNode(extraEmitter, 8, 2, DyeColor.BLUE, true));
@@ -304,9 +304,9 @@ public final class GlareGameTests {
     public static void relayWrenchCapacityAndBulkUnlinkSemantics(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos center = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(2, 2, 18)));
-        GlareNodePos first = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(4, 2, 18)));
-        GlareNodePos second = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(6, 2, 18)));
+        DimensionalNodePos center = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(2, 2, 18)));
+        DimensionalNodePos first = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(4, 2, 18)));
+        DimensionalNodePos second = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(6, 2, 18)));
         data.registerNode(level, new TestNode(center, 2));
         data.registerNode(level, new TestNode(first, 1));
         data.registerNode(level, new TestNode(second, 1));
@@ -381,8 +381,8 @@ public final class GlareGameTests {
     public static void chromaticTransceiverUsesUnloadedEmitterColourState(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos emitter = new GlareNodePos(level.dimension(), new BlockPos(30_000_000, 80, 30_000_000));
-        GlareNodePos transceiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 150)));
+        DimensionalNodePos emitter = new DimensionalNodePos(level.dimension(), new BlockPos(30_000_000, 80, 30_000_000));
+        DimensionalNodePos transceiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 150)));
         data.registerNode(level, new TestEmitterNode(emitter, 1, 7, DyeColor.MAGENTA, true));
         data.registerNode(level, new TestReceiverNode(transceiver, 1, 0, GlareOperationStatus.ONLINE));
         data.tryAddLink(level, emitter, transceiver);
@@ -403,7 +403,7 @@ public final class GlareGameTests {
     public static void telemetrySendReadDiscardCapAndCleanup(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos node = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 170)));
+        DimensionalNodePos node = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 170)));
         data.registerNode(level, new TestNode(node, 1));
         UUID networkId = requireNetwork(data, node);
         GlareAddress sender = GlareAddress.of(Items.REDSTONE, Items.IRON_INGOT, Items.GLASS);
@@ -432,8 +432,8 @@ public final class GlareGameTests {
     public static void telemetryMergeTemporarilyExceedsCapThenInsertionTrims(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 180)));
-        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 180)));
+        DimensionalNodePos a = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 180)));
+        DimensionalNodePos b = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 180)));
         data.registerNode(level, new TestNode(a, 1));
         data.registerNode(level, new TestNode(b, 1));
         GlareAddress address = GlareAddress.of(Items.RED_DYE, Items.GREEN_DYE, Items.BLUE_DYE);
@@ -461,8 +461,8 @@ public final class GlareGameTests {
     public static void telemetrySplitCopiesAcrossUnloadedNodeAndSurvivesReload(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos local = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 190)));
-        GlareNodePos remote = new GlareNodePos(level.dimension(), new BlockPos(30_000_000, 80, 29_999_984));
+        DimensionalNodePos local = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 190)));
+        DimensionalNodePos remote = new DimensionalNodePos(level.dimension(), new BlockPos(30_000_000, 80, 29_999_984));
         data.registerNode(level, new TestNode(local, 1));
         data.registerNode(level, new TestNode(remote, 1));
         data.tryAddLink(level, local, remote);
@@ -494,7 +494,7 @@ public final class GlareGameTests {
     public static void telemetrySubscribersReceiveExactMutations(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos node = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 200)));
+        DimensionalNodePos node = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 200)));
         data.registerNode(level, new TestNode(node, 1));
         UUID networkId = requireNetwork(data, node);
         GlareAddress address = GlareAddress.of(Items.BOOK, Items.FEATHER, Items.INK_SAC);
@@ -561,7 +561,7 @@ public final class GlareGameTests {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
         GlareAddress address = GlareAddress.of(Items.GRASS_BLOCK, Items.REDSTONE, Items.ENDER_PEARL);
-        GlareNodePos pos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 90)));
+        DimensionalNodePos pos = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 90)));
         data.registerNode(level, new TestRemoteNode(pos, RemoteEndpointKind.TRANSPORTER, address,
                 RemoteEntanglementMode.TRANSPORTER_RECEIVE_ONLY, true));
 
@@ -581,8 +581,8 @@ public final class GlareGameTests {
     public static void stateOnlyRefreshPreservesTopologyAndNetworkIdentity(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos emitter = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 12)));
-        GlareNodePos receiver = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 12)));
+        DimensionalNodePos emitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 12)));
+        DimensionalNodePos receiver = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 12)));
         data.registerNode(level, new TestEmitterNode(emitter, 1, 8, DyeColor.RED, true));
         data.registerNode(level, new TestReceiverNode(receiver, 1, 1, GlareOperationStatus.ONLINE));
         data.tryAddLink(level, emitter, receiver);
@@ -603,11 +603,11 @@ public final class GlareGameTests {
     public static void boundedLosValidationAdvancesRoundRobin(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
-        GlareNodePos a = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 14)));
-        GlareNodePos b = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 14)));
-        GlareNodePos c = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 14)));
-        GlareNodePos d = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(7, 2, 14)));
-        for (GlareNodePos pos : List.of(a, b, c, d)) data.registerNode(level, new TestNode(pos, 2));
+        DimensionalNodePos a = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 14)));
+        DimensionalNodePos b = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 14)));
+        DimensionalNodePos c = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 14)));
+        DimensionalNodePos d = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(7, 2, 14)));
+        for (DimensionalNodePos pos : List.of(a, b, c, d)) data.registerNode(level, new TestNode(pos, 2));
         List<GlareLink> testLinks = List.of(new GlareLink(a, b), new GlareLink(b, c), new GlareLink(c, d));
         for (GlareLink link : testLinks) {
             data.tryAddLink(level, link.a(), link.b());
@@ -629,9 +629,9 @@ public final class GlareGameTests {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = GlareSavedData.get(level);
         GlareAddress address = GlareAddress.of(Items.GRASS_BLOCK, Items.REDSTONE, Items.ENDER_PEARL);
-        GlareNodePos sourcePos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 92)));
-        GlareNodePos receiverPos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 92)));
-        GlareNodePos sendOnlyPos = new GlareNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 92)));
+        DimensionalNodePos sourcePos = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 92)));
+        DimensionalNodePos receiverPos = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(3, 2, 92)));
+        DimensionalNodePos sendOnlyPos = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(5, 2, 92)));
         data.unregisterLoadedNode(sourcePos);
         data.unregisterLoadedNode(receiverPos);
         data.unregisterLoadedNode(sendOnlyPos);
@@ -656,13 +656,13 @@ public final class GlareGameTests {
         helper.succeed();
     }
 
-    private static UUID requireNetwork(GlareSavedData data, GlareNodePos pos) {
+    private static UUID requireNetwork(GlareSavedData data, DimensionalNodePos pos) {
         return data.getNode(pos)
                 .flatMap(node -> java.util.Optional.ofNullable(node.networkId))
                 .orElseThrow(() -> new AssertionError("node has no network: " + pos.toShortString()));
     }
 
-    private static GlareSavedData.NetworkRecord requireNetworkRecord(GlareSavedData data, GlareNodePos pos) {
+    private static GlareSavedData.NetworkRecord requireNetworkRecord(GlareSavedData data, DimensionalNodePos pos) {
         UUID networkId = requireNetwork(data, pos);
         return data.getNetwork(networkId).orElseThrow(() -> new AssertionError("missing network record: " + networkId));
     }
@@ -673,26 +673,26 @@ public final class GlareGameTests {
         }
     }
 
-    private record TestNode(GlareNodePos pos, int maxLinks) implements IGlareNode {
+    private record TestNode(DimensionalNodePos pos, int maxLinks) implements IGlareNode {
         @Override
         public int getMaxGlareLinks() {
             return maxLinks;
         }
 
         @Override
-        public GlareNodePos getGlareNodePos() {
+        public DimensionalNodePos getGlareNodePos() {
             return pos;
         }
     }
 
-    private record TestEmitterNode(GlareNodePos pos, int maxLinks, int producedLux, DyeColor colour, boolean enabled) implements IGlareNode, IGlareEmitter {
+    private record TestEmitterNode(DimensionalNodePos pos, int maxLinks, int producedLux, DyeColor colour, boolean enabled) implements IGlareNode, IGlareEmitter {
         @Override
         public int getMaxGlareLinks() {
             return maxLinks;
         }
 
         @Override
-        public GlareNodePos getGlareNodePos() {
+        public DimensionalNodePos getGlareNodePos() {
             return pos;
         }
 
@@ -712,14 +712,14 @@ public final class GlareGameTests {
         }
     }
 
-    private record TestReceiverNode(GlareNodePos pos, int maxLinks, int allocatedLux, GlareOperationStatus status) implements IGlareNode, IGlareReceiver {
+    private record TestReceiverNode(DimensionalNodePos pos, int maxLinks, int allocatedLux, GlareOperationStatus status) implements IGlareNode, IGlareReceiver {
         @Override
         public int getMaxGlareLinks() {
             return maxLinks;
         }
 
         @Override
-        public GlareNodePos getGlareNodePos() {
+        public DimensionalNodePos getGlareNodePos() {
             return pos;
         }
 
@@ -737,10 +737,10 @@ public final class GlareGameTests {
         public void setGlareOperationStatus(GlareOperationStatus status) {}
     }
 
-    private record TestRemoteNode(GlareNodePos pos, RemoteEndpointKind kind, GlareAddress address,
-            RemoteEntanglementMode mode, boolean assembled) implements IGlareNode, IRemoteEntanglementEndpoint {
+    private record TestRemoteNode(DimensionalNodePos pos, RemoteEndpointKind kind, GlareAddress address,
+                                  RemoteEntanglementMode mode, boolean assembled) implements IGlareNode, IRemoteEntanglementEndpoint {
         @Override public int getMaxGlareLinks() { return 8; }
-        @Override public GlareNodePos getGlareNodePos() { return pos; }
+        @Override public DimensionalNodePos getGlareNodePos() { return pos; }
         @Override public RemoteEndpointKind getRemoteEndpointKind() { return kind; }
         @Override public GlareAddress getRemoteAddress() { return address; }
         @Override public RemoteEntanglementMode getRemoteMode() { return mode; }
@@ -751,9 +751,9 @@ public final class GlareGameTests {
         static TestNodes create(ServerLevel level, GameTestHelper helper, int zOffset) {
             BlockPos origin = helper.absolutePos(new BlockPos(1, 2, zOffset));
             return new TestNodes(
-                    new TestNode(new GlareNodePos(level.dimension(), origin), 8),
-                    new TestNode(new GlareNodePos(level.dimension(), origin.offset(2, 0, 0)), 8),
-                    new TestNode(new GlareNodePos(level.dimension(), origin.offset(4, 0, 0)), 8)
+                    new TestNode(new DimensionalNodePos(level.dimension(), origin), 8),
+                    new TestNode(new DimensionalNodePos(level.dimension(), origin.offset(2, 0, 0)), 8),
+                    new TestNode(new DimensionalNodePos(level.dimension(), origin.offset(4, 0, 0)), 8)
             );
         }
 

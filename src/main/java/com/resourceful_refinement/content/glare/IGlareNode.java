@@ -14,7 +14,7 @@ public interface IGlareNode {
         return Vec3.atCenterOf(pos);
     }
 
-    GlareNodePos getGlareNodePos();
+    DimensionalNodePos getGlareNodePos();
 
     default void onGlareNetworkChanged(ServerLevel level, UUID networkId) {}
 

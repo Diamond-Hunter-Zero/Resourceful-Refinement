@@ -1,7 +1,7 @@
 package com.resourceful_refinement.content.glare.remote;
 
 import com.resourceful_refinement.content.glare.GlareAddress;
-import com.resourceful_refinement.content.glare.GlareNodePos;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareOperationStatus;
 import com.resourceful_refinement.content.glare.GlareSavedData;
 import com.resourceful_refinement.content.glare.GlareService;
@@ -140,7 +140,7 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
     public IItemHandler getItemHandler() { return getDepotBehaviour().itemHandler; }
 
     @Override public int getMaxGlareLinks() { return 1; }
-    @Override public GlareNodePos getGlareNodePos() { return GlareNodePos.of(level, worldPosition); }
+    @Override public DimensionalNodePos getGlareNodePos() { return DimensionalNodePos.of(level, worldPosition); }
     @Override public void onGlareNetworkChanged(ServerLevel level, UUID id) { networkId = id; sendData(); }
     @Override public void onGlareLinksChanged(ServerLevel level) { sendData(); }
     @Override public int getAllocatedLux() { return REQUIRED_LUX; }

@@ -103,6 +103,9 @@ public class ModItems {
     public static final DeferredItem<GlareNodeBlockItem> GLARE_TELEMETRY_TERMINAL = ITEMS.register("glare_telemetry_terminal",
             () -> new GlareNodeBlockItem(ModBlocks.GLARE_TELEMETRY_TERMINAL.get(), new Item.Properties()));
 
+    public static final DeferredItem<GlareNodeBlockItem> LUX_TRANSCEIVER = ITEMS.register("lux_transceiver",
+            () -> new GlareNodeBlockItem(ModBlocks.LUX_TRANSCEIVER.get(), new Item.Properties()));
+
     public static final DeferredItem<GlareNodeBlockItem> REMOTE_ENTANGLER_DEPOT = ITEMS.register("remote_entangler_depot",
             () -> new GlareNodeBlockItem(ModBlocks.REMOTE_ENTANGLER_DEPOT.get(), new Item.Properties()));
 

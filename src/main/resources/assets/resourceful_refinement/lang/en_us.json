@@ -17,6 +17,7 @@
   "block.resourceful_refinement.glare_kinetic_receiver": "GLARE Kinetic Receiver",
   "block.resourceful_refinement.glare_chromatic_transceiver": "GLARE Chromatic Transceiver",
   "block.resourceful_refinement.glare_telemetry_terminal": "GLARE Telemetry Terminal",
+  "block.resourceful_refinement.lux_transceiver": "Lux Transceiver",
   "block.resourceful_refinement.resonance_crystal": "Resonance Crystal",
   "block.resourceful_refinement.artificial_resonance_crystal": "Artificial Resonance Crystal",
   "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",

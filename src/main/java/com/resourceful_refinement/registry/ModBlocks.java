@@ -18,6 +18,7 @@ import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlock;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlock;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
@@ -219,6 +220,13 @@ public class ModBlocks {
 
     public static final DeferredBlock<TelemetryTerminalBlock> GLARE_TELEMETRY_TERMINAL = BLOCKS.register("glare_telemetry_terminal",
             () -> new TelemetryTerminalBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<LuxTransceiverBlock> LUX_TRANSCEIVER = BLOCKS.register("lux_transceiver",
+            () -> new LuxTransceiverBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()

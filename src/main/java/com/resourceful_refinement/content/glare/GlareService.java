@@ -46,6 +46,13 @@ public final class GlareService {
         if (!(level instanceof ServerLevel server)) {
             return List.of();
         }
+        return GlareSavedData.get(server).getCountedLinksFor(pos);
+    }
+
+    public static List<GlareLink> getAllLinks(Level level, DimensionalNodePos pos) {
+        if (!(level instanceof ServerLevel server)) {
+            return List.of();
+        }
         return GlareSavedData.get(server).getLinksFor(pos);
     }
 
@@ -63,6 +70,14 @@ public final class GlareService {
 
     public static GlareSavedData.LinkResult tryLink(ServerLevel level, DimensionalNodePos from, DimensionalNodePos to) {
         return GlareSavedData.get(level).tryAddLink(level, from, to);
+    }
+
+    public static GlareSavedData.LinkResult trySocketLink(ServerLevel level, DimensionalNodePos from, DimensionalNodePos to) {
+        return GlareSavedData.get(level).tryAddSocketLink(level, from, to);
+    }
+
+    public static boolean removeLink(ServerLevel level, DimensionalNodePos from, DimensionalNodePos to) {
+        return GlareSavedData.get(level).removeLink(from, to);
     }
 
     public static boolean tryResetNetwork(ServerLevel level, UUID networkId) {

@@ -42,6 +42,7 @@ public class GlareSavedData extends SavedData {
     private final Map<DimensionalNodePos, LinkedHashSet<GlareLink>> linksByNode = new HashMap<>();
     private final Map<ResourceKey<Level>, ArrayList<GlareLink>> linksByDimension = new HashMap<>();
     private final Map<GlareLink, LinkValidity> linkValidity = new HashMap<>();
+    private final Map<GlareLink, LinkKind> linkKinds = new HashMap<>();
     private final Map<UUID, NetworkRecord> networks = new HashMap<>();
     private final Map<Long, TelemetrySubscriber> telemetrySubscribers = new HashMap<>();
     private long nextTelemetrySubscriberId;
@@ -87,6 +88,7 @@ public class GlareSavedData extends SavedData {
             DimensionalNodePos.writePos(linkTag, "A", link.a());
             DimensionalNodePos.writePos(linkTag, "B", link.b());
             linkTag.putString("Validity", getLinkValidity(link).name());
+            linkTag.putString("Kind", getLinkKind(link).name());
             linkList.add(linkTag);
         }
         tag.put("Links", linkList);
@@ -105,6 +107,7 @@ public class GlareSavedData extends SavedData {
         linksByNode.clear();
         linksByDimension.clear();
         linkValidity.clear();
+        linkKinds.clear();
         networks.clear();
 
         ListTag nodeList = tag.getList("Nodes", Tag.TAG_COMPOUND);
@@ -126,6 +129,11 @@ public class GlareSavedData extends SavedData {
                     linkValidity.put(link, LinkValidity.valueOf(linkTag.getString("Validity")));
                 } catch (IllegalArgumentException ignored) {
                     linkValidity.put(link, LinkValidity.UNKNOWN);
+                }
+                try {
+                    linkKinds.put(link, LinkKind.valueOf(linkTag.getString("Kind")));
+                } catch (IllegalArgumentException ignored) {
+                    linkKinds.put(link, LinkKind.NORMAL);
                 }
             }
         }
@@ -257,6 +265,12 @@ public class GlareSavedData extends SavedData {
         return indexed == null ? List.of() : List.copyOf(indexed);
     }
 
+    public List<GlareLink> getCountedLinksFor(DimensionalNodePos pos) {
+        return getLinksFor(pos).stream()
+                .filter(link -> getLinkKind(link).countsTowardLimit())
+                .toList();
+    }
+
     public List<DimensionalNodePos> getNeighbours(DimensionalNodePos pos) {
         return getLinksFor(pos).stream().map(link -> link.other(pos)).toList();
     }
@@ -272,6 +286,10 @@ public class GlareSavedData extends SavedData {
         return linkValidity.getOrDefault(link, LinkValidity.UNKNOWN);
     }
 
+    public LinkKind getLinkKind(GlareLink link) {
+        return linkKinds.getOrDefault(link, LinkKind.NORMAL);
+    }
+
     private boolean isActiveNetworkLink(GlareLink link) {
         return getLinkValidity(link) != LinkValidity.BLOCKED;
     }
@@ -283,6 +301,7 @@ public class GlareSavedData extends SavedData {
         double syncDistance = Math.max(256.0D, level.getServer().getPlayerList().getViewDistance() * 16.0D + 64.0D);
         double syncDistanceSq = syncDistance * syncDistance;
         return links.stream()
+                .filter(link -> getLinkKind(link).renders())
                 .filter(link -> link.a().levelKey().equals(level.dimension()) && link.b().levelKey().equals(level.dimension()))
                 .filter(link -> level.isLoaded(link.a().pos()) || level.isLoaded(link.b().pos()))
                 .filter(link -> isCloseEnoughToRender(player, link, syncDistanceSq))
@@ -439,6 +458,7 @@ public class GlareSavedData extends SavedData {
         links.add(link);
         indexLink(link);
         linkValidity.put(link, canValidate ? LinkValidity.VALID : LinkValidity.UNKNOWN);
+        linkKinds.put(link, LinkKind.NORMAL);
         setDirtyAndRebuild();
         notifyLoadedEndpoints(level, affected);
         NodeRecord rebuiltFirst = nodes.get(a);
@@ -452,15 +472,45 @@ public class GlareSavedData extends SavedData {
         return LinkResult.CREATED;
     }
 
+    public LinkResult tryAddSocketLink(ServerLevel level, DimensionalNodePos a, DimensionalNodePos b) {
+        if (a.equals(b)) {
+            return LinkResult.FAIL_SAME_NODE;
+        }
+        if (!a.levelKey().equals(b.levelKey())) {
+            return LinkResult.FAIL_CROSS_DIMENSION;
+        }
+        if (!nodes.containsKey(a) || !nodes.containsKey(b)) {
+            return LinkResult.FAIL_MISSING_NODE;
+        }
+        GlareLink link = new GlareLink(a, b);
+        if (links.contains(link)) {
+            return getLinkKind(link) == LinkKind.SOCKET ? LinkResult.ALREADY_LINKED : LinkResult.FAIL_LINK_LIMIT;
+        }
+
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>(Set.of(a, b));
+        affected.addAll(getNetworkNodesFor(a));
+        affected.addAll(getNetworkNodesFor(b));
+        links.add(link);
+        indexLink(link);
+        linkValidity.put(link, LinkValidity.VALID);
+        linkKinds.put(link, LinkKind.SOCKET);
+        setDirtyAndRebuild();
+        for (DimensionalNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
+        notifyLoadedEndpoints(level, affected);
+        GlareDebug.log("Created socket link {} <-> {}", a.toShortString(), b.toShortString());
+        return LinkResult.CREATED;
+    }
+
     private Set<DimensionalNodePos> evictOldestIfFull(NodeRecord record) {
         Set<DimensionalNodePos> affected = new LinkedHashSet<>();
-        while (record.maxLinks >= 0 && getLinksFor(record.pos).size() >= record.maxLinks && record.maxLinks > 0) {
-            GlareLink oldest = getLinksFor(record.pos).get(0);
+        while (record.maxLinks >= 0 && getCountedLinksFor(record.pos).size() >= record.maxLinks && record.maxLinks > 0) {
+            GlareLink oldest = getCountedLinksFor(record.pos).get(0);
             affected.add(oldest.a());
             affected.add(oldest.b());
             links.remove(oldest);
             unindexLink(oldest);
             linkValidity.remove(oldest);
+            linkKinds.remove(oldest);
         }
         return affected;
     }
@@ -468,11 +518,12 @@ public class GlareSavedData extends SavedData {
     private boolean trimLinksToLimit(NodeRecord record) {
         boolean changed = false;
         int limit = Math.max(0, record.maxLinks);
-        while (getLinksFor(record.pos).size() > limit) {
-            GlareLink oldest = getLinksFor(record.pos).getFirst();
+        while (getCountedLinksFor(record.pos).size() > limit) {
+            GlareLink oldest = getCountedLinksFor(record.pos).getFirst();
             links.remove(oldest);
             unindexLink(oldest);
             linkValidity.remove(oldest);
+            linkKinds.remove(oldest);
             changed = true;
         }
         return changed;
@@ -484,6 +535,7 @@ public class GlareSavedData extends SavedData {
         if (removed) {
             unindexLink(link);
             linkValidity.remove(link);
+            linkKinds.remove(link);
             setDirtyAndRebuild();
             GlareDebug.log("Removed link {} <-> {}", a.toShortString(), b.toShortString());
         }
@@ -508,6 +560,9 @@ public class GlareSavedData extends SavedData {
         while (examined < examinationBudget) {
             GlareLink link = dimensionLinks.get((start + examined) % dimensionLinks.size());
             examined++;
+            if (!getLinkKind(link).requiresLineOfSight()) {
+                continue;
+            }
             if (!GlareLineOfSight.canValidate(level.getServer(), link.a(), link.b())) {
                 continue;
             }
@@ -913,6 +968,7 @@ public class GlareSavedData extends SavedData {
                 links.remove(link);
                 unindexLink(link);
                 linkValidity.remove(link);
+                linkKinds.remove(link);
                 removed = true;
             }
         }
@@ -921,11 +977,11 @@ public class GlareSavedData extends SavedData {
 
     public boolean canAcceptLink(DimensionalNodePos pos) {
         NodeRecord node = nodes.get(pos);
-        return node != null && node.maxLinks > 0 && getLinksFor(pos).size() < node.maxLinks;
+        return node != null && node.maxLinks > 0 && getCountedLinksFor(pos).size() < node.maxLinks;
     }
 
     public int removeAllLinks(ServerLevel level, DimensionalNodePos pos) {
-        List<GlareLink> incident = getLinksFor(pos);
+        List<GlareLink> incident = getCountedLinksFor(pos);
         if (incident.isEmpty()) return 0;
         Set<DimensionalNodePos> affected = getNetworkNodesFor(pos);
         for (GlareLink link : incident) {
@@ -934,6 +990,7 @@ public class GlareSavedData extends SavedData {
             links.remove(link);
             unindexLink(link);
             linkValidity.remove(link);
+            linkKinds.remove(link);
         }
         setDirtyAndRebuild();
         for (DimensionalNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
@@ -984,6 +1041,33 @@ public class GlareSavedData extends SavedData {
         UNKNOWN,
         VALID,
         BLOCKED
+    }
+
+    public enum LinkKind {
+        NORMAL(true, true, true),
+        SOCKET(false, false, false);
+
+        private final boolean countsTowardLimit;
+        private final boolean requiresLineOfSight;
+        private final boolean renders;
+
+        LinkKind(boolean countsTowardLimit, boolean requiresLineOfSight, boolean renders) {
+            this.countsTowardLimit = countsTowardLimit;
+            this.requiresLineOfSight = requiresLineOfSight;
+            this.renders = renders;
+        }
+
+        public boolean countsTowardLimit() {
+            return countsTowardLimit;
+        }
+
+        public boolean requiresLineOfSight() {
+            return requiresLineOfSight;
+        }
+
+        public boolean renders() {
+            return renders;
+        }
     }
 
     public record LinkRenderRecord(DimensionalNodePos a, DimensionalNodePos b, LinkValidity validity) {}

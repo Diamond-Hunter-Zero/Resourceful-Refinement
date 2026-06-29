@@ -25,6 +25,7 @@ import com.resourceful_refinement.content.glare.GlareEmitterDishBlockEntity;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlockEntity;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity;
@@ -102,6 +103,9 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<TelemetryTerminalBlockEntity>> GLARE_TELEMETRY_TERMINAL_BE = BLOCK_ENTITIES.register("glare_telemetry_terminal",
             () -> BlockEntityType.Builder.of(TelemetryTerminalBlockEntity::new, ModBlocks.GLARE_TELEMETRY_TERMINAL.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LuxTransceiverBlockEntity>> LUX_TRANSCEIVER_BE = BLOCK_ENTITIES.register("lux_transceiver",
+            () -> BlockEntityType.Builder.of(LuxTransceiverBlockEntity::new, ModBlocks.LUX_TRANSCEIVER.get()).build(null));
 
     public static final Supplier<BlockEntityType<RemoteEntanglerDepotBlockEntity>> REMOTE_ENTANGLER_DEPOT_BE = BLOCK_ENTITIES.register(
             "remote_entangler_depot", () -> BlockEntityType.Builder.of(

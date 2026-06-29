@@ -22,6 +22,7 @@ import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotRenderer;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverRenderer;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
@@ -415,6 +416,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), RemoteEntanglerDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LAUNCHPAD_CONTROLLER_BE.get(), LaunchpadControllerRenderer::new);

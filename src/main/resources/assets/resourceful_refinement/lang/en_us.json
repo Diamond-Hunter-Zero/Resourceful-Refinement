@@ -32,6 +32,11 @@
   "block.resourceful_refinement.fuel_tank": "Fuel Tank",
   "block.resourceful_refinement.advanced_pump": "Advanced Pump",
   "block.resourceful_refinement.milking_station": "Milking Station",
+  "block.resourceful_refinement.crystal_fissure_bud": "Crystal Fissure Bud",
+  "block.resourceful_refinement.drill_pylon_head": "Drill Pylon Head",
+  "block.resourceful_refinement.drill_pylon_proxy": "Drill Pylon",
+  "block.resourceful_refinement.drill_pylon_kinetic_proxy": "Drill Pylon",
+  "recipe.resourceful_refinement.drill_pylon": "Drill Pylon",
 
   "fluid_type.resourceful_refinement.molten_crimsite": "Molten Crimsite",
   "block.resourceful_refinement.fluids.molten_crimsite": "Molten Crimsite",

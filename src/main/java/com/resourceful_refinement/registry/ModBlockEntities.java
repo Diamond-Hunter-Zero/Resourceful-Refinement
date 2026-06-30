@@ -7,6 +7,10 @@ import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlockE
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonKineticProxyBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonProxyBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
@@ -85,6 +89,18 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<BucketExcavatorBlockEntity>> BUCKET_EXCAVATOR_BE = BLOCK_ENTITIES.register("bucket_excavator",
             () -> BlockEntityType.Builder.of((pos, state) -> new BucketExcavatorBlockEntity(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), pos, state), ModBlocks.BUCKET_EXCAVATOR.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CrystalFissureBudBlockEntity>> CRYSTAL_FISSURE_BUD_BE = BLOCK_ENTITIES.register("crystal_fissure_bud",
+            () -> BlockEntityType.Builder.of(CrystalFissureBudBlockEntity::new, ModBlocks.CRYSTAL_FISSURE_BUD.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonHeadBlockEntity>> DRILL_PYLON_HEAD_BE = BLOCK_ENTITIES.register("drill_pylon_head",
+            () -> BlockEntityType.Builder.of((pos, state) -> new DrillPylonHeadBlockEntity(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), pos, state), ModBlocks.DRILL_PYLON_HEAD.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonProxyBlockEntity>> DRILL_PYLON_PROXY_BE = BLOCK_ENTITIES.register("drill_pylon_proxy",
+            () -> BlockEntityType.Builder.of(DrillPylonProxyBlockEntity::new, ModBlocks.DRILL_PYLON_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonKineticProxyBlockEntity>> DRILL_PYLON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("drill_pylon_kinetic_proxy",
+            () -> BlockEntityType.Builder.of(DrillPylonKineticProxyBlockEntity::new, ModBlocks.DRILL_PYLON_KINETIC_PROXY.get()).build(null));
 
 
     // GLARE blocks

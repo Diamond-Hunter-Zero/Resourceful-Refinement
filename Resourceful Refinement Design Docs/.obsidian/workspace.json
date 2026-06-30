@@ -55,12 +55,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Drill Pylon.md",
+                "file": "GLARE Networks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Drill Pylon"
+              "title": "GLARE Networks"
             }
           }
         ],
@@ -121,7 +121,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 370.5
   },
   "right": {
     "id": "726b9ba427b6c15f",
@@ -230,6 +230,7 @@
   },
   "active": "0341f91acf5af401",
   "lastOpenFiles": [
+    "Drill Pylon.md",
     "2026-06-29_15.16.38.png",
     "GLARE  Lux Transceiver.md",
     "Bucket Excavator.md",

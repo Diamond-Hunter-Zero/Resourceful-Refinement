@@ -86,6 +86,10 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", ModBlocks.MINERAL_DEPOSIT);
 
+    public static final DeferredItem<BlockItem> CRYSTAL_FISSURE_BUD_ITEM = ITEMS.registerSimpleBlockItem("crystal_fissure_bud", ModBlocks.CRYSTAL_FISSURE_BUD);
+
+    public static final DeferredItem<BlockItem> DRILL_PYLON_HEAD_ITEM = ITEMS.registerSimpleBlockItem("drill_pylon_head", ModBlocks.DRILL_PYLON_HEAD);
+
 
     // GLARE Content
     public static final DeferredItem<GlareNodeBlockItem> GLARE_RELAY = ITEMS.register("glare_relay",

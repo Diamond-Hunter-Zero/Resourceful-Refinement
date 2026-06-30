@@ -7,6 +7,10 @@ import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
+import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonKineticProxyBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonProxyBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
@@ -184,6 +188,37 @@ public class ModBlocks {
             () -> new Block(BlockBehaviour.Properties.of()
                     .strength(2f)
                     .sound(SoundType.STONE)));
+
+    public static final DeferredBlock<CrystalFissureBudBlock> CRYSTAL_FISSURE_BUD = BLOCKS.register("crystal_fissure_bud",
+            () -> new CrystalFissureBudBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(50.0f, 1200.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<DrillPylonHeadBlock> DRILL_PYLON_HEAD = BLOCKS.register("drill_pylon_head",
+            () -> new DrillPylonHeadBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<DrillPylonProxyBlock> DRILL_PYLON_PROXY = BLOCKS.register("drill_pylon_proxy",
+            () -> new DrillPylonProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<DrillPylonKineticProxyBlock> DRILL_PYLON_KINETIC_PROXY = BLOCKS.register("drill_pylon_kinetic_proxy",
+            () -> new DrillPylonKineticProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
 
 
     // -------------------------------------------------------------------------

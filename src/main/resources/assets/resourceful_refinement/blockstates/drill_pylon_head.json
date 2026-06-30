@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "resourceful_refinement:block/drill_pylon_head",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "resourceful_refinement:block/drill_pylon_head",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "resourceful_refinement:block/drill_pylon_head",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "resourceful_refinement:block/drill_pylon_head",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "resourceful_refinement:block/drill_pylon_head"
+    },
+    "facing=west": {
+      "model": "resourceful_refinement:block/drill_pylon_head",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

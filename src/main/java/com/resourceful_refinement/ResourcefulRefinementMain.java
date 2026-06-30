@@ -18,6 +18,8 @@ import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer;
@@ -359,6 +361,13 @@ public class ResourcefulRefinementMain {
             return side == facing.getOpposite() ? be.outputInv : null;
         });
 
+        // --- Drill Pylon ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.DRILL_PYLON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity controller = be.getController(be.getLevel());
+            return controller != null && controller.isOutputProxySide(be, side) ? controller.getOutputInventory() : null;
+        });
+
     }
 
     /**
@@ -414,6 +423,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.RADIATOR_PIPE_BE.get(), RadiatorRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);

@@ -14,6 +14,7 @@ import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRe
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberFanModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronForgeRenderer;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
@@ -368,6 +369,18 @@ public class ResourcefulRefinementMain {
             return controller != null && controller.isOutputProxySide(be, side) ? controller.getOutputInventory() : null;
         });
 
+        // --- Cyclotron Forge ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CYCLOTRON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity controller = be.getController(be.getLevel());
+            return controller != null ? controller.getItemHandlerForProxy(be, side) : null;
+        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CYCLOTRON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity controller = be.getController(be.getLevel());
+            return controller != null ? controller.getFluidHandlerForProxy(be, side) : null;
+        });
+
     }
 
     /**
@@ -424,6 +437,7 @@ public class ResourcefulRefinementMain {
 
             event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.CYCLOTRON_CONTROLLER_BE.get(), CyclotronForgeRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);

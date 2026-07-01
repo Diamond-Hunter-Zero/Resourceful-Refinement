@@ -9,6 +9,10 @@ import java.util.UUID;
 public interface IGlareNode {
     int getMaxGlareLinks();
 
+    default boolean allowsManualGlareLinks() {
+        return true;
+    }
+
     default Vec3 getGlareLinkEndpoint() {
         BlockPos pos = getGlareNodePos().pos();
         return Vec3.atCenterOf(pos);

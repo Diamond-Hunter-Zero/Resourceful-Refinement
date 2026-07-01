@@ -47,7 +47,7 @@ public class GlareNodeBlockItem extends BlockItem {
             return InteractionResult.SUCCESS;
         }
         BlockEntity be = context.getLevel().getBlockEntity(context.getClickedPos());
-        if (be instanceof IGlareNode) {
+        if (be instanceof IGlareNode node && node.allowsManualGlareLinks()) {
             if (!context.getLevel().isClientSide && player != null) {
                 GlareService.tryAddTarget(stack, context.getLevel(), context.getClickedPos(), player);
             }

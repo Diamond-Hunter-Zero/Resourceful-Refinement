@@ -90,6 +90,10 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> DRILL_PYLON_HEAD_ITEM = ITEMS.registerSimpleBlockItem("drill_pylon_head", ModBlocks.DRILL_PYLON_HEAD);
 
+    public static final DeferredItem<BlockItem> HEAVY_PLATE_SHIELDING_ITEM = ITEMS.registerSimpleBlockItem("heavy_plate_shielding", ModBlocks.HEAVY_PLATE_SHIELDING);
+
+    public static final DeferredItem<BlockItem> CYCLOTRON_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("cyclotron_controller", ModBlocks.CYCLOTRON_CONTROLLER);
+
 
     // GLARE Content
     public static final DeferredItem<GlareNodeBlockItem> GLARE_RELAY = ITEMS.register("glare_relay",

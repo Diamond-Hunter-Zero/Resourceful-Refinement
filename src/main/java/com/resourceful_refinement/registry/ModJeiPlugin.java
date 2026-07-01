@@ -4,6 +4,8 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipeCategory;
 import com.resourceful_refinement.content.coating.CoatingRecipeCategory;
+import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipe;
+import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipeCategory;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipeCategory;
 import com.resourceful_refinement.content.drill_pylon.recipe.DrillPylonRecipe;
@@ -53,6 +55,7 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(new MilkingStationRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new BrewersTapRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new DrillPylonRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        registration.addRecipeCategories(new CyclotronForgeRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -134,6 +137,14 @@ public class ModJeiPlugin implements IModPlugin {
                 .toList();
 
         registration.addRecipes(DrillPylonRecipeCategory.TYPE, drillPylonRecipes);
+
+        // Cyclotron Forge
+        List<CyclotronForgeRecipe> cyclotronRecipes = rm.getAllRecipesFor(ModRecipeTypes.CYCLOTRON_FORGE_TYPE.get())
+                .stream()
+                .map(RecipeHolder::value)
+                .toList();
+
+        registration.addRecipes(CyclotronForgeRecipeCategory.TYPE, cyclotronRecipes);
     }
 
     @Override
@@ -153,5 +164,6 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.BREWERS_TAP.get()), BrewersTapRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.DRILL_PYLON_HEAD.get()), DrillPylonRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.CRYSTAL_FISSURE_BUD.get()), DrillPylonRecipeCategory.TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.CYCLOTRON_CONTROLLER.get()), CyclotronForgeRecipeCategory.TYPE);
     }
 }

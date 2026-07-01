@@ -1,0 +1,30 @@
+{
+  "type": "resourceful_refinement:cyclotron_forge",
+  "processing_time": 200,
+  "coil_length": 3,
+  "min_rpm": 64,
+  "lux_curve": [4,6, 8, 6,4,2],
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "item": "minecraft:charcoal",
+      "count": 2
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:graphite",
+      "count": 1
+    },
+    {
+      "id": "resourceful_refinement:coolant",
+      "amount": 250
+    }
+  ]
+}

@@ -438,6 +438,11 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     @Override
+    public boolean allowsManualGlareLinks() {
+        return false;
+    }
+
+    @Override
     public DimensionalNodePos getGlareNodePos() {
         return DimensionalNodePos.of(level, worldPosition);
     }

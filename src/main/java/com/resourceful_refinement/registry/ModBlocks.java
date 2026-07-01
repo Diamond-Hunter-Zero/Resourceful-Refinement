@@ -6,6 +6,9 @@ import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronProxyBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlock;
 import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
@@ -214,6 +217,37 @@ public class ModBlocks {
 
     public static final DeferredBlock<DrillPylonKineticProxyBlock> DRILL_PYLON_KINETIC_PROXY = BLOCKS.register("drill_pylon_kinetic_proxy",
             () -> new DrillPylonKineticProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<Block> HEAVY_PLATE_SHIELDING = BLOCKS.register("heavy_plate_shielding",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(4.0f, 8.0f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()));
+
+    public static final DeferredBlock<CyclotronControllerBlock> CYCLOTRON_CONTROLLER = BLOCKS.register("cyclotron_controller",
+            () -> new CyclotronControllerBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<CyclotronProxyBlock> CYCLOTRON_PROXY = BLOCKS.register("cyclotron_proxy",
+            () -> new CyclotronProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<CyclotronKineticProxyBlock> CYCLOTRON_KINETIC_PROXY = BLOCKS.register("cyclotron_kinetic_proxy",
+            () -> new CyclotronKineticProxyBlock(BlockBehaviour.Properties.of()
                     .pushReaction(PushReaction.BLOCK)
                     .strength(2.5f)
                     .sound(SoundType.COPPER)

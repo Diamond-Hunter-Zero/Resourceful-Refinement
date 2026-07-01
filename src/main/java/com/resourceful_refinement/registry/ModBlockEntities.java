@@ -6,6 +6,9 @@ import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronProxyBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlockEntity;
 import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity;
@@ -101,6 +104,15 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<DrillPylonKineticProxyBlockEntity>> DRILL_PYLON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("drill_pylon_kinetic_proxy",
             () -> BlockEntityType.Builder.of(DrillPylonKineticProxyBlockEntity::new, ModBlocks.DRILL_PYLON_KINETIC_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronControllerBlockEntity>> CYCLOTRON_CONTROLLER_BE = BLOCK_ENTITIES.register("cyclotron_controller",
+            () -> BlockEntityType.Builder.of(CyclotronControllerBlockEntity::new, ModBlocks.CYCLOTRON_CONTROLLER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronProxyBlockEntity>> CYCLOTRON_PROXY_BE = BLOCK_ENTITIES.register("cyclotron_proxy",
+            () -> BlockEntityType.Builder.of(CyclotronProxyBlockEntity::new, ModBlocks.CYCLOTRON_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronKineticProxyBlockEntity>> CYCLOTRON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("cyclotron_kinetic_proxy",
+            () -> BlockEntityType.Builder.of(CyclotronKineticProxyBlockEntity::new, ModBlocks.CYCLOTRON_KINETIC_PROXY.get()).build(null));
 
 
     // GLARE blocks

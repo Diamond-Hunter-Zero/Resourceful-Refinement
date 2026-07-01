@@ -131,6 +131,9 @@ public final class GlareService {
         }
         GlareTargetsData targets = stack.getOrDefault(com.resourceful_refinement.registry.ModDataComponents.GLARE_TARGETS.get(), GlareTargetsData.EMPTY);
         DimensionalNodePos target = liveNode.get().getGlareNodePos();
+        if (!canAcceptLink(level, target)) {
+            return false;
+        }
         stack.set(com.resourceful_refinement.registry.ModDataComponents.GLARE_TARGETS.get(), targets.withAdded(target));
         player.displayClientMessage(Component.translatable("message.resourceful_refinement.glare.target_added", target.toShortString()), true);
         return true;

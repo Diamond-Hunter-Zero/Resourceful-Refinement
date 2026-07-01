@@ -320,6 +320,7 @@ public class GlareSavedData extends SavedData {
             nodes.put(pos, record);
         }
         record.maxLinks = Math.max(0, glareNode.getMaxGlareLinks());
+        record.manualLinkingEnabled = glareNode.allowsManualGlareLinks();
         record.loaded = true;
         record.removed = false;
         updateLuxState(record, glareNode);
@@ -379,6 +380,7 @@ public class GlareSavedData extends SavedData {
             nodes.put(pos, record);
         }
         record.maxLinks = Math.max(0, glareNode.getMaxGlareLinks());
+        record.manualLinkingEnabled = glareNode.allowsManualGlareLinks();
         record.loaded = true;
         record.removed = false;
         updateLuxState(record, glareNode);
@@ -443,6 +445,9 @@ public class GlareSavedData extends SavedData {
         }
         if (first.maxLinks <= 0 || second.maxLinks <= 0) {
             return LinkResult.FAIL_LINK_LIMIT;
+        }
+        if (!first.manualLinkingEnabled || !second.manualLinkingEnabled) {
+            return LinkResult.FAIL_MANUAL_LINK_DISABLED;
         }
         boolean canValidate = GlareLineOfSight.canValidate(level.getServer(), a, b);
         boolean hasLineOfSight = !canValidate || GlareLineOfSight.hasLineOfSight(level.getServer(), a, b);
@@ -977,7 +982,7 @@ public class GlareSavedData extends SavedData {
 
     public boolean canAcceptLink(DimensionalNodePos pos) {
         NodeRecord node = nodes.get(pos);
-        return node != null && node.maxLinks > 0 && getCountedLinksFor(pos).size() < node.maxLinks;
+        return node != null && node.manualLinkingEnabled && node.maxLinks > 0 && getCountedLinksFor(pos).size() < node.maxLinks;
     }
 
     public int removeAllLinks(ServerLevel level, DimensionalNodePos pos) {
@@ -1034,7 +1039,8 @@ public class GlareSavedData extends SavedData {
         FAIL_MISSING_NODE,
         FAIL_CROSS_DIMENSION,
         FAIL_LINE_OF_SIGHT,
-        FAIL_LINK_LIMIT
+        FAIL_LINK_LIMIT,
+        FAIL_MANUAL_LINK_DISABLED
     }
 
     public enum LinkValidity {
@@ -1083,6 +1089,7 @@ public class GlareSavedData extends SavedData {
         public int maxLinks = 0;
         public boolean loaded;
         public boolean removed;
+        public boolean manualLinkingEnabled = true;
         public boolean emitter;
         public boolean receiver;
         public int luxProduced;
@@ -1108,6 +1115,7 @@ public class GlareSavedData extends SavedData {
             tag.putInt("MaxLinks", maxLinks);
             tag.putBoolean("Loaded", loaded);
             tag.putBoolean("Removed", removed);
+            tag.putBoolean("ManualLinkingEnabled", manualLinkingEnabled);
             tag.putBoolean("Emitter", emitter);
             tag.putBoolean("Receiver", receiver);
             tag.putInt("LuxProduced", luxProduced);
@@ -1138,6 +1146,7 @@ public class GlareSavedData extends SavedData {
             record.maxLinks = tag.getInt("MaxLinks");
             record.loaded = tag.getBoolean("Loaded");
             record.removed = tag.getBoolean("Removed");
+            record.manualLinkingEnabled = !tag.contains("ManualLinkingEnabled") || tag.getBoolean("ManualLinkingEnabled");
             record.emitter = tag.getBoolean("Emitter");
             record.receiver = tag.getBoolean("Receiver");
             record.luxProduced = tag.getInt("LuxProduced");

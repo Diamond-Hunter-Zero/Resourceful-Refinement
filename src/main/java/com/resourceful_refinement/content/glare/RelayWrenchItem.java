@@ -29,6 +29,7 @@ public class RelayWrenchItem extends Item {
 
     public InteractionResult interactWithNode(ItemStack stack, Level level, net.minecraft.core.BlockPos pos, Player player) {
         if (!(level.getBlockEntity(pos) instanceof IGlareNode node)) return InteractionResult.PASS;
+        if (!node.allowsManualGlareLinks()) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         ServerLevel server = (ServerLevel) level;
         GlareService.ensureLiveNodeRegistered(server, pos);

@@ -13,6 +13,10 @@
     "resourceful_refinement:fluid_refill_station",
     "resourceful_refinement:fuel_tank",
     "resourceful_refinement:paint_nozzle",
-    "resourceful_refinement:milking_station"
+    "resourceful_refinement:milking_station",
+    "resourceful_refinement:heavy_plate_shielding",
+    "resourceful_refinement:cyclotron_controller",
+    "resourceful_refinement:cyclotron_proxy",
+    "resourceful_refinement:cyclotron_kinetic_proxy"
   ]
 }

@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.gui.PowerTerminalMenu;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationMenu;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverMenu;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMenu;
@@ -29,4 +30,7 @@ public class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<LaunchpadMenu>> LAUNCHPAD =
             MENUS.register("launchpad", () -> IMenuTypeExtension.create(LaunchpadMenu::fromNetwork));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PowerTerminalMenu>> POWER_TERMINAL =
+            MENUS.register("power_terminal", () -> IMenuTypeExtension.create(PowerTerminalMenu::fromNetwork));
 }

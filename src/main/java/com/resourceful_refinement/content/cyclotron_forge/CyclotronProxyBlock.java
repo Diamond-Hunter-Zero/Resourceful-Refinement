@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.cyclotron_forge;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -55,8 +56,7 @@ public class CyclotronProxyBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof CyclotronProxyBlockEntity proxy) {
             CyclotronControllerBlockEntity controller = proxy.getController(level);
             if (controller != null) {
-                return level.getBlockState(controller.getBlockPos())
-                        .useWithoutItem(level, player, hitResult.withPosition(controller.getBlockPos()));
+                return GlarePowerTerminalOpener.open(level, controller.getBlockPos(), pos, player);
             }
         }
         return InteractionResult.PASS;

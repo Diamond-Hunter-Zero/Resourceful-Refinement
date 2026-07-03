@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
 import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.content.glare.RelayWrenchItem;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -84,18 +85,9 @@ public class LuxTransceiverBlock extends DirectionalBlock implements EntityBlock
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
-        }
-        if (level.getBlockEntity(pos) instanceof LuxTransceiverBlockEntity transceiver
-                && transceiver.getNetworkId() != null && level instanceof ServerLevel server) {
-            boolean reset = GlareService.tryResetNetwork(server, transceiver.getNetworkId());
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(reset
-                    ? "message.resourceful_refinement.glare.reset_success"
-                    : "message.resourceful_refinement.glare.reset_failed"), true);
-            return InteractionResult.CONSUME;
-        }
-        return InteractionResult.PASS;
+        return level.getBlockEntity(pos) instanceof LuxTransceiverBlockEntity
+                ? GlarePowerTerminalOpener.open(level, pos, player)
+                : InteractionResult.PASS;
     }
 
     @Override

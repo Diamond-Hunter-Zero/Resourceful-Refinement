@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.glare;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -84,16 +85,9 @@ public class GlareNodeBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
-        }
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof GlareKineticReceiverBlockEntity receiver && receiver.getNetworkId() != null && level instanceof ServerLevel server) {
-            boolean reset = GlareService.tryResetNetwork(server, receiver.getNetworkId());
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(reset ? "message.resourceful_refinement.glare.reset_success" : "message.resourceful_refinement.glare.reset_failed"), true);
-            return InteractionResult.CONSUME;
-        }
-        return InteractionResult.PASS;
+        return level.getBlockEntity(pos) instanceof IGlareNode
+                ? GlarePowerTerminalOpener.open(level, pos, player)
+                : InteractionResult.PASS;
     }
 
     @Override

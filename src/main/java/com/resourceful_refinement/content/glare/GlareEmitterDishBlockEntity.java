@@ -2,6 +2,8 @@ package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -18,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements IGlareNode, IGlareEmitter {
+public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements IGlareNode, IGlareEmitter, GlareNetworkSnapshotProvider {
     public static final int MAX_LINK_COUNT = 1;
     public static final int BASE_LUX = 8;
     public static final float REQUIRED_RPM = 32.0F;
@@ -32,6 +34,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
     private int syncedLuxAllocated;
     private boolean syncedOverloaded;
     private final int[] syncedColourCharges = new int[DyeColor.values().length];
+    private int[] syncedLuxHistory = new int[0];
 
     public GlareEmitterDishBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.GLARE_EMITTER_DISH_BE.get(), pos, blockState);
@@ -131,11 +134,13 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
         syncedLuxAllocated = 0;
         syncedOverloaded = false;
         Arrays.fill(syncedColourCharges, 0);
+        syncedLuxHistory = new int[0];
         if (networkId != null) {
             GlareService.getNetwork(server, networkId).ifPresent(network -> {
                 syncedLuxCapacity = network.luxCapacity;
                 syncedLuxAllocated = network.luxAllocated;
                 syncedOverloaded = network.overloaded;
+                syncedLuxHistory = network.luxHistory.stream().mapToInt(Integer::intValue).toArray();
                 for (var entry : network.colourCharges.entrySet()) {
                     syncedColourCharges[entry.getKey().ordinal()] = entry.getValue();
                 }
@@ -164,6 +169,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
         tag.putInt("GlareLuxAllocated", syncedLuxAllocated);
         tag.putBoolean("GlareOverloaded", syncedOverloaded);
         tag.putIntArray("GlareColourCharges", syncedColourCharges);
+        tag.putIntArray("GlareLuxHistory", syncedLuxHistory);
     }
 
     @Override
@@ -180,6 +186,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
         int[] colourCharges = tag.getIntArray("GlareColourCharges");
         Arrays.fill(syncedColourCharges, 0);
         System.arraycopy(colourCharges, 0, syncedColourCharges, 0, Math.min(colourCharges.length, syncedColourCharges.length));
+        syncedLuxHistory = tag.getIntArray("GlareLuxHistory");
     }
 
     @Override
@@ -192,6 +199,12 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public GlareNetworkSnapshot getSyncedGlareNetworkSnapshot() {
+        return GlareNetworkSnapshot.of(networkId != null, syncedLuxAllocated, syncedLuxCapacity, syncedLuxHistory,
+                syncedOverloaded ? GlareOperationStatus.OVERLOADED : GlareOperationStatus.ONLINE, syncedOverloaded);
     }
 
     @Override

@@ -16,6 +16,8 @@ public class ServerConfig {
     public static final ModConfigSpec.BooleanValue GLARE_DEBUG_LOGGING;
     public static final ModConfigSpec.IntValue GLARE_LOS_CHECKS_PER_TICK;
     public static final ModConfigSpec.IntValue GLARE_LINK_SYNC_INTERVAL;
+    public static final ModConfigSpec.IntValue GLARE_LUX_HISTORY_SAMPLE_INTERVAL;
+    public static final ModConfigSpec.IntValue GLARE_LUX_HISTORY_SAMPLES;
     public static final ModConfigSpec.IntValue PUG_TANK_CAPACITY_MB;
     public static final ModConfigSpec.IntValue PUG_BASE_FUEL_MB;
     public static final ModConfigSpec.IntValue PUG_FUEL_PER_STEP_MB;
@@ -75,6 +77,12 @@ public class ServerConfig {
         GLARE_LINK_SYNC_INTERVAL = CONFIG_BUILDER
                 .comment("Ticks between GLARE link render synchronization packets")
                 .defineInRange("link_sync_interval", 20, 1, 200);
+        GLARE_LUX_HISTORY_SAMPLE_INTERVAL = CONFIG_BUILDER
+                .comment("Ticks between GLARE network Lux history samples")
+                .defineInRange("lux_history_sample_interval", 40, 1, 20 * 60);
+        GLARE_LUX_HISTORY_SAMPLES = CONFIG_BUILDER
+                .comment("Maximum Lux history samples retained per GLARE network")
+                .defineInRange("lux_history_samples", 16, 1, 256);
         CONFIG_BUILDER.pop();
 
         CONFIG_BUILDER.push("PUG Logistics");

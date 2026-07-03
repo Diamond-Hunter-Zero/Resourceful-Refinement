@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.drill_pylon;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
 import com.simibubi.create.foundation.block.IBE;
@@ -57,7 +58,7 @@ public class DrillPylonHeadBlock extends KineticBlock implements IBE<DrillPylonH
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (player.isShiftKeyDown()) return InteractionResult.PASS;
         if (!(level.getBlockEntity(pos) instanceof DrillPylonHeadBlockEntity head)) return InteractionResult.PASS;
-        if (head.isAssembled()) return InteractionResult.PASS;
+        if (head.isAssembled()) return GlarePowerTerminalOpener.open(level, pos, player);
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         DrillPylonHeadBlockEntity.AssemblyResult result = head.tryAssemble(player);

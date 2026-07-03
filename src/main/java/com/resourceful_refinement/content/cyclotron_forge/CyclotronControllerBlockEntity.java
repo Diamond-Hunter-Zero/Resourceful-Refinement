@@ -7,6 +7,8 @@ import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.content.glare.IGlareNode;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipe;
 import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipeInput;
 import com.resourceful_refinement.registry.ModBlockEntities;
@@ -39,13 +41,14 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-public class CyclotronControllerBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, IGlareNode, IGlareReceiver {
+public class CyclotronControllerBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, IGlareNode, IGlareReceiver, GlareNetworkSnapshotProvider {
     public record AssemblyResult(boolean success, String reason) {
         public static AssemblyResult ok() {
             return new AssemblyResult(true, "");
@@ -71,9 +74,15 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     private int craftingProgress;
     private UUID networkId;
     private GlareOperationStatus operationStatus = GlareOperationStatus.ONLINE;
+    private int syncedLuxCapacity;
+    private int syncedLuxAllocated;
+    private boolean syncedOverloaded;
+    private int[] syncedLuxHistory = new int[0];
     private CyclotronForgeRecipe lastRecipe;
     private ResourceLocation displayedRecipeId;
     private String processErrorString = "";
+    private boolean isProcessing = false;
+    private CyclotronKineticProxyBlockEntity kineticProxy;
 
     public final ItemStackHandler inputInv = new ItemStackHandler(ITEM_INPUT_SLOTS) {
         @Override
@@ -133,6 +142,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     public void tick() {
         super.tick();
         if (level == null || level.isClientSide) return;
+        isProcessing = false;
 
         if (!assembled) {
             resetProcessingState();
@@ -181,6 +191,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
 
         processErrorString = "";
         craftingProgress++;
+        isProcessing = true;
         if (craftingProgress < duration) {
             syncData();
             return;
@@ -195,12 +206,24 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         return assembled;
     }
 
+    public boolean isProcessing() {return isProcessing;}
+
     public int getCoilLength() {
         return coilLength;
     }
 
     public Direction getFacing() {
         return facing;
+    }
+
+    public @Nullable CyclotronKineticProxyBlockEntity getKineticProxy() {
+        return kineticProxy;
+    }
+
+    void cacheKineticProxy(CyclotronKineticProxyBlockEntity proxy) {
+        if (proxy != null && proxy.getControllerPos().equals(worldPosition)) {
+            kineticProxy = proxy;
+        }
     }
 
     public AssemblyResult tryAssemble() {
@@ -220,7 +243,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
                 if (level instanceof ServerLevel server) {
                     GlareService.onNodeLoaded(server, this);
                 }
-                refreshAdjacentLuxTransceivers();
+                refreshAdjacentLuxTransceivers(candidateLength);
                 updateAssembledBlockState(true);
                 syncData();
                 return AssemblyResult.ok();
@@ -333,6 +356,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         int assembledCoilLength = coilLength;
         assembled = false;
         coilLength = 0;
+        kineticProxy = null;
         craftingProgress = 0;
         lastRecipe = null;
         displayedRecipeId = null;
@@ -369,7 +393,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
             }
         }
 
-        refreshAdjacentLuxTransceivers();
+        refreshAdjacentLuxTransceivers(assembledCoilLength);
         syncData();
     }
 
@@ -415,12 +439,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     }
 
     public float getProxySpeed() {
-        if (level == null || !assembled || coilLength <= 0) return 0;
-        BlockPos kineticPos = slicePos(coilLength + 1, 0, 0);
-        if (level.getBlockEntity(kineticPos) instanceof CyclotronKineticProxyBlockEntity kineticProxy) {
-            return Math.abs(kineticProxy.getSpeed());
-        }
-        return 0;
+        return assembled && kineticProxy != null ? Math.abs(kineticProxy.getSpeed()) : 0;
     }
 
     private CyclotronForgeRecipeInput createRecipeInput() {
@@ -605,6 +624,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
             proxy.setControllerData(worldPosition, pos.getX() - worldPosition.getX(),
                     pos.getY() - worldPosition.getY(), pos.getZ() - worldPosition.getZ());
             proxy.setStoredState(oldState);
+            kineticProxy = proxy;
         }
     }
 
@@ -640,11 +660,22 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     }
 
     private void refreshAdjacentLuxTransceivers() {
+        refreshAdjacentLuxTransceivers(coilLength);
+    }
+
+    private void refreshAdjacentLuxTransceivers(int assembledCoilLength) {
         if (!(level instanceof ServerLevel server)) return;
+        refreshAdjacentLuxTransceiversForCap(server, 0);
+        if (assembledCoilLength > 0) {
+            refreshAdjacentLuxTransceiversForCap(server, assembledCoilLength + 1);
+        }
+    }
+
+    private void refreshAdjacentLuxTransceiversForCap(ServerLevel server, int depth) {
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
                 if (Math.abs(x) + Math.abs(y) != 1) continue;
-                BlockPos socketPos = slicePos(0, x, y);
+                BlockPos socketPos = slicePos(depth, x, y);
                 Direction outward = x == 1 ? facing.getClockWise()
                         : x == -1 ? facing.getCounterClockWise()
                         : y == 1 ? Direction.UP
@@ -670,6 +701,15 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         }
     }
 
+    private void cacheKineticProxyFromWorld() {
+        kineticProxy = null;
+        if (level == null || !assembled || coilLength <= 0) return;
+        BlockPos kineticPos = slicePos(coilLength + 1, 0, 0);
+        if (level.getBlockEntity(kineticPos) instanceof CyclotronKineticProxyBlockEntity proxy) {
+            kineticProxy = proxy;
+        }
+    }
+
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
@@ -678,7 +718,12 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         tag.putString("Facing", facing.getName());
         tag.putInt("AllocatedLux", allocatedLux);
         tag.putInt("CraftingProgress", craftingProgress);
+        tag.putBoolean("IsProcessing", isProcessing);
         tag.putString("OperationStatus", operationStatus.name());
+        tag.putInt("GlareLuxCapacity", syncedLuxCapacity);
+        tag.putInt("GlareLuxAllocated", syncedLuxAllocated);
+        tag.putBoolean("GlareOverloaded", syncedOverloaded);
+        tag.putIntArray("GlareLuxHistory", syncedLuxHistory);
         tag.put("InputInv", inputInv.serializeNBT(registries));
         tag.put("OutputInv", outputInv.serializeNBT(registries));
         tag.put("InputTankA", inputTankA.writeToNBT(registries, new CompoundTag()));
@@ -698,11 +743,16 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         if (facing == null || facing.getAxis() == Direction.Axis.Y) facing = Direction.NORTH;
         allocatedLux = tag.getInt("AllocatedLux");
         craftingProgress = tag.getInt("CraftingProgress");
+        isProcessing = tag.getBoolean("IsProcessing");
         try {
             operationStatus = GlareOperationStatus.valueOf(tag.getString("OperationStatus"));
         } catch (IllegalArgumentException ignored) {
             operationStatus = GlareOperationStatus.ONLINE;
         }
+        syncedLuxCapacity = tag.getInt("GlareLuxCapacity");
+        syncedLuxAllocated = tag.getInt("GlareLuxAllocated");
+        syncedOverloaded = tag.getBoolean("GlareOverloaded");
+        syncedLuxHistory = tag.getIntArray("GlareLuxHistory");
         if (tag.contains("InputInv")) inputInv.deserializeNBT(registries, tag.getCompound("InputInv"));
         if (tag.contains("OutputInv")) outputInv.deserializeNBT(registries, tag.getCompound("OutputInv"));
         if (tag.contains("InputTankA")) inputTankA.readFromNBT(registries, tag.getCompound("InputTankA"));
@@ -711,13 +761,16 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         networkId = tag.hasUUID("GlareNetwork") ? tag.getUUID("GlareNetwork") : null;
         displayedRecipeId = tag.contains("DisplayedRecipe") ? ResourceLocation.tryParse(tag.getString("DisplayedRecipe")) : null;
         processErrorString = tag.getString("ProcessError");
+        cacheKineticProxyFromWorld();
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
+        cacheKineticProxyFromWorld();
         if (assembled && level instanceof ServerLevel server) {
             GlareService.onNodeLoaded(server, this);
+            refreshSyncedGlareSummary(server);
             refreshAdjacentLuxTransceivers();
         }
     }
@@ -745,11 +798,13 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     @Override
     public void onGlareNetworkChanged(ServerLevel level, UUID networkId) {
         this.networkId = networkId;
+        refreshSyncedGlareSummary(level);
         syncData();
     }
 
     @Override
     public void onGlareLinksChanged(ServerLevel level) {
+        refreshSyncedGlareSummary(level);
         syncData();
     }
 
@@ -764,6 +819,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         allocatedLux = next;
         if (level instanceof ServerLevel server && assembled) {
             GlareService.updateNodeState(server, this);
+            refreshSyncedGlareSummary(server);
         }
         syncData();
     }
@@ -778,6 +834,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         operationStatus = status == null ? GlareOperationStatus.ONLINE : status;
         if (level instanceof ServerLevel server && assembled) {
             GlareService.updateNodeState(server, this);
+            refreshSyncedGlareSummary(server);
         }
         syncData();
     }
@@ -785,7 +842,29 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     @Override
     public void applyGlareOperationStatusFromNetwork(GlareOperationStatus status) {
         operationStatus = status == null ? GlareOperationStatus.ONLINE : status;
+        if (level instanceof ServerLevel server) refreshSyncedGlareSummary(server);
         syncData();
+    }
+
+    private void refreshSyncedGlareSummary(ServerLevel server) {
+        syncedLuxCapacity = 0;
+        syncedLuxAllocated = 0;
+        syncedOverloaded = false;
+        syncedLuxHistory = new int[0];
+        if (networkId != null) {
+            GlareService.getNetwork(server, networkId).ifPresent(network -> {
+                syncedLuxCapacity = network.luxCapacity;
+                syncedLuxAllocated = network.luxAllocated;
+                syncedOverloaded = network.overloaded;
+                syncedLuxHistory = network.luxHistory.stream().mapToInt(Integer::intValue).toArray();
+            });
+        }
+    }
+
+    @Override
+    public GlareNetworkSnapshot getSyncedGlareNetworkSnapshot() {
+        return GlareNetworkSnapshot.of(networkId != null, syncedLuxAllocated, syncedLuxCapacity, syncedLuxHistory,
+                syncedOverloaded ? GlareOperationStatus.OVERLOADED : operationStatus, syncedOverloaded);
     }
 
     @Override

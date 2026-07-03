@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.glare;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -82,6 +83,14 @@ public final class GlareService {
 
     public static boolean tryResetNetwork(ServerLevel level, UUID networkId) {
         return GlareSavedData.get(level).tryResetNetwork(level, networkId);
+    }
+
+    public static boolean forceOverloadNetwork(ServerLevel level, UUID networkId) {
+        return GlareSavedData.get(level).forceOverloadNetwork(level, networkId);
+    }
+
+    public static void sampleLuxHistories(MinecraftServer server, int sampleIntervalTicks, int maxSamples) {
+        GlareSavedData.get(server.overworld()).sampleLuxHistories(server, sampleIntervalTicks, maxSamples);
     }
 
     public static void reconcileLoadedChunk(ServerLevel level, BlockPos chunkOrigin) {

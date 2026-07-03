@@ -1,7 +1,12 @@
 package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
+import com.resourceful_refinement.content.gui.GlareNetworkGuiData;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
+import com.resourceful_refinement.content.gui.PowerTerminal;
 import com.resourceful_refinement.network.ConfigureGlareTransceiverPayload;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -11,11 +16,14 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<GlareChromaticTransceiverMenu> {
     private static final int VISIBLE_ROWS = 7;
     private static final int ROW_HEIGHT = 20;
+    private static final int POWER_TERMINAL_WIDTH = 192;
+    private static final int PANEL_GAP = 8;
     private static final int PANEL = 0xFF252A2D;
     private static final int PANEL_LIGHT = 0xFF3B4246;
     private static final int TEXT = 0xFFE5E7E8;
@@ -28,11 +36,12 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
     private GlareLogicMode mode;
     private Button modeButton;
     private VerticalScrollBar scrollBar;
+    private PowerTerminal powerTerminal;
     private int scrollOffset;
 
     public GlareChromaticTransceiverScreen(GlareChromaticTransceiverMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 256;
+        imageWidth = POWER_TERMINAL_WIDTH + PANEL_GAP + 256;
         imageHeight = 224;
         inventoryLabelY = 1000;
         mode = menu.getInitialMode();
@@ -45,6 +54,8 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
     @Override
     protected void init() {
         super.init();
+        int configLeft = configLeft();
+        powerTerminal = new PowerTerminal(leftPos, topPos, POWER_TERMINAL_WIDTH, imageHeight, menu.getBlockPos(), this::networkSnapshot);
         for (DyeColor colour : DyeColor.values()) {
             int index = colour.ordinal();
             toggles[index] = addRenderableWidget(Button.builder(toggleLabel(index), button -> toggleFilter(index))
@@ -59,13 +70,27 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
             thresholdFields[index] = addRenderableWidget(field);
         }
         modeButton = addRenderableWidget(Button.builder(modeLabel(), button -> cycleMode())
-                .bounds(leftPos + 178, topPos + 18, 62, 20).build());
+                .bounds(configLeft + 178, topPos + 18, 62, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.resourceful_refinement.glare_transceiver.save"), button -> saveAndClose())
-                .bounds(leftPos + 178, topPos + 166, 62, 20).build());
+                .bounds(configLeft + 178, topPos + 166, 62, 20).build());
         scrollBar = addRenderableWidget(new VerticalScrollBar(
-                leftPos + 168, topPos + 42, 6, VISIBLE_ROWS * ROW_HEIGHT - 2,
+                configLeft + 168, topPos + 42, 6, VISIBLE_ROWS * ROW_HEIGHT - 2,
                 DyeColor.values().length, VISIBLE_ROWS, scrollOffset, this::setScrollOffset));
         updateRows();
+    }
+
+    private int configLeft() {
+        return leftPos + POWER_TERMINAL_WIDTH + PANEL_GAP;
+    }
+
+    private GlareNetworkGuiData networkSnapshot() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
+            return GlareNetworkSnapshot.EMPTY;
+        }
+        BlockEntity blockEntity = minecraft.level.getBlockEntity(menu.getBlockPos());
+        return blockEntity instanceof GlareNetworkSnapshotProvider provider
+                ? provider.getSyncedGlareNetworkSnapshot() : GlareNetworkSnapshot.EMPTY;
     }
 
     private void toggleFilter(int index) {
@@ -100,16 +125,17 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
     }
 
     private void updateRows() {
+        int configLeft = configLeft();
         for (int i = 0; i < 16; i++) {
             int visibleRow = i - scrollOffset;
             boolean visible = visibleRow >= 0 && visibleRow < VISIBLE_ROWS;
             int y = topPos + 42 + visibleRow * ROW_HEIGHT;
-            toggles[i].setPosition(leftPos + 12, y);
+            toggles[i].setPosition(configLeft + 12, y);
             toggles[i].visible = visible;
-            comparisonButtons[i].setPosition(leftPos + 103, y);
+            comparisonButtons[i].setPosition(configLeft + 103, y);
             comparisonButtons[i].visible = visible;
             comparisonButtons[i].active = enabled[i];
-            thresholdFields[i].setPosition(leftPos + 129, y);
+            thresholdFields[i].setPosition(configLeft + 129, y);
             thresholdFields[i].visible = visible;
             thresholdFields[i].setEditable(enabled[i]);
         }
@@ -141,7 +167,8 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (mouseX >= leftPos + 8 && mouseX < leftPos + 176 && mouseY >= topPos + 40 && mouseY < topPos + 182) {
+        int configLeft = configLeft();
+        if (mouseX >= configLeft + 8 && mouseX < configLeft + 176 && mouseY >= topPos + 40 && mouseY < topPos + 182) {
             if (scrollBar != null && scrollBar.scrollBy(-(int) Math.signum(scrollY))) {
                 return true;
             }
@@ -169,24 +196,29 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, PANEL);
-        graphics.fill(leftPos + 7, topPos + 39, leftPos + 176, topPos + 183, PANEL_LIGHT);
-        graphics.fill(leftPos + 183, topPos + 43, leftPos + 245, topPos + 157, 0xFF1C2022);
+        int configLeft = configLeft();
+        if (powerTerminal != null) {
+            powerTerminal.render(graphics, font, mouseX, mouseY);
+        }
+        graphics.fill(configLeft, topPos, configLeft + 256, topPos + imageHeight, PANEL);
+        graphics.fill(configLeft + 7, topPos + 39, configLeft + 176, topPos + 183, PANEL_LIGHT);
+        graphics.fill(configLeft + 183, topPos + 43, configLeft + 245, topPos + 157, 0xFF1C2022);
         for (int row = 0; row < VISIBLE_ROWS; row++) {
             int index = row + scrollOffset;
             DyeColor colour = DyeColor.values()[index];
             int y = topPos + 47 + row * ROW_HEIGHT;
-            graphics.fill(leftPos + 36, y, leftPos + 46, y + 10, 0xFF000000 | colour.getTextureDiffuseColor());
-            graphics.drawString(font, Component.translatable("color.minecraft." + colour.getName()), leftPos + 50, y + 1, TEXT, false);
+            graphics.fill(configLeft + 36, y, configLeft + 46, y + 10, 0xFF000000 | colour.getTextureDiffuseColor());
+            graphics.drawString(font, Component.translatable("color.minecraft." + colour.getName()), configLeft + 50, y + 1, TEXT, false);
         }
-        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.filters"), leftPos + 10, topPos + 27, TEXT, false);
-        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.logic"), leftPos + 178, topPos + 8, TEXT, false);
-        graphics.drawString(font, (scrollOffset + 1) + "-" + (scrollOffset + VISIBLE_ROWS) + "/16", leftPos + 119, topPos + 27, 0xFF9DA5A8, false);
+        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.filters"), configLeft + 10, topPos + 27, TEXT, false);
+        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.logic"), configLeft + 178, topPos + 8, TEXT, false);
+        graphics.drawString(font, (scrollOffset + 1) + "-" + (scrollOffset + VISIBLE_ROWS) + "/16", configLeft + 119, topPos + 27, 0xFF9DA5A8, false);
         renderColourTotals(graphics);
     }
 
     private void renderColourTotals(GuiGraphics graphics) {
-        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.live_charges"), leftPos + 9, topPos + 190, TEXT, false);
+        int configLeft = configLeft();
+        graphics.drawString(font, Component.translatable("gui.resourceful_refinement.glare_transceiver.live_charges"), configLeft + 9, topPos + 190, TEXT, false);
         DyeColor[] colours = DyeColor.values();
         for (int i = 0; i < colours.length; i++) {
             int column = i % 8;
@@ -194,12 +226,18 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
             DyeColor colour = colours[i];
             String compact = "▮" + menu.getColourCharge(colour);
             Component text = Component.literal(compact).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(colour.getTextColor())));
-            graphics.drawString(font, text, leftPos + 9 + column * 30, topPos + 202 + row * 10, 0xFFFFFFFF, false);
+            graphics.drawString(font, text, configLeft + 9 + column * 30, topPos + 202 + row * 10, 0xFFFFFFFF, false);
         }
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return powerTerminal != null && powerTerminal.mouseClicked(mouseX, mouseY, button)
+                || super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, 9, 8, TEXT, false);
+        graphics.drawString(font, title, POWER_TERMINAL_WIDTH + PANEL_GAP + 9, 8, TEXT, false);
     }
 }

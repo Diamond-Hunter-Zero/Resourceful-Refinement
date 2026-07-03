@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.cyclotron_forge;
 
 import com.mojang.serialization.MapCodec;
 import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
@@ -71,7 +72,7 @@ public class CyclotronControllerBlock extends HorizontalDirectionalBlock impleme
         if (!(level.getBlockEntity(pos) instanceof CyclotronControllerBlockEntity controller)) {
             return InteractionResult.PASS;
         }
-        if (controller.isAssembled()) return InteractionResult.PASS;
+        if (controller.isAssembled()) return GlarePowerTerminalOpener.open(level, pos, player);
         if (level.isClientSide) return InteractionResult.SUCCESS;
 
         CyclotronControllerBlockEntity.AssemblyResult result = controller.tryAssemble();

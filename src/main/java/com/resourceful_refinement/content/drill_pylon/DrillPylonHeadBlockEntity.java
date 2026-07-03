@@ -9,6 +9,8 @@ import com.resourceful_refinement.content.glare.GlareService;
 import com.resourceful_refinement.content.glare.IGlareNode;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
@@ -42,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation, IGlareNode, IGlareReceiver {
+public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation, IGlareNode, IGlareReceiver, GlareNetworkSnapshotProvider {
     public record AssemblyResult(boolean success, String reason) {
         public static AssemblyResult ok() {
             return new AssemblyResult(true, "");
@@ -64,6 +66,10 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     private int allocatedLux;
     private UUID networkId;
     private GlareOperationStatus operationStatus = GlareOperationStatus.ONLINE;
+    private int syncedLuxCapacity;
+    private int syncedLuxAllocated;
+    private boolean syncedOverloaded;
+    private int[] syncedLuxHistory = new int[0];
     private ResourceLocation displayedRecipeId;
     private DrillPylonRecipe lastRecipe;
     private Item lastSourceItem = Items.AIR;
@@ -393,6 +399,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
                 }
             }
         }
+        refreshAdjacentLuxTransceiver();
         syncData();
     }
 
@@ -428,6 +435,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         allocatedLux = next;
         if (level instanceof ServerLevel server && assembled) {
             GlareService.updateNodeState(server, this);
+            refreshSyncedGlareSummary(server);
         }
         syncData();
     }
@@ -455,11 +463,13 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     @Override
     public void onGlareNetworkChanged(ServerLevel level, UUID networkId) {
         this.networkId = networkId;
+        refreshSyncedGlareSummary(level);
         syncData();
     }
 
     @Override
     public void onGlareLinksChanged(ServerLevel level) {
+        refreshSyncedGlareSummary(level);
         syncData();
     }
 
@@ -478,6 +488,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         operationStatus = status;
         if (level instanceof ServerLevel server) {
             GlareService.updateNodeState(server, this);
+            refreshSyncedGlareSummary(server);
         }
         syncData();
     }
@@ -485,6 +496,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     @Override
     public void applyGlareOperationStatusFromNetwork(GlareOperationStatus status) {
         operationStatus = status;
+        if (level instanceof ServerLevel server) refreshSyncedGlareSummary(server);
         syncData();
     }
 
@@ -493,6 +505,8 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         super.onLoad();
         if (assembled && level instanceof ServerLevel server) {
             GlareService.onNodeLoaded(server, this);
+            refreshSyncedGlareSummary(server);
+            refreshAdjacentLuxTransceiver();
         }
     }
 
@@ -505,6 +519,10 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         tag.putInt("StandaloneDrillTimer", standaloneDrillTimer);
         tag.putInt("AllocatedLux", allocatedLux);
         tag.putString("OperationStatus", operationStatus.name());
+        tag.putInt("GlareLuxCapacity", syncedLuxCapacity);
+        tag.putInt("GlareLuxAllocated", syncedLuxAllocated);
+        tag.putBoolean("GlareOverloaded", syncedOverloaded);
+        tag.putIntArray("GlareLuxHistory", syncedLuxHistory);
         tag.put("OutputInv", outputInv.serializeNBT(registries));
         if (networkId != null) tag.putUUID("GlareNetwork", networkId);
         if (displayedRecipeId != null) tag.putString("DisplayedRecipe", displayedRecipeId.toString());
@@ -524,9 +542,34 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         } catch (IllegalArgumentException ignored) {
             operationStatus = GlareOperationStatus.ONLINE;
         }
+        syncedLuxCapacity = tag.getInt("GlareLuxCapacity");
+        syncedLuxAllocated = tag.getInt("GlareLuxAllocated");
+        syncedOverloaded = tag.getBoolean("GlareOverloaded");
+        syncedLuxHistory = tag.getIntArray("GlareLuxHistory");
         if (tag.contains("OutputInv")) outputInv.deserializeNBT(registries, tag.getCompound("OutputInv"));
         networkId = tag.hasUUID("GlareNetwork") ? tag.getUUID("GlareNetwork") : null;
         displayedRecipeId = tag.contains("DisplayedRecipe") ? ResourceLocation.tryParse(tag.getString("DisplayedRecipe")) : null;
+    }
+
+    private void refreshSyncedGlareSummary(ServerLevel server) {
+        syncedLuxCapacity = 0;
+        syncedLuxAllocated = 0;
+        syncedOverloaded = false;
+        syncedLuxHistory = new int[0];
+        if (networkId != null) {
+            GlareService.getNetwork(server, networkId).ifPresent(network -> {
+                syncedLuxCapacity = network.luxCapacity;
+                syncedLuxAllocated = network.luxAllocated;
+                syncedOverloaded = network.overloaded;
+                syncedLuxHistory = network.luxHistory.stream().mapToInt(Integer::intValue).toArray();
+            });
+        }
+    }
+
+    @Override
+    public GlareNetworkSnapshot getSyncedGlareNetworkSnapshot() {
+        return GlareNetworkSnapshot.of(networkId != null, syncedLuxAllocated, syncedLuxCapacity, syncedLuxHistory,
+                syncedOverloaded ? GlareOperationStatus.OVERLOADED : operationStatus, syncedOverloaded);
     }
 
     @Override

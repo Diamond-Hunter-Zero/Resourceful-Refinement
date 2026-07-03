@@ -2,6 +2,8 @@ package com.resourceful_refinement.content.glare;
 
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 /** SmartBlockEntity counterpart to {@link GlareNodeBlockEntity}, for GLARE nodes that use Create behaviours. */
-public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity implements IGlareNode, IHaveGoggleInformation {
+public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity implements IGlareNode, IHaveGoggleInformation, GlareNetworkSnapshotProvider {
     private final int maxLinks;
     private UUID networkId;
     private int syncedLinkCount;
@@ -25,6 +27,7 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
     private boolean syncedOverloaded;
     private GlareOperationStatus syncedOperationStatus = GlareOperationStatus.ONLINE;
     private final int[] syncedColourCharges = new int[DyeColor.values().length];
+    private int[] syncedLuxHistory = new int[0];
 
     protected GlareSmartNodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int maxLinks) {
         super(type, pos, state);
@@ -65,10 +68,12 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
         syncedOverloaded = false;
         syncedOperationStatus = this instanceof IGlareReceiver receiver ? receiver.getGlareOperationStatus() : GlareOperationStatus.ONLINE;
         Arrays.fill(syncedColourCharges, 0);
+        syncedLuxHistory = new int[0];
         if (networkId != null) GlareService.getNetwork(server, networkId).ifPresent(network -> {
             syncedLuxCapacity = network.luxCapacity;
             syncedLuxAllocated = network.luxAllocated;
             syncedOverloaded = network.overloaded;
+            syncedLuxHistory = network.luxHistory.stream().mapToInt(Integer::intValue).toArray();
             network.colourCharges.forEach((colour, count) -> syncedColourCharges[colour.ordinal()] = count);
         });
     }
@@ -82,6 +87,7 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
         tag.putBoolean("GlareOverloaded", syncedOverloaded);
         tag.putString("GlareOperationStatus", syncedOperationStatus.name());
         tag.putIntArray("GlareColourCharges", syncedColourCharges);
+        tag.putIntArray("GlareLuxHistory", syncedLuxHistory);
     }
 
     @Override protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
@@ -96,6 +102,13 @@ public abstract class GlareSmartNodeBlockEntity extends SmartBlockEntity impleme
         Arrays.fill(syncedColourCharges, 0);
         int[] charges = tag.getIntArray("GlareColourCharges");
         System.arraycopy(charges, 0, syncedColourCharges, 0, Math.min(charges.length, syncedColourCharges.length));
+        syncedLuxHistory = tag.getIntArray("GlareLuxHistory");
+    }
+
+    @Override
+    public GlareNetworkSnapshot getSyncedGlareNetworkSnapshot() {
+        return GlareNetworkSnapshot.of(networkId != null, syncedLuxAllocated, syncedLuxCapacity, syncedLuxHistory,
+                syncedOverloaded ? GlareOperationStatus.OVERLOADED : syncedOperationStatus, syncedOverloaded);
     }
 
     @Override public boolean addToGoggleTooltip(List<Component> tooltip, boolean sneaking) {

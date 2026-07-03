@@ -44,6 +44,11 @@ public final class ModGlareEvents {
             return;
         }
         GlareService.validateLoadedLinks(serverLevel, ServerConfig.GLARE_LOS_CHECKS_PER_TICK.get());
+        if (serverLevel == serverLevel.getServer().overworld()) {
+            GlareService.sampleLuxHistories(serverLevel.getServer(),
+                    ServerConfig.GLARE_LUX_HISTORY_SAMPLE_INTERVAL.get(),
+                    ServerConfig.GLARE_LUX_HISTORY_SAMPLES.get());
+        }
         if (serverLevel.getGameTime() % ServerConfig.GLARE_LINK_SYNC_INTERVAL.get() != 0L) return;
         for (ServerPlayer player : serverLevel.players()) {
             PacketDistributor.sendToPlayer(player, GlareLinkSyncPayload.of(serverLevel.dimension().location(), GlareService.getRenderableLinks(player)));

@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.cyclotron_forge;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
@@ -63,8 +64,7 @@ public class CyclotronKineticProxyBlock extends RotatedPillarKineticBlock implem
         if (level.getBlockEntity(pos) instanceof CyclotronKineticProxyBlockEntity proxy) {
             CyclotronControllerBlockEntity controller = proxy.getController(level);
             if (controller != null) {
-                return level.getBlockState(controller.getBlockPos())
-                        .useWithoutItem(level, player, hitResult.withPosition(controller.getBlockPos()));
+                return GlarePowerTerminalOpener.open(level, controller.getBlockPos(), pos, player);
             }
         }
         return InteractionResult.PASS;

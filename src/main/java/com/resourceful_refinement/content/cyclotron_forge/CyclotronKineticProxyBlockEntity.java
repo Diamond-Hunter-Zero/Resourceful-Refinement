@@ -78,6 +78,15 @@ public class CyclotronKineticProxyBlockEntity extends KineticBlockEntity impleme
     }
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        CyclotronControllerBlockEntity controller = getController(level);
+        if (controller != null) {
+            controller.cacheKineticProxy(this);
+        }
+    }
+
+    @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         CyclotronControllerBlockEntity controller = getController(level);
         return controller != null && controller.addToGoggleTooltip(tooltip, isPlayerSneaking);

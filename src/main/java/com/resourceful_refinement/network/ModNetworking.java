@@ -37,6 +37,11 @@ public final class ModNetworking {
                         ConfigureLaunchpadPayload.STREAM_CODEC,
                         ModNetworking::handleConfigureLaunchpad
                 )
+                .playToServer(
+                        ToggleGlareNetworkPayload.TYPE,
+                        ToggleGlareNetworkPayload.STREAM_CODEC,
+                        ModNetworking::handleToggleGlareNetwork
+                )
                 .playToClient(
                         TelemetryTerminalStatePayload.TYPE,
                         TelemetryTerminalStatePayload.STREAM_CODEC,
@@ -87,6 +92,14 @@ public final class ModNetworking {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
                 ConfigureLaunchpadPayload.handle(payload, serverPlayer);
+            }
+        });
+    }
+
+    private static void handleToggleGlareNetwork(ToggleGlareNetworkPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                ToggleGlareNetworkPayload.handle(payload, serverPlayer);
             }
         });
     }

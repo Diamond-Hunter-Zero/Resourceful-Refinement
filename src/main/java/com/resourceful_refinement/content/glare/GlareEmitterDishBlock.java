@@ -1,12 +1,14 @@
 package com.resourceful_refinement.content.glare;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -87,6 +89,13 @@ public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE
             return GlareService.tryAddTarget(stack, level, pos, player) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        return level.getBlockEntity(pos) instanceof GlareEmitterDishBlockEntity
+                ? GlarePowerTerminalOpener.open(level, pos, player)
+                : InteractionResult.PASS;
     }
 
     @Override

@@ -262,7 +262,7 @@ public final class GlareGameTests {
     }
 
     @GameTest(template = "empty")
-    public static void overloadLatchesUntilReset(GameTestHelper helper) {
+    public static void overloadedNetworkRecoversWhenMergedWithSufficientCapacity(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         GlareSavedData data = new GlareSavedData();
         DimensionalNodePos weakEmitter = new DimensionalNodePos(level.dimension(), helper.absolutePos(new BlockPos(1, 2, 130)));
@@ -280,14 +280,10 @@ public final class GlareGameTests {
         require(!data.tryResetNetwork(overloaded.id), "reset should fail while still over-allocated");
 
         data.tryAddLink(level, extraEmitter, receiver);
-        GlareSavedData.NetworkRecord latched = requireNetworkRecord(data, receiver);
-        require(latched.luxCapacity == 4 && latched.luxAllocated == 3, "extra emitter should fix capacity");
-        require(latched.overloaded, "network should remain latched overloaded until reset");
-        require(data.tryResetNetwork(latched.id), "reset should succeed once allocation fits capacity");
-
-        GlareSavedData.NetworkRecord reset = requireNetworkRecord(data, receiver);
-        require(!reset.overloaded, "network should clear overload after successful reset");
-        require(data.getNode(receiver).orElseThrow().status == GlareOperationStatus.ONLINE, "receiver should return online after reset");
+        GlareSavedData.NetworkRecord recovered = requireNetworkRecord(data, receiver);
+        require(recovered.luxCapacity == 4 && recovered.luxAllocated == 3, "extra emitter should fix capacity");
+        require(!recovered.overloaded, "merged network should recover when combined capacity is sufficient");
+        require(data.getNode(receiver).orElseThrow().status == GlareOperationStatus.ONLINE, "receiver should return online after sufficient merge");
         helper.succeed();
     }
 

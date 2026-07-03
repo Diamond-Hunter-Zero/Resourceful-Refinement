@@ -1,6 +1,8 @@
 package com.resourceful_refinement.content.glare;
 
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHaveGoggleInformation {
+public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHaveGoggleInformation, GlareNetworkSnapshotProvider {
     private final int maxLinks;
     private UUID networkId;
 
@@ -31,6 +33,7 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
     private boolean syncedOverloaded;
     private GlareOperationStatus syncedOperationStatus = GlareOperationStatus.ONLINE;
     private final int[] syncedColourCharges = new int[DyeColor.values().length];
+    private int[] syncedLuxHistory = new int[0];
 
     public GlareNodeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState, int maxLinks) {
         super(type, pos, blockState);
@@ -81,11 +84,13 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
         syncedOverloaded = false;
         syncedOperationStatus = this instanceof IGlareReceiver receiver ? receiver.getGlareOperationStatus() : GlareOperationStatus.ONLINE;
         Arrays.fill(syncedColourCharges, 0);
+        syncedLuxHistory = new int[0];
         if (networkId != null) {
             GlareService.getNetwork(server, networkId).ifPresent(network -> {
                 syncedLuxCapacity = network.luxCapacity;
                 syncedLuxAllocated = network.luxAllocated;
                 syncedOverloaded = network.overloaded;
+                syncedLuxHistory = network.luxHistory.stream().mapToInt(Integer::intValue).toArray();
                 for (var entry : network.colourCharges.entrySet()) {
                     syncedColourCharges[entry.getKey().ordinal()] = entry.getValue();
                 }
@@ -118,6 +123,7 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
         tag.putBoolean("GlareOverloaded", syncedOverloaded);
         tag.putString("GlareOperationStatus", syncedOperationStatus.name());
         tag.putIntArray("GlareColourCharges", syncedColourCharges);
+        tag.putIntArray("GlareLuxHistory", syncedLuxHistory);
     }
 
     @Override
@@ -136,6 +142,7 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
         int[] colourCharges = tag.getIntArray("GlareColourCharges");
         Arrays.fill(syncedColourCharges, 0);
         System.arraycopy(colourCharges, 0, syncedColourCharges, 0, Math.min(colourCharges.length, syncedColourCharges.length));
+        syncedLuxHistory = tag.getIntArray("GlareLuxHistory");
     }
 
     @Override
@@ -174,6 +181,12 @@ public class GlareNodeBlockEntity extends BlockEntity implements IGlareNode, IHa
 
     protected int getSyncedColourCharge(DyeColor colour) {
         return syncedColourCharges[colour.ordinal()];
+    }
+
+    @Override
+    public GlareNetworkSnapshot getSyncedGlareNetworkSnapshot() {
+        return GlareNetworkSnapshot.of(networkId != null, syncedLuxAllocated, syncedLuxCapacity, syncedLuxHistory,
+                syncedOverloaded ? GlareOperationStatus.OVERLOADED : syncedOperationStatus, syncedOverloaded);
     }
 
     private String colourChargeSummary() {

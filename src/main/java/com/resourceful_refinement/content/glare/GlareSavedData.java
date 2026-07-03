@@ -628,6 +628,43 @@ public class GlareSavedData extends SavedData {
         return reset;
     }
 
+    public boolean forceOverloadNetwork(ServerLevel level, UUID networkId) {
+        NetworkRecord network = networks.get(networkId);
+        if (network == null) {
+            return false;
+        }
+        markNetworkOverloaded(network);
+        setDirty();
+        notifyLoadedEndpoints(level, network.nodes);
+        return true;
+    }
+
+    public void sampleLuxHistories(MinecraftServer server, int sampleIntervalTicks, int maxSamples) {
+        int interval = Math.max(1, sampleIntervalTicks);
+        int limit = Math.max(1, maxSamples);
+        long gameTime = server.getTickCount();
+        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
+        boolean changed = false;
+        for (NetworkRecord network : networks.values()) {
+            if (network.lastLuxSampleGameTime != Long.MIN_VALUE
+                    && gameTime - network.lastLuxSampleGameTime < interval) {
+                continue;
+            }
+            network.lastLuxSampleGameTime = gameTime;
+            network.luxHistory.add(Math.max(0, network.luxAllocated));
+            while (network.luxHistory.size() > limit) {
+                network.luxHistory.removeFirst();
+            }
+            affected.addAll(network.nodes);
+            changed = true;
+        }
+        if (!changed) {
+            return;
+        }
+        setDirty();
+        notifyLoadedEndpoints(server, affected);
+    }
+
     public void reconcileLoadedChunk(ServerLevel level, BlockPos chunkOrigin) {
         int minX = chunkOrigin.getX();
         int minZ = chunkOrigin.getZ();
@@ -734,6 +771,7 @@ public class GlareSavedData extends SavedData {
             UUID id = chooseNetworkId(component, oldNetworks, claimedNetworkIds);
             claimedNetworkIds.add(id);
             boolean preserveOverload = shouldPreserveOverload(component, oldNetworks);
+            boolean mergedFromMultipleNetworks = oldNetworkOverlapCount(component, oldNetworks) > 1;
             NetworkRecord oldNetwork = oldNetworks.get(id);
             NetworkRecord network = oldNetwork == null ? new NetworkRecord(id) : oldNetwork.copyForRebuild(preserveOverload);
             if (oldNetwork == null) {
@@ -755,7 +793,10 @@ public class GlareSavedData extends SavedData {
                     }
                 }
             }
-            if (network.luxAllocated > network.luxCapacity || network.overloaded) {
+            boolean mergedOverloadRecovered = mergedFromMultipleNetworks
+                    && network.overloaded
+                    && network.luxAllocated <= network.luxCapacity;
+            if (network.luxAllocated > network.luxCapacity || (network.overloaded && !mergedOverloadRecovered)) {
                 markNetworkOverloaded(network);
             } else {
                 markNetworkOnline(network);
@@ -847,6 +888,16 @@ public class GlareSavedData extends SavedData {
         return count;
     }
 
+    private static int oldNetworkOverlapCount(Set<DimensionalNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
+        int count = 0;
+        for (NetworkRecord network : oldNetworks.values()) {
+            if (network.nodes.stream().anyMatch(component::contains)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void applyLux(NetworkRecord network, NodeRecord node) {
         network.luxCapacity += Math.max(0, node.luxProduced);
         network.luxAllocated += Math.max(0, node.luxAllocated);
@@ -922,6 +973,19 @@ public class GlareSavedData extends SavedData {
     private void notifyLoadedEndpoints(ServerLevel level, Collection<DimensionalNodePos> positions) {
         for (DimensionalNodePos pos : positions) {
             notifyLoadedEndpoint(level, pos);
+        }
+    }
+
+    private void notifyLoadedEndpoint(MinecraftServer server, DimensionalNodePos pos) {
+        ServerLevel level = server.getLevel(pos.levelKey());
+        if (level != null) {
+            notifyLoadedEndpoint(level, pos);
+        }
+    }
+
+    private void notifyLoadedEndpoints(MinecraftServer server, Collection<DimensionalNodePos> positions) {
+        for (DimensionalNodePos pos : positions) {
+            notifyLoadedEndpoint(server, pos);
         }
     }
 
@@ -1191,6 +1255,8 @@ public class GlareSavedData extends SavedData {
         public final Map<DyeColor, Integer> colourCharges = new HashMap<>();
         public final Map<GlareAddress, List<GlareMessage>> telemetryInboxes = new HashMap<>();
         public final Set<GlareAddress> registeredTelemetryAddresses = new LinkedHashSet<>();
+        public final List<Integer> luxHistory = new ArrayList<>();
+        public long lastLuxSampleGameTime = Long.MIN_VALUE;
         public int luxCapacity;
         public int luxAllocated;
         public boolean overloaded;
@@ -1202,6 +1268,8 @@ public class GlareSavedData extends SavedData {
         NetworkRecord copyForRebuild(boolean preserveOverload) {
             NetworkRecord copy = new NetworkRecord(id);
             copy.overloaded = preserveOverload;
+            copy.luxHistory.addAll(luxHistory);
+            copy.lastLuxSampleGameTime = lastLuxSampleGameTime;
             return copy;
         }
 
@@ -1228,6 +1296,12 @@ public class GlareSavedData extends SavedData {
             tag.putInt("LuxCapacity", luxCapacity);
             tag.putInt("LuxAllocated", luxAllocated);
             tag.putBoolean("Overloaded", overloaded);
+            tag.putLong("LastLuxSampleGameTime", lastLuxSampleGameTime);
+            int[] history = new int[luxHistory.size()];
+            for (int i = 0; i < history.length; i++) {
+                history[i] = luxHistory.get(i);
+            }
+            tag.putIntArray("LuxHistory", history);
             ListTag nodeList = new ListTag();
             for (DimensionalNodePos pos : nodes) {
                 CompoundTag nodeTag = new CompoundTag();
@@ -1263,6 +1337,11 @@ public class GlareSavedData extends SavedData {
             record.luxCapacity = tag.getInt("LuxCapacity");
             record.luxAllocated = tag.getInt("LuxAllocated");
             record.overloaded = tag.getBoolean("Overloaded");
+            record.lastLuxSampleGameTime = tag.contains("LastLuxSampleGameTime", Tag.TAG_LONG)
+                    ? tag.getLong("LastLuxSampleGameTime") : Long.MIN_VALUE;
+            for (int sample : tag.getIntArray("LuxHistory")) {
+                record.luxHistory.add(Math.max(0, sample));
+            }
             ListTag nodeList = tag.getList("Nodes", Tag.TAG_COMPOUND);
             for (int i = 0; i < nodeList.size(); i++) {
                 DimensionalNodePos.readPos(nodeList.getCompound(i), "").ifPresent(record.nodes::add);

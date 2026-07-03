@@ -14,7 +14,10 @@ import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRe
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberFanModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronBackModel;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronCoilModel;
 import com.resourceful_refinement.content.cyclotron_forge.CyclotronForgeRenderer;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronFrontModel;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
@@ -37,6 +40,7 @@ import com.resourceful_refinement.content.pug.LaunchpadControllerRenderer;
 import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.sieve.*;
 import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
@@ -68,7 +72,6 @@ import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
 import org.slf4j.Logger;
 
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
-import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.*;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock;
@@ -77,6 +80,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationRende
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverScreen;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen;
+import com.resourceful_refinement.content.gui.PowerTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
 import com.simibubi.create.foundation.model.ModelSwapper;
 
@@ -411,6 +415,7 @@ public class ResourcefulRefinementMain {
             event.register(ModMenus.GLARE_CHROMATIC_TRANSCEIVER.get(), GlareChromaticTransceiverScreen::new);
             event.register(ModMenus.GLARE_TELEMETRY_TERMINAL.get(), TelemetryTerminalScreen::new);
             event.register(ModMenus.LAUNCHPAD.get(), com.resourceful_refinement.content.pug.LaunchpadScreen::new);
+            event.register(ModMenus.POWER_TERMINAL.get(), PowerTerminalScreen::new);
         }
 
         @SubscribeEvent
@@ -488,11 +493,11 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(RefineryLayers.MIDDLE, RefineryMiddleModel::createBodyLayer);
             event.registerLayerDefinition(RefineryLayers.TOP, RefineryTopModel::createBodyLayer);
             event.registerLayerDefinition(RefineryLayers.BLENDER, RefineryBlenderModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING, com.resourceful_refinement.content.sieve.MechanicalSieveCasingModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_BOTTOM, com.resourceful_refinement.content.sieve.MechanicalSieveCasingBottomModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_MIDDLE, com.resourceful_refinement.content.sieve.MechanicalSieveCasingMiddleModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_TOP, com.resourceful_refinement.content.sieve.MechanicalSieveCasingTopModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.COG, com.resourceful_refinement.content.sieve.MechanicalSieveCogModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING, MechanicalSieveCasingModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_BOTTOM, MechanicalSieveCasingBottomModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_MIDDLE, MechanicalSieveCasingMiddleModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_TOP, MechanicalSieveCasingTopModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.COG, MechanicalSieveCogModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.CASING, ForgeMouldCasingModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.PRESS, ForgeMouldPressModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.TUBE, ForgeMouldTubeModel::createBodyLayer);
@@ -503,13 +508,19 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.TOP, FrackingPumpTopModel::createBodyLayer);
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
+
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
             event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
             event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+
             event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
             event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
+
+            event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
+            event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);
+            event.registerLayerDefinition(CyclotronBackModel.LAYER_LOCATION, CyclotronBackModel::createBodyLayer);
         }
     }
 

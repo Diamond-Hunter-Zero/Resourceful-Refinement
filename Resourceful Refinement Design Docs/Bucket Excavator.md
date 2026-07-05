@@ -1,6 +1,7 @@
 The Bucket Excavator is a blockEntity consisting of a cuboid mount and an extended bucket-wheel, which passively generates resources when placed over mineral deposits, or slowly mines blocks when switched to 'destruction' mode.
 
 **ID:** *bucket_excavator*
+**Vertical Slice:** 0.4
 
 #### **Physical Design**
 The Bucket Excavator is a single blockEntity, which can be horizontally rotated. Its back face exposes an item-output interface, and its left/right side faces act as a shaft transferring kinetic input.

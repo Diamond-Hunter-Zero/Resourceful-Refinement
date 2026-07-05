@@ -2,6 +2,7 @@
 Gel Splatters are a multi-face block (i.e. block with configurable interior faces like cave-lichen or amber) which represent an inworld layers of fluids, placed down by the Hosegun. They are heavily inspired by the gels from Portal 2, or the paints from Splatoon. A Gel Splatter block is linked to a fluid ID, which determines its tint colour and physical properties. Any fluid except water or potions can be turned into a Gel Splatter
 
 **ID:** *gel_splatter*
+**Vertical Slice:** 0.2
 
 #### **Shape & Placement**
 The Gel Splatter is a multi-face block. To create Gel Splatters, players must fill a Hosegun with any non-water/non-potion fluid, then use the hosegun to shoot out gel-blob projectile entities.

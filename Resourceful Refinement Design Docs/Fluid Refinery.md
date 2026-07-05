@@ -2,6 +2,8 @@
 #### **Description**
 The Fluid Refinery is a large multiblock structure that functions as another crating station for Create, specializing in combining fluids and items with each other. The Fluid Refinery has internal tanks for two input fluids and 1 output fluid, and can accept up to 2 kinds of input items as well. The refinery is used to improve the quality of molten minerals, create molten alloys, and even refine combustible fuel.
 
+**Vertical Slice:** 0.1
+
 #### **Construction**
 The Fluid Refinery is assembled as a multiblock structure with a base of either 3x3 or 5x5 blocks. It must eb constructed with a minimum height of 3 blocks, but can be extended up to a configurable maximum height. The top and bottom layers of the multiblock always follow the same pattern, while the middle layers are just repeated vertically.
 

@@ -1,5 +1,6 @@
 Remote Entanglement refers to a behaviour system implemented by two GLARE-powered blocks; The Remote Entanglement Depot, and the Remote Entanglement Transporter. Both blockEntities share similar logic and functions, but act on different subjects.
 
+**Vertical Slice:** 0.4
 
 ### Remote Entanglement Depot
 The Remote Entanglement Depot is a variant of Create's Depot block, functioning like one, just as the Casting Depot does. However, it can also be used to teleport itemstacks between linked depots on the same GLARE network. It is a horizontally directional block.

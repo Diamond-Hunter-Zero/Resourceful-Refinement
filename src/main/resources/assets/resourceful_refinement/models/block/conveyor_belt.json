@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "belt": "minecraft:block/blackstone",
+    "side": "minecraft:block/deepslate_tiles",
+    "particle": "minecraft:block/blackstone"
+  },
+  "elements": [
+    {
+      "from": [0, 4, 0],
+      "to": [16, 12, 16],
+      "faces": {
+        "down": { "texture": "#side", "cullface": "down" },
+        "up": { "texture": "#belt" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "west": { "texture": "#side" },
+        "east": { "texture": "#side" }
+      }
+    }
+  ]
+}

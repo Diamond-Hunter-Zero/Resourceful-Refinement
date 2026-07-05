@@ -2,6 +2,7 @@
 The Brewer's Tap is a horizontally rotatable block, which can be used to turn fluids into drinks.
 
 **ID:** *brewers_tap*
+**Vertical Slice:** 0.3
 
 #### **Behaviour**
 A Brewer's Tap can be placed on the side of any Distillery, Fuel Tank, or Fluid Tank. Like the Paint Nozzle, it has two states; a "valve_open" state, and a (default) "valve_closed" state, which players can toggle between by right-clicking with an empty hand.

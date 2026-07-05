@@ -24,6 +24,8 @@
   "block.resourceful_refinement.fuel_tank": "Fuel Tank",
   "block.resourceful_refinement.advanced_pump": "Advanced Pump",
   "block.resourceful_refinement.milking_station": "Milking Station",
+  "block.resourceful_refinement.conveyor_belt": "Conveyor Belt",
+  "block.resourceful_refinement.conveyor_rotator": "Conveyor Rotator",
 
   "fluid_type.resourceful_refinement.molten_crimsite": "Molten Crimsite",
   "block.resourceful_refinement.fluids.molten_crimsite": "Molten Crimsite",

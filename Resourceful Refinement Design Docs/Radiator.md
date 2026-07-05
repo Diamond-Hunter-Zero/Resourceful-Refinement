@@ -2,6 +2,7 @@
 Radiators are pipe-like blocks which heat or cool their surroundings. Depending on the fluid passing through them, they can act as a heat source for other Create machines.
 
 **ID:** *radiator_pipe*
+**Vertical Slice:** 0.3
 
 #### **Behaviour**
 Radiators are pipe-like blocks which heat or cool their surroundings. They are fully directional blocks.

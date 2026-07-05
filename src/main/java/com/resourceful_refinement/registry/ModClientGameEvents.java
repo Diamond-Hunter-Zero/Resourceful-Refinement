@@ -3,11 +3,13 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
+import com.resourceful_refinement.content.conveyor.ConveyorBeltConnectorHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid = ResourcefulRefinementMain.MOD_ID, value = Dist.CLIENT)
@@ -29,5 +31,10 @@ public class ModClientGameEvents {
         if (flavour != null) {
             event.getToolTip().add(Component.literal(flavour.getDisplayName() + " flavour").withColor(flavour.getColor()));
         }
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        ConveyorBeltConnectorHandler.tick();
     }
 }

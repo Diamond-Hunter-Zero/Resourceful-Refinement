@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north,part=start": { "model": "resourceful_refinement:block/conveyor_belt" },
+    "facing=north,part=middle": { "model": "resourceful_refinement:block/conveyor_belt" },
+    "facing=north,part=end": { "model": "resourceful_refinement:block/conveyor_belt" },
+    "facing=north,part=pulley": { "model": "resourceful_refinement:block/conveyor_belt" },
+    "facing=east,part=start": { "model": "resourceful_refinement:block/conveyor_belt", "y": 90 },
+    "facing=east,part=middle": { "model": "resourceful_refinement:block/conveyor_belt", "y": 90 },
+    "facing=east,part=end": { "model": "resourceful_refinement:block/conveyor_belt", "y": 90 },
+    "facing=east,part=pulley": { "model": "resourceful_refinement:block/conveyor_belt", "y": 90 },
+    "facing=south,part=start": { "model": "resourceful_refinement:block/conveyor_belt", "y": 180 },
+    "facing=south,part=middle": { "model": "resourceful_refinement:block/conveyor_belt", "y": 180 },
+    "facing=south,part=end": { "model": "resourceful_refinement:block/conveyor_belt", "y": 180 },
+    "facing=south,part=pulley": { "model": "resourceful_refinement:block/conveyor_belt", "y": 180 },
+    "facing=west,part=start": { "model": "resourceful_refinement:block/conveyor_belt", "y": 270 },
+    "facing=west,part=middle": { "model": "resourceful_refinement:block/conveyor_belt", "y": 270 },
+    "facing=west,part=end": { "model": "resourceful_refinement:block/conveyor_belt", "y": 270 },
+    "facing=west,part=pulley": { "model": "resourceful_refinement:block/conveyor_belt", "y": 270 }
+  }
+}

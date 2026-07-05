@@ -1,6 +1,8 @@
 
 The Telemetry Terminal is a horizontally rotatable SmartEntityBlock, which connects to GLARE networks as a receiver, and enables network-wide communication through the telemetry system.
 
+**Vertical Slice:** 0.4
+
 
 The Telemetry Terminal can be right-clicked to open a versatile GUI that allows player to view, send, and automate the handling of inbox messages. A row of browser-like tabs along the top of the GUI allow the user to switch the terminal between its 3 modes; MANUAL, AUTO-SEND, and AUTO-RECEIVE. Each mode represents a different function of the terminal, and a different GUI state or sub-screen.
 

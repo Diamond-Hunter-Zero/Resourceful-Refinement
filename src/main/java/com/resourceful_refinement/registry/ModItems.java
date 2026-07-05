@@ -4,6 +4,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.DrinkItem;
 import com.resourceful_refinement.content.casting_depot.CastingDepotItem;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberItem;
+import com.resourceful_refinement.content.conveyor.ConveyorBeltItem;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
@@ -76,6 +77,11 @@ public class ModItems {
             () -> new MilkingStationItem(ModBlocks.MILKING_STATION.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> BREWERS_TAP_ITEM = ITEMS.registerSimpleBlockItem("brewers_tap", ModBlocks.BREWERS_TAP);
+
+    public static final DeferredItem<ConveyorBeltItem> CONVEYOR_BELT_ITEM = ITEMS.register("conveyor_belt",
+            () -> new ConveyorBeltItem(ModBlocks.CONVEYOR_BELT.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> CONVEYOR_ROTATOR_ITEM = ITEMS.registerSimpleBlockItem("conveyor_rotator", ModBlocks.CONVEYOR_ROTATOR);
 
 
     // -------------------------------------------------------------------------

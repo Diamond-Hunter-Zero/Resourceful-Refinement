@@ -2,6 +2,7 @@
 The Mechanical sieve is a rotation-powered block, which processes an input fluid and produces an output fluid and/or an item by-product. 
 
 **ID:** *mechanical_sieve*
+**Vertical Slice:** 0.1
 
 #### **Construction**
 The Mechanical Sieve is a single block. It allows pipe connection on its top and bottom faces, and item interface connection on its front face. It accepts rotational input from cogs on any of its non-front faces.

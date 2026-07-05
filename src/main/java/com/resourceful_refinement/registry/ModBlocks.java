@@ -5,6 +5,9 @@ import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
+import com.resourceful_refinement.content.conveyor.ConveyorBeltBlock;
+import com.resourceful_refinement.content.conveyor.ConveyorRotatorBlock;
+import com.resourceful_refinement.content.conveyor.ConveyorRotatorProxyBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
@@ -147,6 +150,27 @@ public class ModBlocks {
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
+
+    public static final DeferredBlock<ConveyorBeltBlock> CONVEYOR_BELT = BLOCKS.register("conveyor_belt",
+            () -> new ConveyorBeltBlock(BlockBehaviour.Properties.of()
+                    .strength(1.0f)
+                    .sound(SoundType.WOOL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<ConveyorRotatorBlock> CONVEYOR_ROTATOR = BLOCKS.register("conveyor_rotator",
+            () -> new ConveyorRotatorBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<ConveyorRotatorProxyBlock> CONVEYOR_ROTATOR_PROXY = BLOCKS.register("conveyor_rotator_proxy",
+            () -> new ConveyorRotatorProxyBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0f, 3600000.0f)
+                    .noLootTable()
+                    .noOcclusion()
+                    .pushReaction(PushReaction.BLOCK)));
 
 
     // -------------------------------------------------------------------------

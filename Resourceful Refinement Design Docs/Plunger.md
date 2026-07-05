@@ -4,6 +4,7 @@ The Plunger is a throwable weapon which inherits from the trident. Like a triden
 However, the plunger has an additional functionality; When held, players can use it to right click on fluid-containing blocks, and empty their contents.
 
 **ID:** *plunger*
+**Vertical Slice:** 0.2
 
 
 #### **Behaviour**

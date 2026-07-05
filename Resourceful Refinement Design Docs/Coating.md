@@ -1,5 +1,7 @@
 Coating is a process in which a fluid and an item ingredient are applied onto a tool item, giving it a secondary durability bar, and a special temporary effect. Coating is a process performed by the Mechanical Forge Mould and Casting Depot on any tool item. It is a recipe type distinct from mechanical_forge_mould recipes.
 
+**Vertical Slice:** 0.1
+
 #### **Application**
 To Coat an item, the user places any tool onto a Casting Depot below a Mechanical Forge Mould. The Forge is then provided with an amount of fluid (specified by the recipe) and a secondary ingredient item. If a valid recipe is found, the forge performs it's processing animation, and 'coats' the tool.
 

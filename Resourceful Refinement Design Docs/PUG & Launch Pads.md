@@ -1,6 +1,7 @@
 
 The PUG (Payload Uncrewed Gadget) system is a mechanism which allows players to remotely transfer resources over long distances or between dimensions. It consists of Launch Pads (Which define send and receive locations, and provide interfaces for cargo, destination points, and fuel), and PUG entities (Which actually travel and transfer cargo).
 
+**Vertical Slice:** 0.4
 
 ### Launch Pads
 

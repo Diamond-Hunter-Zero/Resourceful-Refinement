@@ -2,6 +2,7 @@
 The Forge Mould is a rotation-powered mechanical block, which turns a fluid input and/or an item input into an item output on top of a belt or depot, behaving like a Spout combined with a Mechanical Press.
 
 **ID:** *mechanical_forge_mould*
+**Vertical Slice:** 0.1
 
 #### **Construction**
 The Forge Mould is a single block. It allows pipe connection on its top face, and item interface connection on its front face. It accepts rotational input from shafts on either of its left or right sides. Like a Mechanical Press, it must be placed with  a one block gap above a working surface in order to craft items.

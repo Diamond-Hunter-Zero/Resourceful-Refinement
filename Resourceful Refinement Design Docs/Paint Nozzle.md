@@ -2,6 +2,7 @@
 The Paint Nozzle is a directional block which connects to Create pipe networks, and allows fluids to be directly turned into gel-blobs.
 
 **ID:** *paint_nozzle*
+**Vertical Slice:** 0.2
 
 
 #### **Behaviour**

@@ -3,6 +3,7 @@
 The Geyser Block is a block which naturally generates in geyser structures upon the overworld's surface and within caves. Geysers periodically spawn fluid source blocks above them, as well as jets of particles which launch entities up into the air.
 
 **ID:** *geyser_block*
+**Vertical Slice:** 0.1
 
 #### **Behaviour**
 Geysers appear as stone blocks with transparent cracks on them, which expose a cube of animated fluid texture within them. Geyser blocks are associated with a registered fluid, which can be set in Creative mode by right-clicking with a bucket. This is stored in the block entity's data. Geysers do not drop when broken, are highly explosion resistant, and take a while to mine.

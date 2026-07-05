@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -39,6 +40,13 @@ public class ModDataComponents {
             () -> DataComponentType.<Boolean>builder()
                     .persistent(Codec.BOOL)
                     .networkSynchronized(ByteBufCodecs.BOOL)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> CONVEYOR_FIRST_SHAFT = DATA_COMPONENTS.register("conveyor_first_shaft",
+            () -> DataComponentType.<BlockPos>builder()
+                    .persistent(BlockPos.CODEC)
+                    .networkSynchronized(BlockPos.STREAM_CODEC)
                     .build()
     );
 

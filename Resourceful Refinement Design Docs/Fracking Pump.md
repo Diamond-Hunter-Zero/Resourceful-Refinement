@@ -4,6 +4,7 @@ The Fracking Pump is a multiblock structure assembled on top of a geyser block. 
 The height of the pump determines the rate of production, and the minimum RPM required.
 
 **ID:** *fracking_pump_outlet*
+**Vertical Slice:** 0.1
 
 #### **Construction**
 The Fracking Pump is a multiblock structure which uses a *fracking_pump_outlet* as it's controller block. To assemble a Fracking Pump, a *fracking_pump_outlet* is placed on top of a geyser block. On top of this are placed 2 brass casing blocks (*brass_casing*). Metal girders (*metal_girder*) are then stacked vertically on top of the casings. An andesite alloy block (*andesite_alloy_block*) is then placed on top of the stack. A ring (3x3 with centre hole) of industrial iron blocks (*industrial_iron_block*) is then built around the top half of the girder pole. This is its "Counterweight".

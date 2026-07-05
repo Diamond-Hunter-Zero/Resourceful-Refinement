@@ -13,6 +13,7 @@ public class ModStressValues {
     public static final double FORGE_STRESS = 8;
     public static final double ADVANCED_PUMP_STRESS = 8;
     public static final double MILKING_STATION_STRESS = 4;
+    public static final double CONVEYOR_ROTATOR_STRESS = 2;
 
 
     public static void register() {
@@ -23,6 +24,7 @@ public class ModStressValues {
         registerImpact(ModBlocks.MECHANICAL_FORGE_MOULD.get(), () -> FORGE_STRESS);
         registerImpact(ModBlocks.ADVANCED_PUMP.get(), () -> ADVANCED_PUMP_STRESS);
         registerImpact(ModBlocks.MILKING_STATION.get(), () -> MILKING_STATION_STRESS);
+        registerImpact(ModBlocks.CONVEYOR_ROTATOR.get(), () -> CONVEYOR_ROTATOR_STRESS);
 
         // Register generation capacities
         registerCapacity(ModBlocks.COMBUSTION_CHAMBER.get(), () -> 10);

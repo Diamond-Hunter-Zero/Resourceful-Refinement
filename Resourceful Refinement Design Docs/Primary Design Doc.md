@@ -106,12 +106,13 @@ Cooled and Chilled radiators are used to cool Combustion Chambers or Distillery 
 
 
 **Combustion Chambers**
-Combustion Chambers are industrial engines which turn carborax fuels into kinetic rotation. Combustion Chambers have a fluid intake on one face, and a shaft output on the opposing face. When placed in a line, chambers share a single fluid intake and shaft output, but combine their consumption and output.
+Combustion Chambers are industrial engines which turn carborax fuels into kinetic rotation. Combustion Chambers have a fluid intake on one face, and a shaft output on the opposing face. When placed in a line, chambers share a single fluid intake and shaft output, but combine their consumption and output, forming a 'Combustion Chamber Train'.
 
 Combustion Chambers require cooling according to their fuel.
 - Unrefined carborax requires no cooling, but produces very little stress at low speed for large amounts of fuel.
 - Catalysed carborax produces moderate stress and medium speed when 'Cooled', and half as much when running passively.
 - Overcharged carborax produces large amounts of stress at high speed when 'Chilled', and a third as much when 'Cooled'. It will not run passively.
+- Encased Fans can be placed in front of Combustion Chamber trains to increase their output by 25%
 
 
 **Milking Station**
@@ -137,6 +138,10 @@ In addition, when a redstone signal is applied, it reverses its flow direction, 
 The Advanced Pump also shows its fluid passthrough rate in mb/s when viewed with goggles.
 
 
+**Brewers Tap**
+The Brewers Tap is a crafting machine which automatically extract fluids from tanks and distilleries, and turns them into consumable drinks. Items can also be placed inside the tap to enhance drinks with a 'flavour', which grants them a short status effect when consumed.
+
+
 **Stuffing & Stuffing Sleaves**
 A fluid created from mixing wool or string with water. Unlike other fluids, its source block is just white wool.
 The Stuffing Sleave is a multi-variant block which attaches to pipes and acts as a fluid container which only accepts stuffing. Once filled with enough stuffing, a Stuffing Sleave will transform into a block or entity according to its variant (Plushie, Sports Ball, etc...).
@@ -146,10 +151,32 @@ The Stuffing Sleave is a multi-variant block which attaches to pipes and acts as
 A decorative entity, which bounces around like a bouncy ball. When hit by an attack, it is propelled forwards. Created by placing a "Sports Ball Stuffing Sleave" on a pipe outlet, and allowing stuffing to fill it.
 
 
+**Liquid Concrete & Poured Cement**
+Liquid Concrete is a fluid produced in the Fluid Refinery. When pumped out of a Hose Pump, or passed through a Mechanical Sieve, it turns into Poured Cement at a high conversion rate.
+
+Poured Cement source blocks randomly set into Grey Concrete after a period of time.
+
+
+**New Fluids and Items:**
+- Coolant
+- Drinks Glass
+- Milkshake
+- Mead Tankard
+- Spirits Bottle
+- Energy Drink
+- Hot Chocolate Mug
+- Polymer Residue - Refined from mixing unrefined carborax  and water over heat. Used to craft plastics, or refined carborax fluids
+- Organic Slush - Distilled from different plant tags and water. Used for fertiliser, diesel, and tea
+- Compacted Biomatter - Mixed from Organic Slush and string
+- Polymer Sludge - Distilled from polymer residue
+- Graphite - Mixed from Catalysed Sparkpowder and charcoal
+- Graphene Mesh - Sequence-Assembly from molten scorchia and graphite
+
+
 ### **Content (v0.4)**
 
-**Excavator Wheels**
-Excavator Wheels are kinetic blocks with a large protruding blockEntity renderer, which extract resources from *Mineral Deposits*. When provided with rotational input, Excavator Wheels will passively produce resources according to any *Mineral Deposits* they intersect with. Excavator Wheels will not operate if intersecting with another Excavator Wheel.
+**Bucket Excavators**
+Bucket Excavators are kinetic blocks with a large protruding blockEntity renderer, which extract resources from *Mineral Deposits*. When provided with rotational input, Excavator Wheels will passively produce resources according to any *Mineral Deposits* they intersect with. Excavator Wheels will not operate if intersecting with another Excavator Wheel.
 
 **Mineral Deposits**
 Mineral Deposits are geological features which spawn on the surface of the overworld and end dimension, and can be mined via Excavator Wheels to passively produce simple resources such as stone variants, and dyes.
@@ -160,11 +187,11 @@ Chorus Crystal is a translucent block which generates in large crystal-spike for
 **Choral Cluster Biome**
 The Choral Cluster is a mountainous biome which generates in the outer End Dimension. Large crystalline spikes and pillars of Chorus Crystal generate here, as well as Resonance Crystals and Chorus Crystal Hearts.
 
-**Crystal Drills**
-Crystal Drills are large multiblock structures which allow the extraction of resources from *Crystal Hearts*. Once constructed on top of a Crystal Heart, drills must be provided with kinetic input from the top, and fluid from behind. Outputs are then transferred from the front of the drill. Drills can also have their efficiency increased by switching to 'turbo mode', and powering its GLARE Receivers on their side faces - While in turbo mode, a drill consumes an amount of power from the GLARE network according to its position on a curve dictated by the current progression of its cycle.
+**Drill Pylons**
+Drill Pylons are large multiblock structures which allow the extraction of resources from *Crystal Hearts*. Once constructed on top of a Crystal Heart, drills must be provided with kinetic input from the top, and fluid from behind. Outputs are then transferred from the front of the drill. Drills can also have their efficiency increased by switching to 'turbo mode', and powering its GLARE Receivers on their side faces - While in turbo mode, a drill consumes an amount of power from the GLARE network according to its position on a curve dictated by the current progression of its cycle.
 
 **Resonance Crystals**
-Resonance Crystals are terrain features which can be found rarely throughout the overworld and nether, and commonly in the end. Alternatively, players can also craft Artificial Resonance Crystals themselves using resources obtained from Crystal Drills. Placing Artificial Resonance Crystals in the End Dimension causes a deadly explosion.
+Resonance Crystals are terrain features which can be found rarely throughout the overworld and nether, and commonly in the end. Alternatively, players can also craft Artificial Resonance Crystals themselves using resources obtained from Drill Pylons. Placing Artificial Resonance Crystals in the End Dimension causes a deadly explosion.
 GLARE Emitters can be placed on to of Resonance Crystals to power a GLARE network.
 
 **G.L.A.R.E. Networks**
@@ -181,7 +208,13 @@ Emitters can only target 1 other connection point.
 Relays act as universal connection points in Glare Networks. They can accept up to 8 different connections.
 
 **GLARE Chromatic-Transceivers**
-Transceivers produce a redstone output according to the colour-charges present on their network. Receivers can be configured to filter for a select list of colour-charges using AND/OR/XOR logic and count thresholds. Receivers can only target 1 other connection point.
+Chromatic-Transceivers produce a redstone output according to the colour-charges present on their network. Receivers can be configured to filter for a select list of colour-charges using AND/OR/XOR logic and count thresholds. Transceivers can only target 1 other connection point.
+
+**GLARE Kinetic-Transceiver**
+Kinetic-Transceivers produce a small amount of stress and RPM when provided with Lux from a GLARE network. Transceivers can only target 1 other connection point.
+
+**GLARE Lux-Transceiver**
+When placed on a Lux-Socket interface exposed by a blockEntity, and connected to a GLARE network, Lux-Transceivers can provide blockEntities with Lux for crafting or operation. Transceivers can only target 1 other connection point.
 
 **Telemetry Terminals**
 Telemetry Terminals allow players to use GLARE networks for communication. A Telemetry Terminal can connect to any relay node in a network. Each terminal supports a 3-item ID Code, used to identify its address.
@@ -212,11 +245,36 @@ Once having reached a certain altitude, PUG entities are removed, and instead si
 
 If a PUG's destination no longer exists at the end of its travel (the controller has been removed, changed its ID, or moved location), the PUG instead crash-lands at its last known location, and becomes a world entity with a lootable inventory.
 
+**Cyclotron Forge**
+The Cyclotron Forge is a processing multiblock, which turns multiple input items and fluids, into both item and fluid outputs. Its recipes require Lux to operate, as well as an exact Cyclotron length.
+
+
+
+### **Content (v0.5)**
+
+**Conveyor Belts**
+Conveyor Belts are the logistical counterpart to Create's Mechanical Belts, and transport placed blocks (not items). Blocks on top of Conveyor Belts are pushed in the direction of motion as if by a piston. Conveyor Belts otherwise function like Mechanical Belts, but cannot be placed vertically or diagonally.
+
+**Conveyor Rotator**
+When provided with kinetic rotation, the Conveyor Rotator acts like an autonomous Mechanical Bearing that rotates any movable block above it to face it's Output Direction. It then tries to push the block in the direction of output, like a Conveyor Belt.
+
+
+**Mechanical Stamper**
+Mechanical Stampers function like a horizontal Mechanical Press. They can act upon either itemEntities or items on a belt in front them (like the Mechanical Press, but horizontally), but there must be an air gap between them. Like a press, they will halt item flow on belts while processing an item.
+
+As well as the primary target ingredient, Mechanical Stampers can specify three other optional inputs; A 'Stamp Item' item, a 'Fill Medium' item, and/or a 'Fill Fluid' fluid.
+
+The Stamp Item is a single-count itemstack represented as a ChancedIngredient. Most Stamp Items have a 0% chance of being consumed when used. Stamp Items can only be inserted into the Mechanical Stamper by clicking (or inserting through) its front-face.
+
+The Fill Fluid can only be inserted into the Mechanical Stamper through its back face.
+
+The Fill Medium can be inserted through any face except for the front or back, and is represented as a SizedIngredient.
+
 
 
 ### **Content (v1)**
 
 **Manifolds**
-Distillery tanks ar
+
 
 **Delivery Monoliths**

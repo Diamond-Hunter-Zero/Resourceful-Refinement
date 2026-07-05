@@ -1,5 +1,6 @@
-
 ## Overview
+
+**Vertical Slice:** 0.5
 
 The **Blender Blade** (`resourceful_refinement:blender_blade`) is a Create-connected kinetic block: a shaft-mounted rotor with two opposing flat arms. It is used as a structural and mechanical component inside the [[Fluid Refinery]] multiblock (centre column of middle and top layers) and can also be placed standalone.
 

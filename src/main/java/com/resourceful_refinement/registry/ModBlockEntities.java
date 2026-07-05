@@ -5,6 +5,8 @@ import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
+import com.resourceful_refinement.content.conveyor.ConveyorBeltBlockEntity;
+import com.resourceful_refinement.content.conveyor.ConveyorRotatorBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
@@ -91,6 +93,12 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<BrewersTapBlockEntity>> BREWERS_TAP_BE = BLOCK_ENTITIES.register("brewers_tap",
             () -> BlockEntityType.Builder.of((pos, state) -> new BrewersTapBlockEntity(ModBlockEntities.BREWERS_TAP_BE.get(), pos, state), ModBlocks.BREWERS_TAP.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ConveyorBeltBlockEntity>> CONVEYOR_BELT_BE = BLOCK_ENTITIES.register("conveyor_belt",
+            () -> BlockEntityType.Builder.of((pos, state) -> new ConveyorBeltBlockEntity(ModBlockEntities.CONVEYOR_BELT_BE.get(), pos, state), ModBlocks.CONVEYOR_BELT.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ConveyorRotatorBlockEntity>> CONVEYOR_ROTATOR_BE = BLOCK_ENTITIES.register("conveyor_rotator",
+            () -> BlockEntityType.Builder.of((pos, state) -> new ConveyorRotatorBlockEntity(ModBlockEntities.CONVEYOR_ROTATOR_BE.get(), pos, state), ModBlocks.CONVEYOR_ROTATOR.get()).build(null));
 
 
 

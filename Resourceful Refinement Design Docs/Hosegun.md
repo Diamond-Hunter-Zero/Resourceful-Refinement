@@ -3,6 +3,7 @@
 The hosegun is an item tool which has an internal fluid tank, and can be used to fire a spray of gel-blob projectile entities. Gel-blobs carry a fluid ID, and execute different functions or effects when they impact blocks or entities, according to their gel-type.
 
 **ID:** *housegun*
+**Vertical Slice:** 0.2
 
 
 #### **Usage & Ammunition**

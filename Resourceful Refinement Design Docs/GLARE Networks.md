@@ -2,6 +2,8 @@
 
 GLARE Networks are a graph network formed by in-world blocks, connected to each other by line-of-sight laser beams, and synchronously handled by a global data structure. A GLARE network provides and allocates power called 'Lux Capacity', stores and transfers messages in an e-mail-like system, and enables teleportation between locations.
 
+**Vertical Slice:** 0.4
+
 
 ### **GLARE Network Rules**
 A GLARE network consist of a graph of links between BlockEntities. A network encodes no sense of directionality; Only membership to the network. At a high-level, a network exists as a structural data-object server-side, associating nodes (blocks) in the network with the network ID, properties, and their immediate neighbours.

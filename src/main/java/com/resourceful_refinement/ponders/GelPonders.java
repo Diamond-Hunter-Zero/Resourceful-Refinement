@@ -201,7 +201,14 @@ public class GelPonders {
                 .independent();
 
         var sheepLink = scene.world().createEntity(level -> {
-            Sheep sheepMob = new Sheep(EntityType.SHEEP, level);
+            Sheep sheepMob = new Sheep(EntityType.SHEEP, level){
+                @Override
+                public void tick() {
+                    // Disable the default tick calls
+                    //super.tick();
+                    this.walkAnimation.update(0f, 0f);
+                }
+            };
             sheepMob.setPos(1.5, 1, 1.5);
             sheepMob.setYRot(225f);
             sheepMob.setNoAi(true);
@@ -389,7 +396,15 @@ public class GelPonders {
 
         scene.idle(10);
         var sheepLink = scene.world().createEntity(level -> {
-            Sheep sheepMob = new Sheep(EntityType.SHEEP, level);
+            Sheep sheepMob = new Sheep(EntityType.SHEEP, level)
+            {
+                @Override
+                public void tick() {
+                    // Disable the default tick calls
+                    //super.tick();
+                    this.walkAnimation.update(0f, 0f);
+                }
+            };
             sheepMob.setPos(moltenGelSegment.getCenter().add(0,-0.5,0));
             sheepMob.setYRot(180);
             sheepMob.setNoAi(true);

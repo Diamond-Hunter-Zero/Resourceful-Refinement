@@ -2,7 +2,9 @@ package com.resourceful_refinement.ponders;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.registry.ModBlocks;
+import com.resourceful_refinement.registry.ModFluids;
 import com.resourceful_refinement.registry.ModItems;
+import com.simibubi.create.AllBlocks;
 import net.createmod.ponder.api.registration.PonderPlugin;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.createmod.ponder.api.registration.PonderTagRegistrationHelper;
@@ -76,6 +78,35 @@ public class ModPonders implements PonderPlugin {
         helper.forComponents(ModItems.GLUE_POT.getId())
                 .addStoryBoard("glue_pot_ponder", GelPonders::gloopyHosegunScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
+        helper.forComponents(ModItems.RADIATOR_PIPE_ITEM.getId(), ModFluids.COOLANT.bucket.getId())
+                .addStoryBoard("radiator_ponder", RadiatorPonders::radiatorBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("radiator_crafting_ponder", RadiatorPonders::radiatorCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModFluids.COOLANT.bucket.getId())
+                .addStoryBoard("radiator_ponder", RadiatorPonders::radiatorBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(AllBlocks.BASIN.getId())
+                .addStoryBoard("radiator_crafting_ponder", RadiatorPonders::radiatorCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.DISTILLERY.getId())
+                .addStoryBoard("distillery_ponder", DistilleryPonders::distilleryScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("radiator_crafting_ponder", RadiatorPonders::radiatorCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.COMBUSTION_CHAMBER.getId())
+                .addStoryBoard("combustion_chamber_ponder", CombustionChamberPonders::chamberBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.FUEL_TANK.getId())
+                .addStoryBoard("fuel_tank_ponder", CombustionChamberPonders::fuelTankScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.MILKING_STATION.getId())
+                .addStoryBoard("milking_station_ponder", MilkingStationPonders::milkingStationScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.ADVANCED_PUMP.getId())
+                .addStoryBoard("advanced_pump_ponder", PumpPonders::advancedPumpBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
+        helper.forComponents(ModBlocks.BREWERS_TAP.getId(), ModItems.DRINKS_GLASS.getId())
+                .addStoryBoard("brewers_tap_ponder", BrewersTapPonders::brewersTapScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
     }
 
     public static void registerTagsHelper(PonderTagRegistrationHelper<ResourceLocation> helper) {
@@ -84,7 +115,7 @@ public class ModPonders implements PonderPlugin {
                 .addToIndex()
                 .title("Resourceful Refinement")
                 .description("Advanced processing and refinement for fluids and ores")
-                .icon(ModBlocks.MECHANICAL_SIEVE.getId())
+                .item(ModBlocks.MECHANICAL_SIEVE.asItem(), true, true)
                 .register();
 
         helper.addToTag(RESOURCEFUL_REFINEMENT_CHAPTER)
@@ -101,6 +132,14 @@ public class ModPonders implements PonderPlugin {
                 .add(ModBlocks.GEL_SPLATTER_BOUNCY.getId())
                 .add(ModBlocks.GEL_SPLATTER.getId())
                 .add(ModItems.HOSEGUN.getId())
-                .add(ModBlocks.FLUID_REFILL_STATION.getId());
+                .add(ModBlocks.FLUID_REFILL_STATION.getId())
+                .add(ModBlocks.RADIATOR_PIPE.getId())
+                .add(ModFluids.COOLANT.bucket.getId())
+                .add(ModBlocks.DISTILLERY.getId())
+                .add(ModBlocks.COMBUSTION_CHAMBER.getId())
+                .add(ModBlocks.FUEL_TANK.getId())
+                .add(ModBlocks.MILKING_STATION.getId())
+                .add(ModBlocks.ADVANCED_PUMP.getId())
+                .add(ModBlocks.BREWERS_TAP.getId());
     }
 }

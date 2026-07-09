@@ -61,6 +61,18 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
         return redstonePowered;
     }
 
+    public void setRedstoneState( boolean shouldBePowdered)
+    {
+        if (level == null || level.isClientSide)
+            return;
+
+        redstonePowered = shouldBePowdered;
+        if (getBlockState().getBlock() instanceof AdvancedPumpBlock)
+            AdvancedPumpBlock.updatePoweredState(level, worldPosition, getBlockState(), shouldBePowdered);
+        updatePressureChange();
+        sendData();
+    }
+
     @Override
     public void updatePressureChange() {
         AdvancedPumpThroughputTracker.remove(this);

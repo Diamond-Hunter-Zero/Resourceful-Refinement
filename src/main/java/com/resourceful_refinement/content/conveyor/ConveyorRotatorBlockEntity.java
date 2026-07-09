@@ -27,6 +27,7 @@ public class ConveyorRotatorBlockEntity extends KineticBlockEntity implements IC
     private Direction outputDirection;
     private ConveyorRotatorRotationSession rotationSession;
     private BlockState completedFullSpinState;
+    private BlockState pendingRotatedOutputState;
     private ControlledContraptionEntity movedContraption;
     private float contraptionAngle;
 
@@ -87,12 +88,24 @@ public class ConveyorRotatorBlockEntity extends KineticBlockEntity implements IC
         BlockState sourceState = level.getBlockState(sourcePos);
         if (sourceState.isAir()) {
             completedFullSpinState = null;
+            pendingRotatedOutputState = null;
             return false;
         }
         if (completedFullSpinState != null && !sourceState.equals(completedFullSpinState)) {
             completedFullSpinState = null;
         }
+        if (pendingRotatedOutputState != null && !sourceState.equals(pendingRotatedOutputState)) {
+            pendingRotatedOutputState = null;
+        }
         if (!canHandleSource(sourcePos)) {
+            return false;
+        }
+
+        if (tryPushPendingRotatedOutput(sourcePos, sourceState)) {
+            return true;
+        }
+
+        if (isRedstonePowered()) {
             return false;
         }
 
@@ -144,6 +157,9 @@ public class ConveyorRotatorBlockEntity extends KineticBlockEntity implements IC
         if (completedFullSpinState != null) {
             compound.put("CompletedFullSpinState", NbtUtils.writeBlockState(completedFullSpinState));
         }
+        if (pendingRotatedOutputState != null) {
+            compound.put("PendingRotatedOutputState", NbtUtils.writeBlockState(pendingRotatedOutputState));
+        }
         super.write(compound, registries, clientPacket);
     }
 
@@ -158,6 +174,9 @@ public class ConveyorRotatorBlockEntity extends KineticBlockEntity implements IC
         contraptionAngle = compound.getFloat("ContraptionAngle");
         completedFullSpinState = compound.contains("CompletedFullSpinState")
                 ? NbtUtils.readBlockState(registries.lookupOrThrow(Registries.BLOCK), compound.getCompound("CompletedFullSpinState"))
+                : null;
+        pendingRotatedOutputState = compound.contains("PendingRotatedOutputState")
+                ? NbtUtils.readBlockState(registries.lookupOrThrow(Registries.BLOCK), compound.getCompound("PendingRotatedOutputState"))
                 : null;
     }
 
@@ -247,15 +266,35 @@ public class ConveyorRotatorBlockEntity extends KineticBlockEntity implements IC
         level.setBlock(sourcePos, session.targetState(), Block.UPDATE_ALL);
 
         completedFullSpinState = session.fullSpin() ? session.targetState() : null;
+        pendingRotatedOutputState = session.targetState();
         clearRotationSession();
         if (!forcedByPlayer || getSpeed() != 0) {
-            ConveyorBlockMover.tryMoveBlock(level, sourcePos, outputDirection);
+            ConveyorMovementResult result = ConveyorBlockMover.tryMoveBlock(level, sourcePos, outputDirection);
+            if (result.moved()) {
+                pendingRotatedOutputState = null;
+            }
         }
+    }
+
+    private boolean tryPushPendingRotatedOutput(BlockPos sourcePos, BlockState sourceState) {
+        if (pendingRotatedOutputState == null || !sourceState.equals(pendingRotatedOutputState)) {
+            return false;
+        }
+
+        ConveyorMovementResult result = ConveyorBlockMover.tryMoveBlock(level, sourcePos, outputDirection);
+        if (result.moved()) {
+            pendingRotatedOutputState = null;
+        }
+        return true;
     }
 
     private boolean canHandleSource(BlockPos sourcePos) {
         return ConveyorBlockMover.getSourceMovementFailure(level, sourcePos, outputDirection)
                 == ConveyorMovementResult.FailureReason.NONE;
+    }
+
+    private boolean isRedstonePowered() {
+        return level != null && level.hasNeighborSignal(worldPosition);
     }
 
     private boolean isSessionBlock(BlockState state) {

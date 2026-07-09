@@ -17,6 +17,7 @@ import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
+import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
@@ -193,6 +194,12 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Mechanical Stamper ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MECHANICAL_STAMPER_BE.get(),
+                (be, side) -> be.getItemHandler(side));
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.MECHANICAL_STAMPER_BE.get(),
+                (be, side) -> be.getFluidHandler(side));
+
         // --- Casting Depot ---
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CASTING_DEPOT_BE.get(), (be, side) -> be.getItemHandler());
 
@@ -336,6 +343,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_ACCESS_PORT.get(), FluidRefineryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_SIEVE_BE.get(), com.resourceful_refinement.content.sieve.MechanicalSieveRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_FORGE_MOULD_BE.get(), ForgeMouldRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_STAMPER_BE.get(), MechanicalStamperRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CASTING_DEPOT_BE.get(), CastingDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);

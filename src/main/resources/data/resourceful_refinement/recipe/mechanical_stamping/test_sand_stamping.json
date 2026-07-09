@@ -1,0 +1,19 @@
+{
+  "type": "resourceful_refinement:mechanical_stamping",
+  "ingredients": [],
+  "target": {
+    "item": "minecraft:sand"
+  },
+  "stamp": {
+    "item": "minecraft:stone",
+    "consumption_chance": 0.0
+  },
+  "results": [
+    {
+      "id": "minecraft:glass",
+      "count": 1
+    }
+  ],
+  "processingTime": 80,
+  "isolatedStamper": false
+}

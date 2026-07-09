@@ -45,6 +45,8 @@ public class ModItems {
     public static final DeferredItem<MechanicalForgeMouldItem> MECHANICAL_FORGE_MOULD_ITEM = ITEMS.register("mechanical_forge_mould",
             () -> new MechanicalForgeMouldItem(ModBlocks.MECHANICAL_FORGE_MOULD.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> MECHANICAL_STAMPER_ITEM = ITEMS.registerSimpleBlockItem("mechanical_stamper", ModBlocks.MECHANICAL_STAMPER);
+
     public static final DeferredItem<BlockItem> CASTING_DEPOT_ITEM = ITEMS.register("casting_depot",
             ()-> new CastingDepotItem(ModBlocks.CASTING_DEPOT.get(), new Item.Properties()));
 

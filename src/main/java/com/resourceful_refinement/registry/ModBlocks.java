@@ -14,6 +14,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
+import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
@@ -66,6 +67,9 @@ public class ModBlocks {
 
     public static final DeferredBlock<MechanicalForgeMouldBlock> MECHANICAL_FORGE_MOULD = BLOCKS.register("mechanical_forge_mould",
             () -> new MechanicalForgeMouldBlock(BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<MechanicalStamperBlock> MECHANICAL_STAMPER = BLOCKS.register("mechanical_stamper",
+            () -> new MechanicalStamperBlock(BlockBehaviour.Properties.of().strength(2.5f).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion()));
 
     public static final DeferredBlock<CastingDepotBlock> CASTING_DEPOT = BLOCKS.register("casting_depot",
             () -> new CastingDepotBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.DEPOT.get()).requiresCorrectToolForDrops().noOcclusion()));

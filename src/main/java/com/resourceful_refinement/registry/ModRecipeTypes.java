@@ -4,6 +4,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
+import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipe;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipe;
@@ -52,6 +53,14 @@ public class ModRecipeTypes {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MechanicalForgeMouldRecipe>> MECHANICAL_FORGE_MOULD_SERIALIZER =
             RECIPE_SERIALIZERS.register("mechanical_forge_mould", MechanicalForgeMouldRecipe.Serializer::new);
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<MechanicalStamperRecipe>> MECHANICAL_STAMPING_TYPE =
+            RECIPE_TYPES.register("mechanical_stamping", () -> {
+                return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_stamping"));
+            });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<MechanicalStamperRecipe>> MECHANICAL_STAMPING_SERIALIZER =
+            RECIPE_SERIALIZERS.register("mechanical_stamping", MechanicalStamperRecipe.Serializer::new);
 
     public static final DeferredHolder<RecipeType<?>, RecipeType<com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe>> COATING_TYPE =
             RECIPE_TYPES.register("coating", () -> {
@@ -126,6 +135,12 @@ public class ModRecipeTypes {
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_forge_mould"),
             MECHANICAL_FORGE_MOULD_SERIALIZER::get,
             MECHANICAL_FORGE_MOULD_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo MECHANICAL_STAMPING_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "mechanical_stamping"),
+            MECHANICAL_STAMPING_SERIALIZER::get,
+            MECHANICAL_STAMPING_TYPE::get
     );
 
     public static final IRecipeTypeInfo COATING_TYPE_INFO = new RefinementRecipeTypeInfo(

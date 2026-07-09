@@ -44,15 +44,31 @@ public class ConveyorBeltBlockEntity extends KineticBlockEntity {
             return false;
         }
 
+        List<BlockPos> chain = new ArrayList<>(ConveyorBeltBlock.getBeltChain(level, worldPosition));
+        if (isTrainPowered(chain)) {
+            return false;
+        }
+
         int interval = ConveyorBlockMover.movementIntervalForSpeed(speed);
         if (level.getGameTime() % interval != 0) {
             return false;
         }
 
         Direction movementDirection = movementFacingForSpeed(speed);
-        List<BlockPos> chain = new ArrayList<>(ConveyorBeltBlock.getBeltChain(level, worldPosition));
         ConveyorBlockMover.processLineFrontToBack(level, chain, movementDirection);
         return true;
+    }
+
+    private boolean isTrainPowered(List<BlockPos> chain) {
+        if (level == null) {
+            return false;
+        }
+        for (BlockPos beltPos : chain) {
+            if (level.hasNeighborSignal(beltPos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

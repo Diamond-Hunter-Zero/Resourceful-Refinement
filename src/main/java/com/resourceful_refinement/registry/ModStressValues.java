@@ -11,6 +11,7 @@ public class ModStressValues {
     public static final double FRACKING_STRESS = 16;
     public static final double SIEVE_STRESS = 4;
     public static final double FORGE_STRESS = 8;
+    public static final double MECHANICAL_STAMPER_STRESS = 4;
     public static final double ADVANCED_PUMP_STRESS = 8;
     public static final double MILKING_STATION_STRESS = 4;
     public static final double CONVEYOR_ROTATOR_STRESS = 2;
@@ -22,6 +23,7 @@ public class ModStressValues {
         registerImpact(ModBlocks.FRACKING_PUMP_OUTLET.get(), () -> FRACKING_STRESS);
         registerImpact(ModBlocks.MECHANICAL_SIEVE.get(), () -> SIEVE_STRESS);
         registerImpact(ModBlocks.MECHANICAL_FORGE_MOULD.get(), () -> FORGE_STRESS);
+        registerImpact(ModBlocks.MECHANICAL_STAMPER.get(), () -> MECHANICAL_STAMPER_STRESS);
         registerImpact(ModBlocks.ADVANCED_PUMP.get(), () -> ADVANCED_PUMP_STRESS);
         registerImpact(ModBlocks.MILKING_STATION.get(), () -> MILKING_STATION_STRESS);
         registerImpact(ModBlocks.CONVEYOR_ROTATOR.get(), () -> CONVEYOR_ROTATOR_STRESS);

@@ -11,6 +11,7 @@ import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
+import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperBlockEntity;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
@@ -48,6 +49,9 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<MechanicalForgeMouldBlockEntity>> MECHANICAL_FORGE_MOULD_BE = BLOCK_ENTITIES.register("mechanical_forge_mould",
             () -> BlockEntityType.Builder.of((pos, state) -> new MechanicalForgeMouldBlockEntity(ModBlockEntities.MECHANICAL_FORGE_MOULD_BE.get(), pos, state), ModBlocks.MECHANICAL_FORGE_MOULD.get()).build(null));
+
+    public static final Supplier<BlockEntityType<MechanicalStamperBlockEntity>> MECHANICAL_STAMPER_BE = BLOCK_ENTITIES.register("mechanical_stamper",
+            () -> BlockEntityType.Builder.of((pos, state) -> new MechanicalStamperBlockEntity(ModBlockEntities.MECHANICAL_STAMPER_BE.get(), pos, state), ModBlocks.MECHANICAL_STAMPER.get()).build(null));
 
     public static final Supplier<BlockEntityType<CastingDepotBlockEntity>> CASTING_DEPOT_BE = BLOCK_ENTITIES.register("casting_depot",
             () -> BlockEntityType.Builder.of((pos, state) -> new CastingDepotBlockEntity(ModBlockEntities.CASTING_DEPOT_BE.get(), pos, state), ModBlocks.CASTING_DEPOT.get()).build(null));

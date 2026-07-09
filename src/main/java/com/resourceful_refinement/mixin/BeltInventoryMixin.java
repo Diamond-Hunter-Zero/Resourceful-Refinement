@@ -1,6 +1,7 @@
 package com.resourceful_refinement.mixin;
 
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
+import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.transport.BeltInventory;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
@@ -21,6 +22,9 @@ public abstract class BeltInventoryMixin {
     @Inject(method = "handleBeltProcessingAndCheckIfRemoved", at = @At("HEAD"), cancellable = true)
     private void resourceful_refinement$handleBrewersTapProcessing(TransportedItemStack transported, float nextOffset, boolean blocking, CallbackInfoReturnable<Boolean> cir) {
         Boolean result = BrewersTapBlockEntity.handleBeltProcessing(belt, transported, nextOffset, blocking);
+        if (result == null) {
+            result = MechanicalStamperBlockEntity.handleBeltProcessing(belt, transported, nextOffset, blocking);
+        }
         if (result != null) {
             cir.setReturnValue(result);
         }

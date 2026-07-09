@@ -5,7 +5,7 @@ Mechanical Stampers function like a horizontal Mechanical Press. While powered b
 **Vertical Slice:** 0.5
 
 #### **Placement**
-Mechanical Stampers function like a horizontal Mechanical Press. They can act upon either itemEntities or items on a belt, depot, or workspace in front them (like the Mechanical Press, but horizontally), but there must be an air gap between them. Like a press, they will halt item flow on belts while processing an item.
+Mechanical Stampers function like a horizontal Mechanical Press. They can act upon either itemEntities or items on a belt, depot, or workspace in front them (like the Mechanical Press, but horizontally), usually in pairs. Both Stampers must be placed with an empty (Air) 3 block gap between them, and facing each other. Their work item (whether on a belt/depot, or as a floating itemEntity) must be positioned in the middle block gap (This means that for items on belts/depots, the stampers must technically check the block below the middle-gap block). Like a press, they will halt item flow on belts while processing an item.
 
 
 #### **Behaviour**
@@ -19,14 +19,25 @@ As well as the primary target ingredient, Mechanical Stampers can specify three 
 
 - The Fill Medium can be inserted through any face except for the front or back, and is represented as a SizedIngredient.
 
-Mechanical Stampers accepts and transfer kinetic rotation along a horizontal (local) X-Axis. They only operate while receiving kinetic input, and their processing time is proportional to their RPM.
+Mechanical Stampers accepts and transfer kinetic rotation along a horizontal (local) X-Axis. They only operate while receiving kinetic input, and their processing time is proportional to the stamper in the pair with the lowest RPM.
 
 
 Like the Mechanical Press, the Mechanical Stamper uses a staged processing cycle;
-1. Once a valid recipe has been detected, the stamper halts the item (if on a belt), and begins to extend its head
-2. Once the head is fully extended, the stamp checks that the recipe is still valid, and processing inputs/outputs
-3. The belt in then unhalted (regardless of successful processing), and the head begins to retract
-4. Once the head is back to tis retracted resting state, it then idles until a new valid recipe is detected again
+1. Once a valid recipe has been detected by either stamper, it then check whether it has a valid partner, and if so, whether that partner is available to begin  processing cycle. If so, the process proceeds:
+2. The stampers halt the item (if on a belt), and begin to extend their heads towards each other
+3. Once the heads are fully extended, the stampers check that the recipe is still valid, and process inputs/outputs
+4. The belt in then unhalted (regardless of successful processing), and the heads begin to retract
+5. Once each stamper's head is back to its retracted resting state, it then idles until a new valid recipe is detected again
+
+
+### **Partnering**
+Mechanical Stampers typically work in pairs. When in the correct placement (as described above), either stamper in a pair can initiate a processing sequence. Both stampers need to have the valid inputs for the recipe and kinetic input, and both stampers consume these ingredients on a successful output. The stampers do not individually produce outputs though (i.e. only one set of results is produced). If either stamper is rotated or removed prior to the processing step, the recipe fails.
+
+Whenever a stamper is removed, placed, or rotated, it should update any partners it was previously linked to, or look for a new partner to connect to.
+
+
+### **Isolated Stampers**
+The Stamper recipe type should contain a boolean field called "isolatedStamper", with a default value of FALSE. Recipes utilising this field with a value of TRUE do not require stampers to work in pairs, and only need a single stamper with the valid inputs to be considered a valid recipe.
 
 
 ### **Rendering**

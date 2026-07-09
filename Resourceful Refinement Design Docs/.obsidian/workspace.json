@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Conveyor Belt.md",
+                "file": "Mechanical Stamper.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Conveyor Belt"
+              "title": "Mechanical Stamper"
             }
           }
         ],
@@ -244,9 +244,9 @@
   },
   "active": "e4f0f7c0aecf1424",
   "lastOpenFiles": [
+    "Conveyor Belt.md",
     "Mechanical Stamper.md",
     "Primary Design Doc.md",
-    "Conveyor Belt.md",
     "v0.3 Recipes & Crafting Items.md",
     "Telemetry Terminal GUI.md",
     "Speedy Gel Parkour Run.mp4",

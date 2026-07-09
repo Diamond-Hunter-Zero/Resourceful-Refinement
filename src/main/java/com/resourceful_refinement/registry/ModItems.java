@@ -8,6 +8,8 @@ import com.resourceful_refinement.content.conveyor.ConveyorBeltItem;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldItem;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletItem;
 import com.resourceful_refinement.content.geyser.GeyserItem;
+import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
+import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.content.milking_station.MilkingStationItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
@@ -37,7 +39,6 @@ public class ModItems {
             () -> new BlenderBladeItem(ModBlocks.BLENDER_BLADE.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> REFINERY_ACCESS_PORT = ITEMS.registerSimpleBlockItem("refinery_access_port", ModBlocks.REFINERY_ACCESS_PORT);
-    // REFINERY_PROXY has no player-obtainable item — it is only placed programmatically during assembly.
 
     public static final DeferredItem<BlockItem> MECHANICAL_SIEVE_ITEM = ITEMS.register("mechanical_sieve",
             ()-> new MechanicalSieveItem(ModBlocks.MECHANICAL_SIEVE.get(), new Item.Properties()));
@@ -64,6 +65,8 @@ public class ModItems {
     public static final DeferredItem<FluidRefillStationItem> FLUID_REFILL_STATION_ITEM = ITEMS.register("fluid_refill_station",
             () -> new FluidRefillStationItem(ModBlocks.FLUID_REFILL_STATION.get(), new Item.Properties()));
 
+
+    // v0.3 Content
     public static final DeferredItem<BlockItem> DISTILLERY_ITEM = ITEMS.registerSimpleBlockItem("distillery", ModBlocks.DISTILLERY);
 
     public static final DeferredItem<BlockItem> RADIATOR_PIPE_ITEM = ITEMS.registerSimpleBlockItem("radiator_pipe", ModBlocks.RADIATOR_PIPE);
@@ -86,6 +89,54 @@ public class ModItems {
     public static final DeferredItem<BlockItem> CONVEYOR_ROTATOR_ITEM = ITEMS.registerSimpleBlockItem("conveyor_rotator", ModBlocks.CONVEYOR_ROTATOR);
 
 
+    // v0.4 Content
+    public static final DeferredItem<BlockItem> BUCKET_EXCAVATOR_ITEM = ITEMS.registerSimpleBlockItem("bucket_excavator", ModBlocks.BUCKET_EXCAVATOR);
+
+    public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", ModBlocks.MINERAL_DEPOSIT);
+
+    public static final DeferredItem<BlockItem> CRYSTAL_FISSURE_BUD_ITEM = ITEMS.registerSimpleBlockItem("crystal_fissure_bud", ModBlocks.CRYSTAL_FISSURE_BUD);
+
+    public static final DeferredItem<BlockItem> DRILL_PYLON_HEAD_ITEM = ITEMS.registerSimpleBlockItem("drill_pylon_head", ModBlocks.DRILL_PYLON_HEAD);
+
+    public static final DeferredItem<BlockItem> HEAVY_PLATE_SHIELDING_ITEM = ITEMS.registerSimpleBlockItem("heavy_plate_shielding", ModBlocks.HEAVY_PLATE_SHIELDING);
+
+    public static final DeferredItem<BlockItem> CYCLOTRON_CONTROLLER_ITEM = ITEMS.registerSimpleBlockItem("cyclotron_controller", ModBlocks.CYCLOTRON_CONTROLLER);
+
+
+    // GLARE Content
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_RELAY = ITEMS.register("glare_relay",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_RELAY.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_EMITTER_DISH = ITEMS.register("glare_emitter_dish",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_EMITTER_DISH.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_KINETIC_RECEIVER = ITEMS.register("glare_kinetic_receiver",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_KINETIC_RECEIVER.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_CHROMATIC_TRANSCEIVER = ITEMS.register("glare_chromatic_transceiver",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> GLARE_TELEMETRY_TERMINAL = ITEMS.register("glare_telemetry_terminal",
+            () -> new GlareNodeBlockItem(ModBlocks.GLARE_TELEMETRY_TERMINAL.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> LUX_TRANSCEIVER = ITEMS.register("lux_transceiver",
+            () -> new GlareNodeBlockItem(ModBlocks.LUX_TRANSCEIVER.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> REMOTE_ENTANGLER_DEPOT = ITEMS.register("remote_entangler_depot",
+            () -> new GlareNodeBlockItem(ModBlocks.REMOTE_ENTANGLER_DEPOT.get(), new Item.Properties()));
+
+    public static final DeferredItem<GlareNodeBlockItem> REMOTE_ENTANGLEMENT_TRANSPORTER = ITEMS.register(
+            "remote_entanglement_transporter",
+            () -> new GlareNodeBlockItem(ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> LAUNCHPAD_CONTROLLER = ITEMS.registerSimpleBlockItem(
+            "launchpad_controller", ModBlocks.LAUNCHPAD_CONTROLLER);
+
+    public static final DeferredItem<BlockItem> RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("resonance_crystal", ModBlocks.RESONANCE_CRYSTAL);
+
+    public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);
+
+
     // -------------------------------------------------------------------------
     // Gel Items
     // -------------------------------------------------------------------------
@@ -102,6 +153,8 @@ public class ModItems {
 
     public static final DeferredItem<Item> FERROUS_CRYSTAL = ITEMS.registerItem("ferrous_crystal", Item::new, new Item.Properties());
     public static final DeferredItem<Item> FLUX_DUST = ITEMS.registerItem("flux_dust", Item::new, new Item.Properties());
+    public static final DeferredItem<RelayWrenchItem> RELAY_WRENCH = ITEMS.register("relay_wrench",
+            () -> new RelayWrenchItem(new Item.Properties()));
 
     public static final DeferredItem<Item> DURASTEEL_INGOT = ITEMS.registerItem("durasteel_ingot", Item::new, new Item.Properties());
     public static final DeferredItem<Item> DURASTEEL_SHEET = ITEMS.registerItem("durasteel_sheet", Item::new, new Item.Properties());

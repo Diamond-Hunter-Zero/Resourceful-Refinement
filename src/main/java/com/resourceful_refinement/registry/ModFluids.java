@@ -67,6 +67,7 @@ public class ModFluids {
     public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, PouredCementBlock.class);
     public static final FluidEntry ORGANIC_SLUSH = register("organic_slush", 0x516e3e, FluidGroup.ALLOYED);
     public static final FluidEntry POLYMER_SLUDGE = register("polymer_sludge", 0x1f2840, FluidGroup.ALLOYED);
+    public static final FluidEntry LIQUID_CHORUS = register("liquid_chorus", 0x8E63C7, FluidGroup.ALLOYED);
 
     // Drinks
     public static final FluidEntry HOT_CHOCOLATE = register("hot_chocolate", 0x633721, FluidGroup.DRINK);

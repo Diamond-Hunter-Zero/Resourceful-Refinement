@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=down": { "model": "resourceful_refinement:block/lux_transceiver", "x": 180 },
+    "facing=up": { "model": "resourceful_refinement:block/lux_transceiver" },
+    "facing=north": { "model": "resourceful_refinement:block/lux_transceiver", "x": 90 },
+    "facing=east": { "model": "resourceful_refinement:block/lux_transceiver", "x": 90, "y": 90 },
+    "facing=south": { "model": "resourceful_refinement:block/lux_transceiver", "x": 90, "y": 180 },
+    "facing=west": { "model": "resourceful_refinement:block/lux_transceiver", "x": 90, "y": 270 }
+  }
+}

@@ -2,6 +2,8 @@ package com.resourceful_refinement.content.refill_station;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures;
+import com.resourceful_refinement.content.gui.SqrHoverButton;
 import com.resourceful_refinement.network.SetRefillStationTrackingIdPayload;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.simibubi.create.foundation.gui.AllIcons;
@@ -17,7 +19,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -88,22 +89,22 @@ public class FluidRefillStationScreen extends AbstractSimiScreen implements Menu
         ).calling(this::applyTrackingIdSelection);
         addRenderableWidget(trackingIdPicker);
 
-        addRenderableWidget(new RefillStationHoverButton(
+        addRenderableWidget(new SqrHoverButton(
                 guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 33,
                 guiTop + 4,
-                RefillStationGuiTextures.HOVER_CLOSE,
+                CommonSqrButtonTextures.HOVER_CLOSE,
                 this::onClose));
 
-        addRenderableWidget(new RefillStationHoverButton(
+        addRenderableWidget(new SqrHoverButton(
                 guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 59,
                 guiTop + RefillStationGuiTextures.PANEL_HEIGHT - 24,
-                RefillStationGuiTextures.HOVER_CLEAR,
+                CommonSqrButtonTextures.HOVER_CLEAR,
                 () -> trackingIdField.setValue("")));
 
-        addRenderableWidget(new RefillStationHoverButton(
+        addRenderableWidget(new SqrHoverButton(
                 guiLeft + RefillStationGuiTextures.PANEL_WIDTH - 33,
                 guiTop + RefillStationGuiTextures.PANEL_HEIGHT - 24,
-                RefillStationGuiTextures.HOVER_SAVE,
+                CommonSqrButtonTextures.HOVER_SAVE,
                 this::saveAndClose));
     }
 

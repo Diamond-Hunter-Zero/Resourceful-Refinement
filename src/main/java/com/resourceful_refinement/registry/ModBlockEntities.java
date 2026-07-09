@@ -3,11 +3,19 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.conveyor.ConveyorBeltBlockEntity;
 import com.resourceful_refinement.content.conveyor.ConveyorRotatorBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlockEntity;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronProxyBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonKineticProxyBlockEntity;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonProxyBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockEntity;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
@@ -23,7 +31,18 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEnti
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
+import com.resourceful_refinement.content.glare.GlareEmitterDishBlockEntity;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity;
+import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlockEntity;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationBlockEntity;
+import com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity;
+import com.resourceful_refinement.content.pug.LaunchpadProxyBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -76,6 +95,73 @@ public class ModBlockEntities {
                     (pos, state) -> new FluidRefillStationBlockEntity(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), pos, state),
                     ModBlocks.FLUID_REFILL_STATION.get()
             ).build(null));
+
+    public static final Supplier<BlockEntityType<BucketExcavatorBlockEntity>> BUCKET_EXCAVATOR_BE = BLOCK_ENTITIES.register("bucket_excavator",
+            () -> BlockEntityType.Builder.of((pos, state) -> new BucketExcavatorBlockEntity(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), pos, state), ModBlocks.BUCKET_EXCAVATOR.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CrystalFissureBudBlockEntity>> CRYSTAL_FISSURE_BUD_BE = BLOCK_ENTITIES.register("crystal_fissure_bud",
+            () -> BlockEntityType.Builder.of(CrystalFissureBudBlockEntity::new, ModBlocks.CRYSTAL_FISSURE_BUD.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonHeadBlockEntity>> DRILL_PYLON_HEAD_BE = BLOCK_ENTITIES.register("drill_pylon_head",
+            () -> BlockEntityType.Builder.of((pos, state) -> new DrillPylonHeadBlockEntity(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), pos, state), ModBlocks.DRILL_PYLON_HEAD.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonProxyBlockEntity>> DRILL_PYLON_PROXY_BE = BLOCK_ENTITIES.register("drill_pylon_proxy",
+            () -> BlockEntityType.Builder.of(DrillPylonProxyBlockEntity::new, ModBlocks.DRILL_PYLON_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<DrillPylonKineticProxyBlockEntity>> DRILL_PYLON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("drill_pylon_kinetic_proxy",
+            () -> BlockEntityType.Builder.of(DrillPylonKineticProxyBlockEntity::new, ModBlocks.DRILL_PYLON_KINETIC_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronControllerBlockEntity>> CYCLOTRON_CONTROLLER_BE = BLOCK_ENTITIES.register("cyclotron_controller",
+            () -> BlockEntityType.Builder.of(CyclotronControllerBlockEntity::new, ModBlocks.CYCLOTRON_CONTROLLER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronProxyBlockEntity>> CYCLOTRON_PROXY_BE = BLOCK_ENTITIES.register("cyclotron_proxy",
+            () -> BlockEntityType.Builder.of(CyclotronProxyBlockEntity::new, ModBlocks.CYCLOTRON_PROXY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CyclotronKineticProxyBlockEntity>> CYCLOTRON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("cyclotron_kinetic_proxy",
+            () -> BlockEntityType.Builder.of(CyclotronKineticProxyBlockEntity::new, ModBlocks.CYCLOTRON_KINETIC_PROXY.get()).build(null));
+
+
+    // GLARE blocks
+
+    public static final Supplier<BlockEntityType<GlareRelayBlockEntity>> GLARE_RELAY_BE = BLOCK_ENTITIES.register("glare_relay",
+            () -> BlockEntityType.Builder.of(GlareRelayBlockEntity::new, ModBlocks.GLARE_RELAY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareEmitterDishBlockEntity>> GLARE_EMITTER_DISH_BE = BLOCK_ENTITIES.register("glare_emitter_dish",
+            () -> BlockEntityType.Builder.of(GlareEmitterDishBlockEntity::new, ModBlocks.GLARE_EMITTER_DISH.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareKineticReceiverBlockEntity>> GLARE_KINETIC_RECEIVER_BE = BLOCK_ENTITIES.register("glare_kinetic_receiver",
+            () -> BlockEntityType.Builder.of(GlareKineticReceiverBlockEntity::new, ModBlocks.GLARE_KINETIC_RECEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<GlareChromaticTransceiverBlockEntity>> GLARE_CHROMATIC_TRANSCEIVER_BE = BLOCK_ENTITIES.register("glare_chromatic_transceiver",
+            () -> BlockEntityType.Builder.of(GlareChromaticTransceiverBlockEntity::new, ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<TelemetryTerminalBlockEntity>> GLARE_TELEMETRY_TERMINAL_BE = BLOCK_ENTITIES.register("glare_telemetry_terminal",
+            () -> BlockEntityType.Builder.of(TelemetryTerminalBlockEntity::new, ModBlocks.GLARE_TELEMETRY_TERMINAL.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LuxTransceiverBlockEntity>> LUX_TRANSCEIVER_BE = BLOCK_ENTITIES.register("lux_transceiver",
+            () -> BlockEntityType.Builder.of(LuxTransceiverBlockEntity::new, ModBlocks.LUX_TRANSCEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteEntanglerDepotBlockEntity>> REMOTE_ENTANGLER_DEPOT_BE = BLOCK_ENTITIES.register(
+            "remote_entangler_depot", () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new RemoteEntanglerDepotBlockEntity(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), pos, state),
+                    ModBlocks.REMOTE_ENTANGLER_DEPOT.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteEntanglementTransporterBlockEntity>> REMOTE_ENTANGLEMENT_TRANSPORTER_BE = BLOCK_ENTITIES.register(
+            "remote_entanglement_transporter", () -> BlockEntityType.Builder.of(RemoteEntanglementTransporterBlockEntity::new,
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RemoteTransporterProxyBlockEntity>> REMOTE_ENTANGLEMENT_TRANSPORTER_PROXY_BE = BLOCK_ENTITIES.register(
+            "remote_entanglement_transporter_proxy", () -> BlockEntityType.Builder.of(RemoteTransporterProxyBlockEntity::new,
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get(),
+                    ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LaunchpadControllerBlockEntity>> LAUNCHPAD_CONTROLLER_BE = BLOCK_ENTITIES.register(
+            "launchpad_controller", () -> BlockEntityType.Builder.of(LaunchpadControllerBlockEntity::new,
+                    ModBlocks.LAUNCHPAD_CONTROLLER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<LaunchpadProxyBlockEntity>> LAUNCHPAD_PROXY_BE = BLOCK_ENTITIES.register(
+            "launchpad_proxy", () -> BlockEntityType.Builder.of(LaunchpadProxyBlockEntity::new,
+                    ModBlocks.LAUNCHPAD_PROXY.get()).build(null));
 
     public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
             () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));

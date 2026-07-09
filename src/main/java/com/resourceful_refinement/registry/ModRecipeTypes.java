@@ -2,7 +2,10 @@ package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
+import com.resourceful_refinement.content.bucket_excavator.recipe.ExcavationRecipe;
+import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
+import com.resourceful_refinement.content.drill_pylon.recipe.DrillPylonRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
 import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipe;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
@@ -103,7 +106,25 @@ public class ModRecipeTypes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<BrewersTapRecipe>> BREWERS_TAP_SERIALIZER =
             RECIPE_SERIALIZERS.register("brewers_tap", BrewersTapRecipe.Serializer::new);
 
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ExcavationRecipe>> EXCAVATION_TYPE =
+            RECIPE_TYPES.register("excavation", () -> {
+                return RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "excavation"));
+            });
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ExcavationRecipe>> EXCAVATION_SERIALIZER =
+            RECIPE_SERIALIZERS.register("excavation", ExcavationRecipe.Serializer::new);
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<DrillPylonRecipe>> DRILL_PYLON_TYPE =
+            RECIPE_TYPES.register("drill_pylon", () -> RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "drill_pylon")));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<DrillPylonRecipe>> DRILL_PYLON_SERIALIZER =
+            RECIPE_SERIALIZERS.register("drill_pylon", DrillPylonRecipe.Serializer::new);
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<CyclotronForgeRecipe>> CYCLOTRON_FORGE_TYPE =
+            RECIPE_TYPES.register("cyclotron_forge", () -> RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "cyclotron_forge")));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CyclotronForgeRecipe>> CYCLOTRON_FORGE_SERIALIZER =
+            RECIPE_SERIALIZERS.register("cyclotron_forge", CyclotronForgeRecipe.Serializer::new);
 
     public record RefinementRecipeTypeInfo(ResourceLocation id,
                                          Supplier<RecipeSerializer<?>> serializer,
@@ -171,5 +192,23 @@ public class ModRecipeTypes {
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "brewers_tap"),
             BREWERS_TAP_SERIALIZER::get,
             BREWERS_TAP_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo EXCAVATION_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "excavation"),
+            EXCAVATION_SERIALIZER::get,
+            EXCAVATION_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo DRILL_PYLON_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "drill_pylon"),
+            DRILL_PYLON_SERIALIZER::get,
+            DRILL_PYLON_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo CYCLOTRON_FORGE_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "cyclotron_forge"),
+            CYCLOTRON_FORGE_SERIALIZER::get,
+            CYCLOTRON_FORGE_TYPE::get
     );
 }

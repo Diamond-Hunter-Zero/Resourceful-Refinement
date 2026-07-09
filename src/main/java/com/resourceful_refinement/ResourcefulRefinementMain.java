@@ -5,27 +5,43 @@ import com.mojang.logging.LogUtils;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
 import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapRenderer;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorModel;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorRenderer;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberFanModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronBackModel;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronCoilModel;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronForgeRenderer;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronFrontModel;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperRenderer;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotRenderer;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverRenderer;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
+import com.resourceful_refinement.content.pug.LaunchpadControllerRenderer;
+import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.sieve.*;
 import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
@@ -64,6 +80,9 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock
 import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverScreen;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen;
+import com.resourceful_refinement.content.gui.PowerTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
 import com.simibubi.create.foundation.model.ModelSwapper;
 
@@ -88,6 +107,7 @@ public class ResourcefulRefinementMain {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(ModNetworking::registerPayloadHandlers);
+        modEventBus.addListener(com.resourceful_refinement.content.pug.PugChunkLoading::registerTicketController);
 
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
@@ -100,6 +120,13 @@ public class ResourcefulRefinementMain {
             LOGGER.warn("[Resourceful Refinement] Common setup was invoked more than once; skipping duplicate registration work.");
             return;
         }
+
+        // Register telemetry terminals as display targets
+        event.enqueueWork(() -> {
+            com.simibubi.create.api.behaviour.display.DisplayTarget.BY_BLOCK_ENTITY.register(
+                    ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
+                    new com.resourceful_refinement.content.glare.terminal.TelemetryTerminalDisplayTarget());
+        });
 
         // Register stress values
         event.enqueueWork(ModStressValues::register);
@@ -202,6 +229,37 @@ public class ResourcefulRefinementMain {
 
         // --- Casting Depot ---
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CASTING_DEPOT_BE.get(), (be, side) -> be.getItemHandler());
+
+        // --- Remote Entanglement ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(),
+                (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(),
+                (be, side) -> {
+                    Direction facing = be.getBlockState().getValue(
+                            com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock.FACING);
+                    return side == facing.getOpposite() ? be.getTank() : null;
+                });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_PROXY_BE.get(),
+                (be, side) -> {
+                    if (!be.getBlockState().is(ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get()) || side != Direction.UP) return null;
+                    com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getTank();
+                });
+
+        // --- PUG Launchpad proxies ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.LAUNCHPAD_PROXY_BE.get(),
+                (be, side) -> {
+                    com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getItemHandlerForProxy(be, side);
+                });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.LAUNCHPAD_PROXY_BE.get(),
+                (be, side) -> {
+                    com.resourceful_refinement.content.pug.LaunchpadControllerBlockEntity controller =
+                            be.getController(be.getLevel());
+                    return controller == null ? null : controller.getFuelHandlerForProxy(be, side);
+                });
 
         // --- Fracking Pump ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), (be, side) -> {
@@ -306,6 +364,35 @@ public class ResourcefulRefinementMain {
             return side == facing.getOpposite() ? be.outputFluidHandler : null;
         });
 
+        // --- Excavator ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(BucketExcavatorBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(BucketExcavatorBlock.FACING);
+            return side == facing.getOpposite() ? be.outputInv : null;
+        });
+
+        // --- Drill Pylon ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.DRILL_PYLON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlockEntity controller = be.getController(be.getLevel());
+            return controller != null && controller.isOutputProxySide(be, side) ? controller.getOutputInventory() : null;
+        });
+
+        // --- Cyclotron Forge ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.CYCLOTRON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity controller = be.getController(be.getLevel());
+            return controller != null ? controller.getItemHandlerForProxy(be, side) : null;
+        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CYCLOTRON_PROXY_BE.get(), (be, side) -> {
+            if (side == null) return null;
+            com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity controller = be.getController(be.getLevel());
+            return controller != null ? controller.getFluidHandlerForProxy(be, side) : null;
+        });
+
     }
 
     /**
@@ -333,6 +420,10 @@ public class ResourcefulRefinementMain {
         @SubscribeEvent
         public static void registerMenuScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenus.FLUID_REFILL_STATION.get(), FluidRefillStationScreen::new);
+            event.register(ModMenus.GLARE_CHROMATIC_TRANSCEIVER.get(), GlareChromaticTransceiverScreen::new);
+            event.register(ModMenus.GLARE_TELEMETRY_TERMINAL.get(), TelemetryTerminalScreen::new);
+            event.register(ModMenus.LAUNCHPAD.get(), com.resourceful_refinement.content.pug.LaunchpadScreen::new);
+            event.register(ModMenus.POWER_TERMINAL.get(), PowerTerminalScreen::new);
         }
 
         @SubscribeEvent
@@ -349,6 +440,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
@@ -357,10 +449,21 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.RADIATOR_PIPE_BE.get(), RadiatorRenderer::new);
 
+            event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.CYCLOTRON_CONTROLLER_BE.get(), CyclotronForgeRenderer::new);
+
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), RemoteEntanglerDepotRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LAUNCHPAD_CONTROLLER_BE.get(), LaunchpadControllerRenderer::new);
+
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
             event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
+            event.registerEntityRenderer(ModEntities.PUG.get(), com.resourceful_refinement.content.pug.PugEntityRenderer::new);
         }
 
         @SubscribeEvent
@@ -399,11 +502,11 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(RefineryLayers.MIDDLE, RefineryMiddleModel::createBodyLayer);
             event.registerLayerDefinition(RefineryLayers.TOP, RefineryTopModel::createBodyLayer);
             event.registerLayerDefinition(RefineryLayers.BLENDER, RefineryBlenderModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING, com.resourceful_refinement.content.sieve.MechanicalSieveCasingModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_BOTTOM, com.resourceful_refinement.content.sieve.MechanicalSieveCasingBottomModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_MIDDLE, com.resourceful_refinement.content.sieve.MechanicalSieveCasingMiddleModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.CASING_TOP, com.resourceful_refinement.content.sieve.MechanicalSieveCasingTopModel::createBodyLayer);
-            event.registerLayerDefinition(com.resourceful_refinement.content.sieve.MechanicalSieveLayers.COG, com.resourceful_refinement.content.sieve.MechanicalSieveCogModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING, MechanicalSieveCasingModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_BOTTOM, MechanicalSieveCasingBottomModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_MIDDLE, MechanicalSieveCasingMiddleModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.CASING_TOP, MechanicalSieveCasingTopModel::createBodyLayer);
+            event.registerLayerDefinition(MechanicalSieveLayers.COG, MechanicalSieveCogModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.CASING, ForgeMouldCasingModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.PRESS, ForgeMouldPressModel::createBodyLayer);
             event.registerLayerDefinition(ForgeMouldLayers.TUBE, ForgeMouldTubeModel::createBodyLayer);
@@ -414,11 +517,19 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.TOP, FrackingPumpTopModel::createBodyLayer);
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
+
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
             event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
             event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+
+            event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
+            event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
+
+            event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
+            event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);
+            event.registerLayerDefinition(CyclotronBackModel.LAYER_LOCATION, CyclotronBackModel::createBodyLayer);
         }
     }
 

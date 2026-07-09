@@ -1,0 +1,16 @@
+{
+  "type": "resourceful_refinement:excavation",
+  "mined_block": "minecraft:stone",
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "minecraft:cobblestone",
+      "amount": 2
+    },
+    {
+      "id": "minecraft:flint",
+      "amount": 1
+    }
+  ]
+}

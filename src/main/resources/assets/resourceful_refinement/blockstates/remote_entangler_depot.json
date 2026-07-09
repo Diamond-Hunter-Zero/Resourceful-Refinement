@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "resourceful_refinement:block/remote_entangler_depot" },
+    "facing=east": { "model": "resourceful_refinement:block/remote_entangler_depot", "y": 90 },
+    "facing=south": { "model": "resourceful_refinement:block/remote_entangler_depot", "y": 180 },
+    "facing=west": { "model": "resourceful_refinement:block/remote_entangler_depot", "y": 270 }
+  }
+}

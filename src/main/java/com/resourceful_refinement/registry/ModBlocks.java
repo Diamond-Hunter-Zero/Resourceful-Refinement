@@ -3,19 +3,40 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
+import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlock;
+import com.resourceful_refinement.content.cyclotron_forge.CyclotronProxyBlock;
 import com.resourceful_refinement.content.conveyor.ConveyorBeltBlock;
 import com.resourceful_refinement.content.conveyor.ConveyorRotatorBlock;
 import com.resourceful_refinement.content.conveyor.ConveyorRotatorProxyBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlock;
+import com.resourceful_refinement.content.drill_pylon.CrystalFissureBudBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonKineticProxyBlock;
+import com.resourceful_refinement.content.drill_pylon.DrillPylonProxyBlock;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperBlock;
+import com.resourceful_refinement.content.glare.GlareEmitterDishBlock;
+import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlock;
+import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareNodeBlock;
+import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlock;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
+import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
+import com.resourceful_refinement.content.pug.LaunchpadControllerBlock;
+import com.resourceful_refinement.content.pug.LaunchpadProxyBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
 import com.resourceful_refinement.content.plushie.PlushieBlock;
 import com.resourceful_refinement.content.radiator.RadiatorBlock;
@@ -27,6 +48,7 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.simibubi.create.AllBlocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -38,7 +60,7 @@ public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ResourcefulRefinementMain.MOD_ID);
 
     // -------------------------------------------------------------------------
-    // Mechanical Blocks
+    // v0.1 - v0.2 Mechanical Blocks
     // -------------------------------------------------------------------------
     public static final DeferredBlock<BlenderBladeBlock> BLENDER_BLADE = BLOCKS.register("blender_blade",
             () -> new BlenderBladeBlock(BlockBehaviour.Properties.of().strength(1.0f).sound(SoundType.METAL).noOcclusion()));
@@ -108,6 +130,11 @@ public class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
 
+
+    // -------------------------------------------------------------------------
+    // v0.3 Blocks
+    // -------------------------------------------------------------------------
+
     public static final DeferredBlock<DistilleryBlock> DISTILLERY = BLOCKS.register("distillery",
             () -> new DistilleryBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
@@ -175,6 +202,170 @@ public class ModBlocks {
                     .noLootTable()
                     .noOcclusion()
                     .pushReaction(PushReaction.BLOCK)));
+
+
+    // -------------------------------------------------------------------------
+    // v0.4 Blocks
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<BucketExcavatorBlock> BUCKET_EXCAVATOR = BLOCKS.register("bucket_excavator",
+            () -> new BucketExcavatorBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<Block> MINERAL_DEPOSIT = BLOCKS.register("mineral_deposit",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .strength(2f)
+                    .sound(SoundType.STONE)));
+
+    public static final DeferredBlock<CrystalFissureBudBlock> CRYSTAL_FISSURE_BUD = BLOCKS.register("crystal_fissure_bud",
+            () -> new CrystalFissureBudBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(50.0f, 1200.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<DrillPylonHeadBlock> DRILL_PYLON_HEAD = BLOCKS.register("drill_pylon_head",
+            () -> new DrillPylonHeadBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<DrillPylonProxyBlock> DRILL_PYLON_PROXY = BLOCKS.register("drill_pylon_proxy",
+            () -> new DrillPylonProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<DrillPylonKineticProxyBlock> DRILL_PYLON_KINETIC_PROXY = BLOCKS.register("drill_pylon_kinetic_proxy",
+            () -> new DrillPylonKineticProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<Block> HEAVY_PLATE_SHIELDING = BLOCKS.register("heavy_plate_shielding",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(4.0f, 8.0f)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops()));
+
+    public static final DeferredBlock<CyclotronControllerBlock> CYCLOTRON_CONTROLLER = BLOCKS.register("cyclotron_controller",
+            () -> new CyclotronControllerBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<CyclotronProxyBlock> CYCLOTRON_PROXY = BLOCKS.register("cyclotron_proxy",
+            () -> new CyclotronProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+    public static final DeferredBlock<CyclotronKineticProxyBlock> CYCLOTRON_KINETIC_PROXY = BLOCKS.register("cyclotron_kinetic_proxy",
+            () -> new CyclotronKineticProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK)
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()
+                    .noLootTable()));
+
+
+    // -------------------------------------------------------------------------
+    // GLARE Blocks
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<GlareNodeBlock> GLARE_RELAY = BLOCKS.register("glare_relay",
+            () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), GlareRelayBlockEntity::new));
+
+    public static final DeferredBlock<GlareEmitterDishBlock> GLARE_EMITTER_DISH = BLOCKS.register("glare_emitter_dish",
+            () -> new GlareEmitterDishBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<GlareNodeBlock> GLARE_KINETIC_RECEIVER = BLOCKS.register("glare_kinetic_receiver",
+            () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), GlareKineticReceiverBlockEntity::new));
+
+    public static final DeferredBlock<GlareChromaticTransceiverBlock> GLARE_CHROMATIC_TRANSCEIVER = BLOCKS.register("glare_chromatic_transceiver",
+            () -> new GlareChromaticTransceiverBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<TelemetryTerminalBlock> GLARE_TELEMETRY_TERMINAL = BLOCKS.register("glare_telemetry_terminal",
+            () -> new TelemetryTerminalBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<LuxTransceiverBlock> LUX_TRANSCEIVER = BLOCKS.register("lux_transceiver",
+            () -> new LuxTransceiverBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<RemoteEntanglerDepotBlock> REMOTE_ENTANGLER_DEPOT = BLOCKS.register("remote_entangler_depot",
+            () -> new RemoteEntanglerDepotBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.DEPOT.get())
+                    .requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<RemoteEntanglementTransporterBlock> REMOTE_ENTANGLEMENT_TRANSPORTER = BLOCKS.register(
+            "remote_entanglement_transporter", () -> new RemoteEntanglementTransporterBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<RemoteTransporterProxyBlock> REMOTE_ENTANGLEMENT_TRANSPORTER_TANK = BLOCKS.register(
+            "remote_entanglement_transporter_tank", () -> new RemoteTransporterProxyBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.COPPER).noOcclusion().noLootTable(), true));
+
+    public static final DeferredBlock<RemoteTransporterProxyBlock> REMOTE_ENTANGLEMENT_TRANSPORTER_CASING = BLOCKS.register(
+            "remote_entanglement_transporter_casing", () -> new RemoteTransporterProxyBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5F).sound(SoundType.GLASS).noOcclusion().noLootTable(), false));
+
+    public static final DeferredBlock<LaunchpadControllerBlock> LAUNCHPAD_CONTROLLER = BLOCKS.register(
+            "launchpad_controller", () -> new LaunchpadControllerBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK).strength(2.5F).sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<LaunchpadProxyBlock> LAUNCHPAD_PROXY = BLOCKS.register(
+            "launchpad_proxy", () -> new LaunchpadProxyBlock(BlockBehaviour.Properties.of()
+                    .pushReaction(PushReaction.BLOCK).strength(2.5F).sound(SoundType.COPPER)
+                    .noOcclusion().noLootTable()));
+
+    public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
+            () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), false));
+
+    public static final DeferredBlock<ResonanceCrystalBlock> ARTIFICIAL_RESONANCE_CRYSTAL = BLOCKS.register("artificial_resonance_crystal",
+            () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion(), true));
 
 
     // -------------------------------------------------------------------------

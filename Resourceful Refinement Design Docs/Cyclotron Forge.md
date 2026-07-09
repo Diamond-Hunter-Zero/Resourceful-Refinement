@@ -1,6 +1,7 @@
 The Cyclotron Forge is a multiblock processing machine which uses kinetic input and Lux to produce both items and fluids.
 
 **Controller ID:** *cyclotron_controller*
+
 **Shielding ID:** *heavy_plate_shielding*
 **Vertical Slice:** 0.4
 

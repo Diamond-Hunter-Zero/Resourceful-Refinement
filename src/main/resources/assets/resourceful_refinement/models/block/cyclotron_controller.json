@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "minecraft:block/copper_block",
+    "side": "minecraft:block/deepslate_tiles",
+    "top": "resourceful_refinement:block/brass_block"
+  }
+}

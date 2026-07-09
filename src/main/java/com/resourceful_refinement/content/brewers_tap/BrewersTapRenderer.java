@@ -36,7 +36,7 @@ public class BrewersTapRenderer implements BlockEntityRenderer<BrewersTapBlockEn
                 ms.translate(0F, -0.03F, -0.275F);
             else
                 ms.translate(0F, 0.02F, -0.275F);
-            ms.mulPose(Axis.YP.rotationDegrees(45));
+            ms.mulPose(Axis.YP.rotationDegrees(-45));
 
             ms.scale(0.85F, 0.85F, 0.85F);
             this.itemRenderer.renderStatic(

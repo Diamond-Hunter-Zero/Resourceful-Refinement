@@ -27,6 +27,8 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue PUG_TRAVEL_TICKS_PER_STEP;
     public static final ModConfigSpec.IntValue PUG_TRAVEL_STEP_BLOCKS;
     public static final ModConfigSpec.IntValue PUG_CROSS_DIMENSION_TRAVEL_TICKS;
+    public static final ModConfigSpec.BooleanValue RESEARCH_ENABLED;
+    public static final ModConfigSpec.BooleanValue RESEARCH_GLOBAL_UNLOCKS;
 
 
     static {
@@ -113,6 +115,15 @@ public class ServerConfig {
         PUG_CROSS_DIMENSION_TRAVEL_TICKS = CONFIG_BUILDER
                 .comment("Additional flight duration when dimensions differ (2400 ticks = 120 seconds)")
                 .defineInRange("cross_dimension_travel_ticks", 2_400, 0, Integer.MAX_VALUE);
+        CONFIG_BUILDER.pop();
+
+        CONFIG_BUILDER.push("Research System");
+        RESEARCH_ENABLED = CONFIG_BUILDER
+                .comment("Enables server-side research progression, reward grants, and recipe locks")
+                .define("research.enabled", true);
+        RESEARCH_GLOBAL_UNLOCKS = CONFIG_BUILDER
+                .comment("When enabled, research unlocks apply to every player on the server")
+                .define("research.global_unlocks", false);
         CONFIG_BUILDER.pop();
 
         SPEC = CONFIG_BUILDER.build();

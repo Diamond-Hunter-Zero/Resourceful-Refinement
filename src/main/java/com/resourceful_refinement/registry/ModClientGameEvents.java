@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.client.research.ResearchKeyMappings;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.conveyor.ConveyorBeltConnectorHandler;
@@ -38,6 +39,7 @@ public class ModClientGameEvents {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         ConveyorBeltConnectorHandler.tick();
+        ResearchKeyMappings.tick(event);
     }
 
     @SubscribeEvent

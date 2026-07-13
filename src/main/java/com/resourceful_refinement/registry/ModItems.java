@@ -51,6 +51,9 @@ public class ModItems {
     public static final DeferredItem<BlockItem> CASTING_DEPOT_ITEM = ITEMS.register("casting_depot",
             ()-> new CastingDepotItem(ModBlocks.CASTING_DEPOT.get(), new Item.Properties()));
 
+    public static final DeferredItem<BlockItem> RESEARCH_TERMINAL_ITEM = ITEMS.registerSimpleBlockItem("research_terminal",
+            ModBlocks.RESEARCH_TERMINAL);
+
     public static final DeferredItem<FrackingPumpOutletItem> FRACKING_PUMP_OUTLET_ITEM = ITEMS.register("fracking_pump_outlet",
             () -> new FrackingPumpOutletItem(ModBlocks.FRACKING_PUMP_OUTLET.get(), new Item.Properties()));
 

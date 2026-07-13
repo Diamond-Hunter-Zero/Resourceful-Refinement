@@ -1,0 +1,27 @@
+{
+  "title": {
+    "text": "Fluid Handling"
+  },
+  "description": {
+    "text": "Refinery access, coolant production, and the first steps into controlled fluid processing."
+  },
+  "icon": {
+    "id": "resourceful_refinement:refinery_access_port",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/root"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:blender_blade",
+      "count": 1
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:shaped_crafting/refinery_access_port_shaped_crafting",
+    "resourceful_refinement:shaped_crafting/blender_blade_shaped_crafting",
+    "resourceful_refinement:fluid_refinery/coolant_refinery",
+    "resourceful_refinement:fluid_refinery/paint/red_paint_from_dye"
+  ]
+}

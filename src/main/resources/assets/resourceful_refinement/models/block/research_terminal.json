@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "resourceful_refinement:block/andesite_casing",
+    "down": "resourceful_refinement:block/andesite_casing",
+    "up": "resourceful_refinement:block/casting_depot",
+    "north": "resourceful_refinement:block/andesite_casing",
+    "south": "resourceful_refinement:block/andesite_casing",
+    "east": "resourceful_refinement:block/andesite_casing",
+    "west": "resourceful_refinement:block/andesite_casing"
+  }
+}

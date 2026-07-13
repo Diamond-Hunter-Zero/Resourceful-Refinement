@@ -29,6 +29,7 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue PUG_CROSS_DIMENSION_TRAVEL_TICKS;
     public static final ModConfigSpec.BooleanValue RESEARCH_ENABLED;
     public static final ModConfigSpec.BooleanValue RESEARCH_GLOBAL_UNLOCKS;
+    public static final ModConfigSpec.IntValue RESEARCH_TERMINAL_CYCLE_TICKS;
 
 
     static {
@@ -124,6 +125,9 @@ public class ServerConfig {
         RESEARCH_GLOBAL_UNLOCKS = CONFIG_BUILDER
                 .comment("When enabled, research unlocks apply to every player on the server")
                 .define("research.global_unlocks", false);
+        RESEARCH_TERMINAL_CYCLE_TICKS = CONFIG_BUILDER
+                .comment("Ticks required for a Research Terminal to process one item or one bucket of fluid")
+                .defineInRange("research.terminal_cycle_ticks", 1200, 1, Integer.MAX_VALUE);
         CONFIG_BUILDER.pop();
 
         SPEC = CONFIG_BUILDER.build();

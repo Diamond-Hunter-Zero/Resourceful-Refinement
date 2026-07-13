@@ -1,0 +1,31 @@
+{
+  "title": {
+    "text": "Advanced Alloys"
+  },
+  "description": {
+    "text": "High-value alloy refinement and durable material output after precision machining."
+  },
+  "icon": {
+    "id": "resourceful_refinement:durasteel_ingot",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/precision_machining"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:durasteel_ingot",
+      "count": 2
+    },
+    {
+      "id": "resourceful_refinement:durasteel_sheet",
+      "count": 2
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:fluid_refinery/alloys/durasteel_alloy_refining",
+    "resourceful_refinement:mechanical_forge_mould/durasteel_alloy_to_ingot",
+    "resourceful_refinement:mechanical_forge_mould/purified_durasteel_to_sheet",
+    "resourceful_refinement:coating/durasteel_coating"
+  ]
+}

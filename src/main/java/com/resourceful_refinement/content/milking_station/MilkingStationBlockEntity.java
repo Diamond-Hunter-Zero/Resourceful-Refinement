@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.milking_station;
 
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipeInput;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
@@ -342,6 +343,10 @@ public class MilkingStationBlockEntity extends KineticBlockEntity {
 
         MilkingStationRecipeInput input = new MilkingStationRecipeInput(activeEntityType);
         if (lastRecipe != null && lastRecipe.matches(input, level)) {
+            if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                clearRecipeProgress();
+                return null;
+            }
             return lastRecipe;
         }
 
@@ -355,6 +360,10 @@ public class MilkingStationBlockEntity extends KineticBlockEntity {
 
         lastRecipe = recipe.get().value();
         displayedRecipeId = recipe.get().id();
+        if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+            clearRecipeProgress();
+            return null;
+        }
         return lastRecipe;
     }
 

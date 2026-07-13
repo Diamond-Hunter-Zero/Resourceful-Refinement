@@ -1,0 +1,31 @@
+{
+  "title": {
+    "text": "Casting And Moulding"
+  },
+  "description": {
+    "text": "Unlocks mechanical forging, casting depot work, and purified metal casting."
+  },
+  "icon": {
+    "id": "resourceful_refinement:mechanical_forge_mould",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/root"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:ingot_mould",
+      "count": 1
+    },
+    {
+      "id": "resourceful_refinement:shaft_mould",
+      "count": 1
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:shaped_crafting/mechanical_forge_shaped_crafting",
+    "resourceful_refinement:shaped_crafting/casting_depot_shaped_crafting",
+    "resourceful_refinement:mechanical_forge_mould/purified_iron_to_ingot",
+    "resourceful_refinement:mechanical_forge_mould/shaft_casting"
+  ]
+}

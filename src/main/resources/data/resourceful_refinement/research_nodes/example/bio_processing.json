@@ -1,0 +1,31 @@
+{
+  "title": {
+    "text": "Bio Processing"
+  },
+  "description": {
+    "text": "Milk, syrups, and drink bottling for creature and kitchen-adjacent processing."
+  },
+  "icon": {
+    "id": "resourceful_refinement:milking_station",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/root"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:drinks_glass",
+      "count": 4
+    },
+    {
+      "id": "minecraft:sugar",
+      "count": 8
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:shaped_crafting/milking_station",
+    "resourceful_refinement:milking_station/cow_milk",
+    "resourceful_refinement:distillery/sugar_syrup_distilling",
+    "resourceful_refinement:brewers_tap/milkshake_tapping"
+  ]
+}

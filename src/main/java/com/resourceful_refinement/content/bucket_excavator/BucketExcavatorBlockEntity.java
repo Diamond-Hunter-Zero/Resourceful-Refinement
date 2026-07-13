@@ -5,6 +5,7 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.bucket_excavator.recipe.ExcavationRecipeInput;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipeInput;
 import com.resourceful_refinement.content.glare.DimensionalNodePos;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.resourceful_refinement.utilities.GoggleUtilities;
@@ -158,6 +159,9 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
                     var recipeHolder = level.getRecipeManager().getRecipeFor(ModRecipeTypes.EXCAVATION_TYPE.get(), input, level);
                     if (recipeHolder.isPresent())
                     {
+                        if (!ResearchRecipeGate.canUseServerRecipe(level, recipeHolder.get())) {
+                            continue;
+                        }
                         var recipe = recipeHolder.get().value();
                         for (ItemStack result : recipe.rollResults(level.random)) {
                             if (!result.isEmpty()) {

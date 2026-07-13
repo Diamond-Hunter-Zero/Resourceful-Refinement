@@ -1,0 +1,27 @@
+{
+  "title": {
+    "text": "Alt Advanced Alloys"
+  },
+  "description": {
+    "text": "Alternate advanced alloys..."
+  },
+  "icon": {
+    "id": "minecraft:gold_ingot",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/precision_machining"
+  ],
+  "rewards": [
+    {
+      "id": "minecraft:gold_ingot",
+      "count": 4
+    },
+    {
+      "id": "minecraft:diamond",
+      "count": 1
+    }
+  ],
+  "recipes": [
+  ]
+}

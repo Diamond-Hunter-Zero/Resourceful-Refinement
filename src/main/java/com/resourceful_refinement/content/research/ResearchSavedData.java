@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
+import java.util.HashMap;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -28,6 +29,8 @@ public final class ResearchSavedData extends SavedData {
     private final Map<ResourceLocation, LinkedHashSet<UUID>> playerUnlocksByNode = new LinkedHashMap<>();
     private final Set<ResourceLocation> globalUnlocks = new LinkedHashSet<>();
     private final Map<ResourceLocation, ResourceLocation> manualRecipeLocks = new LinkedHashMap<>();
+    private final Map<ResourceLocation, Map<UUID, RequirementProgress>> playerProgressByNode = new LinkedHashMap<>();
+    private final Map<ResourceLocation, RequirementProgress> globalProgressByNode = new LinkedHashMap<>();
 
     public static SavedData.Factory<ResearchSavedData> factory() {
         return new SavedData.Factory<>(ResearchSavedData::new, ResearchSavedData::load);
@@ -48,6 +51,8 @@ public final class ResearchSavedData extends SavedData {
         data.readPlayerUnlocks(tag.getList("PlayerUnlocks", Tag.TAG_COMPOUND));
         data.readGlobalUnlocks(tag.getList("GlobalUnlocks", Tag.TAG_STRING));
         data.readManualRecipeLocks(tag.getList("ManualRecipeLocks", Tag.TAG_COMPOUND));
+        data.readPlayerProgress(tag.getList("PlayerProgress", Tag.TAG_COMPOUND));
+        data.readGlobalProgress(tag.getList("GlobalProgress", Tag.TAG_COMPOUND));
         if (version > DATA_VERSION) {
             // Future versions should remain readable when their v1-compatible fields are present.
         }
@@ -64,12 +69,15 @@ public final class ResearchSavedData extends SavedData {
         tag.put("PlayerUnlocks", writePlayerUnlocks());
         tag.put("GlobalUnlocks", writeResourceLocationSet(globalUnlocks));
         tag.put("ManualRecipeLocks", writeManualRecipeLocks());
+        tag.put("PlayerProgress", writePlayerProgress());
+        tag.put("GlobalProgress", writeGlobalProgress());
         return tag;
     }
 
     public boolean grantPlayer(ResourceLocation nodeId, UUID playerId) {
         LinkedHashSet<UUID> players = playerUnlocksByNode.computeIfAbsent(nodeId, ignored -> new LinkedHashSet<>());
         if (!players.add(playerId)) return false;
+        clearPlayerProgress(nodeId, playerId);
         setDirty();
         return true;
     }
@@ -78,6 +86,7 @@ public final class ResearchSavedData extends SavedData {
         LinkedHashSet<UUID> players = playerUnlocksByNode.get(nodeId);
         if (players == null || !players.remove(playerId)) return false;
         if (players.isEmpty()) playerUnlocksByNode.remove(nodeId);
+        clearPlayerProgress(nodeId, playerId);
         setDirty();
         return true;
     }
@@ -100,12 +109,14 @@ public final class ResearchSavedData extends SavedData {
 
     public boolean grantGlobal(ResourceLocation nodeId) {
         if (!globalUnlocks.add(nodeId)) return false;
+        clearGlobalProgress(nodeId);
         setDirty();
         return true;
     }
 
     public boolean revokeGlobal(ResourceLocation nodeId) {
         if (!globalUnlocks.remove(nodeId)) return false;
+        clearGlobalProgress(nodeId);
         setDirty();
         return true;
     }
@@ -141,6 +152,41 @@ public final class ResearchSavedData extends SavedData {
 
     public Map<ResourceLocation, ResourceLocation> getManualRecipeLocks() {
         return Map.copyOf(manualRecipeLocks);
+    }
+
+    public RequirementProgress getPlayerProgress(ResourceLocation nodeId, UUID playerId) {
+        Map<UUID, RequirementProgress> nodeProgress = playerProgressByNode.get(nodeId);
+        RequirementProgress progress = nodeProgress == null ? null : nodeProgress.get(playerId);
+        return progress == null ? RequirementProgress.empty() : progress.copy();
+    }
+
+    public RequirementProgress getOrCreatePlayerProgress(ResourceLocation nodeId, UUID playerId) {
+        return playerProgressByNode
+                .computeIfAbsent(nodeId, ignored -> new LinkedHashMap<>())
+                .computeIfAbsent(playerId, ignored -> new RequirementProgress());
+    }
+
+    public RequirementProgress getGlobalProgress(ResourceLocation nodeId) {
+        RequirementProgress progress = globalProgressByNode.get(nodeId);
+        return progress == null ? RequirementProgress.empty() : progress.copy();
+    }
+
+    public RequirementProgress getOrCreateGlobalProgress(ResourceLocation nodeId) {
+        return globalProgressByNode.computeIfAbsent(nodeId, ignored -> new RequirementProgress());
+    }
+
+    public boolean clearPlayerProgress(ResourceLocation nodeId, UUID playerId) {
+        Map<UUID, RequirementProgress> nodeProgress = playerProgressByNode.get(nodeId);
+        if (nodeProgress == null || nodeProgress.remove(playerId) == null) return false;
+        if (nodeProgress.isEmpty()) playerProgressByNode.remove(nodeId);
+        setDirty();
+        return true;
+    }
+
+    public boolean clearGlobalProgress(ResourceLocation nodeId) {
+        if (globalProgressByNode.remove(nodeId) == null) return false;
+        setDirty();
+        return true;
     }
 
     private ListTag writePlayerUnlocks() {
@@ -223,11 +269,167 @@ public final class ResearchSavedData extends SavedData {
         }
     }
 
+    private ListTag writePlayerProgress() {
+        ListTag entries = new ListTag();
+        playerProgressByNode.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                .forEach(nodeEntry -> nodeEntry.getValue().entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey(Comparator.comparing(UUID::toString)))
+                        .forEach(playerEntry -> {
+                            CompoundTag tag = playerEntry.getValue().write();
+                            tag.putString("Node", nodeEntry.getKey().toString());
+                            tag.putString("Player", playerEntry.getKey().toString());
+                            entries.add(tag);
+                        }));
+        return entries;
+    }
+
+    private void readPlayerProgress(ListTag entries) {
+        playerProgressByNode.clear();
+        for (int index = 0; index < entries.size(); index++) {
+            CompoundTag tag = entries.getCompound(index);
+            Optional<ResourceLocation> nodeId = parseId(tag.getString("Node"));
+            UUID playerId;
+            try {
+                playerId = UUID.fromString(tag.getString("Player"));
+            } catch (IllegalArgumentException ignored) {
+                continue;
+            }
+            if (nodeId.isPresent()) {
+                RequirementProgress progress = RequirementProgress.read(tag);
+                if (!progress.isEmpty()) {
+                    playerProgressByNode.computeIfAbsent(nodeId.get(), ignored -> new LinkedHashMap<>())
+                            .put(playerId, progress);
+                }
+            }
+        }
+    }
+
+    private ListTag writeGlobalProgress() {
+        ListTag entries = new ListTag();
+        globalProgressByNode.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                .forEach(entry -> {
+                    CompoundTag tag = entry.getValue().write();
+                    tag.putString("Node", entry.getKey().toString());
+                    entries.add(tag);
+                });
+        return entries;
+    }
+
+    private void readGlobalProgress(ListTag entries) {
+        globalProgressByNode.clear();
+        for (int index = 0; index < entries.size(); index++) {
+            CompoundTag tag = entries.getCompound(index);
+            Optional<ResourceLocation> nodeId = parseId(tag.getString("Node"));
+            if (nodeId.isPresent()) {
+                RequirementProgress progress = RequirementProgress.read(tag);
+                if (!progress.isEmpty()) {
+                    globalProgressByNode.put(nodeId.get(), progress);
+                }
+            }
+        }
+    }
+
     private static Optional<ResourceLocation> parseId(String value) {
         try {
             return Optional.of(ResourceLocation.parse(value));
         } catch (Exception ignored) {
             return Optional.empty();
+        }
+    }
+
+    public static final class RequirementProgress {
+        private final Map<ResourceLocation, Integer> items = new HashMap<>();
+        private final Map<ResourceLocation, Integer> fluids = new HashMap<>();
+
+        public static RequirementProgress empty() {
+            return new RequirementProgress();
+        }
+
+        public RequirementProgress copy() {
+            RequirementProgress copy = new RequirementProgress();
+            copy.items.putAll(items);
+            copy.fluids.putAll(fluids);
+            return copy;
+        }
+
+        public Map<ResourceLocation, Integer> items() {
+            return Map.copyOf(items);
+        }
+
+        public Map<ResourceLocation, Integer> fluids() {
+            return Map.copyOf(fluids);
+        }
+
+        public int getItem(ResourceLocation itemId) {
+            return items.getOrDefault(itemId, 0);
+        }
+
+        public int getFluid(ResourceLocation fluidId) {
+            return fluids.getOrDefault(fluidId, 0);
+        }
+
+        public int addItem(ResourceLocation itemId, int amount, int max) {
+            return add(items, itemId, amount, max);
+        }
+
+        public int addFluid(ResourceLocation fluidId, int amount, int max) {
+            return add(fluids, fluidId, amount, max);
+        }
+
+        public boolean isEmpty() {
+            return items.isEmpty() && fluids.isEmpty();
+        }
+
+        private static int add(Map<ResourceLocation, Integer> values, ResourceLocation id, int amount, int max) {
+            if (amount <= 0 || max <= 0) return 0;
+            int current = values.getOrDefault(id, 0);
+            int accepted = Math.max(0, Math.min(amount, max - current));
+            if (accepted > 0) {
+                values.put(id, current + accepted);
+            }
+            return accepted;
+        }
+
+        private CompoundTag write() {
+            CompoundTag tag = new CompoundTag();
+            tag.put("Items", writeAmounts(items, "Item"));
+            tag.put("Fluids", writeAmounts(fluids, "Fluid"));
+            return tag;
+        }
+
+        private static RequirementProgress read(CompoundTag tag) {
+            RequirementProgress progress = new RequirementProgress();
+            readAmounts(tag.getList("Items", Tag.TAG_COMPOUND), "Item", progress.items);
+            readAmounts(tag.getList("Fluids", Tag.TAG_COMPOUND), "Fluid", progress.fluids);
+            return progress;
+        }
+
+        private static ListTag writeAmounts(Map<ResourceLocation, Integer> amounts, String idKey) {
+            ListTag list = new ListTag();
+            amounts.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 0)
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing(ResourceLocation::toString)))
+                    .forEach(entry -> {
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString(idKey, entry.getKey().toString());
+                        tag.putInt("Amount", entry.getValue());
+                        list.add(tag);
+                    });
+            return list;
+        }
+
+        private static void readAmounts(ListTag list, String idKey, Map<ResourceLocation, Integer> target) {
+            for (int index = 0; index < list.size(); index++) {
+                CompoundTag tag = list.getCompound(index);
+                parseId(tag.getString(idKey)).ifPresent(id -> {
+                    int amount = tag.getInt("Amount");
+                    if (amount > 0) {
+                        target.put(id, amount);
+                    }
+                });
+            }
         }
     }
 }

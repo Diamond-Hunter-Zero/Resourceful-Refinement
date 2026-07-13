@@ -3,6 +3,7 @@ package com.resourceful_refinement.content.distillery;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipeInput;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.utilities.GoggleUtilities;
@@ -320,6 +321,14 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
 
         // Decrement timer
         if (timer > 0) {
+            if (level != null && !level.isClientSide && !ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                timer = 0;
+                lastRecipe = null;
+                displayedRecipeId = null;
+                processErrorString = ResearchRecipeGate.RECIPE_LOCKED_MESSAGE.getString();
+                sendData();
+                return;
+            }
 
             // Check progress of ongoing recipe conditions
             DistilleryErrorCode processingError = canProcess();
@@ -380,8 +389,25 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
 
             lastRecipe = recipe.get().value();
             displayedRecipeId = recipe.get().id();
+            if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                timer = 20;
+                lastRecipe = null;
+                displayedRecipeId = null;
+                processErrorString = ResearchRecipeGate.RECIPE_LOCKED_MESSAGE.getString();
+                sendData();
+                return;
+            }
             timer = lastRecipe.getProcessingDuration();
             if (timer <= 0) timer = 20;
+            sendData();
+            return;
+        }
+
+        if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+            timer = 20;
+            lastRecipe = null;
+            displayedRecipeId = null;
+            processErrorString = ResearchRecipeGate.RECIPE_LOCKED_MESSAGE.getString();
             sendData();
             return;
         }

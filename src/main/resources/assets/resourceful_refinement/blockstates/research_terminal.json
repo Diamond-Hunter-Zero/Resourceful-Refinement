@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "resourceful_refinement:block/research_terminal" },
+    "facing=east": { "model": "resourceful_refinement:block/research_terminal", "y": 90 },
+    "facing=south": { "model": "resourceful_refinement:block/research_terminal", "y": 180 },
+    "facing=west": { "model": "resourceful_refinement:block/research_terminal", "y": 270 }
+  }
+}

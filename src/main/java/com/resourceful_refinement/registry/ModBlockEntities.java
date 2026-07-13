@@ -28,6 +28,7 @@ import com.resourceful_refinement.content.refinery.BlenderBladeBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryProxyBlockEntity;
 import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
+import com.resourceful_refinement.content.research_terminal.ResearchTerminalBlockEntity;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
@@ -74,6 +75,11 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<CastingDepotBlockEntity>> CASTING_DEPOT_BE = BLOCK_ENTITIES.register("casting_depot",
             () -> BlockEntityType.Builder.of((pos, state) -> new CastingDepotBlockEntity(ModBlockEntities.CASTING_DEPOT_BE.get(), pos, state), ModBlocks.CASTING_DEPOT.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ResearchTerminalBlockEntity>> RESEARCH_TERMINAL_BE = BLOCK_ENTITIES.register("research_terminal",
+            () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new ResearchTerminalBlockEntity(ModBlockEntities.RESEARCH_TERMINAL_BE.get(), pos, state),
+                    ModBlocks.RESEARCH_TERMINAL.get()).build(null));
 
     public static final Supplier<BlockEntityType<FrackingPumpOutletBlockEntity>> FRACKING_PUMP_OUTLET_BE = BLOCK_ENTITIES.register("fracking_pump_outlet",
             () -> BlockEntityType.Builder.of((pos, state) -> new FrackingPumpOutletBlockEntity(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), pos, state), ModBlocks.FRACKING_PUMP_OUTLET.get()).build(null));

@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.refinery;
 
 import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.resourceful_refinement.utilities.GoggleUtilities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
@@ -407,6 +408,12 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                 craftingProgress = 0;
                 requiredHeat = 0;
                 syncData();
+            } else if (!ResearchRecipeGate.canUseServerRecipe(level, currentRecipe)) {
+                currentRecipe = null;
+                activeRecipeDuration = 0;
+                craftingProgress = 0;
+                requiredHeat = 0;
+                syncData();
             }
         }
 
@@ -415,7 +422,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                 level.getRecipeManager().getRecipeFor(com.resourceful_refinement.registry.ModRecipeTypes.FLUID_REFINERY_TYPE.get(), recipeInput, level);
             
             if (match.isPresent()) {
-                if (match.get().value().matchesFilter(filtering)) {
+                if (ResearchRecipeGate.canUseServerRecipe(level, match.get()) && match.get().value().matchesFilter(filtering)) {
                     currentRecipe = match.get();
                     craftingProgress = 0;
                     activeRecipeDuration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());

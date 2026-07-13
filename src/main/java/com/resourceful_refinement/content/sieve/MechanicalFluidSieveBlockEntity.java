@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.sieve;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipe;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipeInput;
 import com.resourceful_refinement.registry.ModRecipeTypes;
@@ -127,6 +128,13 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
         if (getSpeed() == 0) return;
 
         if (timer > 0) {
+            if (level != null && !level.isClientSide && !ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                timer = 0;
+                lastRecipe = null;
+                displayedRecipeId = null;
+                sendData();
+                return;
+            }
             timer -= getProcessingSpeed();
 
             if (lastRecipe != null) {
@@ -171,8 +179,23 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
             lastRecipe = recipe.get().value();
             displayedRecipeId = recipe.get().id();
+            if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                timer = 20;
+                lastRecipe = null;
+                displayedRecipeId = null;
+                sendData();
+                return;
+            }
             timer = scaledProcessingDuration(lastRecipe.getProcessingDuration(), stackSize);
             if (timer <= 0) timer = 20;
+            sendData();
+            return;
+        }
+
+        if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+            timer = 20;
+            lastRecipe = null;
+            displayedRecipeId = null;
             sendData();
             return;
         }

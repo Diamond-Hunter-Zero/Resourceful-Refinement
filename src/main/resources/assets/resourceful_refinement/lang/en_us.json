@@ -8,6 +8,7 @@
   "block.resourceful_refinement.mechanical_forge_mould": "Mechanical Forge Mould",
   "block.resourceful_refinement.mechanical_stamper": "Mechanical Stamper",
   "block.resourceful_refinement.casting_depot": "Casting Depot",
+  "block.resourceful_refinement.research_terminal": "Research Terminal",
   "block.resourceful_refinement.fracking_pump_outlet": "Fracking Pylon Outlet",
   "block.resourceful_refinement.geyser_block": "Geyser Block",
   "block.resourceful_refinement.fox_plushie": "Trinket Plushie",
@@ -22,6 +23,7 @@
   "block.resourceful_refinement.resonance_crystal": "Resonance Crystal",
   "block.resourceful_refinement.artificial_resonance_crystal": "Artificial Resonance Crystal",
   "item.resourceful_refinement.fluid_refill_station": "Fluid Refill Station",
+  "item.resourceful_refinement.research_terminal": "Research Terminal",
   "block.resourceful_refinement.gel_splatter": "Gel Splatter",
   "block.resourceful_refinement.gel_splatter_sticky": "Sticky Gel Splatter",
   "block.resourceful_refinement.gel_splatter_slippery": "Slippery Gel Splatter",
@@ -572,5 +574,8 @@
   "gui.resourceful_refinement.launchpad.failure.insufficient_fuel": "PUG is awaiting fuel",
   "gui.resourceful_refinement.launchpad.failure.waiting_for_redstone": "Waiting for redstone signal",
   "gui.resourceful_refinement.launchpad.failure.waiting_for_timer": "Launch timer is still counting",
-  "gui.resourceful_refinement.launchpad.failure.pad_occupied": "Launchpad is occupied"
+  "gui.resourceful_refinement.launchpad.failure.pad_occupied": "Launchpad is occupied",
+  "gui.resourceful_refinement.research_tree": "Research Trees",
+  "key.resourceful_refinement.research_tree": "Open Research Trees",
+  "key.categories.resourceful_refinement": "Resourceful Refinement"
 }

@@ -17,9 +17,18 @@
     "BeltInventoryMixin",
     "FluidNetworkMixin",
     "HosePulleyFluidHandlerMixin",
-    "OpenEndedPipeFluidHandlerMixin"
+    "OpenEndedPipeFluidHandlerMixin",
+    "CrafterBlockMixin",
+    "CrafterMenuMixin",
+    "CreateRecipeGridHandlerMixin",
+    "CraftingMenuMixin",
+    "InventoryMenuMixin",
+    "ResultSlotAccessor",
+    "ResultSlotMixin",
+    "SlotMixin"
   ],
   "client": [
+    "client.AbstractContainerScreenMixin",
     "client.LocalPlayerMixin"
   ],
   "server": [],

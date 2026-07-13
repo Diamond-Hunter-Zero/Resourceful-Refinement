@@ -1,0 +1,27 @@
+{
+  "title": {
+    "text": "Geologic Extraction"
+  },
+  "description": {
+    "text": "Fracking pump construction and molten mineral extraction from geologic sources."
+  },
+  "icon": {
+    "id": "resourceful_refinement:fracking_pump_outlet",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/fluid_handling"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:fracking_pump_outlet",
+      "count": 1
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:shaped_crafting/fracking_pump_outlet_shaped_crafting",
+    "resourceful_refinement:fracking/crimsite_to_molten_crimsite",
+    "resourceful_refinement:fracking/asurine_to_molten_asurine",
+    "resourceful_refinement:fracking/lava_geyser_to_lava"
+  ]
+}

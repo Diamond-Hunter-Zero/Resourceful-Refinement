@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.mechanical_stamper;
 
 import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipe;
 import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipeInput;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
@@ -20,6 +21,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
@@ -72,6 +74,7 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
     private UUID targetEntityId;
     private BlockPos targetDepotPos;
     private MechanicalStamperRecipe lastRecipe;
+    private ResourceLocation lastRecipeId;
     private boolean processingBeltItem;
     private int beltProcessSegment = -1;
 
@@ -191,7 +194,7 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         }
 
         Optional<RecipeHolder<MechanicalStamperRecipe>> recipe = findRecipe(target.stack(), target.paired());
-        recipe.ifPresent(holder -> startCycle(holder.value(), target));
+        recipe.ifPresent(holder -> startCycle(holder, target));
     }
 
     private void tickRunning() {
@@ -259,7 +262,8 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         updateExtensionProgress();
     }
 
-    private void startCycle(MechanicalStamperRecipe recipe, WorkTarget target) {
+    private void startCycle(RecipeHolder<MechanicalStamperRecipe> holder, WorkTarget target) {
+        MechanicalStamperRecipe recipe = holder.value();
         boolean isolated = recipe.isIsolatedStamper();
         MechanicalStamperBlockEntity partner = null;
         if (!isolated) {
@@ -269,15 +273,17 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
             }
         }
 
-        beginCycle(recipe, target, partner == null ? null : partner.getBlockPos(), isolated, true);
+        beginCycle(holder, target, partner == null ? null : partner.getBlockPos(), isolated, true);
         if (partner != null) {
-            partner.beginCycle(recipe, target, worldPosition, false, false);
+            partner.beginCycle(holder, target, worldPosition, false, false);
         }
     }
 
-    private void beginCycle(MechanicalStamperRecipe recipe, WorkTarget target, @Nullable BlockPos partnerPos,
+    private void beginCycle(RecipeHolder<MechanicalStamperRecipe> holder, WorkTarget target, @Nullable BlockPos partnerPos,
                             boolean isolated, boolean activeController) {
+        MechanicalStamperRecipe recipe = holder.value();
         this.lastRecipe = recipe;
+        this.lastRecipeId = holder.id();
         this.targetEntityId = target.itemEntity() == null ? null : target.itemEntity().getUUID();
         this.targetDepotPos = target.depotPos();
         this.partnerPos = partnerPos;
@@ -292,9 +298,11 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         sendData();
     }
 
-    private void beginBeltCycle(MechanicalStamperRecipe recipe, int beltSegment, @Nullable BlockPos partnerPos,
+    private void beginBeltCycle(RecipeHolder<MechanicalStamperRecipe> holder, int beltSegment, @Nullable BlockPos partnerPos,
                                 boolean isolated, boolean activeController) {
+        MechanicalStamperRecipe recipe = holder.value();
         this.lastRecipe = recipe;
+        this.lastRecipeId = holder.id();
         this.targetEntityId = null;
         this.targetDepotPos = null;
         this.partnerPos = partnerPos;
@@ -429,9 +437,9 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
             }
         }
 
-        beginBeltCycle(recipe, segment, partner == null ? null : partner.getBlockPos(), isolated, true);
+        beginBeltCycle(recipeHolder.get(), segment, partner == null ? null : partner.getBlockPos(), isolated, true);
         if (partner != null) {
-            partner.beginBeltCycle(recipe, segment, worldPosition, false, false);
+            partner.beginBeltCycle(recipeHolder.get(), segment, worldPosition, false, false);
         }
         return true;
     }
@@ -451,6 +459,9 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         if (lastRecipe == null || stack.isEmpty()) {
             return false;
         }
+        if (!ResearchRecipeGate.canUseServerRecipe(level, lastRecipeId)) {
+            return false;
+        }
         boolean paired = !isolatedCycle;
         if (!lastRecipe.matches(createInput(stack, paired), level)) {
             return false;
@@ -461,6 +472,9 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
 
     private void processAtImpact() {
         if (level == null || lastRecipe == null) {
+            return;
+        }
+        if (!ResearchRecipeGate.canUseServerRecipe(level, lastRecipeId)) {
             return;
         }
 
@@ -715,6 +729,7 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         targetDepotPos = null;
         partnerPos = null;
         lastRecipe = null;
+        lastRecipeId = null;
         sendData();
     }
 
@@ -767,6 +782,7 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
     private void clearStaleRecipe() {
         if (state == RunningState.IDLE) {
             lastRecipe = null;
+            lastRecipeId = null;
             targetEntityId = null;
             targetDepotPos = null;
             partnerPos = null;
@@ -830,7 +846,9 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
 
     private Optional<RecipeHolder<MechanicalStamperRecipe>> findRecipe(ItemStack target, boolean allowPaired) {
         MechanicalStamperRecipeInput input = createInput(target, allowPaired);
-        return level.getRecipeManager().getRecipeFor(ModRecipeTypes.MECHANICAL_STAMPING_TYPE.get(), input, level);
+        return level.getRecipeManager()
+                .getRecipeFor(ModRecipeTypes.MECHANICAL_STAMPING_TYPE.get(), input, level)
+                .filter(holder -> ResearchRecipeGate.canUseServerRecipe(level, holder));
     }
 
     private MechanicalStamperRecipeInput createInput(ItemStack target, boolean paired) {

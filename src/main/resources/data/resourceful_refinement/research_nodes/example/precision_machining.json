@@ -1,0 +1,33 @@
+{
+  "title": {
+    "text": "Precision Machining"
+  },
+  "description": {
+    "text": "Stamping, excavation, fissure drilling, and cyclotron work that combines casting skill with fluid handling."
+  },
+  "icon": {
+    "id": "resourceful_refinement:mechanical_stamper",
+    "count": 1
+  },
+  "parents": [
+    "resourceful_refinement:example/casting",
+    "resourceful_refinement:example/fluid_handling"
+  ],
+  "rewards": [
+    {
+      "id": "resourceful_refinement:graphite",
+      "count": 4
+    },
+    {
+      "id": "resourceful_refinement:flux_dust",
+      "count": 4
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:mechanical_stamping/test_sand_stamping",
+    "resourceful_refinement:excavation/stone_excavation",
+    "resourceful_refinement:drill_pylon/raw_iron_fissure",
+    "resourceful_refinement:cyclotron_forge/charcoal_graphite_coolant",
+    "resourceful_refinement:shaped_crafting/heavy_plate_shielding"
+  ]
+}

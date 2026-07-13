@@ -51,6 +51,41 @@ public final class ModNetworking {
                         LaunchpadStatePayload.TYPE,
                         LaunchpadStatePayload.STREAM_CODEC,
                         ModNetworking::handleLaunchpadState
+                )
+                .playToClient(
+                        ResearchCraftingLockPayload.TYPE,
+                        ResearchCraftingLockPayload.STREAM_CODEC,
+                        ModNetworking::handleResearchCraftingLock
+                )
+                .playToServer(
+                        RequestResearchTreeDataPayload.TYPE,
+                        RequestResearchTreeDataPayload.STREAM_CODEC,
+                        ModNetworking::handleRequestResearchTreeData
+                )
+                .playToClient(
+                        ResearchTreeSyncPayload.TYPE,
+                        ResearchTreeSyncPayload.STREAM_CODEC,
+                        ModNetworking::handleResearchTreeSync
+                )
+                .playToClient(
+                        OpenResearchTerminalPayload.TYPE,
+                        OpenResearchTerminalPayload.STREAM_CODEC,
+                        ModNetworking::handleOpenResearchTerminal
+                )
+                .playToClient(
+                        ResearchTerminalStatePayload.TYPE,
+                        ResearchTerminalStatePayload.STREAM_CODEC,
+                        ModNetworking::handleResearchTerminalState
+                )
+                .playToClient(
+                        ResearchUnlockToastPayload.TYPE,
+                        ResearchUnlockToastPayload.STREAM_CODEC,
+                        ModNetworking::handleResearchUnlockToast
+                )
+                .playToServer(
+                        ResearchTerminalActionPayload.TYPE,
+                        ResearchTerminalActionPayload.STREAM_CODEC,
+                        ModNetworking::handleResearchTerminalAction
                 );
     }
 
@@ -86,6 +121,42 @@ public final class ModNetworking {
 
     private static void handleLaunchpadState(LaunchpadStatePayload payload, IPayloadContext context) {
         context.enqueueWork(() -> LaunchpadStatePayload.handleClient(payload));
+    }
+
+    private static void handleResearchCraftingLock(ResearchCraftingLockPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ResearchCraftingLockPayload.handleClient(payload));
+    }
+
+    private static void handleRequestResearchTreeData(RequestResearchTreeDataPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                RequestResearchTreeDataPayload.handle(payload, serverPlayer);
+            }
+        });
+    }
+
+    private static void handleResearchTreeSync(ResearchTreeSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ResearchTreeSyncPayload.handleClient(payload));
+    }
+
+    private static void handleOpenResearchTerminal(OpenResearchTerminalPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> OpenResearchTerminalPayload.handleClient(payload));
+    }
+
+    private static void handleResearchTerminalState(ResearchTerminalStatePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ResearchTerminalStatePayload.handleClient(payload));
+    }
+
+    private static void handleResearchUnlockToast(ResearchUnlockToastPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ResearchUnlockToastPayload.handleClient(payload));
+    }
+
+    private static void handleResearchTerminalAction(ResearchTerminalActionPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                ResearchTerminalActionPayload.handle(payload, serverPlayer);
+            }
+        });
     }
 
     private static void handleConfigureLaunchpad(ConfigureLaunchpadPayload payload, IPayloadContext context) {

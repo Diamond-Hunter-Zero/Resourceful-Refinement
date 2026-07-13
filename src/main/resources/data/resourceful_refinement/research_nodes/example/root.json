@@ -1,0 +1,44 @@
+{
+  "title": {
+    "text": "Workshop Fundamentals"
+  },
+  "description": {
+    "text": "Baseline workshop techniques for early Resourceful Refinement devices."
+  },
+  "icon": {
+    "id": "minecraft:book",
+    "count": 1
+  },
+  "rewards": [
+    {
+      "id": "minecraft:iron_ingot",
+      "count": 8
+    },
+    {
+      "id": "minecraft:copper_ingot",
+      "count": 8
+    }
+  ],
+  "recipes": [
+    "resourceful_refinement:shaped_crafting/mechanical_sieve_shaped_crafting",
+    "resourceful_refinement:shapeless_crafting/paint_nozzle_shapeless_crafting"
+  ],
+  "items": [
+    "resourceful_refinement:mechanical_sieve",
+    "minecraft:wooden_pickaxe",
+    "minecraft:chest",
+    "minecraft:red_bed",
+    "minecraft:yellow_bed",
+    "minecraft:lime_bed",
+    "minecraft:blue_bed",
+    "minecraft:magenta_bed",
+    "minecraft:pink_bed",
+    "minecraft:orange_bed",
+    "minecraft:compass",
+    "minecraft:stone_bricks",
+    "minecraft:stone_axe",
+    "minecraft:stone_pickaxe",
+    "minecraft:stone_hoe",
+    "minecraft:stone_sword"
+  ]
+}

@@ -3,7 +3,6 @@ package com.resourceful_refinement.content.research;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.api.research.ResearchApi;
@@ -12,6 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -86,17 +86,30 @@ public final class ResearchCommands {
                         .executes(context -> list(context.getSource())))
                 .then(Commands.literal("locks")
                         .then(recipeArgument()
-                                .executes(context -> locks(context.getSource(), getRecipeId(context, "recipe"))))));
+                                .executes(context -> locks(context.getSource(), getRecipeId(context, "recipe")))))
+                .then(Commands.literal("requirements")
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(nodeArgument()
+                                                .executes(context -> clearRequirements(context.getSource(),
+                                                        EntityArgument.getPlayers(context, "targets"),
+                                                        getNodeId(context, "node"))))))
+                        .then(Commands.literal("fulfill")
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .then(nodeArgument()
+                                                .executes(context -> fulfillRequirements(context.getSource(),
+                                                        EntityArgument.getPlayers(context, "targets"),
+                                                        getNodeId(context, "node"))))))));
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, String> nodeArgument() {
-        return Commands.argument("node", StringArgumentType.word())
+    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> nodeArgument() {
+        return Commands.argument("node", ResourceLocationArgument.id())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                         ResearchApi.getNodeIds().stream().map(ResourceLocation::toString).sorted().toList(), builder));
     }
 
-    private static RequiredArgumentBuilder<CommandSourceStack, String> recipeArgument() {
-        return Commands.argument("recipe", StringArgumentType.word())
+    private static RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> recipeArgument() {
+        return Commands.argument("recipe", ResourceLocationArgument.id())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                         ResearchApi.getKnownLockedRecipeIds(context.getSource().getServer()).stream()
                                 .map(ResourceLocation::toString)
@@ -105,11 +118,11 @@ public final class ResearchCommands {
     }
 
     private static ResourceLocation getNodeId(CommandContext<CommandSourceStack> context, String name) {
-        return ResourceLocation.parse(StringArgumentType.getString(context, name));
+        return ResourceLocationArgument.getId(context, name);
     }
 
     private static ResourceLocation getRecipeId(CommandContext<CommandSourceStack> context, String name) {
-        return ResourceLocation.parse(StringArgumentType.getString(context, name));
+        return ResourceLocationArgument.getId(context, name);
     }
 
     private static int grant(CommandSourceStack source, Collection<ServerPlayer> targets, ResourceLocation nodeId,
@@ -181,15 +194,51 @@ public final class ResearchCommands {
     }
 
     private static int locks(CommandSourceStack source, ResourceLocation recipeId) {
-        Optional<ResourceLocation> nodeId = ResearchApi.getLockingNode(source.getServer(), recipeId);
-        if (nodeId.isEmpty()) {
+        List<ResourceLocation> nodeIds = ResearchApi.getLockingNodes(source.getServer(), recipeId);
+        if (nodeIds.isEmpty()) {
             source.sendSuccess(() -> Component.literal("Recipe " + recipeId + " is not locked by research"), false);
             return 0;
         }
         boolean usable = ResearchApi.canUseRecipeOnServer(source.getServer(), recipeId);
-        source.sendSuccess(() -> Component.literal("Recipe " + recipeId + " is locked by " + nodeId.get()
+        source.sendSuccess(() -> Component.literal("Recipe " + recipeId + " is locked by " + joinIds(nodeIds)
                 + " and is currently " + (usable ? "unlocked" : "locked") + " at server scope"), false);
         return usable ? 1 : 0;
+    }
+
+    private static int clearRequirements(CommandSourceStack source, Collection<ServerPlayer> targets,
+                                         ResourceLocation nodeId) {
+        if (ResearchApi.getNode(nodeId).isEmpty()) {
+            source.sendFailure(Component.literal("Unknown research node: " + nodeId));
+            return 0;
+        }
+        int changed = 0;
+        for (ServerPlayer player : targets) {
+            if (ResearchApi.clearProgress(source.getServer(), player.getUUID(), nodeId)) {
+                changed++;
+            }
+        }
+        int finalChanged = changed;
+        source.sendSuccess(() -> Component.literal("Cleared requirement progress for " + nodeId + " on "
+                + finalChanged + "/" + targets.size() + " player(s)"), true);
+        return changed;
+    }
+
+    private static int fulfillRequirements(CommandSourceStack source, Collection<ServerPlayer> targets,
+                                           ResourceLocation nodeId) {
+        if (ResearchApi.getNode(nodeId).isEmpty()) {
+            source.sendFailure(Component.literal("Unknown research node: " + nodeId));
+            return 0;
+        }
+        int unlocked = 0;
+        for (ServerPlayer player : targets) {
+            if (ResearchApi.fulfillProgress(source.getServer(), player.getUUID(), nodeId).unlocked()) {
+                unlocked++;
+            }
+        }
+        int finalUnlocked = unlocked;
+        source.sendSuccess(() -> Component.literal("Fulfilled requirement progress for " + nodeId + "; unlocked for "
+                + finalUnlocked + "/" + targets.size() + " player(s)"), true);
+        return unlocked;
     }
 
     private static int reportBulkResult(CommandSourceStack source, String verb, int targetCount,

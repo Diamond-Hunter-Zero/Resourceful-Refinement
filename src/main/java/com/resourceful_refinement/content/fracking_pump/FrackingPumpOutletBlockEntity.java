@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.fracking_pump;
 
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.block.IBE;
@@ -105,6 +106,13 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
             var recipe = level.getRecipeManager()
                 .getRecipeFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get(), input, level);
             if (recipe.isPresent()) {
+                if (!ResearchRecipeGate.canUseServerRecipe(level, recipe.get())) {
+                    lastRecipe = null;
+                    displayedRecipeId = null;
+                    timer = 0;
+                    syncData();
+                    return;
+                }
                 lastRecipe = recipe.get().value();
                 if (!recipe.get().id().equals(displayedRecipeId)) {
                     displayedRecipeId = recipe.get().id();
@@ -113,6 +121,12 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
             } else {
                 lastRecipe = null;
             }
+        } else if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+            lastRecipe = null;
+            displayedRecipeId = null;
+            timer = 0;
+            syncData();
+            return;
         }
 
         // 3. Processing
@@ -202,6 +216,7 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         for (var holder : level.getRecipeManager().getAllRecipesFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get())) {
             FrackingPumpRecipe recipe = holder.value();
             if (recipe.getSourceBlock() != sourceBlock) continue;
+            if (!ResearchRecipeGate.canUseServerRecipe(level, holder)) continue;
 
             if (recipe.requiresGeyserFluid()) {
                 if (geyserFluid == null || geyserFluid == Fluids.EMPTY) continue;

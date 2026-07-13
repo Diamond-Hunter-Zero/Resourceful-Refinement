@@ -11,6 +11,7 @@ import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
@@ -176,12 +177,22 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     private DrillPylonRecipe findActiveRecipe(Item sourceItem) {
         if (sourceItem == Items.AIR) return null;
         DrillPylonRecipeInput input = new DrillPylonRecipeInput(sourceItem);
-        if (lastRecipe != null && lastRecipe.matches(input, level)) return lastRecipe;
+        if (lastRecipe != null && lastRecipe.matches(input, level)) {
+            if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                lastRecipe = null;
+                displayedRecipeId = null;
+                progress = 0;
+                syncData();
+                return null;
+            }
+            return lastRecipe;
+        }
 
         RecipeHolder<DrillPylonRecipe> holder = level.getRecipeManager()
                 .getRecipeFor(ModRecipeTypes.DRILL_PYLON_TYPE.get(), input, level)
                 .orElse(null);
         if (holder == null) return null;
+        if (!ResearchRecipeGate.canUseServerRecipe(level, holder)) return null;
         lastRecipe = holder.value();
         displayedRecipeId = holder.id();
         syncData();

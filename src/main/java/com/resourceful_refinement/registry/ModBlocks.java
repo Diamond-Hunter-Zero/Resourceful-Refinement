@@ -45,6 +45,7 @@ import com.resourceful_refinement.content.refinery.BlenderBladeBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
 import com.resourceful_refinement.content.refinery.RefineryProxyBlock;
 import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
+import com.resourceful_refinement.content.research_terminal.ResearchTerminalBlock;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.simibubi.create.AllBlocks;
@@ -95,6 +96,9 @@ public class ModBlocks {
 
     public static final DeferredBlock<CastingDepotBlock> CASTING_DEPOT = BLOCKS.register("casting_depot",
             () -> new CastingDepotBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.DEPOT.get()).requiresCorrectToolForDrops().noOcclusion()));
+
+    public static final DeferredBlock<ResearchTerminalBlock> RESEARCH_TERMINAL = BLOCKS.register("research_terminal",
+            () -> new ResearchTerminalBlock(BlockBehaviour.Properties.ofFullCopy(AllBlocks.DEPOT.get()).requiresCorrectToolForDrops().noOcclusion()));
 
     public static final DeferredBlock<FrackingPumpOutletBlock> FRACKING_PUMP_OUTLET = BLOCKS.register("fracking_pump_outlet",
             () -> new FrackingPumpOutletBlock(BlockBehaviour.Properties.of().pushReaction(PushReaction.BLOCK).strength(2.5f).sound(SoundType.COPPER).requiresCorrectToolForDrops().noOcclusion()));

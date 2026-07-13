@@ -4,6 +4,7 @@ import com.resourceful_refinement.content.gel_splatter.GelFluidTintColors;
 import com.resourceful_refinement.content.gel_splatter.GelFluidTintColorsClient;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlockEntity;
+import com.resourceful_refinement.client.research.ResearchKeyMappings;
 import com.resourceful_refinement.ponders.ModPonders;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Camera;
@@ -15,6 +16,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -48,6 +50,11 @@ public class ModClientEvents {
                 event.register(item, decorator);
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        ResearchKeyMappings.register(event);
     }
 
     @SubscribeEvent

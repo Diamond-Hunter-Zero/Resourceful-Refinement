@@ -4,6 +4,7 @@ import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipeInput;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModDataComponents;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.simibubi.create.AllParticleTypes;
@@ -311,6 +312,13 @@ public class BrewersTapBlockEntity extends SmartBlockEntity implements IHaveGogg
 
             lastRecipe = recipe.get().value();
             displayedRecipeId = recipe.get().id();
+            if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+                clearRecipeCache();
+                return false;
+            }
+        } else if (!ResearchRecipeGate.canUseServerRecipe(level, displayedRecipeId)) {
+            clearRecipeCache();
+            return false;
         }
 
         ItemStack result = lastRecipe.getResultItem(level.registryAccess());

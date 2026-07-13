@@ -11,6 +11,7 @@ import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipe;
 import com.resourceful_refinement.content.cyclotron_forge.recipe.CyclotronForgeRecipeInput;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModRecipeTypes;
@@ -460,6 +461,7 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
         for (RecipeHolder<CyclotronForgeRecipe> holder : level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.CYCLOTRON_FORGE_TYPE.get())) {
             CyclotronForgeRecipe recipe = holder.value();
             if (!recipe.matches(input, level)) continue;
+            if (!ResearchRecipeGate.canUseServerRecipe(level, holder)) continue;
             RecipeSelection selection = new RecipeSelection(holder.id(), recipe, recipe.getCoilLength() == coilLength);
             if (selection.lengthMatches()) return selection;
             if (wrongLengthMatch == null) wrongLengthMatch = selection;

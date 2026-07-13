@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.forge_mould;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
+import com.resourceful_refinement.content.research.ResearchRecipeGate;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -16,6 +17,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,12 +75,14 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
     public RunningState state = RunningState.IDLE;
     public float extensionProgress = 0; // 0 to 1
     private net.minecraft.world.item.crafting.Recipe<MechanicalForgeMouldRecipeInput> lastRecipe;
+    private ResourceLocation lastRecipeId;
     
     private net.minecraft.world.level.block.Block lastWorkspaceBlock;
     private ItemStack lastWorkspaceItem = ItemStack.EMPTY;
 
     public void clearRecipeCache() {
         lastRecipe = null;
+        lastRecipeId = null;
     }
 
     public boolean checkRecipeValidity() {
@@ -260,7 +264,7 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
         // REQUIRE a workspace (depot or belt) below
         if (targetHandler == null) return false;
 
-        if (lastRecipe == null || !lastRecipe.matches(input, level)) {
+        if (lastRecipe == null || !lastRecipe.matches(input, level) || !ResearchRecipeGate.canUseServerRecipe(level, lastRecipeId)) {
             Optional<? extends RecipeHolder<?>> recipe = Optional.empty();
 
             // 1. Try to find a Coating recipe if the depot is occupied
@@ -284,6 +288,12 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
                 return false;
             }
 
+            if (!ResearchRecipeGate.canUseServerRecipe(level, recipe.get())) {
+                lastRecipe = null;
+                lastRecipeId = null;
+                return false;
+            }
+
             net.minecraft.world.item.crafting.Recipe<?> foundRecipe = recipe.get().value();
 
             if (foundRecipe instanceof MechanicalForgeMouldRecipe mfmr && !mfmr.matchesFilter(filtering)) {
@@ -291,6 +301,7 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
             }
 
             lastRecipe = (net.minecraft.world.item.crafting.Recipe<MechanicalForgeMouldRecipeInput>) foundRecipe;
+            lastRecipeId = recipe.get().id();
         }
 
         // Space between (worldPosition.below(1)) MUST be empty

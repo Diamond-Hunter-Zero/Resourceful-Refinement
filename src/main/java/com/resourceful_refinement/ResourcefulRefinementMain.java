@@ -41,6 +41,7 @@ import com.resourceful_refinement.content.pug.LaunchpadControllerRenderer;
 import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.research_terminal.ResearchTerminalModel;
 import com.resourceful_refinement.content.sieve.*;
 import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
@@ -467,6 +468,8 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LAUNCHPAD_CONTROLLER_BE.get(), LaunchpadControllerRenderer::new);
 
+            event.registerBlockEntityRenderer(ModBlockEntities.RESEARCH_TERMINAL_BE.get(), ResearchTerminalRenderer::new);
+
             // Register Projectile Renderer dynamically
             event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
@@ -538,6 +541,8 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronBackModel.LAYER_LOCATION, CyclotronBackModel::createBodyLayer);
+
+            event.registerLayerDefinition(ResearchTerminalModel.LAYER_LOCATION, ResearchTerminalModel::createBodyLayer);
         }
     }
 

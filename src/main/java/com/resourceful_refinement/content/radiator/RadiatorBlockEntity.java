@@ -1,6 +1,9 @@
 package com.resourceful_refinement.content.radiator;
 
 import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.manifold.ManifoldAssemblyAction;
+import com.resourceful_refinement.content.manifold.ManifoldAssemblySession;
+import com.resourceful_refinement.content.manifold.ManifoldBlockEntity;
 import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.api.boiler.BoilerHeater;
@@ -62,6 +65,9 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     public static final int HEAT_STATE_OFFSET = 3;
 
     private int heatTemperature = 0; // Visual/internal heat energy (-1000 to 1000)
+    private BlockPos manifoldAssemblyTargetPos;
+    private int manifoldAssemblyTimer;
+    private ExtendedHeatCondition manifoldAssemblyCondition;
 
     // Flow rate limiting fields (transient / tick-by-tick)
     private int fluidReceivedCurrentTick = 0;
@@ -146,6 +152,10 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             return ExtendedHeatCondition.SUPERHEATED;
     }
 
+    public ExtendedHeatCondition getCurrentHeatCondition() {
+        return getHeatConditionFromEnergy(heatTemperature);
+    }
+
     public static int getHeatGainDelta(int currentEnergy, ExtendedHeatCondition targetState)
     {
         int delta = (targetState.getTargetHeatEnergy() - currentEnergy);
@@ -209,6 +219,8 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
                     .setValue(BlazeBurnerBlock.HEAT_LEVEL, targetBlazeLevel), 3);
         }
 
+        be.tickManifoldTemperatureSession(level, currentHeatCondition);
+
         // Active output pushing (for direct connections to tanks/machines without pipes)
         // Only push if the radiator has more than the minimum tank fill threshold
         if (be.tank.getFluidAmount() > MIN_TANK_FILL_THRESHOLD && state.hasProperty(RadiatorBlock.FACING)) {
@@ -246,6 +258,68 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             setChanged();
             syncData();
         }
+    }
+
+    private void tickManifoldTemperatureSession(Level level, ExtendedHeatCondition heatCondition) {
+        if (heatCondition == ExtendedHeatCondition.NONE) {
+            clearManifoldTemperatureSession();
+            return;
+        }
+
+        if (manifoldAssemblyTargetPos == null) {
+            startManifoldTemperatureSession(level, heatCondition);
+            return;
+        }
+
+        if (!(level.getBlockEntity(manifoldAssemblyTargetPos) instanceof ManifoldBlockEntity)) {
+            clearManifoldTemperatureSession();
+            return;
+        }
+        if (manifoldAssemblyCondition == null) {
+            manifoldAssemblyCondition = heatCondition;
+        }
+
+        ManifoldAssemblyAction.Temperature action = new ManifoldAssemblyAction.Temperature(manifoldAssemblyCondition);
+        if (!ManifoldAssemblySession.canApply(level, manifoldAssemblyTargetPos, action)) {
+            clearManifoldTemperatureSession();
+            return;
+        }
+
+        ManifoldAssemblySession.holdTarget(level, manifoldAssemblyTargetPos);
+        manifoldAssemblyTimer++;
+        if (manifoldAssemblyTimer >= ManifoldAssemblySession.DEFAULT_DURATION) {
+            ManifoldAssemblySession.apply(level, manifoldAssemblyTargetPos, action);
+            clearManifoldTemperatureSession();
+        }
+    }
+
+    private void startManifoldTemperatureSession(Level level, ExtendedHeatCondition heatCondition) {
+        ManifoldAssemblyAction.Temperature action = new ManifoldAssemblyAction.Temperature(heatCondition);
+        for (Direction direction : Direction.values()) {
+            BlockPos candidate = worldPosition.relative(direction);
+            if (!(level.getBlockEntity(candidate) instanceof ManifoldBlockEntity)) {
+                continue;
+            }
+            if (!ManifoldAssemblySession.canApply(level, candidate, action)) {
+                continue;
+            }
+            manifoldAssemblyTargetPos = candidate;
+            manifoldAssemblyTimer = 0;
+            manifoldAssemblyCondition = heatCondition;
+            ManifoldAssemblySession.holdTarget(level, candidate);
+            setChanged();
+            return;
+        }
+    }
+
+    private void clearManifoldTemperatureSession() {
+        if (manifoldAssemblyTargetPos == null && manifoldAssemblyTimer == 0 && manifoldAssemblyCondition == null) {
+            return;
+        }
+        manifoldAssemblyTargetPos = null;
+        manifoldAssemblyTimer = 0;
+        manifoldAssemblyCondition = null;
+        setChanged();
     }
 
     public boolean isHeated() {
@@ -431,6 +505,13 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         tag.putInt("HeatLevel", heatTemperature);
         tag.put("Tank", tank.writeToNBT(registries, new CompoundTag()));
         tag.putInt("FluidReceivedLastTick", fluidReceivedLastTick);
+        if (manifoldAssemblyTargetPos != null) {
+            tag.put("ManifoldAssemblyTarget", net.minecraft.nbt.NbtUtils.writeBlockPos(manifoldAssemblyTargetPos));
+        }
+        tag.putInt("ManifoldAssemblyTimer", manifoldAssemblyTimer);
+        if (manifoldAssemblyCondition != null) {
+            tag.putString("ManifoldAssemblyCondition", manifoldAssemblyCondition.name());
+        }
         ContainerHelper.saveAllItems(tag, this.items, true, registries);
         tag.putIntArray("CookingTimes", this.cookingProgress);
         tag.putIntArray("CookingTotalTimes", this.cookingTime);
@@ -444,6 +525,19 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
             tank.readFromNBT(registries, tag.getCompound("Tank"));
         }
         fluidReceivedLastTick = tag.getInt("FluidReceivedLastTick");
+        manifoldAssemblyTargetPos = tag.contains("ManifoldAssemblyTarget")
+                ? net.minecraft.nbt.NbtUtils.readBlockPos(tag, "ManifoldAssemblyTarget").orElse(null)
+                : null;
+        manifoldAssemblyTimer = tag.getInt("ManifoldAssemblyTimer");
+        if (tag.contains("ManifoldAssemblyCondition")) {
+            try {
+                manifoldAssemblyCondition = ExtendedHeatCondition.valueOf(tag.getString("ManifoldAssemblyCondition"));
+            } catch (IllegalArgumentException ignored) {
+                manifoldAssemblyCondition = null;
+            }
+        } else {
+            manifoldAssemblyCondition = null;
+        }
         this.items.clear();
         ContainerHelper.loadAllItems(tag, this.items, registries);
         if (tag.contains("CookingTimes", 11)) {

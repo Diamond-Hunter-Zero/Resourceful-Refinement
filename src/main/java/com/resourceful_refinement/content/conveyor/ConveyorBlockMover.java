@@ -1,10 +1,13 @@
 package com.resourceful_refinement.content.conveyor;
 
+import com.resourceful_refinement.content.manifold.ManifoldAssemblyRecord;
+import com.resourceful_refinement.content.manifold.ManifoldBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
@@ -73,11 +76,13 @@ public final class ConveyorBlockMover {
             level.destroyBlock(destinationPos, false);
         }
 
+        MovableBlockEntityData movedBlockEntityData = MovableBlockEntityData.capture(level, sourcePos);
         boolean placed = level.setBlock(destinationPos, sourceState, Block.UPDATE_ALL);
         if (!placed) {
             return ConveyorMovementResult.blocked(ConveyorMovementResult.FailureReason.DESTINATION_BLOCKED, sourcePos,
                     destinationPos, sourceState);
         }
+        movedBlockEntityData.restore(level, destinationPos);
 
         level.setBlock(sourcePos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
         return ConveyorMovementResult.moved(sourcePos, destinationPos, sourceState);
@@ -133,11 +138,13 @@ public final class ConveyorBlockMover {
             return ConveyorMovementResult.FailureReason.PUSH_REACTION_DESTROY;
         }
 
-        if (level.getBlockEntity(sourcePos) != null) {
+        BlockEntity sourceBlockEntity = level.getBlockEntity(sourcePos);
+        if (!canMoveBlockEntity(sourceBlockEntity)) {
             return ConveyorMovementResult.FailureReason.BLOCK_ENTITY;
         }
 
-        if (!PistonBaseBlock.isPushable(sourceState, level, sourcePos, movementDirection, false, movementDirection)) {
+        if (sourceBlockEntity == null
+                && !PistonBaseBlock.isPushable(sourceState, level, sourcePos, movementDirection, false, movementDirection)) {
             return ConveyorMovementResult.FailureReason.PISTON_RULE;
         }
 
@@ -172,5 +179,29 @@ public final class ConveyorBlockMover {
         return Comparator.comparingInt((BlockPos pos) -> movementDirection.getAxis()
                         .choose(pos.getX(), pos.getY(), pos.getZ()) * movementDirection.getAxisDirection().getStep())
                 .reversed();
+    }
+
+    private static boolean canMoveBlockEntity(BlockEntity blockEntity) {
+        return blockEntity == null
+                || blockEntity instanceof ManifoldBlockEntity manifold && !manifold.isAssemblyLocked();
+    }
+
+    private interface MovableBlockEntityData {
+        MovableBlockEntityData EMPTY = (level, destinationPos) -> {
+        };
+
+        static MovableBlockEntityData capture(Level level, BlockPos sourcePos) {
+            if (level.getBlockEntity(sourcePos) instanceof ManifoldBlockEntity manifold) {
+                ManifoldAssemblyRecord record = manifold.assemblyRecord();
+                return (destinationLevel, destinationPos) -> {
+                    if (destinationLevel.getBlockEntity(destinationPos) instanceof ManifoldBlockEntity movedManifold) {
+                        movedManifold.setAssemblyRecord(record);
+                    }
+                };
+            }
+            return EMPTY;
+        }
+
+        void restore(Level level, BlockPos destinationPos);
     }
 }

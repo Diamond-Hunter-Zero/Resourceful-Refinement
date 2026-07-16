@@ -11,6 +11,7 @@ import com.resourceful_refinement.content.geyser.GeyserItem;
 import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
 import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.content.milking_station.MilkingStationItem;
+import com.resourceful_refinement.content.manifold.ManifoldItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
@@ -90,6 +91,9 @@ public class ModItems {
             () -> new ConveyorBeltItem(ModBlocks.CONVEYOR_BELT.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> CONVEYOR_ROTATOR_ITEM = ITEMS.registerSimpleBlockItem("conveyor_rotator", ModBlocks.CONVEYOR_ROTATOR);
+
+    public static final DeferredItem<ManifoldItem> MANIFOLD_ITEM = ITEMS.register("manifold_block",
+            () -> new ManifoldItem(ModBlocks.MANIFOLD.get(), new Item.Properties()));
 
 
     // v0.4 Content

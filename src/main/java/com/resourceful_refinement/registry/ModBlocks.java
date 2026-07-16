@@ -35,6 +35,7 @@ import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
 import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
+import com.resourceful_refinement.content.manifold.ManifoldBlock;
 import com.resourceful_refinement.content.pug.LaunchpadControllerBlock;
 import com.resourceful_refinement.content.pug.LaunchpadProxyBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
@@ -206,6 +207,12 @@ public class ModBlocks {
                     .noLootTable()
                     .noOcclusion()
                     .pushReaction(PushReaction.BLOCK)));
+
+    public static final DeferredBlock<ManifoldBlock> MANIFOLD = BLOCKS.register("manifold_block",
+            () -> new ManifoldBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()));
 
 
     // -------------------------------------------------------------------------

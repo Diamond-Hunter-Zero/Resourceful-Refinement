@@ -1,6 +1,8 @@
 package com.resourceful_refinement.content.conveyor;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.manifold.ManifoldAssemblyAction;
+import com.resourceful_refinement.content.manifold.ManifoldBlockEntity;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.simibubi.create.content.kinetics.belt.BeltPart;
 import net.minecraft.core.BlockPos;
@@ -8,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -202,6 +205,32 @@ public final class ConveyorGameTests {
             if (failureReason != ConveyorMovementResult.FailureReason.PISTON_RULE
                     && failureReason != ConveyorMovementResult.FailureReason.PUSH_REACTION_BLOCK) {
                 throw new GameTestAssertException("Expected immovable block failure, got " + failureReason);
+            }
+        });
+    }
+
+    @GameTest(template = "empty")
+    public static void conveyorMoverCarriesManifoldAssemblyRecord(GameTestHelper helper) {
+        helper.setBlock(SOURCE, ModBlocks.MANIFOLD.get().defaultBlockState());
+        ManifoldBlockEntity manifold = (ManifoldBlockEntity) helper.getBlockEntity(SOURCE);
+        manifold.applyAssemblyAction(new ManifoldAssemblyAction.Etching());
+        manifold.applyAssemblyAction(new ManifoldAssemblyAction.Fill(
+                ResourceLocation.fromNamespaceAndPath("minecraft", "water")));
+        String expectedHash = manifold.assemblyRecord().identityHash();
+
+        ConveyorMovementResult result = ConveyorBlockMover.tryMoveBlock(helper.getLevel(), helper.absolutePos(SOURCE),
+                Direction.EAST);
+
+        helper.succeedIf(() -> {
+            if (!result.moved()) {
+                throw new GameTestAssertException("Expected manifold to move, got " + result.failureReason());
+            }
+            helper.assertBlockPresent(Blocks.AIR, SOURCE);
+            helper.assertBlockPresent(ModBlocks.MANIFOLD.get(), DESTINATION);
+            ManifoldBlockEntity movedManifold = (ManifoldBlockEntity) helper.getBlockEntity(DESTINATION);
+            String actualHash = movedManifold.assemblyRecord().identityHash();
+            if (!expectedHash.equals(actualHash)) {
+                throw new GameTestAssertException("Manifold assembly record changed while moving");
             }
         });
     }

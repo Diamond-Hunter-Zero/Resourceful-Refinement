@@ -20,6 +20,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockE
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
 import com.resourceful_refinement.content.mechanical_stamper.MechanicalStamperBlockEntity;
+import com.resourceful_refinement.content.manifold.ManifoldBlockEntity;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
@@ -195,6 +196,9 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<ConveyorRotatorBlockEntity>> CONVEYOR_ROTATOR_BE = BLOCK_ENTITIES.register("conveyor_rotator",
             () -> BlockEntityType.Builder.of((pos, state) -> new ConveyorRotatorBlockEntity(ModBlockEntities.CONVEYOR_ROTATOR_BE.get(), pos, state), ModBlocks.CONVEYOR_ROTATOR.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ManifoldBlockEntity>> MANIFOLD_BE = BLOCK_ENTITIES.register("manifold_block",
+            () -> BlockEntityType.Builder.of(ManifoldBlockEntity::new, ModBlocks.MANIFOLD.get()).build(null));
 
 
 

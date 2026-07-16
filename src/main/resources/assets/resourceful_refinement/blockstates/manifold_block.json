@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=down": { "model": "resourceful_refinement:block/manifold_block", "x": 90 },
+    "facing=up": { "model": "resourceful_refinement:block/manifold_block", "x": 270 },
+    "facing=north": { "model": "resourceful_refinement:block/manifold_block" },
+    "facing=south": { "model": "resourceful_refinement:block/manifold_block", "y": 180 },
+    "facing=west": { "model": "resourceful_refinement:block/manifold_block", "y": 270 },
+    "facing=east": { "model": "resourceful_refinement:block/manifold_block", "y": 90 }
+  }
+}

@@ -1,5 +1,8 @@
 package com.resourceful_refinement.content.mechanical_stamper;
 
+import com.resourceful_refinement.content.manifold.ManifoldAssemblyAction;
+import com.resourceful_refinement.content.manifold.ManifoldAssemblySession;
+import com.resourceful_refinement.content.manifold.ManifoldBlockEntity;
 import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipe;
 import com.resourceful_refinement.content.mechanical_stamper.recipe.MechanicalStamperRecipeInput;
 import com.resourceful_refinement.content.research.ResearchRecipeGate;
@@ -18,6 +21,7 @@ import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -77,6 +81,12 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
     private ResourceLocation lastRecipeId;
     private boolean processingBeltItem;
     private int beltProcessSegment = -1;
+    private boolean processingManifoldBlock;
+    private BlockPos targetManifoldPos;
+    private Direction targetManifoldFace;
+    private ResourceLocation targetManifoldStampId;
+    private ResourceLocation targetManifoldFillId;
+    private boolean targetManifoldUsesFluid;
 
     public final ItemStackHandler stampInv = new ItemStackHandler(1) {
         @Override
@@ -183,6 +193,9 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         if (getSpeed() == 0) {
             return;
         }
+        if (tryStartManifoldStampCycle()) {
+            return;
+        }
         if (scanCooldown-- > 0) {
             return;
         }
@@ -200,6 +213,10 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
     private void tickRunning() {
         if (processingBeltItem) {
             tickBeltCycleAnimation();
+            return;
+        }
+        if (processingManifoldBlock) {
+            tickManifoldBlockCycle();
             return;
         }
 
@@ -262,6 +279,42 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         updateExtensionProgress();
     }
 
+    private void tickManifoldBlockCycle() {
+        if (level.isClientSide) {
+            advanceAnimationTimer();
+            int midpoint = Math.max(1, cycleDuration / 2);
+            state = timer >= midpoint ? RunningState.RETRACTING : RunningState.EXTENDING;
+            updateExtensionProgress();
+            return;
+        }
+
+        if (targetManifoldPos == null || getSpeed() == 0
+                || !(level.getBlockEntity(targetManifoldPos) instanceof ManifoldBlockEntity)) {
+            finishCycle();
+            return;
+        }
+
+        ManifoldAssemblySession.holdTarget(level, targetManifoldPos);
+
+        int midpoint = Math.max(1, cycleDuration / 2);
+        if (!processedThisCycle && timer >= midpoint) {
+            state = RunningState.IMPACTING;
+            extensionProgress = 1;
+            processManifoldStampAtImpact();
+            processedThisCycle = true;
+            state = RunningState.RETRACTING;
+            sendData();
+        }
+
+        if (timer >= cycleDuration) {
+            finishCycle();
+            return;
+        }
+
+        advanceAnimationTimer();
+        updateExtensionProgress();
+    }
+
     private void startCycle(RecipeHolder<MechanicalStamperRecipe> holder, WorkTarget target) {
         MechanicalStamperRecipe recipe = holder.value();
         boolean isolated = recipe.isIsolatedStamper();
@@ -312,6 +365,28 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         this.processingBeltItem = true;
         this.beltProcessSegment = beltSegment;
         this.cycleDuration = Math.max(2, recipe.getProcessingTime());
+        this.prevTimer = 0;
+        this.timer = 0;
+        this.extensionProgress = 0;
+        this.state = RunningState.EXTENDING;
+        sendData();
+    }
+
+    private void beginManifoldBlockCycle(BlockPos targetPos, ManifoldAssemblyAction.Stamp action,
+                                         boolean usesFluidFill) {
+        this.targetEntityId = null;
+        this.targetDepotPos = null;
+        this.partnerPos = null;
+        this.isolatedCycle = true;
+        this.activeController = true;
+        this.processedThisCycle = false;
+        this.processingManifoldBlock = true;
+        this.targetManifoldPos = targetPos;
+        this.targetManifoldFace = action.face();
+        this.targetManifoldStampId = action.stampItemId();
+        this.targetManifoldFillId = action.fillId();
+        this.targetManifoldUsesFluid = usesFluidFill;
+        this.cycleDuration = ManifoldAssemblySession.DEFAULT_DURATION;
         this.prevTimer = 0;
         this.timer = 0;
         this.extensionProgress = 0;
@@ -444,6 +519,25 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         return true;
     }
 
+    private boolean tryStartManifoldStampCycle() {
+        if (level == null || state != RunningState.IDLE || getPartner() != null) {
+            return false;
+        }
+
+        BlockPos targetPos = getIsolatedWorkPos();
+        if (!(level.getBlockEntity(targetPos) instanceof ManifoldBlockEntity manifold)) {
+            return false;
+        }
+
+        ManifoldStampTarget target = createManifoldStampTarget(manifold);
+        if (target == null || !ManifoldAssemblySession.canApply(level, targetPos, target.action())) {
+            return false;
+        }
+
+        beginManifoldBlockCycle(targetPos, target.action(), target.usesFluidFill());
+        return true;
+    }
+
     private boolean canStartBeltRecipe(ItemStack stack, boolean paired) {
         if (state != RunningState.IDLE || getSpeed() == 0) {
             return false;
@@ -506,6 +600,30 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         syncData();
         if (partner != null) {
             partner.syncData();
+        }
+    }
+
+    private void processManifoldStampAtImpact() {
+        if (level == null || targetManifoldPos == null || targetManifoldFace == null
+                || targetManifoldStampId == null || targetManifoldFillId == null) {
+            return;
+        }
+        if (!(level.getBlockEntity(targetManifoldPos) instanceof ManifoldBlockEntity manifold)) {
+            return;
+        }
+        ManifoldAssemblyAction.Stamp action = createManifoldStampAction(manifold, targetManifoldStampId,
+                targetManifoldFillId, targetManifoldUsesFluid);
+        if (action == null) {
+            return;
+        }
+        if (!action.face().equals(targetManifoldFace)) {
+            return;
+        }
+
+        boolean changed = ManifoldAssemblySession.apply(level, targetManifoldPos, action);
+        if (changed) {
+            consumeManifoldStampFill();
+            syncData();
         }
     }
 
@@ -715,6 +833,14 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         recipe.getFillFluid().ifPresent(fluid -> fluidTank.drain(fluid.amount(), IFluidHandler.FluidAction.EXECUTE));
     }
 
+    private void consumeManifoldStampFill() {
+        if (targetManifoldUsesFluid) {
+            fluidTank.drain(1000, IFluidHandler.FluidAction.EXECUTE);
+        } else {
+            mediumInv.extractItem(0, 1, false);
+        }
+    }
+
     private void finishCycle() {
         state = RunningState.IDLE;
         prevTimer = 0;
@@ -724,12 +850,18 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         isolatedCycle = false;
         processedThisCycle = false;
         processingBeltItem = false;
+        processingManifoldBlock = false;
         beltProcessSegment = -1;
         targetEntityId = null;
         targetDepotPos = null;
         partnerPos = null;
         lastRecipe = null;
         lastRecipeId = null;
+        targetManifoldPos = null;
+        targetManifoldFace = null;
+        targetManifoldStampId = null;
+        targetManifoldFillId = null;
+        targetManifoldUsesFluid = false;
         sendData();
     }
 
@@ -786,7 +918,62 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
             targetEntityId = null;
             targetDepotPos = null;
             partnerPos = null;
+            processingManifoldBlock = false;
+            targetManifoldPos = null;
+            targetManifoldFace = null;
+            targetManifoldStampId = null;
+            targetManifoldFillId = null;
+            targetManifoldUsesFluid = false;
         }
+    }
+
+    @Nullable
+    private ManifoldStampTarget createManifoldStampTarget(ManifoldBlockEntity manifold) {
+        ItemStack stamp = getStampItem();
+        if (stamp.isEmpty()) {
+            return null;
+        }
+
+        ResourceLocation stampId = BuiltInRegistries.ITEM.getKey(stamp.getItem());
+        FluidStack fillFluid = getFillFluid();
+        if (!fillFluid.isEmpty() && fillFluid.getAmount() >= 1000) {
+            ResourceLocation fillId = BuiltInRegistries.FLUID.getKey(fillFluid.getFluid());
+            ManifoldAssemblyAction.Stamp action = createManifoldStampAction(manifold, stampId, fillId, true);
+            return action == null ? null : new ManifoldStampTarget(action, true);
+        }
+
+        ItemStack medium = getFillMedium();
+        if (medium.isEmpty()) {
+            return null;
+        }
+
+        ResourceLocation fillId = BuiltInRegistries.ITEM.getKey(medium.getItem());
+        ManifoldAssemblyAction.Stamp action = createManifoldStampAction(manifold, stampId, fillId, false);
+        return action == null ? null : new ManifoldStampTarget(action, false);
+    }
+
+    @Nullable
+    private ManifoldAssemblyAction.Stamp createManifoldStampAction(ManifoldBlockEntity manifold, ResourceLocation stampId,
+                                                                   ResourceLocation fillId, boolean usesFluidFill) {
+        if (stampId == null || fillId == null || getStampItem().isEmpty()
+                || !stampId.equals(BuiltInRegistries.ITEM.getKey(getStampItem().getItem()))) {
+            return null;
+        }
+        if (usesFluidFill) {
+            FluidStack fillFluid = getFillFluid();
+            if (fillFluid.isEmpty() || fillFluid.getAmount() < 1000
+                    || !fillId.equals(BuiltInRegistries.FLUID.getKey(fillFluid.getFluid()))) {
+                return null;
+            }
+        } else {
+            ItemStack medium = getFillMedium();
+            if (medium.isEmpty() || !fillId.equals(BuiltInRegistries.ITEM.getKey(medium.getItem()))) {
+                return null;
+            }
+        }
+
+        Direction localFace = ManifoldAssemblySession.worldFaceToLocalFace(manifold.getBlockState(), getFacing().getOpposite());
+        return new ManifoldAssemblyAction.Stamp(localFace, stampId, fillId);
     }
 
     @Nullable
@@ -989,6 +1176,20 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         }
         tag.putBoolean("ProcessingBeltItem", processingBeltItem);
         tag.putInt("BeltProcessSegment", beltProcessSegment);
+        tag.putBoolean("ProcessingManifoldBlock", processingManifoldBlock);
+        if (targetManifoldPos != null) {
+            tag.put("TargetManifoldPos", NbtUtils.writeBlockPos(targetManifoldPos));
+        }
+        if (targetManifoldFace != null) {
+            tag.putString("TargetManifoldFace", targetManifoldFace.getSerializedName());
+        }
+        if (targetManifoldStampId != null) {
+            tag.putString("TargetManifoldStamp", targetManifoldStampId.toString());
+        }
+        if (targetManifoldFillId != null) {
+            tag.putString("TargetManifoldFill", targetManifoldFillId.toString());
+        }
+        tag.putBoolean("TargetManifoldUsesFluid", targetManifoldUsesFluid);
     }
 
     @Override
@@ -1026,6 +1227,18 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
         targetDepotPos = tag.contains("TargetDepotPos") ? NbtUtils.readBlockPos(tag, "TargetDepotPos").orElse(null) : null;
         processingBeltItem = tag.getBoolean("ProcessingBeltItem");
         beltProcessSegment = tag.contains("BeltProcessSegment") ? tag.getInt("BeltProcessSegment") : -1;
+        processingManifoldBlock = tag.getBoolean("ProcessingManifoldBlock");
+        targetManifoldPos = tag.contains("TargetManifoldPos") ? NbtUtils.readBlockPos(tag, "TargetManifoldPos").orElse(null) : null;
+        targetManifoldFace = tag.contains("TargetManifoldFace")
+                ? Direction.byName(tag.getString("TargetManifoldFace"))
+                : null;
+        targetManifoldStampId = tag.contains("TargetManifoldStamp")
+                ? ResourceLocation.tryParse(tag.getString("TargetManifoldStamp"))
+                : null;
+        targetManifoldFillId = tag.contains("TargetManifoldFill")
+                ? ResourceLocation.tryParse(tag.getString("TargetManifoldFill"))
+                : null;
+        targetManifoldUsesFluid = tag.getBoolean("TargetManifoldUsesFluid");
     }
 
     private void syncData() {
@@ -1082,5 +1295,8 @@ public class MechanicalStamperBlockEntity extends KineticBlockEntity implements 
 
     private record ActiveTarget(@Nullable ItemEntity itemEntity, @Nullable BlockPos depotPos,
                                 @Nullable DepotBehaviour depot, ItemStack stack) {
+    }
+
+    private record ManifoldStampTarget(ManifoldAssemblyAction.Stamp action, boolean usesFluidFill) {
     }
 }

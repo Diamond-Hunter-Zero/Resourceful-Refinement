@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.resourceful_refinement.utilities.GoggleUtilities;
 import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
+import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -482,7 +483,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                     craftingProgress = 0;
                     activeRecipeDuration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());
                     if (activeRecipeDuration <= 0) activeRecipeDuration = 100;
-                    requiredHeat = currentRecipe.value().getRequiredHeatCondition().ordinal();
+                    requiredHeat = currentRecipe.value().getRequiredHeatCondition().getBlazeHeatEnergy();
                     syncData();
                 }
             }
@@ -768,12 +769,9 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
 
             if (!tankOutputFluid.isEmpty() && tankOutputFluid.getAmount() >= outputTank.getCapacity())
                 tooltip.add(Component.literal("§cOutput Tank Full!"));
-            else if (heatLevel.ordinal() != requiredHeat)
+            else if (heatLevel.getBlazeHeatEnergy() != requiredHeat)
             {
-                ExtendedHeatCondition[] conditions = ExtendedHeatCondition.values();
-                String reqName = (requiredHeat >= 0 && requiredHeat < conditions.length)
-                        ? conditions[requiredHeat].getSerializedName().toUpperCase()
-                        : "HEATED";
+                String reqName = com.resourceful_refinement.utilities.heating.HeatUtilities.ConvertHeatLevelToExtendedCondition(requiredHeat).getSerializedName().toUpperCase();
                 tooltip.add(Component.literal("§cRefinery must be " + reqName));
             }
             else
@@ -791,8 +789,8 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         super.write(tag, registries, clientPacket);
         tag.putBoolean("assembled", assembled);
         tag.putInt("structureHeight", structureHeight);
-        tag.putInt("heatLevel", heatLevel.ordinal());
-        tag.putInt("fuelHeatLevel", fuelHeatLevel.ordinal());
+        tag.putInt("heatLevel", heatLevel.getBlazeHeatEnergy());
+        tag.putInt("fuelHeatLevel", fuelHeatLevel.getBlazeHeatEnergy());
         tag.putInt("requiredHeat", requiredHeat);
         tag.putInt("burnTimeRemaining", burnTimeRemaining);
         tag.putInt("craftingProgress", craftingProgress);
@@ -825,11 +823,16 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         super.read(tag, registries, clientPacket);
         assembled = tag.getBoolean("assembled");
         structureHeight = tag.getInt("structureHeight");
-        ExtendedHeatCondition[] conditions = ExtendedHeatCondition.values();
-        int heatIdx = tag.getInt("heatLevel");
-        heatLevel = (heatIdx >= 0 && heatIdx < conditions.length) ? conditions[heatIdx] : ExtendedHeatCondition.NONE;
-        int fuelIdx = tag.getInt("fuelHeatLevel");
-        fuelHeatLevel = (fuelIdx >= 0 && fuelIdx < conditions.length) ? conditions[fuelIdx] : ExtendedHeatCondition.NONE;
+        
+        if (tag.contains("heatLevel"))
+            heatLevel = HeatUtilities.ConvertHeatLevelToExtendedCondition(tag.getInt("heatLevel"));
+        else
+            heatLevel = ExtendedHeatCondition.NONE;
+        if (tag.contains("fuelHeatLevel"))
+            fuelHeatLevel = HeatUtilities.ConvertHeatLevelToExtendedCondition(tag.getInt("fuelHeatLevel"));
+        else
+            fuelHeatLevel = ExtendedHeatCondition.NONE;
+
         requiredHeat = tag.getInt("requiredHeat");
         burnTimeRemaining = tag.getInt("burnTimeRemaining");
         craftingProgress = tag.getInt("craftingProgress");

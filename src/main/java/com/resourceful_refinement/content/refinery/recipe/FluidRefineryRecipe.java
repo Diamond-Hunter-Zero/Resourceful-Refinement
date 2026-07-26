@@ -27,11 +27,13 @@ import java.util.List;
 
 public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryRecipeInput> {
 
+    private final ExtendedHeatCondition heatRequirement;
     private final List<SizedIngredient> sizedIngredients;
     private final List<SizedIngredient> combinedIngredients;
 
-    public FluidRefineryRecipe(ProcessingRecipeParams params, List<SizedIngredient> sizedIngredients) {
+    public FluidRefineryRecipe(ProcessingRecipeParams params, ExtendedHeatCondition heatRequirement, List<SizedIngredient> sizedIngredients) {
         super(ModRecipeTypes.FLUID_REFINERY_TYPE_INFO, params);
+        this.heatRequirement = heatRequirement != null ? heatRequirement : ExtendedHeatCondition.NONE;
 
         // Replace Create's backing ingredients with our sized type
         List<SizedIngredient> sizedIngredientsToAdd = new ArrayList<>();
@@ -78,6 +80,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
         return true;
     }
 
+    public ExtendedHeatCondition getRequiredHeatCondition() { return heatRequirement; }
     public List<SizedIngredient> getSizedIngredients() { return sizedIngredients; }
     public List<SizedIngredient> getCombinedIngredients() { return combinedIngredients; }
 
@@ -142,6 +145,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
         private static final MapCodec<FluidRefineryRecipe> MAP_CODEC =
                 RecordCodecBuilder.mapCodec(inst -> inst.group(
                         ProcessingRecipeParams.CODEC.forGetter(ProcessingRecipe::getParams),
+                        ExtendedHeatCondition.CODEC.optionalFieldOf("heat_requirement", ExtendedHeatCondition.NONE).forGetter(FluidRefineryRecipe::getRequiredHeatCondition),
                         SizedIngredient.FLAT_CODEC.listOf().optionalFieldOf("sized_ingredients", List.of()).forGetter(FluidRefineryRecipe::getSizedIngredients)
                 ).apply(inst, FluidRefineryRecipe::new));
 
@@ -149,6 +153,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
                 StreamCodec.of(
                         (buf, recipe) -> {
                             ProcessingRecipeParams.STREAM_CODEC.encode(buf, recipe.getParams());
+                            ExtendedHeatCondition.STREAM_CODEC.encode(buf, recipe.getRequiredHeatCondition());
 
                             buf.writeInt(recipe.getSizedIngredients().size());
                             for (SizedIngredient ingredient : recipe.getSizedIngredients()) {
@@ -157,6 +162,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
                         },
                         buf -> {
                             ProcessingRecipeParams params = ProcessingRecipeParams.STREAM_CODEC.decode(buf);
+                            ExtendedHeatCondition heatRequirement = ExtendedHeatCondition.STREAM_CODEC.decode(buf);
 
                             int count = buf.readInt();
                             List<SizedIngredient> sizedIngredients = new ArrayList<>(count);
@@ -164,7 +170,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
                                 sizedIngredients.add(SizedIngredient.STREAM_CODEC.decode(buf));
                             }
 
-                            return new FluidRefineryRecipe(params, sizedIngredients);
+                            return new FluidRefineryRecipe(params, heatRequirement, sizedIngredients);
                         }
                 );
 

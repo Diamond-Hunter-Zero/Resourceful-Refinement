@@ -9,6 +9,7 @@ import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity
 import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
 import com.resourceful_refinement.registry.ModPartialModels;
 import com.resourceful_refinement.utilities.FluidBoxRendering;
+import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringRenderer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
@@ -163,8 +164,9 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
         }
 
         // --- Fire Rendering ---
-        if (be.getHeatLevel() > 0)
-            renderBlazeFires(buffer.getBuffer(RenderType.cutout()), poseStack, light, be.getHeatLevel());
+        ExtendedHeatCondition heatLevel = be.getHeatLevel();
+        if (heatLevel != ExtendedHeatCondition.NONE)
+            renderBlazeFires(buffer.getBuffer(RenderType.cutout()), poseStack, light, heatLevel);
 
         // ---Send to Rendering ---
         poseStack.popPose();
@@ -291,12 +293,12 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
                 .setNormal(pose, nx, ny, nz);
     }*/
 
-    private void renderBlazeFires(VertexConsumer vc, PoseStack ms, int light, int heatLevel)
+    private void renderBlazeFires(VertexConsumer vc, PoseStack ms, int light, ExtendedHeatCondition heatLevel)
     {
         ms.pushPose();
 
         TextureAtlasSprite sprite;
-        if (heatLevel == 2)
+        if (heatLevel == ExtendedHeatCondition.SUPERHEATED)
             sprite = SOUL_FIRE_TEXTURE.sprite();
         else
             sprite = FIRE_TEXTURE.sprite();

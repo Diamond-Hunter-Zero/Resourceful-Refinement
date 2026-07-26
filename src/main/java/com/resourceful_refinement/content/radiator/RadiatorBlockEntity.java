@@ -253,6 +253,11 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         return this.heatTemperature > ExtendedHeatCondition.NONE.getMaxHeatEnergy();
     }
 
+    /** Returns the current heat condition of this radiator based on its internal heat energy. */
+    public ExtendedHeatCondition getHeatCondition() {
+        return getHeatConditionFromEnergy(this.heatTemperature);
+    }
+
     public NonNullList<ItemStack> getItems() {
         return this.items;
     }

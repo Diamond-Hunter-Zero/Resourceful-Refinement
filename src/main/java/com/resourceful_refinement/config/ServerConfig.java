@@ -27,27 +27,27 @@ public class ServerConfig {
         CONFIG_BUILDER.push("Radiator Parameters");
 
         CHILLED_COOLANT_CONSUMPTION = CONFIG_BUILDER
-                .comment("The rate at which Chilled coolants are consumed (Value between 0 and 1000)")
+                .comment("The rate at which Chilled conduction fluids are consumed (Value between 0 and 1000)")
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
-                .defineInRange("chilled_coolant_consumption", 0.4f, 0f, 1000f);
+                .defineInRange("chilled_coolant_consumption", 0.25f, 0f, 1000f);
 
         COOLED_COOLANT_CONSUMPTION = CONFIG_BUILDER
-                .comment("The rate at which Cooled coolants are consumed (Value between 0 and 1000)")
+                .comment("The rate at which Cooled conduction fluids are consumed (Value between 0 and 1000)")
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
-                .defineInRange("cooled_coolant_consumption", 0.75f, 0f, 1000f);
+                .defineInRange("cooled_coolant_consumption", 1f, 0f, 1000f);
 
         PASSIVE_COOLANT_CONSUMPTION = CONFIG_BUILDER
-                .comment("The rate at which Passive coolants are consumed (Value between 0 and 1000)")
+                .comment("The rate at which Passive conduction fluids are consumed (Value between 0 and 1000)")
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
-                .defineInRange("passive_coolant_consumption", 0.4f, 0f, 1000f);
+                .defineInRange("passive_coolant_consumption", 0.35f, 0f, 1000f);
 
         HEATED_COOLANT_CONSUMPTION = CONFIG_BUILDER
-                .comment("The rate at which Heated coolants are consumed (Value between 0 and 1000)")
+                .comment("The rate at which Heated conduction fluids are consumed (Value between 0 and 1000)")
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
-                .defineInRange("heated_coolant_consumption", 0.5f, 0f, 1000f);
+                .defineInRange("heated_coolant_consumption", 0.4f, 0f, 1000f);
 
         SUPERHEATED_COOLANT_CONSUMPTION = CONFIG_BUILDER
-                .comment("The rate at which Superheated coolants are consumed (Value between 0 and 1000)")
+                .comment("The rate at which Superheated conduction fluids are consumed (Value between 0 and 1000)")
                 .comment("Decimal values below 1 will be treated as percentile chances to consume 1 mb")
                 .defineInRange("superheated_coolant_consumption", 0.8f, 0f, 1000f);
 

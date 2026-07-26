@@ -3,8 +3,10 @@ package com.resourceful_refinement.content.fracking_pump;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.forge_mould.*;
 import com.resourceful_refinement.registry.ModPartialModels;
+import com.resourceful_refinement.utilities.ShaftUtilities;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
@@ -149,21 +151,16 @@ public class FrackingPumpRenderer extends SafeBlockEntityRenderer<FrackingPumpOu
     }
 
     private void renderKineticShaft(FrackingPumpOutletBlockEntity be, BlockState state, PoseStack ms, MultiBufferSource buffer, int light) {
-        Direction.Axis shaftAxis = getRotationAxisOf(be);
-        SuperByteBuffer shaft = CachedBuffers.partial(shaftAxis == Direction.Axis.X ? 
-            ModPartialModels.SHAFT_X :
-            ModPartialModels.SHAFT_Z, state);
-        
-        ms.pushPose();
-        float shaftAngle = getAngleForBe(be, be.getBlockPos(), shaftAxis);
-        shaft.rotateCentered(shaftAngle, shaftAxis)
-             .light(light)
-             .renderInto(ms, buffer.getBuffer(RenderType.solid()));
-        ms.popPose();
-    }
 
-    protected Direction.Axis getRotationAxisOf(FrackingPumpOutletBlockEntity be) {
-        return be.getBlockState().getValue(FrackingPumpOutletBlock.FACING).getClockWise().getAxis();
+        Direction shaftFace = be.getBlockState().getValue(FrackingPumpOutletBlock.FACING).getCounterClockWise();
+        Direction.Axis shaftAxis = shaftFace.getAxis();
+
+        ShaftUtilities.RenderKineticShaft(
+                state,
+                shaftFace,
+                true,
+                getAngleForBe(be, be.getBlockPos(), shaftAxis),
+                ms, buffer, light);
     }
 
     @Override

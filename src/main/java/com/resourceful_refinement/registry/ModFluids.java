@@ -63,8 +63,8 @@ public class ModFluids {
     // Misc Fluids
     public static final FluidEntry LIQUID_GLUE = register("liquid_glue", 0xDEDEB8, FluidGroup.ALLOYED);
     public static final FluidEntry COOLANT = register("coolant", 0xD9F4FA, FluidGroup.ALLOYED);
-    public static final FluidEntry LIQUID_CONCRETE = register("liquid_concrete", 0x948d83, FluidGroup.ALLOYED);
-    public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.ALLOYED, PouredCementBlock.class);
+    public static final FluidEntry LIQUID_CONCRETE = register("liquid_concrete", 0x948d83, FluidGroup.CONCRETE);
+    public static final FluidEntry POURED_CEMENT = register("poured_cement", 0xb4b5a7, FluidGroup.CONCRETE, PouredCementBlock.class);
     public static final FluidEntry ORGANIC_SLUSH = register("organic_slush", 0x516e3e, FluidGroup.ALLOYED);
     public static final FluidEntry POLYMER_SLUDGE = register("polymer_sludge", 0x1f2840, FluidGroup.ALLOYED);
 

@@ -5,7 +5,7 @@
 	"texture_size": [64, 64],
 	"textures": {
       "0": "resourceful_refinement:block/distillery/brewers_tap",
-      "particle": "resourceful_refinement:block/distillery/brewers_tap"
+      "particle": "resourceful_refinement:block/particles/steel_particle"
 	},
 	"elements": [
 		{

@@ -4,6 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
+import com.resourceful_refinement.utilities.ShaftUtilities;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -16,6 +19,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import static com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer.getAngleForBe;
 
 public class MilkingStationRenderer extends SafeBlockEntityRenderer<MilkingStationBlockEntity> {
 
@@ -37,8 +42,11 @@ public class MilkingStationRenderer extends SafeBlockEntityRenderer<MilkingStati
         float time = be.getLevel() == null ? 0 : be.getLevel().getGameTime() + partialTicks;
         float armAngle = speed == 0 ? 0 : Mth.sin(time * speed / 24f) * 0.2f;
 
+        // Render milking arms
         model.animateArm(armAngle);
 
+
+        // Render model
         VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(TEXTURE));
 
         ms.pushPose();
@@ -48,7 +56,23 @@ public class MilkingStationRenderer extends SafeBlockEntityRenderer<MilkingStati
         model.render(ms, casingBuffer, light, overlay);
         ms.popPose();
 
+        // Render shaft
+        renderKineticShaft(be, state, ms, buffer, light);
+
+        // Render entity
         renderCapturedEntity(be, partialTicks, ms, buffer, light, facing);
+    }
+
+    private void renderKineticShaft(MilkingStationBlockEntity be, BlockState state, PoseStack ms, MultiBufferSource buffer, int light) {
+        Direction shaftFace = Direction.DOWN;
+        Direction.Axis shaftAxis = shaftFace.getAxis();
+
+        ShaftUtilities.RenderKineticShaft(
+                state,
+                shaftFace,
+                true,
+                getAngleForBe(be, be.getBlockPos(), shaftAxis),
+                ms, buffer, light);
     }
 
     private void renderCapturedEntity(MilkingStationBlockEntity be, float partialTicks, PoseStack ms,

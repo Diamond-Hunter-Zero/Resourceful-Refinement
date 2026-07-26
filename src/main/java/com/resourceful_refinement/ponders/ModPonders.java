@@ -107,6 +107,9 @@ public class ModPonders implements PonderPlugin {
         helper.forComponents(ModBlocks.BREWERS_TAP.getId(), ModItems.DRINKS_GLASS.getId())
                 .addStoryBoard("brewers_tap_ponder", BrewersTapPonders::brewersTapScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
+        helper.forComponents(ModFluids.LIQUID_CONCRETE.bucket.getId(), ModFluids.POURED_CEMENT.bucket.getId(), AllBlocks.HOSE_PULLEY.getId())
+                .addStoryBoard("cement_ponder", FluidPonders::liquidConcreteScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+
     }
 
     public static void registerTagsHelper(PonderTagRegistrationHelper<ResourceLocation> helper) {
@@ -140,6 +143,8 @@ public class ModPonders implements PonderPlugin {
                 .add(ModBlocks.FUEL_TANK.getId())
                 .add(ModBlocks.MILKING_STATION.getId())
                 .add(ModBlocks.ADVANCED_PUMP.getId())
-                .add(ModBlocks.BREWERS_TAP.getId());
+                .add(ModBlocks.BREWERS_TAP.getId())
+                .add(ModFluids.LIQUID_CONCRETE.bucket.getId())
+                .add(ModFluids.POURED_CEMENT.bucket.getId());
     }
 }

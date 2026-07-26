@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    " E "
+  ],
+  "key": {
+    "A": {
+      "item": "create:copper_sheet"
+    },
+    "B": {
+      "tag": "c:glass_panes"
+    },
+    "C": {
+      "tag": "c:barrels/wooden"
+    },
+    "D": {
+      "tag": "c:glass_panes"
+    },
+    "E": {
+      "item": "create:brass_sheet"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:fuel_tank"
+  }
+}

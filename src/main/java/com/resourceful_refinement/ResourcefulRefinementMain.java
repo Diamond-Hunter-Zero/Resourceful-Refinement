@@ -364,10 +364,18 @@ public class ResourcefulRefinementMain {
 
         @SubscribeEvent
         public static void registerAdditionalModels(net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) {
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_X.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_Z.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_VERTICAL.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X_HALF_MIRROR.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z_HALF_MIRROR.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL_HALF_MIRROR.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.ADVANCED_PUMP_COG.modelLocation(), "standalone"));

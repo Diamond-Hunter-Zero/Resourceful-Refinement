@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    "EFG"
+  ],
+  "key": {
+    "A": {
+      "item": "create:gearbox"
+    },
+    "B": {
+      "item": "create:iron_sheet"
+    },
+    "C": {
+      "item": "create:brass_casing"
+    },
+    "D": {
+      "item": "create:iron_sheet"
+    },
+    "E": {
+      "item": "minecraft:dried_kelp"
+    },
+    "F": {
+      "item": "create:fluid_tank"
+    },
+    "G": {
+      "item": "minecraft:dried_kelp"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:combustion_chamber"
+  }
+}

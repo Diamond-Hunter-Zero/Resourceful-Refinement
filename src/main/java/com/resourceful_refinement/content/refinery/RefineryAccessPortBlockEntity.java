@@ -20,7 +20,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
@@ -390,6 +389,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
 
         Direction facing = getBlockState().getValue(RefineryAccessPortBlock.FACING);
         ExtendedHeatCondition bestRadiatorHeat = ExtendedHeatCondition.NONE;
+        int bestRadiatorHeatStrength = 0;
 
         // Scan all 9 blocks on the 3x3 base layer (dx: -1 to 1, dz: 0 to 2)
         for (int dx = -1; dx <= 1; dx++) {
@@ -401,9 +401,14 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                 net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(belowPos);
                 if (be instanceof RadiatorBlockEntity radiator) {
                     ExtendedHeatCondition radiatorCondition = radiator.getHeatCondition();
-                    if (radiatorCondition != ExtendedHeatCondition.NONE
-                            && radiatorCondition.ordinal() > bestRadiatorHeat.ordinal()) {
+                    if (radiatorCondition == ExtendedHeatCondition.NONE) continue;
+
+                    int heatAbsStrength = Math.abs(radiatorCondition.getBlazeHeatLevel()+1);
+                    if ((heatAbsStrength > bestRadiatorHeatStrength)
+                            || (heatAbsStrength == bestRadiatorHeatStrength && radiatorCondition.ordinal() > bestRadiatorHeat.ordinal()))
+                    {
                         bestRadiatorHeat = radiatorCondition;
+                        bestRadiatorHeatStrength = heatAbsStrength;
                     }
                 }
             }
@@ -411,11 +416,11 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
 
         // Combine: use the higher of fuel heat vs. radiator heat
         ExtendedHeatCondition newEffective;
-        if (burnTimeRemaining > 0 && fuelHeatLevel.ordinal() >= bestRadiatorHeat.ordinal()) {
+        if (burnTimeRemaining > 0 && fuelHeatLevel.ordinal() >= bestRadiatorHeat.ordinal())
             newEffective = fuelHeatLevel;
-        } else {
-            newEffective = bestRadiatorHeat.ordinal() > fuelHeatLevel.ordinal() ? bestRadiatorHeat : fuelHeatLevel;
-        }
+         else
+            newEffective = bestRadiatorHeat;
+
 
         if (newEffective != heatLevel) {
             heatLevel = newEffective;
@@ -483,7 +488,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                     craftingProgress = 0;
                     activeRecipeDuration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());
                     if (activeRecipeDuration <= 0) activeRecipeDuration = 100;
-                    requiredHeat = currentRecipe.value().getRequiredHeatCondition().getBlazeHeatEnergy();
+                    requiredHeat = currentRecipe.value().getRequiredHeatCondition().getBlazeHeatLevel();
                     syncData();
                 }
             }
@@ -715,17 +720,17 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
             tooltip.add(Component.literal("     §cMinimum RPM: §r" + getSpeedRequirement()));
         else
             tooltip.add(Component.literal("     §b" + (int)(speed * ModStressValues.REFINERY_STRESS) + "su §8at current speed"));
-        tooltip.add(Component.literal(""));
 
         // Heating
         if (burnTimeRemaining > 0 || heatLevel != ExtendedHeatCondition.NONE)
         {
             String heatName = heatLevel.getSerializedName();
             if (burnTimeRemaining > 0)
-                tooltip.add(Component.literal("§7" + heatName.toUpperCase() + " for " + (int)(burnTimeRemaining/20f) + "s (fuel)"));
+                tooltip.add(Component.literal("     ").append(Component.literal(heatName.toUpperCase()).withColor(heatLevel.getColor())).append(" §8for " + (int)(burnTimeRemaining/20f) + "s (fuel)"));
             else
-                tooltip.add(Component.literal("§7" + heatName.toUpperCase() + " (radiator)"));
+                tooltip.add(Component.literal("     ").append(Component.literal(heatName.toUpperCase()).withColor(heatLevel.getColor())).append(Component.literal(" §8(radiator)")));
         }
+        tooltip.add(Component.literal(""));
 
         // Item inputs
         ItemStack itemA = itemInput.getStackInSlot(0);
@@ -769,7 +774,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
 
             if (!tankOutputFluid.isEmpty() && tankOutputFluid.getAmount() >= outputTank.getCapacity())
                 tooltip.add(Component.literal("§cOutput Tank Full!"));
-            else if (heatLevel.getBlazeHeatEnergy() != requiredHeat)
+            else if (heatLevel.getBlazeHeatLevel() != requiredHeat)
             {
                 String reqName = com.resourceful_refinement.utilities.heating.HeatUtilities.ConvertHeatLevelToExtendedCondition(requiredHeat).getSerializedName().toUpperCase();
                 tooltip.add(Component.literal("§cRefinery must be " + reqName));
@@ -789,8 +794,8 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         super.write(tag, registries, clientPacket);
         tag.putBoolean("assembled", assembled);
         tag.putInt("structureHeight", structureHeight);
-        tag.putInt("heatLevel", heatLevel.getBlazeHeatEnergy());
-        tag.putInt("fuelHeatLevel", fuelHeatLevel.getBlazeHeatEnergy());
+        tag.putInt("heatLevel", heatLevel.getBlazeHeatLevel());
+        tag.putInt("fuelHeatLevel", fuelHeatLevel.getBlazeHeatLevel());
         tag.putInt("requiredHeat", requiredHeat);
         tag.putInt("burnTimeRemaining", burnTimeRemaining);
         tag.putInt("craftingProgress", craftingProgress);
@@ -823,7 +828,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         super.read(tag, registries, clientPacket);
         assembled = tag.getBoolean("assembled");
         structureHeight = tag.getInt("structureHeight");
-        
+
         if (tag.contains("heatLevel"))
             heatLevel = HeatUtilities.ConvertHeatLevelToExtendedCondition(tag.getInt("heatLevel"));
         else

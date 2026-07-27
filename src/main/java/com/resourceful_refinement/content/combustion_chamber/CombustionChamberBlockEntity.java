@@ -426,7 +426,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         if (localFuelState <= 0 || generatedSpeed == 0 || chainRedstonePowered) {
             return;
         }
-        if (localFuelState == 3 && coldestHeatSource >= ExtendedHeatCondition.NONE.getBlazeHeatEnergy()) {
+        if (localFuelState == 3 && coldestHeatSource >= ExtendedHeatCondition.NONE.getBlazeHeatLevel()) {
             return;
         }
 
@@ -507,10 +507,10 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         isUnderPerforming = true;
 
         if (currentFuelState >= 3) {
-            if (coldestHeatSource <= ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy()) {
+            if (coldestHeatSource <= ExtendedHeatCondition.CHILLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed();
                 isCurrentlyUnderperforming = false;
-            } else if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatEnergy()) {
+            } else if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed() * 0.5f;
                 isCurrentlyUnderperforming = true;
             } else {
@@ -518,7 +518,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
                 isCurrentlyUnderperforming = true;
             }
         } else if (currentFuelState == 2) {
-            if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatEnergy()) {
+            if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed();
                 isCurrentlyUnderperforming = false;
             } else {

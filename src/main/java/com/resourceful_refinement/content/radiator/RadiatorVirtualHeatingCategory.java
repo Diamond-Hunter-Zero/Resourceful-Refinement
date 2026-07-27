@@ -1,14 +1,8 @@
 package com.resourceful_refinement.content.radiator;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.config.ServerConfig;
-import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipe;
-import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
@@ -26,22 +20,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +109,7 @@ public class RadiatorVirtualHeatingCategory implements IRecipeCategory<RadiatorV
         guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(90));
         guiGraphics.pose().scale(radiatorScale, radiatorScale, radiatorScale);
 
-        var vertexConsumer = guiGraphics.bufferSource().getBuffer(RenderType.entityTranslucent(RadiatorModel.GetTextureForHeatEnergy(recipe.resultingHeat().getBlazeHeatEnergy())));
+        var vertexConsumer = guiGraphics.bufferSource().getBuffer(RenderType.entityTranslucent(RadiatorModel.GetTextureForHeatEnergy(recipe.resultingHeat().getBlazeHeatLevel())));
         radiatorModel.render(guiGraphics.pose(),
                 vertexConsumer,
                 0xF000F0,

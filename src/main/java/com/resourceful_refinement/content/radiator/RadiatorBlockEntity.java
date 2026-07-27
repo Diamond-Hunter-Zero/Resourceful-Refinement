@@ -198,7 +198,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
         // Map to block state (HEAT_STATE for visuals, HEAT_LEVEL for basin/boiler compat)
         int currentHeatState = state.getValue(HEAT_STATE) + HEAT_STATE_OFFSET;
         ExtendedHeatCondition currentHeatCondition = getHeatConditionFromEnergy(be.heatTemperature);
-        int targetHeatState = currentHeatCondition.getBlazeHeatEnergy() + HEAT_STATE_OFFSET;
+        int targetHeatState = currentHeatCondition.getBlazeHeatLevel() + HEAT_STATE_OFFSET;
         BlazeBurnerBlock.HeatLevel targetBlazeLevel = getBlazeHeatLevelForCondition(currentHeatCondition);
         BlazeBurnerBlock.HeatLevel currentBlazeLevel = state.getValue(BlazeBurnerBlock.HEAT_LEVEL);
 
@@ -354,7 +354,7 @@ public class RadiatorBlockEntity extends SmartBlockEntity implements IHaveGoggle
     private static void freezeTick(BlockState state, Level level, BlockPos pos, RandomSource random)
     {
         if (!level.isClientSide()) {
-            if (state.getValue(HEAT_STATE) != ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy() + HEAT_STATE_OFFSET)
+            if (state.getValue(HEAT_STATE) != ExtendedHeatCondition.CHILLED.getBlazeHeatLevel() + HEAT_STATE_OFFSET)
                 return;
 
             if (random.nextFloat() > 0.0075f)

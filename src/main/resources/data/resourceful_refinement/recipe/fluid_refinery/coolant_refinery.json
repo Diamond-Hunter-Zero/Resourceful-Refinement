@@ -1,11 +1,12 @@
 {
   "type": "resourceful_refinement:fluid_refinery",
+  "heat_requirement": "cooled",
   "processing_time": 800,
   "ingredients": [
     {
       "type": "neoforge:single",
       "fluid": "resourceful_refinement:polymer_sludge",
-      "amount": 300
+      "amount": 200
     },
     {
       "item": "resourceful_refinement:polymer_residue",

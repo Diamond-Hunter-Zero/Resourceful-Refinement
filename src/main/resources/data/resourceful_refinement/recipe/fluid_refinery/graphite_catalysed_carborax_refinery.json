@@ -1,7 +1,7 @@
 {
   "type": "resourceful_refinement:fluid_refinery",
-  "heat_requirement": "heated",
-  "processing_time": 600,
+  "heat_requirement": "chilled",
+  "processing_time": 400,
   "ingredients": [
     {
       "type": "neoforge:single",

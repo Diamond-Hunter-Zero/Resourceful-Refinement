@@ -373,7 +373,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         return this;
     }
 
-    private List<CombustionChamberBlockEntity> getChainMembers() {
+    public List<CombustionChamberBlockEntity> getChainMembers() {
         List<CombustionChamberBlockEntity> members = new ArrayList<>();
         if (level == null) return members;
 

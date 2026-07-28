@@ -69,13 +69,13 @@ public class CombustionChamberItemRenderer  extends BlockEntityWithoutLevelRende
 
             }
             case GROUND -> {
-                poseStack.translate(0.5F, 0.85F, 0.5F);
-                poseStack.scale(0.3F, -0.3F, -0.3F);
+                poseStack.translate(0.35F, 0.4F, 0.35F);
+                poseStack.scale(0.3F, 0.3F, 0.3F);
             }
             case FIXED -> {
-                poseStack.translate(0.5F, 0.75F, 0.5F);
-                poseStack.scale(0.45F, -0.45F, -0.45F);
-                poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
+                poseStack.translate(0.75F, 0.25F, 0.75F);
+                poseStack.scale(0.5F, -0.5F, -0.5F);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
             }
             case FIRST_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND -> {
                 float side = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND ? -1.0F : 1.0F;

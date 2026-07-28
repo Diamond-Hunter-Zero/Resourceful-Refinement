@@ -116,10 +116,12 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
     private int burnTimeRemaining = 0;
     private double refineryRotationAngle = 0;
     private int speed_requirement = 32;
-    /** Current heat level from burning fuel (set to NONE when burn expires). */
+    /// Current heat level from burning fuel (set to NONE when burn expires).
     private ExtendedHeatCondition fuelHeatLevel = ExtendedHeatCondition.NONE;
-    /** Effective heat level (highest of fuel or radiator heat). Synced to client. */
+    /// Effective heat level (highest of fuel or radiator heat). Synced to client.
     private ExtendedHeatCondition heatLevel = ExtendedHeatCondition.NONE;
+    /// Fake heating visuals to display client-side
+    private ExtendedHeatCondition falseRenderedHeat = ExtendedHeatCondition.NONE;
     private int requiredHeat = 0;
 
     private FilteringBehaviour filtering;
@@ -621,6 +623,17 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         return 0.75f + (structureHeight - 3) * 0.25f;
     }
 
+    public void SetFalseHeatRendering(ExtendedHeatCondition heatCondition)
+    {
+        falseRenderedHeat = heatCondition;
+        syncData();
+    }
+
+    public ExtendedHeatCondition GetFalseHeatRendering()
+    {
+        return falseRenderedHeat;
+    }
+
     // -------------------------------------------------------------------------
     // Inventory Management
     // -------------------------------------------------------------------------
@@ -649,39 +662,6 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
 
         if (extracted) {
             syncData();
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Status chat output (Deprecated - replaced by goggle tooltip)
-    // -------------------------------------------------------------------------
-    public void debugPrintStatus(Player player) {
-        player.displayClientMessage(Component.literal("§6[Refinery] §rAssembled — Height: " + structureHeight), false);
-        player.displayClientMessage(Component.literal(
-                "§6  Tank A: §r" + formatFluid(inputTankA.getFluid()) +
-                " §6| Tank B: §r" + formatFluid(inputTankB.getFluid())), false);
-
-        StringBuilder itemsStr = new StringBuilder("§6  Items: §r");
-        boolean first = true;
-        for (int i = 0; i < itemInput.getSlots(); i++) {
-            ItemStack stack = itemInput.getStackInSlot(i);
-            if (!stack.isEmpty()) {
-                if (!first) itemsStr.append(", ");
-                itemsStr.append(stack.getCount()).append("x ").append(stack.getHoverName().getString());
-                first = false;
-            }
-        }
-        if (first) itemsStr.append("Empty");
-        player.displayClientMessage(Component.literal(itemsStr.toString()), false);
-
-        player.displayClientMessage(Component.literal(
-                "§6  Output: §r" + formatFluid(outputTank.getFluid())), false);
-        player.displayClientMessage(Component.literal(
-                "§6  Heat: §r" + heatLevelName() +
-                " §6| Burn: §r" + burnTimeRemaining + "t"), false);
-        
-        if (!filtering.getFilter().isEmpty()) {
-             player.displayClientMessage(Component.literal("§6  Filter: §r" + filtering.getFilter().getHoverName().getString()), false);
         }
     }
 
@@ -726,9 +706,9 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         {
             String heatName = heatLevel.getSerializedName();
             if (burnTimeRemaining > 0)
-                tooltip.add(Component.literal("     ").append(Component.literal(heatName.toUpperCase()).withColor(heatLevel.getColor())).append(" §8for " + (int)(burnTimeRemaining/20f) + "s (fuel)"));
+                tooltip.add(Component.literal("     ").append(Component.literal(heatName).withColor(heatLevel.getColor())).append(" §8for " + (int)(burnTimeRemaining/20f) + "s (fuel)"));
             else
-                tooltip.add(Component.literal("     ").append(Component.literal(heatName.toUpperCase()).withColor(heatLevel.getColor())).append(Component.literal(" §8(radiator)")));
+                tooltip.add(Component.literal("     ").append(Component.literal(heatName).withColor(heatLevel.getColor())).append(Component.literal(" §8(radiator)")));
         }
         tooltip.add(Component.literal(""));
 
@@ -796,6 +776,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         tag.putInt("structureHeight", structureHeight);
         tag.putInt("heatLevel", heatLevel.getBlazeHeatLevel());
         tag.putInt("fuelHeatLevel", fuelHeatLevel.getBlazeHeatLevel());
+        tag.putInt("falseRenderedHeat", falseRenderedHeat.getBlazeHeatLevel());
         tag.putInt("requiredHeat", requiredHeat);
         tag.putInt("burnTimeRemaining", burnTimeRemaining);
         tag.putInt("craftingProgress", craftingProgress);
@@ -837,6 +818,10 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
             fuelHeatLevel = HeatUtilities.ConvertHeatLevelToExtendedCondition(tag.getInt("fuelHeatLevel"));
         else
             fuelHeatLevel = ExtendedHeatCondition.NONE;
+        if (tag.contains("falseRenderedHeat"))
+            falseRenderedHeat = HeatUtilities.ConvertHeatLevelToExtendedCondition(tag.getInt("falseRenderedHeat"));
+        else
+            falseRenderedHeat = ExtendedHeatCondition.NONE;
 
         requiredHeat = tag.getInt("requiredHeat");
         burnTimeRemaining = tag.getInt("burnTimeRemaining");

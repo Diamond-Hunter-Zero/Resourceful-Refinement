@@ -1,10 +1,12 @@
 package com.resourceful_refinement.ponders;
 
+import com.resourceful_refinement.content.radiator.RadiatorBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlock;
 import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModItems;
+import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
@@ -20,7 +22,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -35,7 +39,7 @@ public class RefineryPonders {
 
         //Build scene
         CreateSceneBuilder scene = new CreateSceneBuilder(builder);
-        scene.title("refinery_basics", "Fluid Refinery");
+        scene.title("refinery_basics", "Building A Fluid Refinery");
 
         scene.configureBasePlate(0,0,7);
 
@@ -195,18 +199,19 @@ public class RefineryPonders {
         // --- Page 5: Completing Assembly ---
         scene.addKeyframe();
 
-        scene.overlay().showControls(accessPortPos.getCenter(), Pointing.RIGHT, 60);
         scene.overlay().showText(80)
                 .text("resourceful_refinement.ponder.refinery_basics.text_12")
                 .independent();
-        scene.idle(90);
+        scene.idle(40);
+        scene.overlay().showControls(accessPortPos.getCenter().add(0.85,-0.2,0), Pointing.RIGHT, 40).rightClick();
+        scene.idle(20);
 
         scene.world().replaceBlocks(fullRefinerySegment.copy().substract(accessPortSegment).substract(kineticSegment), Blocks.AIR.defaultBlockState(), false);
         scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
             blockEntity.setFalseRenderingLevel(3);
         });
         scene.world().modifyBlock(accessPortPos, (blockState) -> blockState.setValue(RefineryAccessPortBlock.ASSEMBLED, true), false);
-        scene.idle(20);
+        scene.idle(50);
 
         scene.overlay().showText(80)
                 .text("resourceful_refinement.ponder.refinery_basics.text_13")
@@ -220,7 +225,7 @@ public class RefineryPonders {
 
         //Build scene
         CreateSceneBuilder scene = new CreateSceneBuilder(builder);
-        scene.title("refinery_crafting", "Fluid Refinery");
+        scene.title("refinery_crafting", "Refining Fluids");
 
         scene.configureBasePlate(0,0,7);
 
@@ -322,8 +327,6 @@ public class RefineryPonders {
         scene.idle(120);
 
         scene.idle(10);
-        scene.world().showSection(cogSegment, Direction.DOWN);
-        scene.idle(10);
         scene.world().setKineticSpeed(kineticSegment, 32);
         scene.world().setKineticSpeed(cogSegment, 32);
 
@@ -336,35 +339,19 @@ public class RefineryPonders {
         // --- Page 3: Heating the Refinery ---
         scene.addKeyframe();
 
-        scene.overlay().showText(340)
+        scene.overlay().showText(90)
                 .text("resourceful_refinement.ponder.refinery_crafting.text_8")
-                .independent(-8);
-        scene.idle(100);
-
-        scene.overlay().showControls(accessPortPos.getCenter().add(0,0.5,-0.5), Pointing.DOWN, 120)
-                .withItem(Items.COAL.getDefaultInstance());
-        scene.overlay().showText(240)
-                .text("resourceful_refinement.ponder.refinery_basics.text_9")
-                .independent(24);
-        scene.idle(140);
-
-        scene.overlay().showControls(accessPortPos.getCenter().add(0,0.5,-0.5), Pointing.DOWN, 100)
-                .withItem(AllItems.BLAZE_CAKE.asStack());
-        scene.overlay().showText(100)
-                .text("resourceful_refinement.ponder.refinery_basics.text_10")
-                .independent(72);
-        scene.idle(120);
-
-        scene.world().setBlock(accessPortPos.offset(-1, 0, -1), AllBlocks.ANDESITE_BELT_FUNNEL.getDefaultState(), true);
-        scene.world().showSection(sideFunnelSegment, Direction.DOWN);
-
-        scene.idle(10);
-        scene.overlay().showControls(accessPortPos.getCenter().add(-1.25,0,-0.25), Pointing.LEFT, 100)
-                .withItem(Items.COAL.getDefaultInstance());
-        scene.overlay().showText(110)
-                .text("resourceful_refinement.ponder.refinery_basics.text_11")
                 .independent();
-        scene.idle(130);
+        scene.idle(20);
+
+        scene.overlay().showControls(accessPortPos.getCenter().add(-1.5,0,0), Pointing.LEFT, 40)
+                .withItem(Items.COAL.getDefaultInstance());
+        scene.idle(20);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.HEATED);
+        });
+
+        scene.idle(70);
 
 
         // --- Page 4: Extracting Outputs ---
@@ -374,7 +361,7 @@ public class RefineryPonders {
         scene.addKeyframe();
 
         scene.overlay().showText(120)
-                .text("resourceful_refinement.ponder.refinery_basics.text_12")
+                .text("resourceful_refinement.ponder.refinery_basics.text_9")
                 .pointAt(frontPipeSegment.getCenter());
         scene.idle(140);
 
@@ -385,12 +372,12 @@ public class RefineryPonders {
 
         //Build scene
         CreateSceneBuilder scene = new CreateSceneBuilder(builder);
-        scene.title("refinery_stacking", "Fluid Refinery");
+        scene.title("refinery_stacking", "Fluid Refinery Heights");
 
         scene.configureBasePlate(0,0,7);
 
         scene.rotateCameraY(0);
-        scene.scaleSceneView(1.25f);
+        scene.scaleSceneView(0.8f);
 
         BlockPos accessPortPos = util.grid().at(3, 1, 2);
         Selection accessPortSegment = util.select().fromTo(accessPortPos, accessPortPos);
@@ -484,10 +471,10 @@ public class RefineryPonders {
         scene.world().moveSection(middleSegmentLink,  new Vec3(0,0.5,0), 15);
         scene.idle(20);
 
-        scene.overlay().showText(120)
+        scene.overlay().showText(140)
                 .text("resourceful_refinement.ponder.refinery_stacking.text_4")
                 .pointAt(middleLayerSegment2.getCenter());
-        scene.idle(130);
+        scene.idle(150);
 
         scene.world().moveSection(middleSegmentLink,  new Vec3(0,-0.5,0), 10);
         scene.idle(10);
@@ -500,6 +487,7 @@ public class RefineryPonders {
         scene.world().moveSection(topSegmentLink,  new Vec3(0,5,0), 0);
         scene.world().showSection(topLayerSegment, Direction.DOWN);
 
+        scene.addKeyframe();
         scene.overlay().showText(120)
                 .text("resourceful_refinement.ponder.refinery_stacking.text_5")
                 .pointAt(middleLayerSegment3.getCenter());
@@ -699,6 +687,158 @@ public class RefineryPonders {
         scene.idle(10);
         scene.world().setKineticSpeed(kineticSegment, 0);
         scene.idle(10);
+
+        scene.markAsFinished();
+    }
+
+    public static void refineryHeatingScene(SceneBuilder builder, SceneBuildingUtil util) {
+
+        //Build scene
+        CreateSceneBuilder scene = new CreateSceneBuilder(builder);
+        scene.title("refinery_heating", "Heating Fluid Refineries");
+
+        scene.configureBasePlate(1,0,7);
+
+        scene.rotateCameraY(0);
+        scene.scaleSceneView(1f);
+
+        BlockPos accessPortPos = util.grid().at(4, 2, 2);
+        Selection accessPortSegment = util.select().fromTo(accessPortPos, accessPortPos);
+
+        BlockPos cogPos = util.grid().at(4, 5, 3);
+        Selection cogSegment = util.select().fromTo(cogPos, cogPos);
+
+        BlockPos cogPos2 = util.grid().at(7, 2, 3);
+        Selection cogSegment2 = util.select().fromTo(cogPos2, cogPos2);
+
+        BlockPos beltStartPos = util.grid().at(3, 1, 0);
+        BlockPos funnelPos = util.grid().at(3, 2, 1);
+        Selection backPipeSegment = util.select().fromTo(7,5,4,5,5,4);
+        Selection beltSegment = util.select().fromTo(3,1,0,3,2,1);
+
+        BlockPos radiatorPos = util.grid().at(4, 1, 2);
+        Selection radiatorSegment = util.select().fromTo(1,1,2,7,1,2);
+
+        Selection platformSegment = util.select().fromTo(3,1,3,5,1,4);
+        Selection fullRefinerySegment = util.select().fromTo(3,2,2,5,4,4);
+
+
+        // Show baseplate
+        scene.showBasePlate();
+        scene.idle(20);
+
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.setFalseRenderingLevel(3);
+        });
+        scene.world().modifyBlock(accessPortPos, (blockState) -> blockState.setValue(RefineryAccessPortBlock.ASSEMBLED, true), false);
+        scene.world().showSection(accessPortSegment, Direction.DOWN);
+        scene.world().showSection(platformSegment, Direction.DOWN);
+
+        scene.idle(20);
+
+        // --- Page 1: Refinery Fuel Heating ---
+        scene.addKeyframe();
+        scene.overlay().showText(110)
+                .text("resourceful_refinement.ponder.refinery_heating.text_1")
+                .pointAt(accessPortPos.above().getCenter());
+        scene.idle(120);
+
+
+        scene.overlay().showText(130)
+                .text("resourceful_refinement.ponder.refinery_heating.text_2")
+                .independent();
+        scene.idle(20);
+
+        scene.overlay().showControls(accessPortPos.getCenter().add(-1.25,0,0), Pointing.LEFT, 35).withItem(Items.CHARCOAL.getDefaultInstance()).rightClick();
+        scene.idle(20);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.HEATED);
+        });
+
+        scene.idle(90);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.NONE);
+        });
+        scene.idle(20);
+
+        scene.overlay().showText(100)
+                .text("resourceful_refinement.ponder.refinery_heating.text_3")
+                .independent();
+        scene.idle(20);
+
+        scene.overlay().showControls(accessPortPos.getCenter().add(-1.25,0,0), Pointing.LEFT, 35).withItem(AllItems.BLAZE_CAKE.asStack()).rightClick();
+        scene.idle(20);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.SUPERHEATED);
+        });
+
+        scene.idle(60);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.NONE);
+        });
+        scene.idle(20);
+
+
+        // --- Page 2: Automate Inputs ---
+        scene.addKeyframe();
+        scene.world().showSection(beltSegment, Direction.DOWN);
+        scene.idle(20);
+
+        scene.overlay().showText(130)
+                .text("resourceful_refinement.ponder.refinery_heating.text_4")
+                .pointAt(accessPortPos.getCenter().add(-1.25,0,0));
+        scene.idle(20);
+
+        var charcoalLink = scene.world().createItemOnBelt(beltStartPos, Direction.UP, Items.CHARCOAL.getDefaultInstance());
+        scene.idle(30);
+        scene.world().flapFunnel(funnelPos, false);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.HEATED);
+        });
+        scene.world().changeBeltItemTo(charcoalLink, ItemStack.EMPTY);
+
+        scene.idle(90);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.NONE);
+        });
+        scene.idle(20);
+
+
+        // --- Page 3: Radiator Heating ---
+        scene.world().hideSection(beltSegment, Direction.UP);
+        scene.idle(30);
+        scene.addKeyframe();
+
+        scene.overlay().showText(70)
+                .text("resourceful_refinement.ponder.refinery_heating.text_5")
+                .independent();
+        scene.idle(90);
+
+        scene.world().showSection(radiatorSegment, Direction.DOWN);
+        scene.idle(20);
+
+        scene.overlay().showText(120)
+                .text("resourceful_refinement.ponder.refinery_heating.text_6")
+                .independent();
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.HEATED);
+        });
+
+        scene.idle(140);
+
+        scene.addKeyframe();
+        scene.overlay().showText(80)
+                .text("resourceful_refinement.ponder.refinery_heating.text_7")
+                .independent();
+
+        scene.world().modifyBlock(radiatorPos, blockState ->{
+            return blockState.setValue(RadiatorBlock.HEAT_STATE, 0);
+        }, false);
+        scene.world().modifyBlockEntity(accessPortPos, RefineryAccessPortBlockEntity.class, blockEntity -> {
+            blockEntity.SetFalseHeatRendering(ExtendedHeatCondition.CHILLED);
+        });
+
+        scene.idle(100);
 
         scene.markAsFinished();
     }

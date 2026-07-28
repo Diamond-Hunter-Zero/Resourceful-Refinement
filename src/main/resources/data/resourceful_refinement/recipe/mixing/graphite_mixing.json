@@ -6,7 +6,7 @@
     },
     {
       "type": "neoforge:single",
-      "amount": 50,
+      "amount": 100,
       "fluid": "resourceful_refinement:catalysed_sparkpowder"
     }
   ],
@@ -18,6 +18,6 @@
       "id": "resourceful_refinement:graphite"
     }
   ],
-  "processingTime": 400,
+  "processingTime": 360,
   "heat_requirement": "superheated"
 }

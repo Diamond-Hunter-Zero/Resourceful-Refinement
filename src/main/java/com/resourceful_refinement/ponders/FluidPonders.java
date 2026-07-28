@@ -78,10 +78,10 @@ public class FluidPonders {
         scene.world().showSection(concretePumpSegment, Direction.DOWN);
         scene.idle(20);
 
-        scene.overlay().showText(80)
+        scene.overlay().showText(90)
                 .text("resourceful_refinement.ponder.liquid_concrete.text_1")
                 .independent();
-        scene.idle(100);
+        scene.idle(110);
 
 
         // --- Page 2: Liquid Concrete Conversion ---
@@ -91,7 +91,7 @@ public class FluidPonders {
         scene.world().movePulley(hosePullyPos, 1, 20);
         scene.idle(20);
 
-        scene.overlay().showText(100)
+        scene.overlay().showText(120)
                 .text("resourceful_refinement.ponder.liquid_concrete.text_2")
                 .pointAt(hosePullyPos.getCenter().add(-0.75,0,0.25));
         scene.idle(20);
@@ -105,7 +105,7 @@ public class FluidPonders {
         scene.world().setBlocks(cement4Segment, ModFluids.POURED_CEMENT.source.get().defaultFluidState().createLegacyBlock(), false);
         scene.idle(15);
 
-        scene.idle(40);
+        scene.idle(60);
 
         scene.addKeyframe();
         scene.overlay().showText(140)

@@ -54,8 +54,40 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/soul_fire_0")
     );
 
+    public static final Material PASSIVE_FIRE_TEXTURE = new Material(
+            InventoryMenu.BLOCK_ATLAS,
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/passive_flames")
+    );
+
+    public static final ResourceLocation FROST_TEXTURE = ResourceLocation
+            .fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/effects/snowflakes.png");
+
+    /** Ticks for the frost sheet to travel one full texture height. */
+    private static final float FROST_SCROLL_TICKS = 320f;
+    private static final float FROST_U_SCALE = 0.5f;
+    /** 64x256 sheet sampled over a 0.6x1.0 quad — keeps the flakes roughly square. */
+    private static final float FROST_V_SCALE = 0.21f;
+
     private static final float FLUID_STACK_START_Y = 0.9375f;
     private static final float FLUID_STACK_RADII = 1.35f;
+
+    /** Placement of the heat effect quads around the base of the structure, shared by fire and frost. */
+    private record HeatQuad(Vec3 offset, float rotY, Vec3 normal) {
+    }
+
+    private static final List<HeatQuad> HEAT_QUADS = List.of(
+            // --- FRONT-LEFT CORNER ---
+            new HeatQuad(new Vec3(1.1, 0.0, 0.5), 0.0f, new Vec3(0, 0, -1)),
+            new HeatQuad(new Vec3(1.5, 0.0, 0.1), 90.0f, new Vec3(-1, 0, 0)),
+            // --- FRONT-RIGHT CORNER ---
+            new HeatQuad(new Vec3(-1.1, 0.0, 0.5), 0.0f, new Vec3(0, 0, -1)),
+            new HeatQuad(new Vec3(-1.5, 0.0, 0.1), 270.0f, new Vec3(1, 0, 0)),
+            // --- BACK-LEFT CORNER ---
+            new HeatQuad(new Vec3(1.1, 0.0, -2.5), 180.0f, new Vec3(0, 0, 1)),
+            new HeatQuad(new Vec3(1.5, 0.0, -2.1), 90.0f, new Vec3(-1, 0, 0)),
+            // --- BACK-RIGHT CORNER ---
+            new HeatQuad(new Vec3(-1.1, 0.0, -2.5), 180.0f, new Vec3(0, 0, 1)),
+            new HeatQuad(new Vec3(-1.5, 0.0, -2.1), 270.0f, new Vec3(1, 0, 0)));
 
     private final RefineryBaseModel base;
     private final RefineryMiddleModel middle;
@@ -163,10 +195,21 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
             poseStack.popPose();
         }
 
-        // --- Fire Rendering ---
+        // --- Heat Effect Rendering ---
         ExtendedHeatCondition heatLevel = be.getHeatLevel();
-        if (heatLevel != ExtendedHeatCondition.NONE)
-            renderBlazeFires(buffer.getBuffer(RenderType.cutout()), poseStack, light, heatLevel);
+        if (be.GetFalseHeatRendering() != ExtendedHeatCondition.NONE)
+            heatLevel = be.GetFalseHeatRendering();
+
+        switch (heatLevel) {
+            case NONE -> {
+            }
+            case CHILLED, COOLED -> {
+                float time = be.getLevel() == null ? 0 : (be.getLevel().getGameTime() % 100000L) + partialTicks;
+                renderFrostSheets(buffer.getBuffer(RenderType.entityTranslucent(FROST_TEXTURE)), poseStack, light,
+                        heatLevel, time);
+            }
+            default -> renderBlazeFires(buffer.getBuffer(RenderType.cutout()), poseStack, light, heatLevel);
+        }
 
         // ---Send to Rendering ---
         poseStack.popPose();
@@ -300,79 +343,113 @@ public class FluidRefineryRenderer extends SafeBlockEntityRenderer<RefineryAcces
         TextureAtlasSprite sprite;
         if (heatLevel == ExtendedHeatCondition.SUPERHEATED)
             sprite = SOUL_FIRE_TEXTURE.sprite();
+        else if (heatLevel == ExtendedHeatCondition.PASSIVE)
+            sprite = PASSIVE_FIRE_TEXTURE.sprite();
         else
             sprite = FIRE_TEXTURE.sprite();
 
-        // 1. Move the coordinate system origin from the block corner to the block center, and offset from centre
-        ms.translate(0, 1.45, 1);
-        ms.scale(0.976f,0.976f,0.976f);
-        ms.mulPose(Axis.ZP.rotationDegrees(180));
+        applyHeatQuadPose(ms);
 
-        // 2. Rotate the entire world space to match the controller's horizontal orientation
-        // Minecraft's toYRot() paired with a negative angle perfectly aligns local +Z with world facing
-
-        // --- FRONT-LEFT CORNER ---
-        // Front Face (Facing +Z)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(1.1, 0.0, 0.5), 0.0f, new Vec3(0, 0, -1));
-        // Left Face (Facing +X)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(1.5, 0.0, 0.1), 90.0f, new Vec3(-1, 0, 0));
-
-        // --- FRONT-RIGHT CORNER ---
-        // Front Face (Facing +Z)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(-1.1, 0.0, 0.5), 0.0f, new Vec3(0, 0, -1));
-        // Right Face (Facing -X)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(-1.5, 0.0, 0.1), 270.0f, new Vec3(1, 0, 0));
-
-        // --- BACK-LEFT CORNER ---
-        // Back Face (Facing -Z)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(1.1, 0.0, -2.5), 180.0f, new Vec3(0, 0, 1));
-        // Left Face (Facing +X)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(1.5, 0.0, -2.1), 90.0f, new Vec3(-1, 0, 0));
-
-        // --- BACK-RIGHT CORNER ---
-        // Back Face (Facing -Z)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(-1.1, 0.0, -2.5), 180.0f, new Vec3(0, 0, 1));
-        // Right Face (Facing -X)
-        renderFireQuad(vc, ms, light, sprite, new Vec3(-1.5, 0.0, -2.1), 270.0f, new Vec3(0, 0, 1));
+        // The fire sprites are animated on the block atlas, so their UVs are static
+        for (HeatQuad quad : HEAT_QUADS)
+            renderHeatQuad(vc, ms, light, quad, sprite.getU0(), sprite.getU1(), sprite.getV0(), sprite.getV1(),
+                    0xFFFFFFFF);
 
         ms.popPose();
     }
 
-    private void renderFireQuad(VertexConsumer vc, PoseStack ms, int light, TextureAtlasSprite sprite, Vec3 posOffset, float rotY, Vec3 norm)
+    /**
+     * Cold counterpart to {@link #renderBlazeFires}. The snow sheet is static, so the downward drift
+     * comes from walking V backwards over time; the texture tiles because it is bound directly
+     * rather than sampled from the block atlas.
+     */
+    private void renderFrostSheets(VertexConsumer vc, PoseStack ms, int light, ExtendedHeatCondition heatLevel,
+            float time)
     {
         ms.pushPose();
 
+        applyHeatQuadPose(ms);
+
+        // V increases down the quad, so a decreasing offset moves the flakes downwards
+        float scroll = (time / FROST_SCROLL_TICKS) % 1.0f;
+        float vTop = -scroll;
+        float vBottom = vTop + FROST_V_SCALE;
+        int colour = frostTint(heatLevel);
+
+        for (HeatQuad quad : HEAT_QUADS)
+            renderHeatQuad(vc, ms, light, quad, 0f, FROST_U_SCALE, vTop, vBottom, colour);
+
+        ms.popPose();
+    }
+
+    /** Shared placement of the heat quad ring around the base of the structure. */
+    private void applyHeatQuadPose(PoseStack ms)
+    {
+        // Move the coordinate system origin from the block corner to the block center, and offset from centre
+        ms.translate(0, 1.475, 1);
+        ms.scale(0.976f, 0.976f, 0.976f);
+        ms.mulPose(Axis.ZP.rotationDegrees(180));
+    }
+
+    /** Tints the frost sheet by the heat condition's colour, pulled towards white so it still reads as snow. */
+    private static int frostTint(ExtendedHeatCondition heatLevel)
+    {
+        boolean chilled = heatLevel == ExtendedHeatCondition.CHILLED;
+        int rgb = heatLevel.getColor();
+        float whiten = chilled ? 0.15f : 0.6f;
+
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        r += Math.round((0xFF - r) * whiten);
+        g += Math.round((0xFF - g) * whiten);
+        b += Math.round((0xFF - b) * whiten);
+
+        return ((chilled ? 0xD0 : 0xA0) << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    private void renderHeatQuad(VertexConsumer vc, PoseStack ms, int light, HeatQuad quad, float u0, float u1,
+            float vTop, float vBottom, int argb)
+    {
+        ms.pushPose();
+
+        Vec3 posOffset = quad.offset();
+        Vec3 norm = quad.normal();
         ms.translate(posOffset.x, posOffset.y, posOffset.z);
-        ms.mulPose(Axis.YP.rotationDegrees(rotY));
+        ms.mulPose(Axis.YP.rotationDegrees(quad.rotY()));
 
         Matrix4f pose = ms.last().pose();
 
-        // Draw a flat quad (Facing the viewer is handled by your desired rotations)
-        // Adjust coordinates as necessary to fit your block's dimension
+        int a = (argb >>> 24) & 0xFF;
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+
+        // Draw a flat quad
         vc.addVertex(pose, -0.3f, 0f, 0f)
-                .setColor(255, 255, 255, 255)
-                .setUv(sprite.getU0(), sprite.getV1())
+                .setColor(r, g, b, a)
+                .setUv(u0, vBottom)
                 .setLight(light)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setNormal(ms.last(), (float) norm.x, (float)norm.y, (float)norm.z);
 
         vc.addVertex(pose, 0.3f, 0f, 0f)
-                .setColor(255, 255, 255, 255)
-                .setUv(sprite.getU1(), sprite.getV1())
+                .setColor(r, g, b, a)
+                .setUv(u1, vBottom)
                 .setLight(light)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setNormal(ms.last(), (float) norm.x, (float)norm.y, (float)norm.z);
 
         vc.addVertex(pose, 0.3f, 1f, 0f)
-                .setColor(255, 255, 255, 255)
-                .setUv(sprite.getU1(), sprite.getV0())
+                .setColor(r, g, b, a)
+                .setUv(u1, vTop)
                 .setLight(light)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setNormal(ms.last(), (float) norm.x, (float)norm.y, (float)norm.z);
 
         vc.addVertex(pose, -0.3f, 1f, 0f)
-                .setColor(255, 255, 255, 255)
-                .setUv(sprite.getU0(), sprite.getV0())
+                .setColor(r, g, b, a)
+                .setUv(u0, vTop)
                 .setLight(light)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setNormal(ms.last(), (float) norm.x, (float)norm.y, (float)norm.z);

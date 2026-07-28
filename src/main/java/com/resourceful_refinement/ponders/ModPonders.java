@@ -48,6 +48,7 @@ public class ModPonders implements PonderPlugin {
         helper.forComponents(ModBlocks.REFINERY_ACCESS_PORT.getId(), ModBlocks.BLENDER_BLADE.getId())
                 .addStoryBoard("basic_refinery_ponder", RefineryPonders::refineryStructureScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("basic_refinery_ponder", RefineryPonders::refineryCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("refinery_heating_ponder", RefineryPonders::refineryHeatingScene, RESOURCEFUL_REFINEMENT_CHAPTER)
                 .addStoryBoard("stacked_refinery_ponder", RefineryPonders::refineryStackingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
         helper.forComponents(ModBlocks.FRACKING_PUMP_OUTLET.getId())
@@ -80,7 +81,8 @@ public class ModPonders implements PonderPlugin {
 
         helper.forComponents(ModItems.RADIATOR_PIPE_ITEM.getId(), ModFluids.COOLANT.bucket.getId())
                 .addStoryBoard("radiator_ponder", RadiatorPonders::radiatorBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER)
-                .addStoryBoard("radiator_crafting_ponder", RadiatorPonders::radiatorCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
+                .addStoryBoard("radiator_crafting_ponder", RadiatorPonders::radiatorCraftingScene, RESOURCEFUL_REFINEMENT_CHAPTER)
+                .addStoryBoard("refinery_heating_ponder", RefineryPonders::refineryHeatingScene, RESOURCEFUL_REFINEMENT_CHAPTER);
 
         helper.forComponents(ModFluids.COOLANT.bucket.getId())
                 .addStoryBoard("radiator_ponder", RadiatorPonders::radiatorBasicsScene, RESOURCEFUL_REFINEMENT_CHAPTER);

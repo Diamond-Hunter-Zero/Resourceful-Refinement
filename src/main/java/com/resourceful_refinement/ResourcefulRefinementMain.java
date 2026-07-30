@@ -17,6 +17,8 @@ import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
+import com.resourceful_refinement.content.geyser.GeyserRenderer;
+import com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
@@ -25,6 +27,10 @@ import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
+import com.resourceful_refinement.content.sports_ball.SportsBallDebugModel;
+import com.resourceful_refinement.content.sports_ball.SportsBallModel;
+import com.resourceful_refinement.content.sports_ball.SportsBallRenderer;
 import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
@@ -334,12 +340,12 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_KINETIC_PROXY.get(), RefineryKineticProxyRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_PROXY.get(), RefineryProxyRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_ACCESS_PORT.get(), FluidRefineryRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_SIEVE_BE.get(), com.resourceful_refinement.content.sieve.MechanicalSieveRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_SIEVE_BE.get(), MechanicalSieveRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_FORGE_MOULD_BE.get(), ForgeMouldRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CASTING_DEPOT_BE.get(), CastingDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), GeyserRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
@@ -350,9 +356,10 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.RADIATOR_PIPE_BE.get(), RadiatorRenderer::new);
 
             // Register Projectile Renderer dynamically
-            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
+            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
             event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
+            event.registerEntityRenderer(ModEntities.SPORTS_BALL.get(), SportsBallRenderer::new);
         }
 
         @SubscribeEvent
@@ -419,6 +426,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
             event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
             event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+            event.registerLayerDefinition(SportsBallRenderer.LAYER, SportsBallModel::createBodyLayer);
         }
     }
 

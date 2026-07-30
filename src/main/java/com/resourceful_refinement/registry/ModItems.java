@@ -109,6 +109,10 @@ public class ModItems {
 
     public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
 
+    public static final DeferredItem<com.resourceful_refinement.content.sports_ball.SportsBallItem> SPORTS_BALL =
+            ITEMS.register("sports_ball",
+                    () -> new com.resourceful_refinement.content.sports_ball.SportsBallItem(new Item.Properties().stacksTo(16)));
+
     public static final DeferredItem<Item> DRINKS_GLASS = ITEMS.registerItem("drinks_glass", Item::new, new Item.Properties());
     public static final DeferredItem<Item> COMPACTED_BIOMATTER = ITEMS.registerItem("compacted_biomatter", Item::new, new Item.Properties());
     public static final DeferredItem<Item> POLYMER_RESIDUE = ITEMS.registerItem("polymer_residue", Item::new, new Item.Properties());

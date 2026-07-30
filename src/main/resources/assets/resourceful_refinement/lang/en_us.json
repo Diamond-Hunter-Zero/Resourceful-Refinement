@@ -242,6 +242,8 @@
   "item.resourceful_refinement.plunger": "Plunger",
   "tooltip.resourceful_refinement.plunger": "Right-click fluid tanks to empty them",
   "item.resourceful_refinement.paint_blob": "Paint Blob",
+  "item.resourceful_refinement.sports_ball": "Sports Ball",
+  "entity.resourceful_refinement.sports_ball": "Sports Ball",
 
   "item.resourceful_refinement.compacted_biomatter": "Compacted Biomatter",
   "item.resourceful_refinement.polymer_residue": "Polymer Residue",

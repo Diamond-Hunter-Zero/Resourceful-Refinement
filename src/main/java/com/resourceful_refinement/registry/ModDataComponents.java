@@ -48,4 +48,11 @@ public class ModDataComponents {
                     .networkSynchronized(FlavourType.STREAM_CODEC)
                     .build()
     );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> BALL_TYPE = DATA_COMPONENTS.register("ball_type",
+            () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.INT)
+                    .build()
+    );
 }

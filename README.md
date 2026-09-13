@@ -11,12 +11,14 @@ Resourceful Refinement is an ongoing development process, that will slowly build
 This project is currently in _Alpha_. 
 
 ----------------
-### *Update - v0.2*
-Major feature release: Paint fluids & Gels!
-- Use Paint Nozzles, or the handheld Hosegun, to turn any fluid into versitile gels with unique and useful properties.
-- Dye blocks like concrete, terracotta, and glass in large batches with paint fluids sprayed by a nozzle or hosegun.
-- Challenge your friends to a guerilla spray-painting match by binding hoseguns to fluid refill stations and display links.
-- Adjusted recipes and balancing around fluid refinement and fracking
+### *Update - v0.3*
+Major feature release: Carbonox processing and Radiators!
+- Turn slugy unrefined carbonox into efficient fuels through refineries and distilleries
+- Construct extensive Combusion Chamber engines to power your factories and contraptions
+- Cool down engines, or heat up distilleries and refineries with Radiators and a new heating condition system
+- Automate milking with the Milking Station
+- Brew tasty drinks with customisable status effects via the Brewer's Tap
+- Adjusted recipes and balancing around ore processing, carbonox processing, and geyser generation
 
 
 ## **Content:**
@@ -25,7 +27,8 @@ Major feature release: Paint fluids & Gels!
 - **Mechanical Fluid Sieve**: Dredge by-products from fluids passing through the sieve. Stack sieves vertically to improve their output rates
 - **Mechanical Forge Mould & Casting Depot**: Cast fluids directly into items on depots and belts
 - **Blender Blade**: Spin entities around or passively damage them
-
+- **Milking Station**: Extract fluids or rare drops from certain mobs automatically
+  
 ---
 
 ### **Fluid Refinement**
@@ -34,7 +37,19 @@ Major feature release: Paint fluids & Gels!
 - Crimsite, Veridium, Ochrum, Asurine, Lava, and Carborax geysers spawn naturally in most overworld biomes or underground. Scorchia geysers can be found rarely throughout the nether.
 - **Fracking Pylon**: Extract endless resources from geysers, by turning water and kinetic input into molten ores using powerful Fracking Pylons
 - **Fluid Refinery**: Refine ores into efficient derivatives, or produce effective alloys and blends that beat mixer recipes in the Fluid Refinery
+- **Distillery Towers**: Convert simple fluids and items into more effective products by bringing the heat and sealing them in distilleries for extensive amounts of time
+- **Advanced Pump**: Pump fluids up to twice as far away, and reverse the direction of flow on command
+- **Fuel Tanks**: Easily store fluids in Fuel Tanks, and provide passive tank capacity to adjacent Combustion Chambers without the need for a pump
 - **Molten Fluids**: Ore fluids progressively improve as you proceed along their refinement tree, from _molten_, to _catalysed_, to _purified_ fluids.  
+
+---
+
+### **Heating & Power**
+![Radiators & Heatable Blocks](https://cdn.modrinth.com/data/cached_images/9cc83acacf4b2746d66afcf747e95b54196e60c0.png)
+- Build upon Create's native _Heat Conditions_ system with a new _Extended Heat Condition_ framework that allows you to both heat _and_ cool!
+- **Distillery Towers**: Convert simple fluids and items into more effective products by bringing the heat and sealing them in distilleries for extensive amounts of time
+- **Radiators**: Pump thermal fluids through Radiators to heat or cool their immmediate envronment. Provide heat fro crafting recipies to basins, refineries, and even distillery towers.
+- **Combustion Chamber**: Generate high stress from chainable carbonox-powered engines. Improve their efficiency by pumping coolant through radiators, or attaching an Encased Fan
 
 ---
 
@@ -44,17 +59,18 @@ Major feature release: Paint fluids & Gels!
 - **Hoseguns** allow players to spray gels whereever they like, turning any landscape into a colorful paintball fight.
 - **Fluid Refill Stations** provide an access point for players to refill fluid containers with ease, or can be used to bind Hoseguns to a Tracking ID. When paired with Display Links and Display Boards, you can track and display the number of gel blocks created by an individual hosegun, or an entire team!
 - Never sure how to get the last few pesky drops of fluid out of a tank or refinery without breaking it? Rest assured, the **Plunger** is here to do the dirty work.
-
-
-https://github.com/user-attachments/assets/3f5b06b8-25de-4327-976d-fb54417728b3
-
-
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/3f5b06b8-25de-4327-976d-fb54417728b3
+" width="80%" controls>
+  </video>
+</p>
 
 ---
 
-### **Coatings**
+### **Dynamic Items**
 ![Coatings & recipe](https://cdn.modrinth.com/data/cached_images/c4037ae4d6aec0800c463a7036b5608150850144.png)
 - Improve your tools and indefinitely extend their durability by using a Casting Depot and Forge Mould to coat your tools in molten fluids. Coatings act as a secondary durability bar, and each apply their own special effect while active.
+- Brew tasty drinks via the Brewer's Tap from a variety of fluids, and flavour them dynamically with foods and ingredients to create simple potions
 
 
 
@@ -62,7 +78,7 @@ https://github.com/user-attachments/assets/3f5b06b8-25de-4327-976d-fb54417728b3
 
 Resourceful Refinement is a _NeoForge_ mod for 1.21.1
 
-**Requires** Create 6.0.8+ and JEI 19.27.0.336
+**Requires** Create 6.0.10+ and JEI 19.27.0.336
  
  
 **Known Incompatibilities:**
@@ -72,4 +88,4 @@ If you encounter any bugs or crashes, please notify me and provide a crash log o
 
 
 ## **Roadmap:**
-![Mod version roadmap](https://cdn.modrinth.com/data/cached_images/66f9b19571511426fdf68a8ef2ebddc8c406b2bc.png)
+![v0.3 Roadmap](https://cdn.modrinth.com/data/cached_images/e600198c600632a79ae8a1e21405e6556f292f53.png)

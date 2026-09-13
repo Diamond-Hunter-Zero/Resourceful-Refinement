@@ -1,6 +1,7 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.fluids.PouredCementBlock;
 import com.resourceful_refinement.content.fluids.base.FluidGroup;
 import com.resourceful_refinement.content.fluids.base.GeneralizedFlowingFluid;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +35,7 @@ public class FluidEntry {
     public int color;
     public final FluidGroup group;
 
-    public FluidEntry(String name, int color, FluidGroup group) {
+    public FluidEntry(String name, int color, FluidGroup group, Class blockClass) {
         this.group = group;
         this.color = ((group == FluidGroup.RAW
                 || group == FluidGroup.CATALYSED
@@ -54,7 +55,11 @@ public class FluidEntry {
 
         // Register Block (path matches assets/blockstates/<group>/<name>.json)
         String blockId = group == FluidGroup.PAINT ? "paint/" + name : name;
-        block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+
+        if (blockClass == PouredCementBlock.class)
+            block = ModBlocks.BLOCKS.register(blockId, () -> new PouredCementBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
+        else
+            block = ModBlocks.BLOCKS.register(blockId, () -> new LiquidBlock(source.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.LAVA).noLootTable()));
 
         // Register Bucket
         bucket = ModItems.ITEMS.register(name + "_bucket", () -> new BucketItem(source.get(), new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
@@ -69,10 +74,4 @@ public class FluidEntry {
         return group == FluidGroup.PAINT;
     }
 
-    /** Item model parent used by {@code models/item/<fluid>_bucket.json}. */
-    /*public ResourceLocation getBucketItemModelParent() {
-        return usesPaintBucketUnderlay()
-                ? PAINT_FLUID_BUCKET_MODEL
-                : ResourceLocation.withDefaultNamespace("item/generated");
-    }*/
 }

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "A B",
+    " C "
+  ],
+  "key": {
+    "A": {
+      "tag": "c:glass_panes"
+    },
+    "B": {
+      "tag": "c:glass_panes"
+    },
+    "C": {
+      "tag": "c:glass_panes"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:drinks_glass"
+  }
+}

@@ -2,20 +2,23 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     " A ",
-    "BC ",
-    " D "
+    "BCD",
+    " E "
   ],
   "key": {
     "A": {
-      "item": "create:fluid_pipe"
-    },
-    "B": {
       "item": "resourceful_refinement:durasteel_ingot"
     },
+    "B": {
+      "item": "minecraft:redstone"
+    },
     "C": {
-      "item": "create:fluid_tank"
+      "item": "resourceful_refinement:fuel_tank"
     },
     "D": {
+      "item": "minecraft:redstone"
+    },
+    "E": {
       "item": "create:brass_casing"
     }
   },

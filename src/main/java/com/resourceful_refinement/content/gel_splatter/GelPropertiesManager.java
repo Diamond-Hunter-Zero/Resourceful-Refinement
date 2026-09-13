@@ -19,6 +19,9 @@ public class GelPropertiesManager {
     public static final int GEL_AMMO_COST = 5;
     public static final int MOLTEN_GEL_AMMO_COST = 20;
     public static final int POTION_AMMO_COST = 125;
+    public static final int FROZEN_AMMO_COST = 20;
+    public static final int CONCRETE_AMMO_COST = 125;
+
 
     static {
         FLUID_TO_GEL.put(Fluids.WATER, GelType.CLEANSE);
@@ -88,6 +91,10 @@ public class GelPropertiesManager {
             return POTION_AMMO_COST;
         else if (getGelType(fluid) == GelType.MOLTEN)
             return MOLTEN_GEL_AMMO_COST;
+        else if (getGelType(fluid) == GelType.FROZEN)
+            return FROZEN_AMMO_COST;
+        else if (getGelType(fluid) == GelType.CONCRETE)
+            return CONCRETE_AMMO_COST;
         return GEL_AMMO_COST;
     }
 

@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=north,model_type=0": { "model": "resourceful_refinement:block/distillery/distillery_single" },
+    "facing=north,model_type=1": { "model": "resourceful_refinement:block/distillery/distillery_base" },
+    "facing=north,model_type=2": { "model": "resourceful_refinement:block/distillery/distillery_middle" },
+    "facing=north,model_type=3": { "model": "resourceful_refinement:block/distillery/distillery_top" },
+
+    "facing=east,model_type=0": { "model": "resourceful_refinement:block/distillery/distillery_single", "y": 90 },
+    "facing=east,model_type=1": { "model": "resourceful_refinement:block/distillery/distillery_base", "y": 90 },
+    "facing=east,model_type=2": { "model": "resourceful_refinement:block/distillery/distillery_middle", "y": 90 },
+    "facing=east,model_type=3": { "model": "resourceful_refinement:block/distillery/distillery_top", "y": 90 },
+
+    "facing=south,model_type=0": { "model": "resourceful_refinement:block/distillery/distillery_single", "y": 180 },
+    "facing=south,model_type=1": { "model": "resourceful_refinement:block/distillery/distillery_base", "y": 180 },
+    "facing=south,model_type=2": { "model": "resourceful_refinement:block/distillery/distillery_middle", "y": 180 },
+    "facing=south,model_type=3": { "model": "resourceful_refinement:block/distillery/distillery_top", "y": 180 },
+
+    "facing=west,model_type=0": { "model": "resourceful_refinement:block/distillery/distillery_single", "y": 270 },
+    "facing=west,model_type=1": { "model": "resourceful_refinement:block/distillery/distillery_base", "y": 270 },
+    "facing=west,model_type=2": { "model": "resourceful_refinement:block/distillery/distillery_middle", "y": 270 },
+    "facing=west,model_type=3": { "model": "resourceful_refinement:block/distillery/distillery_top", "y": 270}
+    }
+}

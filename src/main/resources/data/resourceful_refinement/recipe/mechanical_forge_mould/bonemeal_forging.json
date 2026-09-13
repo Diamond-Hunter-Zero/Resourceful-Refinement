@@ -1,0 +1,17 @@
+{
+  "type": "resourceful_refinement:mechanical_forge_mould",
+  "processing_time": 100,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:milk",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:compacted_biomatter",
+      "count": 6
+    }
+  ]
+}

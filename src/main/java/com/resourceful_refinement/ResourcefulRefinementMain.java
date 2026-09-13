@@ -2,15 +2,41 @@ package com.resourceful_refinement;
 
 import com.mojang.logging.LogUtils;
 
+import com.resourceful_refinement.content.advanced_pump.AdvancedPumpRenderer;
+import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.brewers_tap.BrewersTapRenderer;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotLayers;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotModel;
 import com.resourceful_refinement.content.casting_depot.rendering.CastingDepotRenderer;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberFanModel;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberModel;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberRenderer;
+import com.resourceful_refinement.content.distillery.DistilleryBlock;
+import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
+import com.resourceful_refinement.content.distillery.DistilleryModel;
+import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
+import com.resourceful_refinement.content.geyser.GeyserRenderer;
+import com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer;
+import com.resourceful_refinement.content.milking_station.MilkingStationModel;
+import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
+import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
+import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
+import com.resourceful_refinement.content.sports_ball.SportsBallDebugModel;
+import com.resourceful_refinement.content.sports_ball.SportsBallModel;
+import com.resourceful_refinement.content.sports_ball.SportsBallRenderer;
+import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModBlocks;
+import com.simibubi.create.api.boiler.BoilerHeater;
+import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
+import com.resourceful_refinement.content.radiator.RadiatorRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -20,11 +46,13 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -42,14 +70,23 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationLayer
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
 import com.resourceful_refinement.network.ModNetworking;
+import com.simibubi.create.foundation.model.ModelSwapper;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod(ResourcefulRefinementMain.MOD_ID)
 public class ResourcefulRefinementMain {
 
     public static final String MOD_ID = "resourceful_refinement";
     public static final Logger LOGGER = LogUtils.getLogger();
+    private static final AtomicBoolean COMMON_SETUP_REGISTERED = new AtomicBoolean(false);
 
     public ResourcefulRefinementMain(IEventBus modEventBus, ModContainer modContainer) {
+
+        // Register configs
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+
+        // Initialise content
         ModRegistries.init(modEventBus);
         com.resourceful_refinement.worldgen.GeyserOffsetManager.init();
 
@@ -60,10 +97,35 @@ public class ResourcefulRefinementMain {
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        if (!COMMON_SETUP_REGISTERED.compareAndSet(false, true)) {
+            LOGGER.warn("[Resourceful Refinement] Common setup was invoked more than once; skipping duplicate registration work.");
+            return;
+        }
+
+        // Register stress values
         event.enqueueWork(ModStressValues::register);
+
+        // Register boiler heaters
+        event.enqueueWork(() -> BoilerHeater.REGISTRY.register(
+                ModBlocks.RADIATOR_PIPE.get(),
+                (level, pos, state) -> {
+                    if (level.getBlockEntity(pos) instanceof RadiatorBlockEntity radiator) {
+                        return radiator.getHeat(level, pos, state);
+                    }
+                    return BoilerHeater.NO_HEAT;
+                }
+        ));
+
+        // Dispensers spawn the ball as a live entity rather than tossing an item. The dispenser
+        // registry isn't thread-safe, so this must go inside enqueueWork.
+        event.enqueueWork(() -> net.minecraft.world.level.block.DispenserBlock.registerBehavior(
+                ModItems.SPORTS_BALL.get(),
+                new com.resourceful_refinement.content.sports_ball.SportsBallDispenseBehavior()
+        ));
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -170,6 +232,9 @@ public class ResourcefulRefinementMain {
             return null;
         });
 
+        // --- Brewer's Tap ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.BREWERS_TAP_BE.get(), (be, side) -> be.flavourInv);
+
         // --- Fluid Refill Station ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FLUID_REFILL_STATION_BE.get(), (be, side) -> {
             if (!FluidRefillStationBlock.isPipeFace(be.getBlockState(), side)) {
@@ -180,6 +245,73 @@ public class ResourcefulRefinementMain {
 
         // --- Hosegun Item Capability ---
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
+
+        // --- Distillery ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {
+            DistilleryBlockEntity controller = be.getController();
+            if (controller == null) return null;
+
+            // Only top block exposes output from TOP
+            if (side == Direction.UP && be.stackIndex == be.stackSize - 1) {
+                return controller.outputTank;
+            }
+
+            // Only bottom block accepts input from non-front sides
+            if (!be.getBlockState().hasProperty(DistilleryBlock.FACING)) return null;
+
+            Direction facing = controller.getBlockState().getValue(DistilleryBlock.FACING);
+            if ((side != Direction.DOWN && side != Direction.UP && side != facing)
+                    && be.stackIndex == 0) {
+                return controller.inputTank;
+            }
+            return null;
+        });
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {
+            DistilleryBlockEntity controller = be.getController();
+            if (controller == null) return null;
+
+            // Only bottom block accepts input from FRONT
+            if (be.stackIndex == 0 && be.getBlockState().hasProperty(DistilleryBlock.FACING)) {
+                if (side == be.getBlockState().getValue(DistilleryBlock.FACING)) {
+                    return controller.inputInv;
+                }
+            }
+            return null;
+        });
+
+        // --- Radiator ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.RADIATOR_PIPE_BE.get(),
+                (be, direction) -> direction != null ? be.getFluidHandler(direction) : null
+        );
+
+        // --- Combustion Chamber ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), (be, side) -> {
+            return side != null ? be.getFluidHandler(side) : null;
+        });
+
+        // --- Fuel Tank ---
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FUEL_TANK_BE.get(), (be, side) -> {
+            return side != null ? be.tank : null;
+        });
+
+        // --- Milking Station ---
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MILKING_STATION_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING);
+            return side == facing ? be.outputItemHandler : null;
+        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.MILKING_STATION_BE.get(), (be, side) -> {
+            if (side == null || !be.getBlockState().hasProperty(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING)) {
+                return null;
+            }
+
+            Direction facing = be.getBlockState().getValue(com.resourceful_refinement.content.milking_station.MilkingStationBlock.FACING);
+            return side == facing.getOpposite() ? be.outputFluidHandler : null;
+        });
+
     }
 
     /**
@@ -215,17 +347,26 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_KINETIC_PROXY.get(), RefineryKineticProxyRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_PROXY.get(), RefineryProxyRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_ACCESS_PORT.get(), FluidRefineryRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_SIEVE_BE.get(), com.resourceful_refinement.content.sieve.MechanicalSieveRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_SIEVE_BE.get(), MechanicalSieveRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MECHANICAL_FORGE_MOULD_BE.get(), ForgeMouldRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CASTING_DEPOT_BE.get(), CastingDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FRACKING_PUMP_OUTLET_BE.get(), FrackingPumpRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), com.resourceful_refinement.content.geyser.GeyserRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), com.resourceful_refinement.content.plushie.PlushieRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GEYSER_BE.get(), GeyserRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.PLUSHIE_BE.get(), PlushieRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.FLUID_REFILL_STATION_BE.get(), FluidRefillStationRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.DISTILLERY_BE.get(), DistilleryRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), CombustionChamberRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.ADVANCED_PUMP_BE.get(), AdvancedPumpRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MILKING_STATION_BE.get(), MilkingStationRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.FUEL_TANK_BE.get(), FuelTankRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.BREWERS_TAP_BE.get(), BrewersTapRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.RADIATOR_PIPE_BE.get(), RadiatorRenderer::new);
 
             // Register Projectile Renderer dynamically
-            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer::new);
+            event.registerEntityRenderer(ModEntities.GEL_BLOB.get(), GelBlobEntityRenderer::new);
             event.registerEntityRenderer(ModEntities.THROWN_PLUNGER.get(), ThrownPlungerRenderer::new);
+            event.registerEntityRenderer(ModEntities.MILKING_STATION_SEAT.get(), MilkingStationSeatRenderer::new);
+            event.registerEntityRenderer(ModEntities.SPORTS_BALL.get(), SportsBallRenderer::new);
         }
 
         @SubscribeEvent
@@ -237,11 +378,32 @@ public class ResourcefulRefinementMain {
 
         @SubscribeEvent
         public static void registerAdditionalModels(net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) {
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_X.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_Z.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.SHAFT_VERTICAL.modelLocation(), "standalone"));
-            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(com.resourceful_refinement.registry.ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL_HALF.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_X_HALF_MIRROR.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z_HALF_MIRROR.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL_HALF_MIRROR.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.ADVANCED_PUMP_COG.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_NORTH.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_EAST.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_SOUTH.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_WEST.modelLocation(), "standalone"));
+        }
+
+        @SubscribeEvent
+        public static void modifyBakedModels(ModelEvent.ModifyBakingResult event) {
+            ModelSwapper.swapModels(event.getModels(), ModelSwapper.getAllBlockStateModelLocations(AllBlocks.ENCASED_FAN.get()), CombustionChamberFanModel::new);
+            CombustionChamberFanModel.loadCustomModels(event.getModels());
         }
 
         @SubscribeEvent
@@ -267,6 +429,11 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(FrackingPumpLayers.COUNTERWEIGHT, FrackingPumpCounterweightModel::createBodyLayer);
             event.registerLayerDefinition(PlushieRenderer.LAYER_LOCATION, PlushieModel::createBodyLayer);
             event.registerLayerDefinition(FluidRefillStationLayers.CASING, FluidRefillStationLayers::createCasingLayer);
+            event.registerLayerDefinition(MilkingStationModel.LAYER_LOCATION, MilkingStationModel::createBodyLayer);
+            event.registerLayerDefinition(RadiatorModel.RADIATOR_MODEL_LAYER, RadiatorModel::createBodyLayer);
+            event.registerLayerDefinition(DistilleryModel.DISTILLERY_MODEL_LAYER, DistilleryModel::createBodyLayer);
+            event.registerLayerDefinition(CombustionChamberModel.LAYER_LOCATION, CombustionChamberModel::createBodyLayer);
+            event.registerLayerDefinition(SportsBallRenderer.LAYER, SportsBallModel::createBodyLayer);
         }
     }
 

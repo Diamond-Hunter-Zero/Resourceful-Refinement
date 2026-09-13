@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,valve_open=true": { "model": "resourceful_refinement:block/distillery/brewers_tap_open" },
+    "facing=north,valve_open=false": { "model": "resourceful_refinement:block/distillery/brewers_tap_closed" },
+    "facing=east,valve_open=true": { "model": "resourceful_refinement:block/distillery/brewers_tap_open", "y": 90 },
+    "facing=east,valve_open=false": { "model": "resourceful_refinement:block/distillery/brewers_tap_closed", "y": 90 },
+    "facing=south,valve_open=true": { "model": "resourceful_refinement:block/distillery/brewers_tap_open", "y": 180 },
+    "facing=south,valve_open=false": { "model": "resourceful_refinement:block/distillery/brewers_tap_closed", "y": 180 },
+    "facing=west,valve_open=true": { "model": "resourceful_refinement:block/distillery/brewers_tap_open", "y": 270 },
+    "facing=west,valve_open=false": { "model": "resourceful_refinement:block/distillery/brewers_tap_closed", "y": 270 }
+  }
+}

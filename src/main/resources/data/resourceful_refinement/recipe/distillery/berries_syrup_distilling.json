@@ -1,0 +1,25 @@
+{
+  "type": "resourceful_refinement:distillery",
+  "heat_requirement": "heated",
+  "distillery_height": 4,
+  "processing_time": 4800,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "minecraft:water",
+      "amount": 5000
+    }
+  ],
+  "sized_ingredients": [
+    {
+      "tag": "c:foods/berry",
+      "count": 18
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:liquid_syrup",
+      "amount": 1000
+    }
+  ]
+}

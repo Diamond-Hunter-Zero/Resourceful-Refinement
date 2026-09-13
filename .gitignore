@@ -32,6 +32,9 @@ forge*changelog.txt
 
 # AI Agents
 .cursor
+CLAUDE.md
+.claude
 
 # Mod Content Blacklist
 Recipe Tree Viewer
+/docs

@@ -1,0 +1,22 @@
+{
+  "type": "resourceful_refinement:mechanical_fluid_sieve",
+  "processing_time": 10,
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "fluid": "resourceful_refinement:liquid_concrete",
+      "amount": 20
+    }
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:poured_cement",
+      "amount": 150
+    },
+    {
+      "id": "minecraft:flint",
+      "count": 1,
+      "chance": 0.15
+    }
+  ]
+}

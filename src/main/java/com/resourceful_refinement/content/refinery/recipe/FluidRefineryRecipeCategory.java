@@ -7,7 +7,7 @@ import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMoul
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.registry.ModBlocks;
-import com.simibubi.create.content.processing.recipe.HeatCondition;
+import com.resourceful_refinement.utilities.heating.ExtendedHeatCondition;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -72,10 +72,10 @@ public class FluidRefineryRecipeCategory implements IRecipeCategory<FluidRefiner
 
         if (!recipe.getIngredients().isEmpty())
         {
-            if (recipe.getIngredients().size() > 0 && !recipe.getIngredients().get(0).isEmpty())
-                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos-60, 39).addIngredients(recipe.getIngredients().getFirst());
-            if (recipe.getIngredients().size() > 1 && !recipe.getIngredients().get(1).isEmpty())
-                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos+60, 39).addIngredients(recipe.getIngredients().get(1));
+            if (recipe.getCombinedIngredients().size() > 0 && !recipe.getCombinedIngredients().get(0).ingredient().isEmpty())
+                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos-60, 39).addItemStack(recipe.getCombinedIngredients().get(0).getItems()[0]);
+            if (recipe.getCombinedIngredients().size() > 1 && !recipe.getCombinedIngredients().get(1).ingredient().isEmpty())
+                builder.addSlot(RecipeIngredientRole.INPUT, centreXPos+60, 39).addItemStack(recipe.getCombinedIngredients().get(1).getItems()[0]);
         }
 
         if (!recipe.getFluidIngredients().isEmpty())
@@ -103,8 +103,8 @@ public class FluidRefineryRecipeCategory implements IRecipeCategory<FluidRefiner
         guiGraphics.drawString(font, timeText, centreXPos + 52, this.background.getHeight() - 15 -font.lineHeight/2, 0xFFE3E3E3, false);
 
         // Heating warning
-        String heatText = recipe.getRequiredHeat().getSerializedName();
-        guiGraphics.drawString(font, heatText, 4, this.background.getHeight() - 5 -font.lineHeight, recipe.getRequiredHeat().getColor(), false);
+        String heatText = recipe.getRequiredHeatCondition().getSerializedName();
+        guiGraphics.drawString(font, heatText, 4, this.background.getHeight() - 5 -font.lineHeight, recipe.getRequiredHeatCondition().getColor(), false);
 
         // Render Fluid amounts
         if (!recipe.getFluidIngredients().isEmpty())

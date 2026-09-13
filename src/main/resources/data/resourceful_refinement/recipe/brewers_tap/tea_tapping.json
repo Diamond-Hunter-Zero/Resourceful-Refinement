@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:brewers_tap",
+  "processing_time": 60,
+  "ingredients": [
+    { "item": "resourceful_refinement:drinks_glass" },
+    { "type": "neoforge:single", "fluid": "create:tea", "amount": 250 }
+  ],
+  "flavour_tags": ["cosmic_flavour", "sweet_flavour", "chilled_flavour", "spice_flavour"],
+  "results": [
+    { "id": "create:builders_tea", "count": 1 }
+  ]
+}

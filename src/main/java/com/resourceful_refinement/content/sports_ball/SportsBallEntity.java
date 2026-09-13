@@ -16,11 +16,19 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import com.resourceful_refinement.registry.ModDataComponents;
 import org.joml.Quaternionf;
 
 /**
@@ -34,6 +42,9 @@ public class SportsBallEntity extends Entity {
 
     /** Half the 11px width — the rolling radius used to convert linear speed into spin. */
     public static final float RADIUS = 11.0F / 32.0F;
+
+    /** Maximum distance between player and ball at which player can interact to pick up */
+    public static final float INTERACT_DISTANCE = 2.5F;
 
     private static final double GRAVITY = 0.04D;
     /** Fraction of speed kept when reflecting off a wall or ceiling. */
@@ -52,6 +63,8 @@ public class SportsBallEntity extends Entity {
     private static final double PUNCH_LIFT = 0.3D;
     /** Speeds below this count as stopped, for both spin and settle detection. */
     private static final double EPSILON = 1.0E-4D;
+    /** Bitmask on {@code tickCount}: check hopper pickup every 4 ticks (~5 Hz, matches vanilla hopper cadence). */
+    private static final int HOPPER_CHECK_MASK = 0b11;
 
     /**
      * Orientation the ball came to rest at. Only written when it settles, so this costs one packet
@@ -132,6 +145,42 @@ public class SportsBallEntity extends Entity {
 
         updateSpin();
         updateSettleState();
+        tryHopperPickup();
+    }
+
+    /**
+     * Checks the block underneath and, if it's a hopper with room, converts the ball back into an
+     * item stack and inserts it. Kept cheap: onGround + throttle before any world lookup, then a
+     * fast blockstate comparison before the capability resolution.
+     */
+    private void tryHopperPickup() {
+        if (level().isClientSide || !onGround() || (tickCount & HOPPER_CHECK_MASK) != 0) {
+            return;
+        }
+
+        BlockPos below = getOnPosLegacy();
+        BlockState state = level().getBlockState(below);
+        if (!state.is(Blocks.HOPPER)) {
+            return;
+        }
+
+        IItemHandler handler = level().getCapability(Capabilities.ItemHandler.BLOCK, below, Direction.UP);
+        if (handler == null) {
+            return;
+        }
+
+        ItemStack asItem = new ItemStack(ModItems.SPORTS_BALL.get());
+        asItem.set(ModDataComponents.BALL_TYPE.get(), ballType);
+
+        // Simulate first — bailing before mutation matters when the hopper is full or filtered
+        // against this item, so the ball keeps rolling rather than silently disappearing.
+        ItemStack remainder = ItemHandlerHelper.insertItem(handler, asItem, true);
+        if (!remainder.isEmpty()) {
+            return;
+        }
+
+        ItemHandlerHelper.insertItem(handler, asItem, false);
+        discard();
     }
 
     /** True when an axis had motion going into {@link #move} and none coming out of it. */
@@ -212,9 +261,6 @@ public class SportsBallEntity extends Entity {
     {
         entityData.set(BALL_TYPE, newType);
         ballType = newType;
-
-        level().playSound(null, this, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.4F,
-                1.6F + random.nextFloat() * 0.2F);
     }
 
     // ------------------------------------------------------------------ interaction
@@ -260,9 +306,15 @@ public class SportsBallEntity extends Entity {
             return InteractionResult.SUCCESS;
         }
 
+        if (player.distanceTo(this) > INTERACT_DISTANCE)
+            return InteractionResult.FAIL;
+
         if (player.isHolding(Items.SHEARS))
         {
             setBallType((ballType + 1)%3);
+            level().playSound(null, this, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.4F,
+                    1.6F + random.nextFloat() * 0.2F);
+
             return InteractionResult.SUCCESS;
         }
 

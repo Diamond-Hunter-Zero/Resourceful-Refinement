@@ -119,6 +119,13 @@ public class ResourcefulRefinementMain {
                     return BoilerHeater.NO_HEAT;
                 }
         ));
+
+        // Dispensers spawn the ball as a live entity rather than tossing an item. The dispenser
+        // registry isn't thread-safe, so this must go inside enqueueWork.
+        event.enqueueWork(() -> net.minecraft.world.level.block.DispenserBlock.registerBehavior(
+                ModItems.SPORTS_BALL.get(),
+                new com.resourceful_refinement.content.sports_ball.SportsBallDispenseBehavior()
+        ));
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {

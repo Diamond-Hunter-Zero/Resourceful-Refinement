@@ -54,7 +54,12 @@ public class SportsBallItem extends Item {
                     player.getEyeY() - SportsBallEntity.RADIUS,
                     player.getZ() + look.z * SPAWN_OFFSET
             );
-            ball.setDeltaMovement(look.scale(THROW_SPEED));
+
+            Vec3 throwVec = look.scale(THROW_SPEED);
+            if (player.isCrouching())
+                throwVec = throwVec.scale(0.33);
+
+            ball.setDeltaMovement(throwVec);
             ball.hasImpulse = true;
 
             int type = 0;

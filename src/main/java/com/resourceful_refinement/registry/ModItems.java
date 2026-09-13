@@ -14,6 +14,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
+import com.resourceful_refinement.content.sports_ball.SportsBallItem;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
@@ -109,9 +110,9 @@ public class ModItems {
 
     public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
 
-    public static final DeferredItem<com.resourceful_refinement.content.sports_ball.SportsBallItem> SPORTS_BALL =
-            ITEMS.register("sports_ball",
-                    () -> new com.resourceful_refinement.content.sports_ball.SportsBallItem(new Item.Properties().stacksTo(16)));
+    public static final DeferredItem<SportsBallItem> SPORTS_BALL = ITEMS.register("sports_ball",
+            () -> new SportsBallItem(new Item.Properties().stacksTo(16)
+                    .component(ModDataComponents.BALL_TYPE.get(), 0)));
 
     public static final DeferredItem<Item> DRINKS_GLASS = ITEMS.registerItem("drinks_glass", Item::new, new Item.Properties());
     public static final DeferredItem<Item> COMPACTED_BIOMATTER = ITEMS.registerItem("compacted_biomatter", Item::new, new Item.Properties());

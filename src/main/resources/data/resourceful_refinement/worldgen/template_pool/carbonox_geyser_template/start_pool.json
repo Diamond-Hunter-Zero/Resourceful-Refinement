@@ -1,0 +1,16 @@
+{
+  "name": "resourceful_refinement:carbonox_geyser_template/start_pool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 5,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "resourceful_refinement:carbonox_geyser_small",
+        "projection": "rigid",
+        "processors": "minecraft:empty",
+        "bottom_offset": -3
+      }
+    }
+  ]
+}

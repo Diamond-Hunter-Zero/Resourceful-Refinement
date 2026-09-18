@@ -124,6 +124,7 @@ public class FuelTankBlockEntity extends BlockEntity implements IHaveGoggleInfor
         super.loadAdditional(tag, registries);
         if (tag.contains("Tank")) {
             tank.readFromNBT(registries, tag.getCompound("Tank"));
+            syncToClient();
         }
     }
 

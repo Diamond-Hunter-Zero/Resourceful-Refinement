@@ -15,6 +15,7 @@ import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
 import com.resourceful_refinement.content.sports_ball.SportsBallItem;
+import com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
@@ -68,8 +69,8 @@ public class ModItems {
 
     public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
             () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
-
-    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
+    public static final DeferredItem<FuelTankBlockItem> FUEL_TANK_ITEM = ITEMS.register("fuel_tank",
+            () -> new FuelTankBlockItem(ModBlocks.FUEL_TANK.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
 

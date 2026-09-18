@@ -246,6 +246,9 @@ public class ResourcefulRefinementMain {
         // --- Hosegun Item Capability ---
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
 
+        // --- Fuel Tank Item Capability ---
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem.FuelTankItemFluidHandler(stack), ModItems.FUEL_TANK_ITEM.get());
+
         // --- Distillery ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {
             DistilleryBlockEntity controller = be.getController();

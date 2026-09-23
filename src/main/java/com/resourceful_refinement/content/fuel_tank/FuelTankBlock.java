@@ -224,6 +224,7 @@ public class FuelTankBlock extends Block implements EntityBlock {
             for (ItemStack stack : drops) {
                 if (stack.is(this.asItem())) {
                     fuelTank.saveToItem(stack, registries);
+                    stack.set(com.resourceful_refinement.registry.ModDataComponents.FUEL_TANK_FLUID.get(), net.neoforged.neoforge.fluids.SimpleFluidContent.copyOf(fuelTank.tank.getFluid()));
                 }
             }
         }
@@ -235,6 +236,7 @@ public class FuelTankBlock extends Block implements EntityBlock {
         ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
         if (level.getBlockEntity(pos) instanceof FuelTankBlockEntity fuelTank && !fuelTank.tank.isEmpty()) {
             fuelTank.saveToItem(stack, level.registryAccess());
+            stack.set(com.resourceful_refinement.registry.ModDataComponents.FUEL_TANK_FLUID.get(), net.neoforged.neoforge.fluids.SimpleFluidContent.copyOf(fuelTank.tank.getFluid()));
         }
         return stack;
     }

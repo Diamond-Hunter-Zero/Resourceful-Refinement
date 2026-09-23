@@ -1,7 +1,7 @@
 package com.resourceful_refinement.content.fuel_tank;
 
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
-import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
+import com.resourceful_refinement.utilities.FluidGelTooltipHelper;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

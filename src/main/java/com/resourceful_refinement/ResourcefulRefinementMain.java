@@ -16,9 +16,11 @@ import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
+import com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.geyser.GeyserRenderer;
 import com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer;
+import com.resourceful_refinement.content.hosegun.HosegunItem;
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
@@ -244,10 +246,10 @@ public class ResourcefulRefinementMain {
         });
 
         // --- Hosegun Item Capability ---
-        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.hosegun.HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new HosegunItem.HosegunFluidHandler(stack), ModItems.HOSEGUN.get());
 
         // --- Fuel Tank Item Capability ---
-        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem.FuelTankItemFluidHandler(stack), ModItems.FUEL_TANK_ITEM.get());
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, ctx) -> new FuelTankBlockItem.FuelTankItemFluidHandler(stack), ModItems.FUEL_TANK_ITEM.get());
 
         // --- Distillery ---
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.DISTILLERY_BE.get(), (be, side) -> {

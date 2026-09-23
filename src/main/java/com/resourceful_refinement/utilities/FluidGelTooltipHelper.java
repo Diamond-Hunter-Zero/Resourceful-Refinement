@@ -1,5 +1,7 @@
-package com.resourceful_refinement.content.gel_splatter;
+package com.resourceful_refinement.utilities;
 
+import com.resourceful_refinement.content.gel_splatter.GelPropertiesManager;
+import com.resourceful_refinement.content.gel_splatter.GelType;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -29,7 +31,7 @@ public final class FluidGelTooltipHelper {
         }
     }
 
-    public static void addItemFluidLines(List<Component> tooltip, FluidStack fluid, int capacity, int color, boolean isGloopy) {
+    public static void addItemGelFluidLines(List<Component> tooltip, FluidStack fluid, int capacity, int color, boolean isGloopy) {
         if (fluid.isEmpty()) {
             return;
         }
@@ -39,6 +41,14 @@ public final class FluidGelTooltipHelper {
             tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[Gloop " + formatGelType(gelType) + "]"));
         else
             tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §9[" + formatGelType(gelType) + "]"));
+    }
+
+    public static void addItemFluidLines(List<Component> tooltip, FluidStack fluid, int capacity, int color) {
+        if (fluid.isEmpty()) {
+            return;
+        }
+
+        tooltip.add(Component.literal(fluid.getAmount() + "/" + capacity + " mb").withColor(color).append(" §7" + fluid.getHoverName().getString()));
     }
 
     private static String formatGelType(GelType gelType) {

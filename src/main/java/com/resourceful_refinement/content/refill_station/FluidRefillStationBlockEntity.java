@@ -1,6 +1,6 @@
 package com.resourceful_refinement.content.refill_station;
 
-import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
+import com.resourceful_refinement.utilities.FluidGelTooltipHelper;
 import com.resourceful_refinement.content.gel_tracking.GelTrackingService;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import net.minecraft.core.BlockPos;
@@ -13,7 +13,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.server.level.ServerLevel;

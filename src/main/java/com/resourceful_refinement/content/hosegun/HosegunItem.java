@@ -1,17 +1,12 @@
 package com.resourceful_refinement.content.hosegun;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.resourceful_refinement.content.gel_splatter.FluidGelTooltipHelper;
+import com.resourceful_refinement.utilities.FluidGelTooltipHelper;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationInteractions;
 import com.resourceful_refinement.registry.ModDataComponents;
 import com.resourceful_refinement.registry.ModItems;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.ColorRGBA;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.UseAnim;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.minecraft.server.level.ServerLevel;
@@ -32,9 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidHandlerItemStack;
-import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -194,7 +187,7 @@ public class HosegunItem extends Item {
         if (fluid.isEmpty()) {
             tooltip.add(Component.translatable("tooltip.resourceful_refinement.hosegun.empty").withColor(0x7F7F7F));
         } else {
-            FluidGelTooltipHelper.addItemFluidLines(tooltip, fluid, CAPACITY, 0x3AB3DA, HosegunGloopy.isGloopy(stack));
+            FluidGelTooltipHelper.addItemGelFluidLines(tooltip, fluid, CAPACITY, 0x3AB3DA, HosegunGloopy.isGloopy(stack));
         }
 
         HosegunTracking.getTrackingId(stack).ifPresentOrElse(

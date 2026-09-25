@@ -78,7 +78,7 @@ public class BlenderBladeItemRenderer extends BlockEntityWithoutLevelRenderer {
         ms.translate(0.5, 0.5, 0.5);
         ms.scale(-1.0F, -1.0F, 1.0F);
         ms.translate(0, -1.0, 0);
-        blender.render(ms, buffer.getBuffer(RenderType.entityCutout(BlenderBladeRenderer.TEXTURE)), light, overlay);
+        blender.render(ms, buffer.getBuffer(RenderType.entityTranslucent(BlenderBladeRenderer.TEXTURE)), light, overlay);
         ms.popPose();
 
         ms.popPose();

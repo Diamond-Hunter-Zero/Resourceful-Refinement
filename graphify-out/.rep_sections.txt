@@ -1,0 +1,29 @@
+## Surprising Connections (you probably didn't know these)
+- `Mineral Deposit Node` --semantically_similar_to--> `Geyser`  [INFERRED] [semantically similar]
+  Resourceful Refinement Design Docs/Bucket Excavator.md → README.md
+- `NetherSurfaceJigsawStructure` --inherits--> `Structure`  [EXTRACTED]
+  src/main/java/com/resourceful_refinement/worldgen/structure/NetherSurfaceJigsawStructure.java → tools/decompiled/GenerationContext.java
+- `Fluid Processing Recipes` --references--> `Mechanical Fluid Sieve`  [EXTRACTED]
+  Resourceful Refinement Design Docs/Fluid Processing Recipes.md → README.md
+- `Carborax Fluids` --conceptually_related_to--> `Combustion Chamber`  [INFERRED]
+  Resourceful Refinement Design Docs/Fluid Properties.md → README.md
+- `Carborax Fluids` --conceptually_related_to--> `Carbonox Processing`  [INFERRED]
+  Resourceful Refinement Design Docs/Fluid Properties.md → README.md
+
+## Suggested Questions
+_Questions this graph is uniquely positioned to answer:_
+
+- **Why does `CombustionChamberBlockEntity` connect `Combustion Chamber Logic` to `Block Entity Files`, `Machine Blocks (Interaction)`, `Block Entity Renderers`, `Community 71`, `Block Entity Constructors`, `Community 58`, `Gel Fluid Tint Colours`, `Community 61`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `ResourcefulRefinementMain` connect `Block Entity Renderers` to `Machine Block Items`, `JEI Recipe Categories`, `Entity Model Layers`, `Fracking Pump Outlet Block`, `Recipe Serializers`, `Distillery Logic`, `Jigsaw Structure Worldgen`, `Hosegun Gloopy System`, `Item & Entity Renderers`, `Block Entity Files`, `Milking Station Seat Entity`, `Radiator Model & Heating`, `Community 43`, `Community 56`, `Community 60`, `Community 61`, `Community 64`, `Community 71`, `Community 72`, `Community 74`, `Community 75`, `Community 77`, `Community 78`, `Community 87`, `Community 88`, `Community 90`, `Community 95`, `Community 102`, `Community 105`, `Community 108`, `Community 117`, `Community 118`, `Community 122`, `Community 127`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **Why does `RefineryAccessPortBlockEntity` connect `Refinery Access Port` to `Combustion Chamber Logic`, `Block Entity Files`, `Community 97`, `Machine Blocks (Interaction)`, `Block Entity Renderers`, `Fluid Refinery Recipe`, `Community 73`, `Radiator Heat Logic`, `Mechanical Sieve Models`, `Block Entity Constructors`, `Community 83`, `Milking Station Block`, `Community 94`, `Community 61`, `Refinery Kinetic Proxy`, `Item & Entity Renderers`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **What connects `FRUIT`, `SWEET`, `VEG` to the rest of the system?**
+  _109 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Combustion Chamber Logic` be split into smaller, more focused modules?**
+  _Cohesion score 0.05747126436781609 - nodes in this community are weakly interconnected._
+- **Should `Vanilla Chunk Generation` be split into smaller, more focused modules?**
+  _Cohesion score 0.0741745816372682 - nodes in this community are weakly interconnected._
+- **Should `Machine Block Items` be split into smaller, more focused modules?**
+  _Cohesion score 0.06433566433566433 - nodes in this community are weakly interconnected._

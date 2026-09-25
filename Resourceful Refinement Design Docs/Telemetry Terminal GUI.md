@@ -1,17 +1,48 @@
+---
+title: Telemetry Terminal GUI
+category: Machine
+status: Planned
+introduced: v0.4
+recipe_type: n/a
+related:
+  - "[[GLARE Networks]]"
+tags:
+  - machine
+  - glare
+  - network
+  - client
+  - gui
+---
 
-The Telemetry Terminal is a horizontally rotatable SmartEntityBlock, which connects to GLARE networks as a receiver, and enables network-wide communication through the telemetry system.
+The Telemetry Terminal is a horizontally rotatable SmartEntityBlock, which connects to [[GLARE Networks|GLARE networks]] as a receiver, and enables network-wide communication through the telemetry system.
 
+## Gameplay Role
+
+The Telemetry Terminal is the player-facing front-end for the GLARE network's Telemetry Messaging system (see [[GLARE Networks]]). It lets players read, compose, send, and automate inbox messages over the network, turning the addressed inbox model into an in-game e-mail client with manual and redstone-automated modes.
+
+## Construction & Placement
+
+A horizontally rotatable SmartEntityBlock. Each Terminal can be assigned an Address by using a row of 3 Create item-slot behaviours positioned on the top face of the block (similar to the implementation in Redstone Links).
+
+## Inputs & Outputs
+
+- **GLARE link:** connects to any relay node in a network as a receiver.
+- **Address slots:** the 3 top-face item-slot behaviours set the terminal's Address ID.
+- **Redstone:** in Auto-Send mode a redstone pulse triggers a send; in Auto-Receive mode a matching message emits a redstone pulse.
+- **Create Display Links:** in Auto-Send mode, a terminal that is the display target of one or more Display Links reads its outgoing body from them (see Operation).
+
+## Operation
 
 The Telemetry Terminal can be right-clicked to open a versatile GUI that allows player to view, send, and automate the handling of inbox messages. A row of browser-like tabs along the top of the GUI allow the user to switch the terminal between its 3 modes; MANUAL, AUTO-SEND, and AUTO-RECEIVE. Each mode represents a different function of the terminal, and a different GUI state or sub-screen.
 
-Each Terminal can be assigned an Address by using a row of 3 Create item-slot behaviours positioned on the top face of the block (similar to the implementation in Redstone Links).
+Where possible, reuse the existing confirm and trash button icons we have in our project textures.
 
-Where possible, reuse the existing confirm and trash button icons we have in our project textures
+### Manual
 
-#### Manual
 In its default manual mode, the Telemetry Terminal GUI behaves like an email program. It itself has two sub-screens it toggles between using tabs on the top-left; An 'Inbox' view, and a 'Compose  Message' view.
 
-##### Inbox
+#### Inbox
+
 The tab for the Inbox view says "Inbox (X messages)" when the address is storing 1 or more messages, or "Inbox" otherwise.
 
 This view consists of a scroll-view along the left-hand edge showing a summary of each message currently in the inbox, with a top-row showing the sender's Address code as rendered items, and bottom row of grey text showing the first few characters of the message.
@@ -20,8 +51,8 @@ The right-hand two thirds of the view shows a large readout of the message conte
 The method for rendering the text content over multiple lines should be defined in a generalized way that allows us to adjust the size and width of the right-hand-side panel when we come to making proper UI assets.
 At the bottom-right of this content panel should be a button which says "Discard". Pressing this removes the message form the inbox.
 
+#### Compose  Message
 
-##### Compose  Message
 The Compose Message view allows the user to type a new message to send to an address.
 
 On the left-hand edge of the view, is a scroll-view of all the terminal's 'saved' Addresses. Clicking on one will clear the current address and repopulate it with the saved one.
@@ -34,8 +65,8 @@ The middle of the viewer is a large text field for the user to enter their messa
 
 At the bottom of the view is a "Send" button. This button should only be enabled and function if the address is filled out, and the text body is non-empty. Pressing 'Send' sends the message to the target address if it exists on the network. If the address does not exist, the warning message along the bottom of the view will say "Address not found on this network". Otherwise, it briefly says "Message sent!", and resets the view.
 
+### Auto-Send
 
-#### Auto-Send
 In auto send mode, the Telemetry Terminal GUI utilises an altered variant of the 'Compose  Message' view;
 
 The address code and text body portions behave the same, allowing the user to set a new address and message.
@@ -44,8 +75,8 @@ In Auto-Send mode, there is no 'Send' button. Instead, whenever a user edits the
 
 Alternatively, if the Telemetry Terminal is the display target of one or more Create Display Links, the text body editor is disabled, and a header saying "Readout from Display Link" is instead shown, with the text produced by all attached display links shown below. In this mode, the combined content of the linked display links is sent as the text body on a redstone pulse (truncated if needed).
 
+### Auto-Receive
 
-#### Auto-Receive
 In auto receive mode, the Telemetry Terminal GUI has a unique view. It consists of a wide scroll-view which shows all current string-filters cached on the terminal. Each entry lists the string, and a small 'delete' button anchored to the far right (use the trash icon from our existing GUI assets) - Pressing this remove the string-filter from the terminal.
 
 Below this scroll-view is a text input field, with a confirm button anchored to its right. Entering text into this field and pressing 'confirm' adds it as a new filter entry (if not already present), and clears the input field. 
@@ -55,3 +86,11 @@ Above the scroll view is a centred button which toggles between "Keep Messages" 
 When an auto-receive terminal receives a message containing any of its string-filters, the terminal emits a redstone pulse for 1 tick (even if already emitting). If set to "Discard Messages", this then discards the triggering message from the inbox. String-filters, when set or when being compared to messages, should always be treated as case-invariant.
 
 Auto-discarding received messages should be done in a way that any other auto-receive terminals listening to the same address will still trigger their 'comparison and emit' logic for that message that tick (i.e. We shouldn't immediately discard on processing, in-case other terminals also need to respond to this same message later during this tick).
+
+## Implementation
+
+Not yet implemented — design target for v0.4.
+
+## Related
+
+- [[GLARE Networks]]

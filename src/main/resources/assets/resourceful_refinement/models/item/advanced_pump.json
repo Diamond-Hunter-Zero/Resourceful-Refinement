@@ -1,5 +1,5 @@
 {
-  "parent": "resourceful_refinement:block/advanced_pump/advanced_pump",
+  "parent": "resourceful_refinement:block/advanced_pump/advanced_pump_item",
   "display": {
     "thirdperson_righthand": {
       "rotation": [75, 45, 0],

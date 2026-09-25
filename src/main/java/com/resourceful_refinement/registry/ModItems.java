@@ -16,6 +16,8 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
+import com.resourceful_refinement.content.sports_ball.SportsBallItem;
+import com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
@@ -70,8 +72,8 @@ public class ModItems {
 
     public static final DeferredItem<CombustionChamberItem> COMBUSTION_CHAMBER_ITEM = ITEMS.register("combustion_chamber",
             () -> new CombustionChamberItem(ModBlocks.COMBUSTION_CHAMBER.get(), new Item.Properties()));
-
-    public static final DeferredItem<BlockItem> FUEL_TANK_ITEM = ITEMS.registerSimpleBlockItem("fuel_tank", ModBlocks.FUEL_TANK);
+    public static final DeferredItem<FuelTankBlockItem> FUEL_TANK_ITEM = ITEMS.register("fuel_tank",
+            () -> new FuelTankBlockItem(ModBlocks.FUEL_TANK.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> ADVANCED_PUMP_ITEM = ITEMS.registerSimpleBlockItem("advanced_pump", ModBlocks.ADVANCED_PUMP);
 
@@ -161,6 +163,10 @@ public class ModItems {
             () -> new PlungerItem(PlungerItem.createProperties()));
 
     public static final DeferredItem<Item> PAINT_BLOB = ITEMS.registerItem("paint_blob", Item::new, new Item.Properties());
+
+    public static final DeferredItem<SportsBallItem> SPORTS_BALL = ITEMS.register("sports_ball",
+            () -> new SportsBallItem(new Item.Properties().stacksTo(16)
+                    .component(ModDataComponents.BALL_TYPE.get(), 0)));
 
     public static final DeferredItem<Item> DRINKS_GLASS = ITEMS.registerItem("drinks_glass", Item::new, new Item.Properties());
     public static final DeferredItem<Item> COMPACTED_BIOMATTER = ITEMS.registerItem("compacted_biomatter", Item::new, new Item.Properties());

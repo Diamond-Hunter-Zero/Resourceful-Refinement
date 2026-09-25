@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:carbonox_geyser",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 26,
+    "separation": 7,
+    "spread_type": "linear",
+    "salt": 461729234
+  }
+}

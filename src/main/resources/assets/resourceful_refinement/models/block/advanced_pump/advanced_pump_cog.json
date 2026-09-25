@@ -4,7 +4,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "resourceful_refinement:block/advanced_pump",
-		"particle": "resourceful_refinement:block/advanced_pump"
+		"particle": "resourceful_refinement:block/particles/steel_particle"
 	},
 	"elements": [
 		{

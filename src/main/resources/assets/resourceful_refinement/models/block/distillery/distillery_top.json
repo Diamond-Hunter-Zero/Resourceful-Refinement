@@ -4,7 +4,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "resourceful_refinement:block/distillery/distillery_tank_connected",
-		"particle": "resourceful_refinement:block/distillery/distillery_tank_connected"
+		"particle": "resourceful_refinement:block/particles/steel_particle"
 	},
 	"elements": [
 		{

@@ -5,10 +5,20 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import net.minecraft.resources.ResourceLocation;
 
 public class ModPartialModels {
-    // Generic Models
+
+    // Shafts
     public static final PartialModel SHAFT_X = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_axis_x"));
     public static final PartialModel SHAFT_Z = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_axis_z"));
     public static final PartialModel SHAFT_VERTICAL = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_vertical"));
+
+    public static final PartialModel SHAFT_X_HALF = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_left"));
+    public static final PartialModel SHAFT_Z_HALF = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_forward"));
+    public static final PartialModel SHAFT_VERTICAL_HALF = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_up"));
+    public static final PartialModel SHAFT_X_HALF_MIRROR = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_right"));
+    public static final PartialModel SHAFT_Z_HALF_MIRROR = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_back"));
+    public static final PartialModel SHAFT_VERTICAL_HALF_MIRROR = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_half_down"));
+
+    // Generic Models
     public static final PartialModel GEYSER_CASING = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/geyser_block"));
     public static final PartialModel NETHERRACK_GEYSER_CASING = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/netherrack_geyser_block"));
     public static final PartialModel INDUSTRIAL_HEATER_STAND = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/distillery/industrial_heater_stand"));

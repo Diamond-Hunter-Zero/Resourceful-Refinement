@@ -23,6 +23,10 @@ public class ModDataComponents {
             () -> DataComponentType.<net.neoforged.neoforge.fluids.SimpleFluidContent>builder().persistent(net.neoforged.neoforge.fluids.SimpleFluidContent.CODEC).networkSynchronized(net.neoforged.neoforge.fluids.SimpleFluidContent.STREAM_CODEC).build()
     );
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.neoforged.neoforge.fluids.SimpleFluidContent>> FUEL_TANK_FLUID = DATA_COMPONENTS.register("fuel_tank_fluid",
+            () -> DataComponentType.<net.neoforged.neoforge.fluids.SimpleFluidContent>builder().persistent(net.neoforged.neoforge.fluids.SimpleFluidContent.CODEC).networkSynchronized(net.neoforged.neoforge.fluids.SimpleFluidContent.STREAM_CODEC).build()
+    );
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> HOSEGUN_TRACKING_ID = DATA_COMPONENTS.register("hosegun_tracking_id",
             () -> DataComponentType.<String>builder()
                     .persistent(Codec.STRING)
@@ -61,6 +65,13 @@ public class ModDataComponents {
             () -> DataComponentType.<FlavourType>builder()
                     .persistent(FlavourType.CODEC)
                     .networkSynchronized(FlavourType.STREAM_CODEC)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> BALL_TYPE = DATA_COMPONENTS.register("ball_type",
+            () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT)
+                    .networkSynchronized(ByteBufCodecs.INT)
                     .build()
     );
 }

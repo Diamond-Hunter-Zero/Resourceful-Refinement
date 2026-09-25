@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -292,6 +293,8 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         }
     }
 
+    public boolean isChainRedstonePowered() {return chainRedstonePowered;}
+
     private void updateChainHeat() {
         CombustionChamberBlockEntity controller = getController();
         if (controller == null) return;
@@ -370,7 +373,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         return this;
     }
 
-    private List<CombustionChamberBlockEntity> getChainMembers() {
+    public List<CombustionChamberBlockEntity> getChainMembers() {
         List<CombustionChamberBlockEntity> members = new ArrayList<>();
         if (level == null) return members;
 
@@ -423,7 +426,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         if (localFuelState <= 0 || generatedSpeed == 0 || chainRedstonePowered) {
             return;
         }
-        if (localFuelState == 3 && coldestHeatSource >= ExtendedHeatCondition.NONE.getBlazeHeatEnergy()) {
+        if (localFuelState == 3 && coldestHeatSource >= ExtendedHeatCondition.NONE.getBlazeHeatLevel()) {
             return;
         }
 
@@ -504,10 +507,10 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
         isUnderPerforming = true;
 
         if (currentFuelState >= 3) {
-            if (coldestHeatSource <= ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy()) {
+            if (coldestHeatSource <= ExtendedHeatCondition.CHILLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed();
                 isCurrentlyUnderperforming = false;
-            } else if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatEnergy()) {
+            } else if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed() * 0.5f;
                 isCurrentlyUnderperforming = true;
             } else {
@@ -515,7 +518,7 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
                 isCurrentlyUnderperforming = true;
             }
         } else if (currentFuelState == 2) {
-            if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatEnergy()) {
+            if (coldestHeatSource <= ExtendedHeatCondition.COOLED.getBlazeHeatLevel()) {
                 baseSpeed = getMaxGeneratedSpeed();
                 isCurrentlyUnderperforming = false;
             } else {
@@ -748,19 +751,31 @@ public class CombustionChamberBlockEntity extends GeneratingKineticBlockEntity i
     private static class RotationDirectionSlot extends ValueBoxTransform {
         @Override
         public Vec3 getLocalOffset(net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockState state) {
-            if (!state.hasProperty(FACING)) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (!state.hasProperty(FACING) || !(be instanceof CombustionChamberBlockEntity combustionBe))
                 return null;
-            }
+
             Direction facing = state.getValue(FACING);
-            Vec3 location = VecHelper.voxelSpace(8, 13.5, 16);
+            Vec3 location;
+            if (combustionBe.hasIntakeFan())
+                location = VecHelper.voxelSpace(8, 16, 14);
+            else
+                location = VecHelper.voxelSpace(8, 13.5, 16);
             return VecHelper.rotateCentered(location, AngleHelper.horizontalAngle(facing), Axis.Y);
         }
 
         @Override
         public void rotate(net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockState state, PoseStack ms) {
+
+            BlockEntity be = level.getBlockEntity(pos);
+            if (!(be instanceof CombustionChamberBlockEntity combustionBe))
+                return;
+
             Direction facing = state.hasProperty(FACING) ? state.getValue(FACING) : Direction.SOUTH;
-            TransformStack.of(ms)
-                    .rotateYDegrees(AngleHelper.horizontalAngle(facing) + 180);
+            TransformStack.of(ms).rotateYDegrees(AngleHelper.horizontalAngle(facing) + 180);
+
+            if (combustionBe.hasIntakeFan())
+                TransformStack.of(ms).rotateXDegrees(90);
         }
 
         @Override

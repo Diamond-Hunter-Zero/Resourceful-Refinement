@@ -211,4 +211,23 @@ public class FuelTankBlock extends Block implements EntityBlock {
         level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
         return ItemInteractionResult.SUCCESS;
     }
+
+    @Override
+    protected java.util.List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootParams.Builder builder) {
+        java.util.List<ItemStack> drops = super.getDrops(state, builder);
+        BlockEntity be = builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.BLOCK_ENTITY);
+        if (be == null && builder.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN) != null) {
+            be = builder.getLevel().getBlockEntity(BlockPos.containing(builder.getParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN)));
+        }
+        if (be instanceof FuelTankBlockEntity fuelTank && !fuelTank.tank.isEmpty()) {
+            net.minecraft.core.HolderLookup.Provider registries = builder.getLevel().registryAccess();
+            for (ItemStack stack : drops) {
+                if (stack.is(this.asItem())) {
+                    fuelTank.saveToItem(stack, registries);
+                    stack.set(com.resourceful_refinement.registry.ModDataComponents.FUEL_TANK_FLUID.get(), net.neoforged.neoforge.fluids.SimpleFluidContent.copyOf(fuelTank.tank.getFluid()));
+                }
+            }
+        }
+        return drops;
+    }
 }

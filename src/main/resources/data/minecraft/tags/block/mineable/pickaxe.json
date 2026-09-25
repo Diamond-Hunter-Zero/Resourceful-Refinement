@@ -14,6 +14,12 @@
     "resourceful_refinement:fuel_tank",
     "resourceful_refinement:paint_nozzle",
     "resourceful_refinement:milking_station",
+    "resourceful_refinement:radiator_pipe",
+    "resourceful_refinement:combustion_chamber",
+    "resourceful_refinement:brewers_tap",
+    "resourceful_refinement:distillery",
+    "resourceful_refinement:advanced_pump"
+    "resourceful_refinement:milking_station",
     "resourceful_refinement:heavy_plate_shielding",
     "resourceful_refinement:cyclotron_controller",
     "resourceful_refinement:cyclotron_proxy",

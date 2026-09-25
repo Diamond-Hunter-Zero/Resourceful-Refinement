@@ -91,16 +91,6 @@
         "processors": "minecraft:empty",
         "bottom_offset": -3
       }
-    },
-    {
-      "weight": 9,
-      "element": {
-        "element_type": "minecraft:single_pool_element",
-        "location": "resourceful_refinement:carbonox_geyser_small",
-        "projection": "rigid",
-        "processors": "minecraft:empty",
-        "bottom_offset": -3
-      }
     }
   ]
 }

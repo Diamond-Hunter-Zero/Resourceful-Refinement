@@ -19,6 +19,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import com.mojang.datafixers.util.Either;
+import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import com.simibubi.create.foundation.codec.CreateCodecs;
+import net.createmod.catnip.codecs.stream.CatnipStreamCodecBuilders;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
@@ -27,11 +33,13 @@ import java.util.List;
 
 public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryRecipeInput> {
 
+    private final ExtendedHeatCondition heatRequirement;
     private final List<SizedIngredient> sizedIngredients;
     private final List<SizedIngredient> combinedIngredients;
 
-    public FluidRefineryRecipe(ProcessingRecipeParams params, List<SizedIngredient> sizedIngredients) {
+    public FluidRefineryRecipe(ProcessingRecipeParams params, ExtendedHeatCondition heatRequirement, List<SizedIngredient> sizedIngredients) {
         super(ModRecipeTypes.FLUID_REFINERY_TYPE_INFO, params);
+        this.heatRequirement = heatRequirement != null ? heatRequirement : ExtendedHeatCondition.NONE;
 
         // Replace Create's backing ingredients with our sized type
         List<SizedIngredient> sizedIngredientsToAdd = new ArrayList<>();
@@ -55,7 +63,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
 
     @Override
     protected int getMaxOutputCount() {
-        return 0; // The refinery primarily outputs fluids in Phase 5
+        return 0;
     }
 
     @Override
@@ -78,8 +86,13 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
         return true;
     }
 
+    public ExtendedHeatCondition getRequiredHeatCondition() { return heatRequirement; }
     public List<SizedIngredient> getSizedIngredients() { return sizedIngredients; }
     public List<SizedIngredient> getCombinedIngredients() { return combinedIngredients; }
+
+    private FluidRefineryProcessingRecipeParams getFluidRefineryParams() {
+        return (FluidRefineryProcessingRecipeParams) getParams();
+    }
 
 
     // -------------------------------------------------------------------------
@@ -141,14 +154,16 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
 
         private static final MapCodec<FluidRefineryRecipe> MAP_CODEC =
                 RecordCodecBuilder.mapCodec(inst -> inst.group(
-                        ProcessingRecipeParams.CODEC.forGetter(ProcessingRecipe::getParams),
+                        FluidRefineryProcessingRecipeParams.CODEC.forGetter(FluidRefineryRecipe::getFluidRefineryParams),
+                        ExtendedHeatCondition.CODEC.optionalFieldOf("heat_requirement", ExtendedHeatCondition.NONE).forGetter(FluidRefineryRecipe::getRequiredHeatCondition),
                         SizedIngredient.FLAT_CODEC.listOf().optionalFieldOf("sized_ingredients", List.of()).forGetter(FluidRefineryRecipe::getSizedIngredients)
                 ).apply(inst, FluidRefineryRecipe::new));
 
         private static final StreamCodec<RegistryFriendlyByteBuf, FluidRefineryRecipe> STREAM_CODEC =
                 StreamCodec.of(
                         (buf, recipe) -> {
-                            ProcessingRecipeParams.STREAM_CODEC.encode(buf, recipe.getParams());
+                            FluidRefineryProcessingRecipeParams.STREAM_CODEC.encode(buf, recipe.getFluidRefineryParams());
+                            ExtendedHeatCondition.STREAM_CODEC.encode(buf, recipe.getRequiredHeatCondition());
 
                             buf.writeInt(recipe.getSizedIngredients().size());
                             for (SizedIngredient ingredient : recipe.getSizedIngredients()) {
@@ -156,7 +171,8 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
                             }
                         },
                         buf -> {
-                            ProcessingRecipeParams params = ProcessingRecipeParams.STREAM_CODEC.decode(buf);
+                            FluidRefineryProcessingRecipeParams params = FluidRefineryProcessingRecipeParams.STREAM_CODEC.decode(buf);
+                            ExtendedHeatCondition heatRequirement = ExtendedHeatCondition.STREAM_CODEC.decode(buf);
 
                             int count = buf.readInt();
                             List<SizedIngredient> sizedIngredients = new ArrayList<>(count);
@@ -164,7 +180,7 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
                                 sizedIngredients.add(SizedIngredient.STREAM_CODEC.decode(buf));
                             }
 
-                            return new FluidRefineryRecipe(params, sizedIngredients);
+                            return new FluidRefineryRecipe(params, heatRequirement, sizedIngredients);
                         }
                 );
 
@@ -176,6 +192,54 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
         @Override
         public StreamCodec<RegistryFriendlyByteBuf, FluidRefineryRecipe> streamCodec() {
             return STREAM_CODEC;
+        }
+    }
+
+    public static class FluidRefineryProcessingRecipeParams extends ProcessingRecipeParams {
+
+        private static final Codec<Either<SizedFluidIngredient, Ingredient>> INGREDIENT_CODEC =
+                Codec.either(CreateCodecs.SIZED_FLUID_INGREDIENT, Ingredient.CODEC);
+        private static final Codec<Either<FluidStack, ProcessingOutput>> RESULT_CODEC =
+                Codec.either(FluidStack.CODEC, ProcessingOutput.CODEC);
+
+        public static final MapCodec<FluidRefineryProcessingRecipeParams> CODEC =
+                RecordCodecBuilder.mapCodec(inst -> inst.group(
+                        INGREDIENT_CODEC.listOf().fieldOf("ingredients").forGetter(params -> params.ingredients()),
+                        RESULT_CODEC.listOf().fieldOf("results").forGetter(params -> params.results()),
+                        Codec.INT.optionalFieldOf("processing_time", 0).forGetter(params -> params.processingDuration())
+                ).apply(inst, FluidRefineryProcessingRecipeParams::new));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, FluidRefineryProcessingRecipeParams> STREAM_CODEC =
+                StreamCodec.of(
+                        (buf, params) -> {
+                            CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).encode(buf, params.ingredients);
+                            CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).encode(buf, params.fluidIngredients);
+                            CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).encode(buf, params.results);
+                            CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).encode(buf, params.fluidResults);
+                            ByteBufCodecs.VAR_INT.encode(buf, params.processingDuration);
+                        },
+                        buf -> {
+                            FluidRefineryProcessingRecipeParams params = new FluidRefineryProcessingRecipeParams();
+                            params.ingredients = CatnipStreamCodecBuilders.nonNullList(Ingredient.CONTENTS_STREAM_CODEC).decode(buf);
+                            params.fluidIngredients = CatnipStreamCodecBuilders.nonNullList(SizedFluidIngredient.STREAM_CODEC).decode(buf);
+                            params.results = CatnipStreamCodecBuilders.nonNullList(ProcessingOutput.STREAM_CODEC).decode(buf);
+                            params.fluidResults = CatnipStreamCodecBuilders.nonNullList(FluidStack.STREAM_CODEC).decode(buf);
+                            params.processingDuration = ByteBufCodecs.VAR_INT.decode(buf);
+                            return params;
+                        }
+                );
+
+        protected FluidRefineryProcessingRecipeParams() {
+        }
+
+        private FluidRefineryProcessingRecipeParams(
+                List<Either<SizedFluidIngredient, Ingredient>> ingredients,
+                List<Either<FluidStack, ProcessingOutput>> results,
+                int processingDuration
+        ) {
+            ingredients.forEach(ingredient -> ingredient.ifLeft(fluidIngredients::add).ifRight(this.ingredients::add));
+            results.forEach(result -> result.ifLeft(fluidResults::add).ifRight(this.results::add));
+            this.processingDuration = processingDuration;
         }
     }
 }

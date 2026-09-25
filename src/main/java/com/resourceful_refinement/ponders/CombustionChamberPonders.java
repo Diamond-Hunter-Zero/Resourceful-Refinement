@@ -145,23 +145,23 @@ public class CombustionChamberPonders {
 
         // --- Page 4: Fueling Chambers ---
         scene.addKeyframe();
-        scene.overlay().showText(260)
+        scene.overlay().showText(360)
                 .text("resourceful_refinement.ponder.combustion_chamber.text_8")
                 .independent(-8);
         scene.idle(140);
 
         scene.world().setKineticSpeed(fullChamberTrainSegment, 0);
         scene.world().setKineticSpeed(fanSegment, 0);
-        scene.overlay().showText(100)
+        scene.overlay().showText(220)
                 .text("resourceful_refinement.ponder.combustion_chamber.text_9")
                 .independent(56);
         scene.idle(120);
 
         scene.addKeyframe();
         scene.world().showSection(radiatorSegment, Direction.UP);
-        scene.overlay().showText(100)
+        scene.overlay().showText(120)
                 .text("resourceful_refinement.ponder.combustion_chamber.text_10")
-                .independent(56);
+                .independent(112);
 
         scene.idle(10);
         scene.world().modifyBlock(radiatorPos1, blockState ->{
@@ -179,7 +179,7 @@ public class CombustionChamberPonders {
         scene.idle(20);
         scene.world().setKineticSpeed(fullChamberTrainSegment, -72);
         scene.world().setKineticSpeed(fanSegment, -72);
-        scene.idle(70);
+        scene.idle(80);
 
         scene.addKeyframe();
         scene.overlay().showOutline(PonderPalette.INPUT, cooledChamberTrainSlot, fullCooledChambersSegment, 100);
@@ -265,7 +265,7 @@ public class CombustionChamberPonders {
                 .independent();
         scene.idle(20);
 
-        scene.overlay().showControls(tankSegment.getCenter(), Pointing.LEFT, 40).withItem(ModFluids.CATALYSED_CARBORAX.bucket.toStack());
+        scene.overlay().showControls(tankSegment.getCenter().add(-0.5, 0, 0.25), Pointing.LEFT, 60).withItem(ModFluids.CATALYSED_CARBORAX.bucket.toStack());
         scene.idle(10);
         FluidStack carboraxStack = new FluidStack(ModFluids.CATALYSED_CARBORAX.source, 4000);
         scene.world().modifyBlockEntity(tankPos, FuelTankBlockEntity.class, tankBE -> {

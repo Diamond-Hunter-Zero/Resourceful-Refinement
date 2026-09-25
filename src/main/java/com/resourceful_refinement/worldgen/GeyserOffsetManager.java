@@ -32,7 +32,8 @@ public class GeyserOffsetManager {
         String[] poolPaths = {
                 "cave_ore_geyser_template/start_pool.json",
                 "nether_scorchia_geyser_template/start_pool.json",
-                "ore_geyser_template/start_pool.json"
+                "ore_geyser_template/start_pool.json",
+                "carbonox_geyser_template/start_pool.json"
         };
 
         for (String relativePath : poolPaths) {

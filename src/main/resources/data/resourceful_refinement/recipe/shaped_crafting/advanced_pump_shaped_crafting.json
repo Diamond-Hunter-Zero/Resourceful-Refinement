@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    " E "
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:dried_kelp"
+    },
+    "B": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "item": "create:mechanical_pump"
+    },
+    "D": {
+      "item": "resourceful_refinement:polymer_residue"
+    },
+    "E": {
+      "item": "minecraft:dried_kelp"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:advanced_pump"
+  }
+}

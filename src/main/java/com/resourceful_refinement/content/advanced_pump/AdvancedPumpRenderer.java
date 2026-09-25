@@ -36,7 +36,7 @@ public class AdvancedPumpRenderer extends KineticBlockEntityRenderer<AdvancedPum
 
     @Override
     public int getViewDistance() {
-        return 72;
+        return 128;
     }
 
     private BlockState getVisualState(BlockState state) {

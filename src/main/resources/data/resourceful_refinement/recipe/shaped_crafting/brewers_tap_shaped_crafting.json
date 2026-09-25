@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " AB",
+    "CD ",
+    "   "
+  ],
+  "key": {
+    "A": {
+      "item": "create:shaft"
+    },
+    "B": {
+      "item": "minecraft:stick"
+    },
+    "C": {
+      "item": "create:fluid_pipe"
+    },
+    "D": {
+      "item": "create:andesite_alloy"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:brewers_tap"
+  }
+}

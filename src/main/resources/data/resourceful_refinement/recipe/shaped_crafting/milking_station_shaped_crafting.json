@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABC",
+    "DEF",
+    " G "
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:glass_bottle"
+    },
+    "B": {
+      "item": "create:copper_casing"
+    },
+    "C": {
+      "item": "minecraft:glass_bottle"
+    },
+    "D": {
+      "item": "create:cogwheel"
+    },
+    "E": {
+      "item": "create:fluid_tank"
+    },
+    "F": {
+      "item": "create:cogwheel"
+    },
+    "G": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:milking_station"
+  }
+}

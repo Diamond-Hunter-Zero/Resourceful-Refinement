@@ -266,7 +266,7 @@ Schedule reconcile **once per dimension load**, not on every chunk load (chunk l
 - [ ] Crafting recipe / advancement (if desired)
 - [ ] Create Ponder scene
 - [ ] JEI / goggles tooltip (tank, tracking ID, bound count when applicable)
-- [ ] Update `docs/AGENT_PROJECT_OVERVIEW.md` class map when feature is complete
+- [ ] Update `Resourceful Refinement Design Docs/Codebase Overview.md` class map when feature is complete
 
 ---
 

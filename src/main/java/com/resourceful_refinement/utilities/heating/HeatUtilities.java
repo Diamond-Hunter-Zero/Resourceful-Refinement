@@ -8,12 +8,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class HeatUtilities {
@@ -117,7 +115,7 @@ public class HeatUtilities {
 
     public static int GetColdestAdjacentHeatSource(Level level, BlockPos pos)
     {
-        int lowestSource = ExtendedHeatCondition.SUPERHEATED.getBlazeHeatEnergy();
+        int lowestSource = ExtendedHeatCondition.SUPERHEATED.getBlazeHeatLevel();
         for (Direction direction : Direction.values())
         {
             int adjacentHeatLevel = HeatUtilities.GetExtendedHeatLevel(level, pos.relative(direction));
@@ -129,7 +127,7 @@ public class HeatUtilities {
 
     public static int GetHottestAdjacentHeatSource(Level level, BlockPos pos)
     {
-        int highestSource = ExtendedHeatCondition.CHILLED.getBlazeHeatEnergy();
+        int highestSource = ExtendedHeatCondition.CHILLED.getBlazeHeatLevel();
         for (Direction direction : Direction.values())
         {
             int adjacentHeatLevel = HeatUtilities.GetExtendedHeatLevel(level, pos.relative(direction));

@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 
 public enum ExtendedHeatCondition implements StringRepresentable {
 
-    CHILLED("chilled", 0xBFF2F5, -500, -750, -3),
-    COOLED("cooled", 0x1A83C9, -50, -350, -2),
+    CHILLED("chilled", 0xa9e8f5, -500, -750, -3),
+    COOLED("cooled", 0x2758c9, -50, -350, -2),
     NONE("none", 16777215, 50, 0, -1),
-    PASSIVE("passive", 0xFF86C43B, 333, 250, 0),
-    HEATED("heated", 15237888, 666, 500, 1),
-    SUPERHEATED("superheated", 6067176, 1000, 750, 2);
+    PASSIVE("passive", 0x86C43B, 333, 250, 0),
+    HEATED("heated", 0xE88000, 666, 500, 1),
+    SUPERHEATED("superheated", 0x5C93E8, 1000, 750, 2);
 
     private final String name;
     private int color;
@@ -48,5 +48,5 @@ public enum ExtendedHeatCondition implements StringRepresentable {
 
     public int getMaxHeatEnergy() { return this.maxHeatEnergy; }
     public int getTargetHeatEnergy() { return this.targetHeatEnergy; }
-    public int getBlazeHeatEnergy() { return this.blazeHeatLevel; }
+    public int getBlazeHeatLevel() { return this.blazeHeatLevel; }
 }

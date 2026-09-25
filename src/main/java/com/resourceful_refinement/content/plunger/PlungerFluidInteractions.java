@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.plunger;
 
+import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -8,6 +9,11 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import org.jetbrains.annotations.Nullable;
+
+import com.resourceful_refinement.content.refinery.RefineryAccessPortBlockEntity;
+import com.resourceful_refinement.content.refinery.RefineryProxyBlockEntity;
+import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEntity;
+import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -39,12 +45,72 @@ public final class PlungerFluidInteractions {
 
     private static Map<IFluidHandler, Boolean> collectHandlers(Level level, BlockPos pos, @Nullable Direction clickedFace) {
         Map<IFluidHandler, Boolean> handlers = new IdentityHashMap<>();
+
+        net.minecraft.world.level.block.entity.BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof RefineryAccessPortBlockEntity refinery) {
+            addRefineryHandlers(refinery, handlers);
+            return handlers;
+        } else if (be instanceof RefineryProxyBlockEntity proxy) {
+            RefineryAccessPortBlockEntity refinery = proxy.getController(level);
+            if (refinery != null) {
+                addRefineryHandlers(refinery, handlers);
+                return handlers;
+            }
+        } else if (be instanceof RefineryKineticProxyBlockEntity proxy) {
+            RefineryAccessPortBlockEntity refinery = proxy.getController(level);
+            if (refinery != null) {
+                addRefineryHandlers(refinery, handlers);
+                return handlers;
+            }
+        } else if (be instanceof CombustionChamberBlockEntity chamber) {
+            addCombustionChamberHandlers(chamber, handlers);
+            return handlers;
+        }
+        else if (be instanceof DistilleryBlockEntity distillery) {
+            addDistilleryHandlers(distillery, handlers);
+            return handlers;
+        }
+
+
         addHandlerIfFluid(level, pos, clickedFace, handlers);
         addHandlerIfFluid(level, pos, null, handlers);
         for (Direction direction : Direction.values()) {
             addHandlerIfFluid(level, pos, direction, handlers);
         }
         return handlers;
+    }
+
+    private static void addRefineryHandlers(RefineryAccessPortBlockEntity refinery, Map<IFluidHandler, Boolean> handlers) {
+        if (!refinery.inputTankA.isEmpty()) {
+            handlers.put(refinery.inputTankA, Boolean.TRUE);
+        }
+        if (!refinery.inputTankB.isEmpty()) {
+            handlers.put(refinery.inputTankB, Boolean.TRUE);
+        }
+        if (!refinery.outputTank.isEmpty()) {
+            handlers.put(refinery.outputTank, Boolean.TRUE);
+        }
+    }
+
+    private static void addCombustionChamberHandlers(CombustionChamberBlockEntity chamber, Map<IFluidHandler, Boolean> handlers) {
+        CombustionChamberBlockEntity controller = chamber.getController();
+        if (controller != null) {
+            for (CombustionChamberBlockEntity member : controller.getChainMembers()) {
+                if (!member.inputTank.isEmpty()) {
+                    handlers.put(member.inputTank, Boolean.TRUE);
+                }
+            }
+        }
+    }
+
+    private static void addDistilleryHandlers(DistilleryBlockEntity distillery, Map<IFluidHandler, Boolean> handlers) {
+        DistilleryBlockEntity controller = distillery.getController();
+        if (controller != null ) {
+            if (!controller.outputTank.isEmpty())
+                handlers.put(controller.outputTank, Boolean.TRUE);
+            if (!controller.inputTank.isEmpty())
+                handlers.put(controller.inputTank, Boolean.TRUE);
+        }
     }
 
     private static void addHandlerIfFluid(

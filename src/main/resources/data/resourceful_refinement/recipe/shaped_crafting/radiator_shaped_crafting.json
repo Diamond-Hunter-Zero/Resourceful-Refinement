@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "BCD",
+    " E "
+  ],
+  "key": {
+    "A": {
+      "item": "create:iron_sheet"
+    },
+    "B": {
+      "item": "create:copper_nugget"
+    },
+    "C": {
+      "item": "create:fluid_pipe"
+    },
+    "D": {
+      "item": "create:copper_nugget"
+    },
+    "E": {
+      "item": "create:iron_sheet"
+    }
+  },
+  "result": {
+    "id": "resourceful_refinement:radiator_pipe"
+  }
+}

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.registry.ModPartialModels;
+import com.resourceful_refinement.utilities.ShaftUtilities;
 import com.resourceful_refinement.utilities.heating.HeatUtilities;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
@@ -24,6 +25,9 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             ResourcefulRefinementMain.MOD_ID, "textures/block/combustion_chamber.png");
 
+    public static final ResourceLocation POWERED_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            ResourcefulRefinementMain.MOD_ID, "textures/block/combustion_chamber_powered.png");
+
     private final CombustionChamberModel casing;
 
     public CombustionChamberRenderer(BlockEntityRendererProvider.Context context) {
@@ -36,7 +40,7 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
         BlockState state = be.getBlockState();
         Direction facing = state.getValue(FACING);
 
-        VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(TEXTURE));
+        VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(be.isChainRedstonePowered() ? POWERED_TEXTURE : TEXTURE));
 
         ms.pushPose();
         ms.translate(0.5, 1.5, 0.5);
@@ -85,21 +89,15 @@ public class CombustionChamberRenderer extends SafeBlockEntityRenderer<Combustio
     }
 
     private void renderKineticShaft(CombustionChamberBlockEntity be, BlockState state, PoseStack ms, MultiBufferSource buffer, int light) {
-        Direction.Axis shaftAxis = getRotationAxisOf(be);
-        SuperByteBuffer shaft = CachedBuffers.partial(shaftAxis == Direction.Axis.X ?
-                ModPartialModels.SHAFT_X :
-                ModPartialModels.SHAFT_Z, state);
+        Direction shaftFace = be.getBlockState().getValue(CombustionChamberBlock.FACING);
+        Direction.Axis shaftAxis = shaftFace.getAxis();
 
-        ms.pushPose();
-        float shaftAngle = getAngleForBe(be, be.getBlockPos(), shaftAxis);
-        shaft.rotateCentered(shaftAngle, shaftAxis)
-                .light(light)
-                .renderInto(ms, buffer.getBuffer(RenderType.solid()));
-        ms.popPose();
-    }
-
-    protected Direction.Axis getRotationAxisOf(CombustionChamberBlockEntity be) {
-        return be.getBlockState().getValue(CombustionChamberBlock.FACING).getAxis();
+        ShaftUtilities.RenderKineticShaft(
+                state,
+                shaftFace,
+                true,
+                getAngleForBe(be, be.getBlockPos(), shaftAxis),
+                ms, buffer, light);
     }
 
     @Override

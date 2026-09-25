@@ -3,7 +3,7 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"4": "resourceful_refinement:block/radiator/radiator_passive",
-		"particle": "resourceful_refinement:block/radiator/radiator_passive"
+		"particle": "resourceful_refinement:block/particles/radiator_particle"
 	},
 	"elements": [
 		{

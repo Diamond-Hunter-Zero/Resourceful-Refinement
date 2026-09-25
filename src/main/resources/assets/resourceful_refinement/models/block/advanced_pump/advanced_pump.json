@@ -5,7 +5,7 @@
     "textures":  {
                      "0":  "resourceful_refinement:block/advanced_pump",
                      "1":  "resourceful_refinement:block/advanced_pump_mount",
-                     "particle":  "resourceful_refinement:block/advanced_pump"
+                     "particle":  "resourceful_refinement:block/particles/steel_particle"
                  },
     "elements":  [
                      {

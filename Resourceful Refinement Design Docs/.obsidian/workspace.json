@@ -55,30 +55,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cyclotron Forge.md",
+                "file": "Bucket Excavator.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Cyclotron Forge"
+              "title": "Bucket Excavator"
             }
           },
           {
-            "id": "df6217a487e29657",
+            "id": "737dc1d597ee5f08",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "GLARE  Lux Transceiver.md",
+                "file": "GLARE Networks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "GLARE  Lux Transceiver"
+              "title": "GLARE Networks"
+            }
+          },
+          {
+            "id": "41affd3c7048bffe",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Coating Variants.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Coating Variants"
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -137,7 +151,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 370.5
+    "width": 300
   },
   "right": {
     "id": "726b9ba427b6c15f",
@@ -233,54 +247,61 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-kanban:Create new board": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
-      "obsidian-kanban:Create new board": false
+      "bases:Create new base": false
     }
   },
-  "active": "df6217a487e29657",
+  "active": "41affd3c7048bffe",
   "lastOpenFiles": [
-    "Resource Resonator.md",
-    "Drill Pylon.md",
-    "Radiator.md",
+    "Coating.md",
+    "Fluid Processing Recipes.md",
+    "Fluid Processing Recipes.md.tmp.92580.9de6ba96a035",
+    "v0.3 Recipes & Crafting Items.md",
+    "Telemetry Terminal GUI.md",
+    "Sports Ball.md",
+    "Speedy Gel Parkour Run.mp4",
     "Remote Entanglement.md",
-    "Cyclotron Forge.md",
-    "2026-07-01_13.56.11.png",
+    "Radiator.md",
+    "PUG & Launch Pads.md",
+    "Primary Design Doc.md",
+    "Poured Cement.md",
+    "Plunger.md",
+    "Paint Fluids.md",
+    "Nether Geyser Worldgen.md",
+    "Milking Station.md",
+    "Mechanical Sieve.md",
+    "Hosegun.md",
     "GLARE Networks.md",
-    "2026-06-29_15.16.38.png",
-    "GLARE  Lux Transceiver.md",
-    "Bucket Excavator.md",
+    "Fox Plushie.md",
+    "Forge Mould.md",
+    "Fluid Refinery.md",
+    "Fluid Refill Station.md",
+    "Fluid Properties.md",
+    "ExtendedHeatCondition.md",
+    "Drill Pylon.md",
+    "Conveyor Belt.md",
+    "Combustion Chamber.md",
+    "Harmonic Cyclotron.md.tmp.92580.c0255d71a76e",
+    "Telemetry Terminal GUI.md.tmp.92580.1c8ca1959bbe",
+    "Conveyor Belt.md.tmp.92580.7a9bad3ea24d",
+    "Drill Pylon.md.tmp.92580.76e778c53c91",
+    "Remote Entanglement.md.tmp.92580.204acf06a3c1",
+    "Bucket Excavator.md.tmp.92580.52d47cf609f8",
+    "GLARE  Lux Transceiver.md.tmp.92580.1b93ff472cc0",
+    "PUG & Launch Pads.md.tmp.92580.0c7f15a34826",
     "bucket_wheel_excavator_volumes.png",
     "bucket_wheel_excavator_block_test_render.png",
-    "PUG & Launch Pads.md",
     "Launchpad Controller Receive GUI Mock-up.png",
     "Launchpad Controller Send GUI Mock-up.png",
-    "Primary Design Doc.md",
-    "Telemetry Terminal GUI.md",
-    "v0.3 Recipes & Crafting Items.md",
-    "ExtendedHeatCondition.md",
-    "Brewer's Tap.md",
-    "Fluid Refill Station.md",
-    "Coating Variants.md",
-    "Fluid Refinery.md",
-    "Paint Recipes.md",
-    "Paint Nozzle.md",
-    "Blender Blade.md",
-    "Hosegun.md",
-    "Gel Splatter.md",
-    "Plunger.md",
-    "Geyser Block.md",
-    "Fracking Source Blocks.md",
     "Fracking Pylon Master Render 1.png",
-    "Fracking Pump.md",
     "Forge Mould Render.png",
-    "Fracking Pylon Master Render.png",
-    "Untitled.base"
+    "Fracking Pylon Master Render.png"
   ]
 }

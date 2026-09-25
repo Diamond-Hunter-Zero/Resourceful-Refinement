@@ -23,7 +23,8 @@ public class ModCreativeTab {
 
     /** Internal items used only as entity projectiles — not shown in creative tabs. */
     public static boolean isHiddenCreativeItem(Item item) {
-        return item == ModItems.PAINT_BLOB.get();
+        return item == ModItems.PAINT_BLOB.get()
+                || item == ModItems.SPORTS_BALL.get();
     }
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()

@@ -1,9 +1,41 @@
-# Fluid Refinery — Implementation Plan
+---
+title: Detailed Fluid Refinery Implementation Plan
+category: Machine
+status: Implemented
+introduced: v0.1
+recipe_type: resourceful_refinement:fluid_refinery
+related:
+  - "[[Fluid Refinery]]"
+tags:
+  - machine
+  - multiblock
+  - kinetic
+  - heat
+  - fluid
+  - plan
+---
+
+This is the original end-to-end implementation plan for the [[Fluid Refinery]] multiblock — from mod
+foundation through to a working demo recipe that produces a custom fluid. It is preserved here as a
+planning and history record; the feature has since shipped. Where the plan and the current code
+disagree, the plan text is kept for intent and a `> [!note] Implementation` callout records what the
+code actually does. For the authoritative, up-to-date description of the machine, see
+[[Fluid Refinery]].
+
+> [!note] Implementation
+> **Status: Implemented.** The refinery, its proxy/kinetic-proxy blocks, the `fluid_refinery` recipe
+> type, Molten Crimsite and a full recipe set are all in the current build. The largest deltas from
+> this plan: a dedicated `RefineryKineticProxyBlock` was added for the central rotor column;
+> `MAX_HEIGHT` is `8`; tank capacity is **dynamic** (`(height − 2) × 1000` mB), not a fixed 4000 mB;
+> heat is matched **exactly** rather than "at least"; and the recipe uses a bespoke serializer
+> (`FluidRefineryRecipe.Serializer`) over `StandardProcessingRecipe`. See the per-phase callouts and
+> the [Resolved Questions](#Resolved-Questions) section.
 
 ## Project Context
 
 | Property | Value |
 |---|---|
+| **Mod version** | `0.3.2` |
 | **Mod ID** | `resourceful_refinement` |
 | **Package** | `com.resourceful_refinement` |
 | **MC Version** | 1.21.1 |
@@ -12,9 +44,9 @@
 | **Java** | 21 |
 
 > [!NOTE]
-> This plan implements the **Fluid Refinery multiblock** end-to-end — from mod foundation through to a working demo recipe that produces a custom fluid. Art assets use placeholders; the segmented BER renders coloured cubes rather than final models.
-
----
+> This plan implements the **Fluid Refinery multiblock** end-to-end — from mod foundation through to
+> a working demo recipe that produces a custom fluid. Art assets use placeholders; the segmented BER
+> renders coloured cubes rather than final models.
 
 ## Architecture Overview
 
@@ -45,7 +77,12 @@ graph TD
     end
 ```
 
----
+> [!note] Implementation
+> The shipped multiblock adds a fourth block type not shown above: `RefineryKineticProxyBlock` /
+> `RefineryKineticProxyBlockEntity` for the central rotor cells (the stress sink, per
+> [[Fluid Refinery]]). The controller BER shipped as `FluidRefineryRenderer` (with
+> `RefineryBaseModel` / `RefineryMiddleModel` / `RefineryTopModel` / `RefineryBlenderModel`), not a
+> class named `RefineryRenderer`.
 
 ## Phase 1 — Mod Foundation & Registries
 
@@ -76,8 +113,6 @@ graph TD
 - All registers initialised via a single `ModRegistries.init(IEventBus)` helper called from the main class constructor.
 - Add a `lang/en_us.json` stub with display names for every registered object.
 
----
-
 ## Phase 2 — Blender Blade Block
 
 **Goal:** A simple shaft-like block that will sit in the centre column of the refinery.
@@ -96,7 +131,11 @@ graph TD
 - Register in `ModBlocks`, `ModItems` (block item), and `ModBlockEntities`.
 - Placeholder texture: solid grey 16×16 PNG.
 
----
+> [!note] Implementation
+> Shipped well beyond the placeholder: `BlenderBladeBlock` extends Create's
+> `RotatedPillarKineticBlock` and is a full kinetic rotor with an animated BER, tangential entity
+> push and contact damage. It also ships a custom `BlenderBladeItem` + `BlenderBladeItemRenderer`.
+> See [[Blender Blade]] for the full behaviour and current tuning constants.
 
 ## Phase 3 — Refinery Access Port & Proxy Blocks
 
@@ -117,6 +156,16 @@ graph TD
 - **`onRemove()`** → if assembled, call disassemble logic.
 - Stores `structureHeight` (3–max), `structureSize` (3 for 3×3; only 3×3 in v1).
 - Exposes `IFluidHandler` on the **front face** (output only) and `IItemHandler` for fuel on **bottom-layer corner side faces**.
+
+> [!note] Implementation
+> `RefineryAccessPortBlock` shipped as a `BaseEntityBlock` with `FACING` **and** an `ASSEMBLED`
+> boolean property (used to switch the model/BER). `useWithoutItem` assembles when un-assembled and,
+> when assembled with an empty hand, clears the inventory back to the player; `useItemOn` with a fuel
+> item feeds the burner. There is no dedicated container/screen GUI — interaction is via fuel
+> insertion, the `FilteringBehaviour` slot and goggle tooltips (`IHaveGoggleInformation`). Fluid
+> input is on the top faces of the two back top corners (Tank A / Tank B); item input is on the
+> outward side faces of the two front top corners; fuel is on the outward side faces of the four
+> bottom corners; fluid **output** is the Access Port's front face.
 
 ### 3B — Refinery Proxy Block
 
@@ -139,7 +188,16 @@ graph TD
   - Bottom-layer corners, outward side faces → fuel item handler.
   - Top/bottom centre, top/bottom face → rotational input (future Create integration).
 
----
+> [!note] Implementation
+> Two proxy types shipped. `RefineryProxyBlock` / `RefineryProxyBlockEntity` (`refinery_proxy`)
+> cover the shell and store `controllerPos` plus local `(dx, dy, dz)`, forwarding capability and
+> interaction queries to the controller's `getFluidHandlerForProxy` / `getItemHandlerForProxy`. The
+> "rotational input" cells became a separate `RefineryKineticProxyBlock` /
+> `RefineryKineticProxyBlockEntity` (`refinery_kinetic_proxy`) — a `RotatedPillarKineticBlock` fixed
+> to the Y axis that carries the refinery's stress (`REFINERY_STRESS = 12` su) and whose `getSpeed()`
+> the controller polls for the crafting speed gate. The proxy also carries a `HEAT_LEVEL` blockstate
+> on the bottom corners for flame rendering. Both proxy blocks are `INVISIBLE` with a full-cube
+> collision shape. The proxy item is **not** registered — proxies are placed only during assembly.
 
 ## Phase 4 — Multiblock Validation, Assembly & Disassembly
 
@@ -212,7 +270,15 @@ sequenceDiagram
 - **Height scanning:** Start at y=1 above controller and keep going up while blocks match the middle-layer pattern. Then check if the top-layer pattern sits at that height. Accept if total height ≥ 3.
 - **Rotation:** All patterns are rotated based on the Access Port's `FACING`. Use a helper method `rotateOffset(BlockPos offset, Direction facing)` to transform local coords to world coords.
 
----
+> [!note] Implementation
+> Matches the plan closely. `RefineryStructureHelper.detectHeight()` scans **top-down** from
+> `MAX_HEIGHT` (8) down to 3 and takes the tallest valid stack. Originals are stored as two parallel
+> lists (`proxyPositions` + `originalStates`) on the controller, serialised as a `proxyData` NBT list
+> (block pos + block state), not a `Map`. Local→world transform is `toWorldPos(ctrl, facing, dx, dy,
+> dz)` using `facing.getOpposite()` for `dz` and `facing.getClockWise()` for `dx`. Inventory contents
+> are **retained** on the Access Port BE across disassembly (as recommended). The glass check accepts
+> the `minecraft:impermeable` tag plus `glass` / `tinted_glass`; blaze burners must be the empty
+> variant.
 
 ## Phase 5 — Recipe Type (`fluid_refinery`)
 
@@ -267,7 +333,21 @@ public record RefineryRecipeTypeInfo(ResourceLocation id,
     Supplier<RecipeType<?>> type) implements IRecipeTypeInfo { ... }
 ```
 
----
+> [!note] Implementation
+> `FluidRefineryRecipe` extends `StandardProcessingRecipe<FluidRefineryRecipeInput>` and overrides
+> `getMaxInputCount = 2`, `getMaxFluidInputCount = 2`, `getMaxFluidOutputCount = 1`,
+> `getMaxOutputCount = 0`, `canRequireHeat = true`, `canSpecifyDuration = true`. The
+> `heat_requirement` field is a mod [[ExtendedHeatCondition]] (five states), **not** Create's
+> two-state `HeatCondition`. The serializer is a **bespoke** `FluidRefineryRecipe.Serializer` (with
+> a nested `FluidRefineryProcessingRecipeParams` extending `ProcessingRecipeParams`), not
+> `StandardProcessingRecipe.Serializer<>`; its map codec reads `ingredients` as
+> `Either<SizedFluidIngredient, Ingredient>` and `results` as `Either<FluidStack, ProcessingOutput>`,
+> plus an optional `sized_ingredients` list for counted item ingredients. The `IRecipeTypeInfo`
+> record is `RefinementRecipeTypeInfo` (exposed as `FLUID_REFINERY_TYPE_INFO`), not
+> `RefineryRecipeTypeInfo`. A JEI category ships as `FluidRefineryRecipeCategory`. **JSON reality:**
+> a fluid result is written with the `FluidStack` codec, so it uses `"id"` + `"amount"` (not
+> `"fluid"`), and vanilla item ingredients take an implicit count of 1 — see the sample in
+> [[Fluid Refinery]] and the shipped files under `data/.../recipe/fluid_refinery/`.
 
 ## Phase 6 — Crafting Logic & Heat System
 
@@ -318,7 +398,25 @@ every tick (when assembled):
 | Item Input (2 slots) | `ItemStackHandler` | 64 per slot |
 | Fuel Input (1 slot) | `ItemStackHandler` | 64 |
 
----
+> [!note] Implementation
+> Shipped in `RefineryAccessPortBlockEntity.tick()` and matches the tick outline, with these
+> specifics:
+> - **Rotation gate:** crafting only advances when a central kinetic proxy's `|speed| ≥ (height − 2) × 32`
+>   RPM (`getSpeedRequirement()`).
+> - **Heat is matched exactly** (`heatLevel == required`), not "≥". Effective heat is the higher of
+>   fuel heat and any [[Radiator]] sensed directly below a base block.
+> - **Fuel:** burn time is read via `stack.getBurnTime(RecipeType.SMELTING)`. Standard fuel →
+>   `HEATED` and accumulates burn time capped at **10000** ticks; Create's Blaze Cake →
+>   `SUPERHEATED`. There is no ">1600 burn time" superheated path — it is Blaze-Cake-specific.
+> - **Tank capacity is dynamic:** `(height − 2) × 1000` mB per tank when assembled (1000 mB default),
+>   *not* a fixed 4000 mB.
+> - **Duration scaling:** effective duration = `processing_time / (0.75 + (height − 3) × 0.25)`, so
+>   taller refineries process faster.
+> - **Item slots:** the two input slots must hold **distinct** items (`isItemValid` rejects a
+>   duplicate of the other slot). Item ingredients are drained by count; fluid ingredients are drained
+>   from whichever input tank matches.
+> - Heat/fuel level uses the five-state [[ExtendedHeatCondition]] (`fuelHeatLevel`, effective
+>   `heatLevel`), stored as blaze-heat ints in NBT.
 
 ## Phase 7 — Molten Crimsite Fluid
 
@@ -368,7 +466,11 @@ public static final DeferredHolder<Fluid, FlowingFluid> MOLTEN_CRIMSITE_FLOWING 
 - Recolour vanilla lava still/flow textures with a crimson/red tint as placeholders (16×16 PNGs).
 - Tint colour: `0xCC3333` (dark red for Crimsite).
 
----
+> [!note] Implementation
+> Molten Crimsite shipped and is a live `fluid_refinery` ingredient (e.g. it feeds the catalysed
+> metal recipes). Fluids in the current mod register through `FluidEntry` in `ModFluids` (fluid type,
+> source, flowing, block and bucket together) rather than the split `ModFluids` / `ModFluidTypes`
+> approach sketched here. See the mod's fluids package for the shipped molten-metal group.
 
 ## Phase 8 — Example Recipe, Placeholder Textures & Testing
 
@@ -431,7 +533,14 @@ Standard single-variant blockstate + cube-all model JSONs for:
 - Uses `PoseStack` translations and `RenderSystem` or `MultiBufferSource` for solid/translucent quads.
 - This is purely a visual placeholder; final Blockbench models replace it later.
 
----
+> [!note] Implementation
+> The shipped recipe set lives under `data/resourceful_refinement/recipe/fluid_refinery/` (catalysed
+> and purified metals, alloys, paints, coolants, carborax refining, etc.). Note the shipped JSON
+> writes fluid results with the `FluidStack` codec keys `"id"` + `"amount"`, and vanilla item
+> ingredients omit `count`. The segmented BER shipped as `FluidRefineryRenderer` (a Create
+> `SafeBlockEntityRenderer`) with real `RefineryBaseModel` / `RefineryMiddleModel` /
+> `RefineryTopModel` / `RefineryBlenderModel` parts and animated fluid/heat/rotor rendering — no
+> longer the coloured-cube placeholder described here.
 
 ## File Structure Summary
 
@@ -498,7 +607,12 @@ src/main/resources/
             └── molten_crimsite.json
 ```
 
----
+> [!note] Implementation
+> The as-built tree adds `RefineryKineticProxyBlock(Entity)`, `recipe/FluidRefineryRecipeCategory`
+> and a `content/refinery/rendering/` package (`FluidRefineryRenderer`, `Refinery*Model`,
+> `RefineryLayers`, `RefineryProxyRenderer`, `RefineryKineticProxyRenderer`, `BlenderBladeRenderer`,
+> `BlenderBladeItemRenderer`) rather than a single `client/renderer/RefineryRenderer.java`. Fluids
+> are registered via `FluidEntry` in `ModFluids`.
 
 ## Implementation Order & Dependencies
 
@@ -532,16 +646,30 @@ gantt
 > [!TIP]
 > Phases 2, 5, and 7 are independent of each other and can be implemented in parallel after Phase 1 is complete. Phase 4 depends on Phase 3. Phase 6 depends on Phases 4 and 5. Phase 8 ties everything together.
 
----
+## Resolved Questions
 
-## Open Questions for Your Input
+The plan's open questions have since been resolved in code. The original questions are preserved
+below with their as-built answers.
 
-1. **3×3 only or 5×5 support now?** The design doc mentions both 3×3 and 5×5 bases. I've scoped this plan for **3×3 only** to keep initial complexity down. Should 5×5 be included in this first pass?
+1. **3×3 only or 5×5 support now?** *Original:* the design doc mentions both; the plan scoped 3×3
+   only. **Resolved:** shipped **3×3 only** — `RefineryStructureHelper` validates only a 3×3 base.
+2. **Maximum height.** *Original:* the doc says "configurable maximum height"; add a config or
+   hardcode a default. **Resolved:** hardcoded `RefineryAccessPortBlockEntity.MAX_HEIGHT = 8`
+   (height 3–8), auto-detected top-down.
+3. **GUI.** *Original:* defer or include a basic container/screen. **Resolved:** no dedicated screen
+   — interaction is fuel insertion, the `FilteringBehaviour` slot and goggle tooltips.
+4. **Create kinetic integration.** *Original:* passive block or real rotation-network connection.
+   **Resolved:** fully integrated — the central column becomes `refinery_kinetic_proxy` blocks
+   (`RotatedPillarKineticBlock`, Y axis) that connect to the network and gate crafting on RPM;
+   standalone [[Blender Blade]]s also spin and affect entities.
+5. **Fuel items for SUPERHEATED.** *Original:* only Blaze Cake, or a tag-based system. **Resolved:**
+   Create's Blaze Cake specifically triggers `SUPERHEATED`; all other fuels give `HEATED` (capped at
+   10000 ticks of stored burn time). A [[Radiator]] beneath the base can also drive the effective
+   heat level via [[ExtendedHeatCondition]].
 
-2. **Maximum height:** The doc says "configurable maximum height." Want me to add a NeoForge config file, or hardcode a reasonable default (e.g., max 7) for now?
+## Related
 
-3. **GUI:** The design doc mentions right-clicking opens a GUI. Should I include a basic container/screen in this plan, or defer the GUI to a later task? (Currently planned as chat-message feedback only.)
-
-4. **Create kinetic integration:** Should the Blender Blade actually connect to Create's rotation network in this first pass, or is it fine as a passive block that the structure validator simply checks for?
-
-5. **Fuel items for SUPERHEATED:** Should only Create's Blaze Cake trigger superheated, or do you want a tag-based system where any item in a `resourceful_refinement:superheated_fuel` tag qualifies?
+- [[Fluid Refinery]]
+- [[Blender Blade]]
+- [[Radiator]]
+- [[ExtendedHeatCondition]]

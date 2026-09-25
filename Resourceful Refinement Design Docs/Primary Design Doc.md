@@ -1,3 +1,28 @@
+---
+title: Primary Design Doc
+category: Framework
+status: Partial
+introduced: v0.1
+recipe_type: n/a
+related:
+  - "[[Codebase Overview]]"
+  - "[[Fluid Properties]]"
+  - "[[Fluid Processing Recipes]]"
+tags:
+  - overview
+  - roadmap
+  - vision
+---
+
+The top-level vision and roadmap for **Resourceful Refinement**. This doc spans shipped, in-progress, and
+purely planned content, organised by target release (v0.1 → v1). It is the authority for *intent*; for the
+current implementation map (what actually exists in code, and where), see [[Codebase Overview]]. When a
+feature here has a dedicated page in this vault, it is linked inline — open that page for full detail.
+
+> [!note] Status legend
+> Roughly: **v0.1–v0.3** content is implemented or in progress; **v0.4** and **v1** are design targets not
+> yet built. Individual feature pages carry a precise `status` field in their frontmatter.
+
 ### **Overview**
 I want to create a Minecraft NeoForge mod for 1.21.1, which is an addon for the Create Mod. This mod (under the ID "resourceful_refinement") introduces a number of new 'crafting station' blocks for Create, which will be used to craft new types of recipes and process fundamental mineral resources at a higher output rate. The mod focuses on converting ores and alloys back and forth between items and fluids, and passing them through several new blocks and multi-block structures, to create a factory-game-like progression.
 
@@ -86,7 +111,10 @@ A directional fluid tank block, which allows players to quickly refill fluid sto
 A fluid form of glue, replacing slime-balls and honey in some recipes.
 
 **Plunger**
-A thrown trident-like weapon, which can be used to right-click on fluid containing blocks to empty their fluid tanks.
+A thrown trident-like weapon, which can be used to right-click on fluid containing blocks to empty their fluid tanks. See [[Plunger]].
+
+**Coatings**
+Coatings are consumable treatments applied to tools, weapons and armour via the Forge Mould, granting passive effects while they last. A coating is stored on the item as a `coating_data` data component (type + integrity), with the integrity depleting through use until the coating wears off. Each coating type has its own colour, durability and effect (e.g. armour, haste, knockback resistance, fortune, slow-fall, conduction, gloop). See [[Coating]] and [[Coating Variants]].
 
 ### **Content (v0.3)**
 
@@ -112,6 +140,14 @@ Combustion Chambers require cooling according to their fuel.
 - Unrefined carborax requires no cooling, but produces very little stress at low speed for large amounts of fuel.
 - Catalysed carborax produces moderate stress and medium speed when 'Cooled', and half as much when running passively.
 - Overcharged carborax produces large amounts of stress at high speed when 'Chilled', and a third as much when 'Cooled'. It will not run passively.
+
+
+**Fuel Tank**
+The Fuel Tank is a placeable fluid tank dedicated to storing carborax fuels for Combustion Chambers and other fuel consumers. Unlike Create's fluid tanks, the Fuel Tank retains its stored fluid when broken and picked up — the contents are written to the item so a filled tank can be relocated without spilling. It exposes a fluid handler for piping in and out.
+
+
+**Brewer's Tap & Drinks**
+The Brewer's Tap dispenses drinks brewed from fluids and ingredients. Each drink carries a `flavour` data component describing its `FlavourType`, which determines its colour, display name and the mob effects applied when the drink is consumed. Drinks include milkshakes, hot chocolate, energy drinks, mead and spirits. Brewer's Tap recipes belong to the "*brewers_tap*" type. See [[Brewer's Tap]].
 
 
 **Milking Station**
@@ -216,7 +252,13 @@ If a PUG's destination no longer exists at the end of its travel (the controller
 
 ### **Content (v1)**
 
+> [!warning] Unwritten section
+> The v1 entries below were left as stubs in the original draft. They are placeholders for future design
+> work — the intent has not yet been specified. Do not treat them as settled design.
+
 **Manifolds**
-Distillery tanks ar
+*(Design not yet written.)* Original note fragment: "Distillery tanks ar…" — likely intended to describe a
+way to branch or combine Distillery towers / fluid outputs. To be specified.
 
 **Delivery Monoliths**
+*(Design not yet written.)* Placeholder for a planned large-scale delivery/logistics structure. To be specified.

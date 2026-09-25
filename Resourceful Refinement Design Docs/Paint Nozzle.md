@@ -1,31 +1,80 @@
-#### **Description**
-The Paint Nozzle is a directional block which connects to Create pipe networks, and allows fluids to be directly turned into gel-blobs.
+---
+title: Paint Nozzle
+category: Machine
+status: Implemented
+introduced: v0.2
+recipe_type: n/a
+related:
+  - "[[Hosegun]]"
+  - "[[Gel Splatter]]"
+  - "[[Paint Fluids]]"
+tags:
+  - gel
+  - fluid
+  - kinetic
+---
 
-**ID:** *paint_nozzle*
+The Paint Nozzle is a directional, wall/pipe-mounted block that connects to Create pipe networks and turns piped fluid directly into gel-blobs — an automated, stationary counterpart to the [[Hosegun]]. While open it drains its internal tank to fire a continuous stream of gel-blobs in the direction it faces.
 
+**ID:** `paint_nozzle`
 
-#### **Behaviour**
-Paint Nozzles can be placed in ant of the 6 facing directions, and auto-connect to pipes. They have a small internal fluid tank (500mb), capable of storing 1 fluid. The Paint Nozzle is only considered to have pipe interface on it's (local) south face.
+## Gameplay Role
 
-Paint Nozzles have two states; Open or Closed. While closed, fluid can flow into the nozzle's internal tank, but no further action occurs. If open, the nozzle drains its internal tank to create gel-blobs at the same rate as a held-down hosegun.
+The Paint Nozzle lets players wire the gel system into Create fluid logistics: pump a fluid to a nozzle, open its valve, and it sprays [[Gel Splatter]] blobs (or paint/cleanse/potion effects) hands-free. It is the fixed-emplacement version of the Hosegun.
 
-**Flow Speed**
-The Paint Nozzle also has a configurable 'flow speed' variable, which can be in one of 3 states; '*Low*', '*Medium*', or '*High*'. By default, the nozzle uses 'Medium'. The flow speed of a nozzle is a multiplication factor which is applied to the speed of gel-blobs produced by the nozzle. To change a nozzle's flow speed, the user can right-click with a Create wrench, cycling through all speeds.
+## Construction & Placement
 
-| **Speed** | **Factor** |
-| --------- | ---------- |
-| Low       | 0.45       |
-| Medium    | 0.75       |
-| High      | 1.2        |
+A single directional block that can be placed facing any of the 6 directions (it faces away from the placing player's look direction). It has a per-facing collision shape and auto-connects to pipes on its back (model-local south) face.
 
-**Gel Blobs**
-Projectiles created by the Paint Nozzle and the [[Hosegun]] are called 'Gel Blobs'. Gel blobs carry the fluid ID and FluidStack of the fluid used to instantiate them.
+- **Pipe face** = the opposite of `FACING` (the back of the nozzle body); this is the only face treated as a pipe interface.
+- **Spray direction** = `FACING`; gel-blobs are emitted from a point just in front of this face.
 
-Gel blobs have unique on-hit-behaviours according to the type of fluid they carry, and whether they impact a block surface or entity. Most gels types result in creating a Gel Splatter block when impacting a block surface.
+## Inputs & Outputs
 
+- **Internal tank:** 500 mb, holding a single fluid (`TANK_CAPACITY = 500`). Fluid flows in through the pipe face.
+- **Output:** gel-blob projectile entities fired from the spray face while the valve is open.
 
-**Drains**
-When a gel-blob impacts a Create drain (*create:drain*), instead of creating a gel-splatter, the blob attempts to fill the drain with the fluid it was carrying. If the drain already contains an incompatible fluid, the gel-blob is instead discarded without instantiating anything.
+## Operation
 
-#### **Rendering**
-Players can right-click a Paint Nozzle to toggle it between 'Open' and 'Closed' states. Doing so updates an internal NBT flag, as well as a blockstate property called "valve_open", which in turn updates the block model used for the nozzle.
+The nozzle has two states, driven by the `valve_open` blockstate property:
+
+- **Closed:** fluid may flow into the internal tank, but nothing else happens.
+- **Open:** the nozzle drains its tank to fire gel-blobs every 2 ticks (the same cadence as a held-down Hosegun), consuming the gel type's ammo cost per blob. Firing pauses if the tank drops below the cost.
+
+**Toggling the valve:** right-click with an empty hand to toggle open/closed. This flips `valve_open`, plays a trapdoor sound, and resets the spray timer. The block model updates from the blockstate.
+
+**Flow speed:** a configurable multiplier applied to the speed of the gel-blobs the nozzle produces, cycled by right-clicking with a Create Wrench. Default is Medium.
+
+| Speed | Velocity factor |
+|---|---|
+| Low | 0.2 |
+| Medium | 0.7 |
+| High | 1.15 |
+
+Blob launch velocity is `1.6 × 1.15 (global gel-blob factor) × flow-speed factor`.
+
+> [!note] Implementation
+> The velocity factors in `PaintNozzleFlowSpeed` are `LOW 0.2`, `MEDIUM 0.7`, `HIGH 1.15`. Older design text listed Low 0.45 / Medium 0.75 / High 1.2; the intent (three ascending speed tiers, Medium default) is unchanged but the current numbers differ.
+
+A Create goggle overlay (`IHaveGoggleInformation`) shows the valve state, current flow speed, and tank contents.
+
+## Recipes
+
+The nozzle produces gel-blobs; it has no processing recipe. Gel-blob impact behaviour is fluid-/gel-type-driven — see [[Gel Splatter]].
+
+## Rendering
+
+Standard block model driven by the `valve_open` blockstate property, so toggling the valve swaps the visible model. Per-facing `VoxelShape`s give it a correct mounted silhouette on each of the 6 faces.
+
+## Implementation
+
+- **Block:** `content/paint_nozzle/PaintNozzleBlock` (extends `DirectionalBlock`; `FACING` + `valve_open` properties; wrench cycles speed, empty-hand toggles valve; server ticker fires blobs).
+- **Block entity:** `PaintNozzleBlockEntity` (500 mb `FluidTank`, spray timer, flow speed; syncs on contents/valve/speed change; goggle tooltip). Fires `GelBlobEntity` via `HosegunItem.GEL_BLOB_VELOCITY_FACTOR`.
+- **Flow speed:** `PaintNozzleFlowSpeed` enum (`LOW`/`MEDIUM`/`HIGH`, `MEDIUM` default, `next()` cycling, ordinal persistence).
+- Shares the `GelBlobEntity` projectile and gel-type system with the [[Hosegun]].
+
+## Related
+
+- [[Hosegun]]
+- [[Gel Splatter]]
+- [[Paint Fluids]]

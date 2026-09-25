@@ -21,6 +21,7 @@ public class GelPropertiesManager {
     public static final int POTION_AMMO_COST = 125;
     public static final int FROZEN_AMMO_COST = 20;
     public static final int CONCRETE_AMMO_COST = 125;
+    public static final int CEMENT_AMMO_COST = 20;
 
 
     static {
@@ -95,6 +96,8 @@ public class GelPropertiesManager {
             return FROZEN_AMMO_COST;
         else if (getGelType(fluid) == GelType.CONCRETE)
             return CONCRETE_AMMO_COST;
+        else if (getGelType(fluid) == GelType.CEMENT)
+            return CEMENT_AMMO_COST;
         return GEL_AMMO_COST;
     }
 

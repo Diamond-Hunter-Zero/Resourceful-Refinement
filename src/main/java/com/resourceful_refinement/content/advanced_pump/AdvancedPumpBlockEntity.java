@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.advanced_pump;
 
+import com.resourceful_refinement.config.ServerConfig;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.fluids.FluidPropagator;
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
@@ -118,7 +119,7 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
 
             List<Pair<Integer, BlockPos>> frontier = new ArrayList<>();
             Set<BlockPos> visited = new HashSet<>();
-            int maxDistance = FluidPropagator.getPumpRange() * 2;
+            int maxDistance = (int)(FluidPropagator.getPumpRange() * ServerConfig.ADVANCED_PUMP_STRENGTH.getAsDouble());
             frontier.add(Pair.of(1, start.getConnectedPos()));
 
             while (!frontier.isEmpty()) {
@@ -256,7 +257,7 @@ public class AdvancedPumpBlockEntity extends PumpBlockEntity implements IHaveGog
 
         tooltip.add(Component.literal("     Advanced Pump:"));
         tooltip.add(Component.literal("\u00A79Throughput: \u00A77" + measuredThroughputMbPerTick + " mB/t \u00A78(" + millibucketsPerSecond + " mB/s)"));
-        tooltip.add(Component.literal("\u00A77Range: \u00A78" + (FluidPropagator.getPumpRange() * 2) + " blocks"));
+        tooltip.add(Component.literal("\u00A77Range: \u00A78" + ((int)(FluidPropagator.getPumpRange() * ServerConfig.ADVANCED_PUMP_STRENGTH.getAsDouble())) + " blocks"));
         tooltip.add(Component.literal("\u00A77Direction: \u00A78" + (redstonePowered ? "Reversed" : "Normal")));
         return true;
     }

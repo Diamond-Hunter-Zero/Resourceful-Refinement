@@ -343,7 +343,7 @@ public class GelBlobEntity extends ThrowableItemProjectile {
 
         if (type == GelType.CONCRETE)
         {
-            // Concrete places light grey concrete
+            // Concrete places light grey concrete in 3x3 area
             BlockPos targetPos;
             for (int x = -1; x <= 1; x++) {
                 for (int z = -1; z <= 1; z++) {
@@ -353,6 +353,16 @@ public class GelBlobEntity extends ThrowableItemProjectile {
                         this.level().setBlock(targetPos, Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState(), 3);
                     }
                 }
+            }
+            return;
+        }
+
+        if (type == GelType.CEMENT)
+        {
+            // Concrete places light grey concrete
+            BlockState placeState = this.level().getBlockState(placePos);
+            if (placeState.canBeReplaced()) {
+                this.level().setBlock(placePos, Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState(), 3);
             }
             return;
         }

@@ -230,14 +230,4 @@ public class FuelTankBlock extends Block implements EntityBlock {
         }
         return drops;
     }
-
-    @Override
-    public ItemStack getCloneItemStack(BlockState state, net.minecraft.world.phys.HitResult target, net.minecraft.world.level.LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
-        if (level.getBlockEntity(pos) instanceof FuelTankBlockEntity fuelTank && !fuelTank.tank.isEmpty()) {
-            fuelTank.saveToItem(stack, level.registryAccess());
-            stack.set(com.resourceful_refinement.registry.ModDataComponents.FUEL_TANK_FLUID.get(), net.neoforged.neoforge.fluids.SimpleFluidContent.copyOf(fuelTank.tank.getFluid()));
-        }
-        return stack;
-    }
 }

@@ -38,8 +38,8 @@ This is the reference table of every [[Coating]] variant defined by the `Coating
 ### Liquid Luck
 - **Colour:** `#E8BD31`
 - **Durability:** 96
-- **Effect:** Affects the tool as if it had Fortune 2 (or bumps tools with Fortune 2 or higher up one level).
-- **Status:** Planned effect. The variant exists and can be applied, but no Fortune handler exists in `ModToolEvents` yet, so the effect is not currently wired up.
+- **Effect:** Makes the tool/weapon behave as if it carries a higher **Fortune** (block drops) and **Looting** (mob drops) enchantment — at least level II, and +1 if the item already has level II or higher (`effective = existing >= 2 ? existing + 1 : 2`). The enchantment is **not** written onto the item; only the level that loot generation reads is raised, so it never shows on the tooltip.
+- **Status:** Implemented (`ModToolEvents.onGetEnchantmentLevel`, via NeoForge's `GetEnchantmentLevelEvent`, which both the block-fortune and mob-looting loot paths query in 1.21.1).
 
 ### Uplift
 - **Colour:** `#E065AF`
@@ -81,7 +81,9 @@ These entries exist in `CoatingType.java` but are currently commented out and ca
 > - **Uplift** colour is **`#E065AF`** in code (older notes said `#db7bae`).
 > - **Conduction** colour is **`#EB9B2D`** in code (older notes said `#cc7f27`).
 > - **Gloopy** is a variant present in code but absent from earlier notes.
-> - **Liquid Luck**'s effect is described but has no handler in `ModToolEvents`, so it is currently inert.
+> - **Liquid Luck** is now wired up: `ModToolEvents.onGetEnchantmentLevel` boosts Fortune and Looting on
+>   coated items through `GetEnchantmentLevelEvent`. It affects loot rolls only and does not add a real
+>   enchantment component, so nothing appears on the tooltip.
 > - **Luminite** and **Obsidian** are commented out and therefore disabled.
 
 ## Related

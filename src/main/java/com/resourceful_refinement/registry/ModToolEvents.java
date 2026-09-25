@@ -1,12 +1,14 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.coating.CoatingType;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -19,6 +21,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,6 +32,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.neoforged.neoforge.event.enchanting.GetEnchantmentLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
@@ -53,6 +59,45 @@ public class ModToolEvents {
         MobEffectInstance flavourEffect = flavour.createEffect();
         if (flavourEffect != null)
             entity.addEffect(flavourEffect);
+    }
+
+    /**
+     * Liquid Luck: makes a coated tool/weapon behave as if it carries a higher Fortune (block drops)
+     * and Looting (mob drops) enchantment, without ever writing the enchantment onto the item.
+     *
+     * <p>In 1.21.1 both the block fortune path ({@code minecraft:apply_bonus}) and the reworked mob
+     * looting path ({@code minecraft:enchanted_count_increase}) read the tool's level through
+     * {@code EnchantmentHelper} → {@code ItemStack#getEnchantmentLevel}, which fires this event — so a
+     * single handler covers both. The boosted level is only visible to loot rolls (and other level
+     * queries); it never appears on the tooltip.</p>
+     *
+     * <p>Effect rule: raise the effective level to at least II, and by +1 if the item already has II or
+     * higher ({@code effective = existing >= 2 ? existing + 1 : 2}).</p>
+     */
+    @SubscribeEvent
+    public static void onGetEnchantmentLevel(GetEnchantmentLevelEvent event) {
+        ItemStack stack = event.getStack();
+
+        // Hot path: this fires for every per-enchant query, so bail as cheaply as possible.
+        if (!stack.has(ModDataComponents.COATING_DATA.get())) return;
+        CoatingData data = stack.get(ModDataComponents.COATING_DATA.get());
+        if (data == null || data.type() != CoatingType.LIQUIDLUCK) return;
+
+        ItemEnchantments.Mutable enchantments = event.getEnchantments();
+
+        // isTargetting(...) is also true for the "get all" query (null target), so both branches run then.
+        if (event.isTargetting(Enchantments.FORTUNE)) {
+            event.getHolder(Enchantments.FORTUNE).ifPresent(holder -> applyLiquidLuck(enchantments, holder));
+        }
+        if (event.isTargetting(Enchantments.LOOTING)) {
+            event.getHolder(Enchantments.LOOTING).ifPresent(holder -> applyLiquidLuck(enchantments, holder));
+        }
+    }
+
+    private static void applyLiquidLuck(ItemEnchantments.Mutable enchantments, Holder<Enchantment> enchantment) {
+        int existing = enchantments.getLevel(enchantment);
+        int effective = existing >= ServerConfig.LIQUID_LUCK_BASE.getAsInt() ? existing + ServerConfig.LIQUID_LUCK_INCREMENT_RATE.getAsInt() : ServerConfig.LIQUID_LUCK_BASE.getAsInt();
+        enchantments.set(enchantment, effective);
     }
 
     @SubscribeEvent

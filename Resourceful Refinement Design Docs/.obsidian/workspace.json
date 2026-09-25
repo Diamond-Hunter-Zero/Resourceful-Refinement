@@ -62,9 +62,23 @@
               "icon": "lucide-file",
               "title": "Cyclotron Forge"
             }
+          },
+          {
+            "id": "df6217a487e29657",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "GLARE  Lux Transceiver.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "GLARE  Lux Transceiver"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -84,7 +98,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -228,22 +244,24 @@
       "obsidian-kanban:Create new board": false
     }
   },
-  "active": "0341f91acf5af401",
+  "active": "df6217a487e29657",
   "lastOpenFiles": [
+    "Resource Resonator.md",
+    "Drill Pylon.md",
+    "Radiator.md",
+    "Remote Entanglement.md",
+    "Cyclotron Forge.md",
     "2026-07-01_13.56.11.png",
     "GLARE Networks.md",
-    "Drill Pylon.md",
     "2026-06-29_15.16.38.png",
     "GLARE  Lux Transceiver.md",
     "Bucket Excavator.md",
     "bucket_wheel_excavator_volumes.png",
     "bucket_wheel_excavator_block_test_render.png",
-    "Radiator.md",
     "PUG & Launch Pads.md",
     "Launchpad Controller Receive GUI Mock-up.png",
     "Launchpad Controller Send GUI Mock-up.png",
     "Primary Design Doc.md",
-    "Remote Entanglement.md",
     "Telemetry Terminal GUI.md",
     "v0.3 Recipes & Crafting Items.md",
     "ExtendedHeatCondition.md",
@@ -262,7 +280,6 @@
     "Fracking Pylon Master Render 1.png",
     "Fracking Pump.md",
     "Forge Mould Render.png",
-    "Fluid Properties.md",
     "Fracking Pylon Master Render.png",
     "Untitled.base"
   ]

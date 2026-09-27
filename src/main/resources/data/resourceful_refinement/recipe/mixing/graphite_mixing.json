@@ -6,7 +6,7 @@
     },
     {
       "type": "neoforge:single",
-      "amount": 100,
+      "amount": 75,
       "fluid": "resourceful_refinement:catalysed_sparkpowder"
     }
   ],

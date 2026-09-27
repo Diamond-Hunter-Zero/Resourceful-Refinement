@@ -123,7 +123,7 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
             if (!isEligiblePlayer(player)) {
                 lastFailure = "The selected player left before entanglement completed";
             } else if (tank.getFluidAmount() < CHORUS_COST) {
-                lastFailure = "Not enough Liquid Chorus (150 mB required)";
+                lastFailure = "Not enough Liquid Chorus (" + CHORUS_COST + "mb required)";
             } else {
                 succeeded = attemptTeleport(server, player);
             }

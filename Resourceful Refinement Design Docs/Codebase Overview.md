@@ -281,7 +281,6 @@ Still design-only (docs exist, no code): [[Conveyor Belt]], [[Conveyor Rotator]]
 Partially implemented / known gaps:
 - **Worldgen for the v0.4 resource nodes** — [[Mineral Deposit]], [[Crystal Fissure Bud]] and
   [[Resonance Crystal]] have no natural generation; no Choral Clusters biome or Chorus Crystal exists yet.
-- **[[GLARE Kinetic Receiver]]** allocates Lux but does not yet output Create Stress/RPM.
 - **[[Resonance Crystal]]** has no crafting recipe (artificial variant) or worldgen — acquisition unimplemented.
 - **[[Mineral Deposit]]** is a plain block, not yet the stored-resource-type block entity the design describes.
 

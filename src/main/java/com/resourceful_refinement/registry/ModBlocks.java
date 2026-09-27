@@ -21,7 +21,7 @@ import com.resourceful_refinement.content.fuel_tank.FuelTankBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.glare.GlareEmitterDishBlock;
 import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlock;
-import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.GlareKineticReceiverBlock;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
@@ -273,12 +273,12 @@ public class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
 
-    public static final DeferredBlock<GlareNodeBlock> GLARE_KINETIC_RECEIVER = BLOCKS.register("glare_kinetic_receiver",
-            () -> new GlareNodeBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<GlareKineticReceiverBlock> GLARE_KINETIC_RECEIVER = BLOCKS.register("glare_kinetic_receiver",
+            () -> new GlareKineticReceiverBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()
-                    .noOcclusion(), GlareKineticReceiverBlockEntity::new));
+                    .noOcclusion()));
 
     public static final DeferredBlock<GlareChromaticTransceiverBlock> GLARE_CHROMATIC_TRANSCEIVER = BLOCKS.register("glare_chromatic_transceiver",
             () -> new GlareChromaticTransceiverBlock(BlockBehaviour.Properties.of()

@@ -1,5 +1,7 @@
 {
   "variants": {
+    "facing=down": { "model": "resourceful_refinement:block/glare_kinetic_receiver", "x": 90 },
+    "facing=up": { "model": "resourceful_refinement:block/glare_kinetic_receiver", "x": 270 },
     "facing=north": { "model": "resourceful_refinement:block/glare_kinetic_receiver" },
     "facing=east": { "model": "resourceful_refinement:block/glare_kinetic_receiver", "y": 90 },
     "facing=south": { "model": "resourceful_refinement:block/glare_kinetic_receiver", "y": 180 },

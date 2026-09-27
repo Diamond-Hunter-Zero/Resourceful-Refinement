@@ -34,6 +34,10 @@ public class ServerConfig {
 
     public static final ModConfigSpec.DoubleValue ADVANCED_PUMP_STRENGTH;
 
+    public static final ModConfigSpec.IntValue KINETIC_RECEIVER_RPM;
+    public static final ModConfigSpec.IntValue KINETIC_RECEIVER_CAPACITY;
+    public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
+
 
     static {
         /*CONFIG_BUILDER.push("Config Section 1");
@@ -73,6 +77,8 @@ public class ServerConfig {
 
         CONFIG_BUILDER.pop();
 
+
+        // GLARE Parameters
         CONFIG_BUILDER.push("GLARE Networks");
         GLARE_DEBUG_LOGGING = CONFIG_BUILDER
                 .comment("Logs GLARE topology, reconciliation, and line-of-sight mutations for diagnostics")
@@ -91,6 +97,8 @@ public class ServerConfig {
                 .defineInRange("lux_history_samples", 16, 1, 256);
         CONFIG_BUILDER.pop();
 
+
+        // PUG Parameters
         CONFIG_BUILDER.push("PUG Logistics");
         PUG_TANK_CAPACITY_MB = CONFIG_BUILDER
                 .comment("Launchpad fuel tank capacity in millibuckets")
@@ -121,6 +129,7 @@ public class ServerConfig {
                 .defineInRange("cross_dimension_travel_ticks", 2_400, 0, Integer.MAX_VALUE);
         CONFIG_BUILDER.pop();
 
+
         // Coating Parameters
         CONFIG_BUILDER.push("Coating Parameters");
 
@@ -134,12 +143,25 @@ public class ServerConfig {
 
         CONFIG_BUILDER.pop();
 
+
         // Kinetic Parameters
         CONFIG_BUILDER.push("Kinetics");
 
         ADVANCED_PUMP_STRENGTH = CONFIG_BUILDER
                 .comment("The pumping-distance multiplier for the Advanced Pump (Value between 0 and 1000)")
                 .defineInRange("advanced_pump_strength", 2f, 0f, 1000f);
+
+        KINETIC_RECEIVER_RPM = CONFIG_BUILDER
+                .comment("The rotation speed (RPM) a GLARE Kinetic Receiver outputs on its back face while powered (Value between 0 and 4096)")
+                .defineInRange("kinetic_receiver_rpm", 32, 0, 4096);
+
+        KINETIC_RECEIVER_CAPACITY = CONFIG_BUILDER
+                .comment("The stress capacity multiplier a GLARE Kinetic Receiver provides while powered, (Value between 1 and 1000000)")
+                .defineInRange("kinetic_receiver_stress", 4, 1, 1000000);
+
+        KINETIC_RECEIVER_LUX = CONFIG_BUILDER
+                .comment("The amount of Lux a GLARE Kinetic Receiver allocates from its network to run (Value between 0 and 1000000)")
+                .defineInRange("kinetic_receiver_lux", 1, 0, 1000000);
 
         CONFIG_BUILDER.pop();
 

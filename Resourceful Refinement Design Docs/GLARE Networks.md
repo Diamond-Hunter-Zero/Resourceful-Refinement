@@ -183,10 +183,7 @@ Relays act as universal connection nodes in GLARE networks. They accept up to 8 
 
 ### GLARE Kinetic Receiver
 
-Kinetic Receivers are intended to consume 1 Lux and produce 256 units of Stress at 128 RPM when powered by a GLARE network. They target only 1 other connection point. See [[GLARE Kinetic Receiver]].
-
-> [!note] Implementation
-> **Partial.** `GlareKineticReceiverBlockEntity` allocates `getAllocatedLux() = 1` and tracks its operation status, but it does **not** currently produce any Stress or RPM — it does not extend a Create kinetic base and generates no rotation. As of v0.4 it is a functional 1-Lux no-op receiver; the 256-stress-at-128-RPM behaviour is unimplemented design intent.
+Kinetic Receivers consume Lux and generate Create rotation, outputting a shaft on their local-back face when powered by a GLARE network. They target only 1 other connection point. Output RPM, stress capacity and Lux draw are config-driven (defaults: 32 RPM, 128 su, 1 Lux). See [[GLARE Kinetic Receiver]].
 
 ### GLARE Chromatic Transceiver
 

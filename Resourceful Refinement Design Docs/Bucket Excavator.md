@@ -1,11 +1,13 @@
 ---
 title: Bucket Excavator
 category: Machine
-status: Planned
+status: Implemented
 introduced: v0.4
-recipe_type: n/a
+recipe_type: resourceful_refinement:excavation
 related:
+  - "[[Mineral Deposit]]"
   - "[[Drill Pylon]]"
+  - "[[Geyser Block]]"
   - "[[Primary Design Doc]]"
 tags:
   - machine
@@ -13,72 +15,99 @@ tags:
   - worldgen
 ---
 
-The Bucket Excavator is a block entity consisting of a cuboid mount and an extended bucket-wheel, which passively generates resources when placed over mineral deposits, or slowly mines blocks when switched to 'destruction' mode.
+The Bucket Excavator is a single kinetic block whose protruding bucket-wheel passively generates resources when placed over mineral deposits, or slowly mines blocks when switched to 'destruction' mode.
 
 **ID:** *bucket_excavator*
 
 ## Gameplay Role
 
-The Bucket Excavator is the surface-extraction machine of the v0.4 tier: parked over [[Mineral Deposits]] and driven by kinetic input, it passively produces simple resources (stone variants, dyes, and other recipe outputs), or acts as a wide area-miner in destruction mode. It pairs with the [[Drill Pylon]], which handles deeper crystal extraction.
+The Bucket Excavator is the surface-extraction machine of the v0.4 tier: parked over [[Mineral Deposit|Mineral Deposits]] and driven by kinetic input, it passively produces simple resources (stone variants, dyes, and other recipe outputs), or acts as a wide area-miner in destruction mode. It pairs with the [[Drill Pylon]], which handles deeper crystal extraction.
 
 ## Construction & Placement
 
-The Bucket Excavator is a single block entity, which can be horizontally rotated.
+The Bucket Excavator is a single block entity, which can be horizontally rotated (`FACING` = `HORIZONTAL_FACING`, set from the player's placement direction).
 
-Extending beyond the front face of the block (or "mount") is a large polyhedral bucket-wheel, which measures 3 blocks tall, 3 blocks deep, and 1 block wide. The wheel is positioned in front of the mount, its axis of rotation parallel to the mount's shaft axis and at the same y-position, such that the entire bounding volume of the bucket excavator appears to be 3x4x1.
+Extending beyond the front face of the block (or "mount") is a large polyhedral bucket-wheel, which measures 3 blocks tall, 3 blocks deep, and 1 block wide. The wheel is positioned in front of the mount, its axis of rotation parallel to the mount's shaft axis and at the same y-position, such that the entire visible bounding volume of the bucket excavator appears to be 3x4x1.
 
 ![[bucket_wheel_excavator_block_test_render.png|388]]
 
-Bucket Excavators occupy a 5x4x1 'excavation volume' encapsulating their wheel. If the excavation-volumes of two or more Bucket Excavators overlap, they won't function or produce resources. Bucket Excavators can be tiled laterally.
+Bucket Excavators occupy an 'excavation region' encapsulating their wheel. If the excavation-regions of two or more Bucket Excavators overlap, they won't function or produce resources. Bucket Excavators can be tiled laterally.
 
 ![[bucket_wheel_excavator_volumes.png|498]]
 
+> [!note] Implementation
+> The excavation region is **5 tall × 5 deep × 1 wide** (`EXCAVATION_REGION_HEIGHT = 5`, `EXCAVATION_REGION_DEPTH = 5`, `EXCAVATION_REGION_WIDTH = 1`), projected out from the mount's front face by `RegionExtents.GetFaceExtendedRegion`. The older "5x4x1 excavation volume" figure in the design text pre-dates this; treat the code constants as authoritative.
+
 ## Inputs & Outputs
 
-The mount's back face exposes an item-output interface, and its left/right side faces act as a shaft transferring kinetic input.
+The mount's back face exposes an item-output interface, and its left/right side faces act as a shaft transferring kinetic input. The rotation axis is the horizontal axis perpendicular to `FACING` (`getRotationAxis` returns `FACING.getClockWise().getAxis()`), so shafts connect on the two side faces.
 
-The Bucket Excavator mount has an internal inventory of up to 4 slots. Outputs from the excavation wheel always try to be placed inside its inventory, not dropped on the ground. If a processing cycle cannot fit all outputs into this inventory, they are dropped as item entities below the wheel.
+The Bucket Excavator mount has an internal inventory of up to 4 slots (`outputInv`, an `ItemStackHandler` of `INVENTORY_SLOT_COUNT = 4`). Outputs from the excavation wheel are inserted into this inventory, not dropped on the ground. Intended behaviour is that any outputs which cannot fit are dropped as item entities below the wheel.
+
+> [!note] Implementation
+> Extraction inserts results with `ItemHandlerHelper.insertItemStacked(outputInv, …)` and **discards** any overflow — the "drop excess below the wheel" fallback is not yet wired up.
 
 ## Operation
 
-When provided with kinetic input, the bucket-wheel rotates, indefinitely producing resources, or mining blocks within its 5x4 volume.
+When provided with kinetic input, the bucket-wheel rotates, indefinitely producing resources, or mining blocks within its excavation region.
 
-The Bucket Excavator has two modes; "Excavation" and "Destruction". The user can toggle between them by using a Create ScrollOptionBehaviour on the top face of the mount block entity.
+The Bucket Excavator has two modes; **Excavation** (`EXTRACTION`) and **Destruction** (`DESTRUCTION`). The user toggles between them with a Create `ScrollOptionBehaviour` on the top face of the mount (value-box slot at the top-centre of the block).
 
-The duration of a processing cycle is fixed, regardless of input speed. While provided with kinetic input (above a minimum speed threshold), the bucket excavator repeatedly processes production cycles.
+The excavator only ticks its work loop while its region is clear of other excavators (`isExcavatorClear`) **and** its absolute speed is at or above `MIN_SPEED_THRESHOLD = 128` RPM. The duration of a processing cycle is fixed, regardless of input speed. While powered above the threshold, the excavator repeatedly processes cycles and emits working particles (surface dust over each non-air block, plus an arc of block particles thrown by the wheel).
 
-**If in 'Excavation' Mode:** At the end of each cycle, it checks all blocks overlapping with its excavation-volume, and produces resources according to any matching recipes for each block.
+**If in 'Excavation' Mode:** the cycle runs for `PROCESSING_CYCLE_DURATION = 300` ticks. At the end of each cycle, it checks every block overlapping its excavation region and, for each non-air block, looks up a matching `excavation` recipe and produces its rolled results into the output inventory.
 
-**If in 'Destruction' Mode:** Throughout the processing cycle, the wheel slowly incrementally breaks all blocks in its excavation volume, like a Create Drill. It will not break any blocks that a Create Drill would not break, or any Mineral Deposits or Geysers.
+**If in 'Destruction' Mode:** the cycle runs for `DESTRUCTION_CYCLE_DURATION = 60` ticks. Throughout the cycle, the wheel incrementally shows block-breaking progress across every block in the region, then destroys them when the cycle completes (`level.destroyBlock(pos, true)`, dropping their loot). It skips air, blocks in the `resourceful_refinement:excavator_indestructible` tag, and unbreakable blocks (`getDestroySpeed < 0`).
 
-The excavator block entity also responds to redstone input from any of its faces; when powered, the wheel freezes, and pauses processing.
-
-### Mineral Deposits
-
-To produce resources, a bucket excavator's excavation-volume must overlap with a Mineral Deposit block (*mineral_deposit_node*).
-
-A Mineral Deposit is a block entity which stores a reference to a block type. It uses the texture asset of this block for its own texture resource. Players in Creative mode can set the source block stored inside a Mineral Deposit by right-clicking with any block. By default, it stores stone. (This entire behaviour is the block equivalent of the [[Geyser Block]] and its functionality with fluids.)
-
-Mineral Deposits can be mined by pickaxes, but take a while, and won't drop anything except their source block.
+> [!note] Implementation
+> The design specifies that redstone input to any face freezes the wheel and pauses processing. The current `BucketExcavatorBlockEntity` has **no redstone gate** — only the speed threshold and overlap-clear flag gate operation. Destruction mode also does not specially exempt Mineral Deposits or Geysers beyond the indestructible tag / unbreakable checks, so protecting them relies on tagging.
 
 ## Recipes
 
-The bucket excavator defines a special recipe-type (design name *bucketExcavationRecipe*), which allows the mod to define a complex extraction relationship between Mineral Deposits/Blocks and Excavators. A bucketExcavationRecipe consists of:
-- An input block ID (the block which must be inside the excavation volume for this recipe to match)
-- An **optional** source block ID as an item ID or ItemTag (the item a Mineral Deposit must store for this recipe to match. If not provided, only the input block is used for matching)
-- A SizedIngredient output item produced (the output(s) produced by a production cycle)
+The Bucket Excavator defines the `resourceful_refinement:excavation` recipe type (`ExcavationRecipe`, extending Create's `StandardProcessingRecipe`). It expresses a extraction relationship between blocks in the region and item outputs. A recipe consists of:
+
+- `mined_block` — the block that must be inside the excavation region for this recipe to match. Optional; defaults to `resourceful_refinement:mineral_deposit`.
+- `mineral_deposit_type` — **optional** block id. When present, the Mineral Deposit's stored block must equal this for the recipe to match; when absent, only `mined_block` is used.
+- `results` — the item output(s) (up to 4) produced by a cycle, each with an optional `chance`.
+- `processing_time` and `ingredients` — inherited from `ProcessingRecipeParams`.
+
+```json
+{
+  "type": "resourceful_refinement:excavation",
+  "mined_block": "minecraft:stone",
+  "ingredients": [],
+  "results": [
+    { "id": "minecraft:cobblestone", "amount": 2 },
+    { "id": "minecraft:flint", "amount": 1 }
+  ]
+}
+```
+
+> [!note] Implementation
+> - The old design name *bucketExcavationRecipe* is, in code, the registered type **`resourceful_refinement:excavation`**.
+> - The design's source-block id *mineral_deposit_node* is actually **`resourceful_refinement:mineral_deposit`** (the recipe's default `mined_block`).
+> - `ExcavationRecipe.matches` supports the optional `mineral_deposit_type` clause, but at runtime the block entity builds its recipe input as `new ExcavationRecipeInput(targetState.getBlock(), null)` — the mineral type is **never fed in**, so any recipe that specifies `mineral_deposit_type` cannot currently match. This aligns with [[Mineral Deposit]] presently being a plain block with no stored resource type.
 
 ## Rendering
 
-The Bucket Excavator uses a large protruding block entity renderer for the bucket-wheel, which extends beyond the mount's own block (the visible bounding volume is 3x4x1). The wheel rotates with kinetic input.
+The Bucket Excavator uses a protruding block entity renderer (`BucketExcavatorRenderer` + `BucketExcavatorModel`) for the bucket-wheel, which extends beyond the mount's own block (visible bounds ~3x4x1). The base block's own render shape is `INVISIBLE`; the wheel rotates with kinetic input.
 
 ## Implementation
 
-Not yet implemented — design target for v0.4.
+- **Package:** `content/bucket_excavator/`
+- **Block:** `BucketExcavatorBlock` (extends `KineticBlock`, implements `IBE<BucketExcavatorBlockEntity>`), id `bucket_excavator`.
+- **Block entity:** `BucketExcavatorBlockEntity` (extends `KineticBlockEntity`).
+- **Recipe:** `recipe/ExcavationRecipe` + `recipe/ExcavationRecipeInput`; type/serializer registered in `ModRecipeTypes` as `excavation`.
+- **Overlap tracking:** `ExcavatorRegionSavedData` (a per-level `SavedData` keyed by `DimensionalNodePos`) plus `SpatialExcavatorIndex`. Regions are (re)registered on `setPlacedBy`, `updateAfterWrenched`, and `onLoad`, and removed on `onRemove`; overlapping excavators have their `isExcavatorClear` flag cleared.
+- **Rendering:** `BucketExcavatorRenderer`, `BucketExcavatorModel`.
+- **Tag:** `resourceful_refinement:excavator_indestructible` (blocks destruction mode won't break).
+- **Stress:** `ModStressValues.BUCKET_EXCAVATOR_STRESS = 16` (SU per RPM).
+- **Tests:** `ExcavatorGameTests`.
+- Constants: `MIN_SPEED_THRESHOLD = 128`, `PROCESSING_CYCLE_DURATION = 300`, `DESTRUCTION_CYCLE_DURATION = 60`, `INVENTORY_SLOT_COUNT = 4`.
 
 ## Related
 
+- [[Mineral Deposit]]
 - [[Drill Pylon]]
-- [[Mineral Deposits]]
 - [[Geyser Block]]
 - [[Primary Design Doc]]

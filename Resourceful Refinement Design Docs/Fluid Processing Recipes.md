@@ -13,6 +13,7 @@ related:
   - "[[Distillery]]"
   - "[[Fracking Pump]]"
   - "[[Paint Recipes]]"
+  - "[[Cyclotron Forge]]"
 tags:
   - recipe
   - fluid
@@ -45,6 +46,13 @@ truth for amounts, heat and timing.
 | Tool coating                                | `resourceful_refinement:coating`                | [[Forge Mould]] + Casting Depot     | 7            |
 | Drink tapping                               | `resourceful_refinement:brewers_tap`            | [[Brewer's Tap]]                    | 6            |
 | Mob milking (fluid)                         | `resourceful_refinement:milking_station`        | [[Milking Station]]                 | 3            |
+| Kinetic + Lux forging                       | `resourceful_refinement:cyclotron_forge`        | [[Cyclotron Forge]]                 | 1            |
+
+There are **11 registered recipe types** in total (`ModRecipeTypes`): the eight `resourceful_refinement`
+types tabulated above (the Melting row is Create's own `create:mixing`, not a mod type) plus
+`cyclotron_forge`, and two v0.4 item-output extraction types — `excavation` and `drill_pylon` — that yield **items, not fluids**,
+so they are not tabulated on this fluid page. See [[Bucket Excavator]] for `excavation` (currently
+`stone_excavation`) and [[Drill Pylon]] for `drill_pylon` (currently `raw_iron_fissure`).
 
 Recipe format samples for each type are in the respective feature pages; a Fluid Refinery example:
 
@@ -335,8 +343,24 @@ the [[Milking Station]] page.) Recipes under `recipe/milking_station/`.
 | `goat_milk` | goat | 1800 | 250mb milk |
 | `player_milk` | player | 400 | 25mb milk |
 
+## Cyclotron Forge — `cyclotron_forge`
+
+Kinetic + Lux multiblock forging in the [[Cyclotron Forge]]. Recipes take up to 2 item and 2 fluid
+inputs and produce a mix of item and fluid outputs, and require an **exact** coil length, a minimum
+RPM and (usually) a per-tick Lux curve. Recipes under `recipe/cyclotron_forge/`. See [[Cyclotron Forge]]
+for the full JSON format, coil-length rules and Lux behaviour.
+
+| Recipe | Coil length | Min RPM | Time | Item input | Fluid input | Item output | Fluid output |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `charcoal_graphite_coolant` | 3 | 64 | 200 | 2x charcoal | 250mb water | graphite | 250mb coolant |
+
+> [!note] Lux curve
+> `charcoal_graphite_coolant` carries a `lux_curve` of `[4, 6, 8, 6, 4, 2]`, sampled per tick and
+> normalised over the 200-tick cycle. Lux allocation is not shown as a column here — see [[GLARE Networks]].
+
 ## Related
 
 - [[Fluid Refinery]] · [[Fluid Properties]] · [[Forge Mould]] · [[Casting Depot]]
 - [[Mechanical Sieve]] · [[Distillery]] · [[Fracking Pump]] · [[Paint Recipes]]
+- [[Cyclotron Forge]] · [[Bucket Excavator]] · [[Drill Pylon]]
 - [[Codebase Overview]] for the recipe-type registry (`ModRecipeTypes`) and datapack layout.

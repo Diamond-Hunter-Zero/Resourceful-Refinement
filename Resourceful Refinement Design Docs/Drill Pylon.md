@@ -1,12 +1,15 @@
 ---
 title: Drill Pylon
 category: Machine
-status: Planned
+status: Implemented
 introduced: v0.4
-recipe_type: n/a
+recipe_type: resourceful_refinement:drill_pylon
 related:
-  - "[[Bucket Excavator]]"
+  - "[[Crystal Fissure Bud]]"
   - "[[GLARE Networks]]"
+  - "[[GLARE  Lux Transceiver]]"
+  - "[[Bucket Excavator]]"
+  - "[[Cyclotron Forge]]"
 tags:
   - machine
   - multiblock
@@ -15,71 +18,93 @@ tags:
   - worldgen
 ---
 
-The Drill Pylon is a multiblock structure which extracts resources from Crystal Fissures. It uses kinetic input to passively produce resources over time.
+The Drill Pylon is a multiblock structure built over a [[Crystal Fissure Bud]] that extracts resources from it. It uses kinetic input to passively produce resources over time, and can be pushed into an amplified mode by drawing Lux from a [[GLARE Networks|GLARE network]].
 
 **Controller ID:** *drill_pylon_head*
-**Proxy ID:** *drill_pylon_proxy*
+**Proxy IDs:** *drill_pylon_proxy*, *drill_pylon_kinetic_proxy*
+**Resource node:** *crystal_fissure_bud*
 
 ## Gameplay Role
 
-The Drill Pylon is the deep-extraction counterpart to the [[Bucket Excavator]]: where the excavator works surface [[Mineral Deposits]], the pylon is built over Crystal Fissure Bud blocks (the crystal-tier resource node) and taps them for higher-value outputs. Its efficiency can be pushed further by feeding it lux from a [[GLARE Networks|GLARE network]] to run its amplified ("turbo") mode.
+The Drill Pylon is the deep-extraction counterpart to the [[Bucket Excavator]]: where the excavator works surface [[Mineral Deposit|Mineral Deposits]], the pylon is built over [[Crystal Fissure Bud]] blocks (the crystal-tier resource node) and taps them for higher-value outputs. Its efficiency can be pushed further by feeding it Lux from a [[GLARE Networks|GLARE network]] to run its amplified ("turbo") mode.
 
 ## Construction & Placement
 
-To build a Drill Pylon, players first place a Drill Pylon Head on top of a Crystal Fissure Bud block. Above the drill head, they then stack 3 layers of a 3x3 ring of brass_casing with a gearbox in the middle. Then, on each of the corner blocks of a 5x5 square centred on the Crystal Fissure Bud block, players must place a girder block, and then vertically stack this layer until it reaches the same height as the brass_casing rings.
+To build a Drill Pylon, players first place a **Drill Pylon Head** directly on top of a [[Crystal Fissure Bud]] block. Above the head they stack **3 layers (y = 1–3)**, each a 3×3 ring of `brass_casing` with a `gearbox` in the centre. Then, on each of the four corners of a 5×5 square centred on the head, they stack `metal_girder` blocks **from y = 0 to y = 3**. The total structure height is **5 blocks** (the Fissure Bud at y = 0, the head at y = 0's position, rings at y = 1–3).
 
-When the drill head is then right-clicked, it tries to assemble a Drill Pylon structure.
+When the head is right-clicked, it attempts to assemble a Drill Pylon structure. The 'front' is taken to be the horizontal direction towards the activating player (`player.getDirection().getOpposite()`). Assembly requires a valid structure and a Crystal Fissure Bud directly below the head.
 
-The total height is therefore 5 blocks.
+> [!note] Implementation
+> `validateStructure` checks: for `y` in 1–3, a `gearbox` at the column centre and `brass_casing` filling the rest of that 3×3 ring; and for `y` in 0–3, a `metal_girder` at each of the four `(±2, y, ±2)` corners. The front must be horizontal. On success `convertStructureToProxies` swaps the built blocks for proxy block entities (storing their original states), and disassembly restores them. Assembly registers the head as a GLARE node and refreshes any adjacent Lux Transceiver.
 
-The Drill Pylon is a horizontally rotatable multiblock structure; its 'front' is taken to be the lateral direction towards the activating player when the Drill Pylon Head is right-clicked to assemble the structure. To assemble, the drill head must have a valid structure (as defined above), and be placed above a Crystal Fissure Bud block.
+If any block in an assembled Drill Pylon is removed or moved, the structure disassembles and reinstates all original blocks. Disassembly also removes any GLARE links and node registration.
 
-If any block in an assembled Drill Pylon is removed/moved, the structure disassembles and reinstantiates all original blocks. This removes any Lux Sockets and breaks any GLARE links too.
-
-Crystal Fissure Bud blocks (like [[Mineral Deposits]] and [[Geyser Block|Geysers]]) internally store an item ID reference. This item ID determines the active DrillPylonRecipe of any Drill Pylon assembled above a Fissure Bud.
+Crystal Fissure Bud blocks (like [[Mineral Deposit|Mineral Deposits]] and [[Geyser Block|Geysers]]) internally store an `Item` reference (default `minecraft:raw_iron`). This stored item selects the active `DrillPylonRecipe` for any pylon assembled above the bud; a creative player can right-click the bud with an item to set it.
 
 ## Inputs & Outputs
 
-An assembled Drill Pylon has several interface points:
-- The middle front face of the lowest brass_casing ring exposes an item output interface.
-- The middle left/right-side faces of the lowest brass_casing ring expose kinetic shafts which power the drill and transfer rotation.
-- The middle back face of the 2nd brass_casing layer exposes a Lux Socket.
+An assembled Drill Pylon exposes interfaces through its proxies, whose roles are assigned by `DrillPylonProxyRole`:
 
-A Drill Pylon has internal storage for 4 item slots.
+- **OUTPUT** — the front-centre proxy of the lowest ring (y = 1) exposes an item-output interface on the front face.
+- **KINETIC** — the left/right-centre proxies of the lowest ring expose kinetic shafts (as `drill_pylon_kinetic_proxy`, axis = `front.getClockWise().getAxis()`) that power the drill.
+- **LUX_SOCKET** — the back-centre proxy of the 2nd ring (y = 2) exposes a Lux Socket on the rear face, where a [[GLARE  Lux Transceiver]] can attach.
+- **STRUCTURE** — all other proxies (including the corner girders and the central column) are inert structural proxies.
+
+A Drill Pylon has internal storage for 4 item slots (`outputInv`).
 
 ## Operation
 
-The Drill Pylon requires a minimum amount of RPM to operate. Once above that speed threshold, the drill will function, and any further speed increases will not improve efficiency.
+The Drill Pylon requires a minimum speed of `MIN_RPM = 64`. Above that threshold the drill functions; further speed increases do not improve efficiency. Speed is read from the two kinetic proxies (`getProxySpeed` takes the max of the left/right kinetic proxy speeds).
 
-Drills have two operational modes; *Regular*, and *Amplified*. When a drill is provided with only kinetic input, it runs in *regular* mode. When a drill is provided with kinetic input and has an attached transceiver on its socket, it runs in *amplified* (turbo) mode, drawing lux from its attached [[GLARE Networks|GLARE network]]. A drill will also not operate if it is not above a Crystal Fissure Bud block that supports a valid DrillPylonRecipe.
+The active recipe is chosen each tick from the Crystal Fissure Bud's stored item (`resolveSourceItem`). If there is no matching recipe, progress and Lux allocation reset and the drill idles.
 
-While operational, a drill repeatedly performs processing cycles. The duration of each cycle is determined by its recipe. If a recipe specifies a Lux Curve parameter, the drill consumes that amount of lux while running according to its progression along the processing cycle.
+While a recipe is active, the drill samples the recipe's **Lux curve** via `GlareLuxCalculator.sampleVariableLux(curve, progress, duration)` and requests that much Lux from the network each tick (`setAllocatedLux`). It only advances progress when `getProxySpeed() >= MIN_RPM` **and** its Lux requirement is satisfied. When progress reaches the recipe duration, it rolls the results and inserts them into the output inventory (deferring if they don't fit), then resets.
 
-If a drill's inputs ever fail to meet their required thresholds, processing pauses until requirements are met again. This includes lux; if a recipe requires a lux curve and the network ever over-allocates and shuts down, the drill's operation is paused until enough lux can be provided again.
+**Regular vs Amplified mode:** with only kinetic input the drill runs in regular mode. When a recipe specifies a non-zero Lux curve (`requiresLux()`), the drill needs an **online** [[GLARE Networks|GLARE network]] link — a bound `networkId`, `GlareOperationStatus.ONLINE`, and at least one live link via the Lux Socket (from a [[GLARE  Lux Transceiver]]) — to progress. If the network over-allocates and shuts down, or Lux otherwise drops out, operation pauses until requirements are met again.
 
-Once a processing cycle completes, the drill produces resources according to the recipe's results, which it stores in its internal inventory. The drill then resets and continues on with the next cycle.
+**Standalone (unassembled) mode:** an un-assembled Drill Pylon Head behaves as an independent mechanical drill. Every `STANDALONE_DRILL_INTERVAL = 20` ticks, while `|speed| >= MIN_RPM`, it mines the 3×3 face directly in front of it (skipping air and unbreakable blocks), like a Create Drill widened to 3×3.
 
 ## Recipes
 
-Each Drill Pylon runs the DrillPylonRecipe (design name) selected by the item ID stored in the Crystal Fissure Bud block beneath it. A recipe determines the cycle duration, the results produced, and optionally a Lux Curve parameter dictating how much lux the drill consumes across the cycle when running in amplified mode.
+Each Drill Pylon runs the `resourceful_refinement:drill_pylon` recipe (`DrillPylonRecipe`) selected by the item stored in the Crystal Fissure Bud beneath it. A recipe defines the cycle duration, the rolled results, and an optional Lux curve dictating per-tick Lux consumption across the cycle in amplified mode.
+
+Recipe JSON keys: `source_item`, `processing_time`, `ingredients`, `results` (each may carry a `chance`), and `lux_curve` (an int array sampled across the cycle; all-zero / absent means the recipe needs no Lux).
+
+```json
+{
+  "type": "resourceful_refinement:drill_pylon",
+  "source_item": "minecraft:raw_iron",
+  "processing_time": 300,
+  "ingredients": [],
+  "results": [
+    { "id": "minecraft:raw_iron", "count": 2 },
+    { "id": "minecraft:raw_copper", "count": 1, "chance": 0.25 }
+  ],
+  "lux_curve": [0, 2, 4, 6, 4, 2]
+}
+```
 
 ## Rendering
 
-The Drill Pylon Head uses a BlockEntityRenderer to render its entity-model visuals. While part of an assembled Drill Pylon, the head is responsible for rendering the entire model of the multiblock structure (and so must have valid bounds to do so).
-
-## Drill Pylon Head
-
-The Drill Pylon Head acts as the controller block entity for a Drill Pylon multiblock, but can also function as an independent mechanical block when unassembled. It shares the same properties and behaviours as the regular Create Drill, with the exception that it mines in a 3x3 area in front of it, instead of the standard 1x1.
-
-It is a fully directional block, with a kinetic shaft input on its local back face.
+The Drill Pylon Head uses `DrillPylonRenderer` (a `BlockEntityRenderer`) for its entity-model visuals. While part of an assembled pylon, the head renders the whole multiblock and reports an expanded render bounding box (`worldPosition ± 2` laterally, up to +4 in y).
 
 ## Implementation
 
-Not yet implemented — design target for v0.4.
+- **Package:** `content/drill_pylon/`
+- **Controller:** `DrillPylonHeadBlock` / `DrillPylonHeadBlockEntity` (extends `KineticBlockEntity`; implements `IGlareNode`, `IGlareReceiver`, `GlareNetworkSnapshotProvider`, `IHaveGoggleInformation`), id `drill_pylon_head`.
+- **Proxies:** `DrillPylonProxyBlock` / `DrillPylonProxyBlockEntity` (id `drill_pylon_proxy`) and `DrillPylonKineticProxyBlock` / `DrillPylonKineticProxyBlockEntity` (id `drill_pylon_kinetic_proxy`, a `RotatedPillarKineticBlock`). Proxy roles: `DrillPylonProxyRole { STRUCTURE, OUTPUT, KINETIC, LUX_SOCKET }`.
+- **Resource node:** `CrystalFissureBudBlock` / `CrystalFissureBudBlockEntity` (id `crystal_fissure_bud`) — see [[Crystal Fissure Bud]].
+- **Recipe:** `recipe/DrillPylonRecipe` (extends `StandardProcessingRecipe`) + `recipe/DrillPylonRecipeInput` + `recipe/DrillPylonRecipeCategory` (JEI). Type/serializer registered in `ModRecipeTypes` as `drill_pylon`.
+- **GLARE integration:** `getMaxGlareLinks() = 1`, `allowsManualGlareLinks() = false`; Lux endpoint is the rear-centre y=2 proxy. Lux sampling via `GlareLuxCalculator`; network state via `GlareService`.
+- **Rendering:** `DrillPylonRenderer`.
+- **Stress:** `ModStressValues.DRILL_PYLON_STRESS = 16` (applied to both `drill_pylon_head` and `drill_pylon_kinetic_proxy`).
+- Constants: `MIN_RPM = 64`, `INVENTORY_SLOT_COUNT = 4`, `STANDALONE_DRILL_INTERVAL = 20`.
 
 ## Related
 
-- [[Bucket Excavator]]
+- [[Crystal Fissure Bud]]
 - [[GLARE Networks]]
-- [[Mineral Deposits]]
+- [[GLARE  Lux Transceiver]]
+- [[Bucket Excavator]]
+- [[Cyclotron Forge]]
 - [[Primary Design Doc]]

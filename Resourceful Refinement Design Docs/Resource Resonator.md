@@ -1,17 +1,66 @@
-#### **Description**
-The **Resource Resonator** is a blockEntity tool, which allows players to scan their nearby area for world generation features, such as geysers, mineral deposits, and crystal fissures. the horizontal (X/Z) coordinates of these features are then displayed in a radar-style GUI.
+---
+title: Resource Resonator
+category: Machine
+status: Planned
+introduced: v0.4
+recipe_type: n/a
+related:
+  - "[[Geyser Block]]"
+  - "[[Mineral Deposit]]"
+  - "[[Crystal Fissure Bud]]"
+  - "[[Codebase Overview]]"
+tags:
+  - machine
+  - tool
+  - worldgen
+  - gui
+  - planned
+---
 
-**ID:** *resource_resonator*
+The **Resource Resonator** is a placed block-entity scanning tool. It analyses the surrounding world for
+generation features — geysers, mineral deposits, crystal fissures — and plots their horizontal (X/Z)
+positions on a radar-style GUI, so players can locate resource nodes before digging them out.
 
-#### **Behaviour**
-The Resource Resonator is a horizontally directional block, may be placed down and then interacted with by right-clicking.
+**ID:** `resource_resonator`
 
-Right-clicking the resonator opens its GUI. This GUI consists of a circular radar-style screen, and a control-panel on the right where users can filter for which type of world-gen features they'd like to scan for, and press the 'Scan' button.
+> [!warning] Not yet implemented
+> This is a v0.4 design target. No `resource_resonator` block, block entity, menu or renderer exists in
+> code yet — the page captures intent only. Note the name collides only lexically with the
+> [[Resonance Crystal]] used by the GLARE [[GLARE Emitter Dish]]; they are unrelated features.
 
-When a resonator performs a scan, it runs an analysis of all chunks within a configurable chunk distance (defined in server-config) to locate the spawn locations of all features matching the resonator's current filter. This scan is performed using the world seed to performantly assess chunks for features, and analyse chunks which may not have generated yet.
+## Gameplay Role
 
-Once scanned, the results are locally cached in the resonator (these do not have to persist between sessions), and displayed on the radar screen as small icons. Each generation feature type has a distinct icon, and hovering over any POI on the radar screen displays it's block coordinates and type. This cache and UI is refreshed whenever a new scan is performed.
+A prospecting aid for the v0.4 extraction loop. Rather than wandering to find [[Geyser Block]] deposits,
+[[Mineral Deposit]] surface nodes, or [[Crystal Fissure Bud]] drill sites, the player places a Resonator
+and scans for them, reading off coordinates from a radar screen.
 
+## Construction & Placement
 
-#### **Rendering**
-The Resource Resonator uses a blockEntityRenderer and Java Entity Model for its visuals and animations.
+A horizontally directional block. Placed down, then interacted with by right-clicking to open its GUI.
+
+## Operation
+
+- Right-clicking opens the GUI: a circular radar-style screen, with a control panel on the right for
+  choosing which world-gen feature type(s) to scan for and a **Scan** button.
+- A scan analyses every chunk within a configurable chunk distance (server config) and locates the spawn
+  positions of all features matching the current filter. The scan is **seed-based**, so it can assess
+  chunks that have not generated yet without loading them.
+- Results are cached locally in the Resonator (persistence across sessions is not required) and drawn on
+  the radar as per-type icons. Hovering a point shows its block coordinates and type. Each scan refreshes
+  the cache and the display.
+
+## Rendering
+
+Intended to use a `BlockEntityRenderer` with a Java entity model for its visuals and animation.
+
+## Implementation
+
+Not yet implemented — design target for v0.4. When built, expect: a directional block + block entity
+(scan cache + filter state), a menu/screen pair for the radar GUI, a seed-based chunk-scanning service
+(likely reusing the worldgen structure/feature lookup used by [[Nether Geyser Worldgen]]), a server-config
+chunk-radius key, and a BER + model.
+
+## Related
+
+- [[Geyser Block]] · [[Mineral Deposit]] · [[Crystal Fissure Bud]]
+- [[Codebase Overview]]

@@ -1,7 +1,7 @@
 ---
 title: Telemetry Terminal GUI
 category: Machine
-status: Planned
+status: Implemented
 introduced: v0.4
 recipe_type: n/a
 related:
@@ -14,7 +14,9 @@ tags:
   - gui
 ---
 
-The Telemetry Terminal is a horizontally rotatable SmartEntityBlock, which connects to [[GLARE Networks|GLARE networks]] as a receiver, and enables network-wide communication through the telemetry system.
+The Telemetry Terminal is a horizontally rotatable Create SmartBlockEntity which connects to a [[GLARE Networks|GLARE network]] as a receiver, and enables network-wide communication through the telemetry system.
+
+**ID:** *glare_telemetry_terminal*
 
 ## Gameplay Role
 
@@ -22,7 +24,10 @@ The Telemetry Terminal is the player-facing front-end for the GLARE network's Te
 
 ## Construction & Placement
 
-A horizontally rotatable SmartEntityBlock. Each Terminal can be assigned an Address by using a row of 3 Create item-slot behaviours positioned on the top face of the block (similar to the implementation in Redstone Links).
+A horizontally rotatable Create SmartBlockEntity. Each Terminal is assigned an Address by using a row of 3 Create item-slot behaviours positioned on the top face of the block (similar to the implementation in Redstone Links).
+
+> [!note] Implementation
+> `TelemetryTerminalBlock extends GlareNodeBlock` (horizontal `FACING`, default NORTH); `TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity implements IGlareReceiver, IGlareTelemetryEndpoint, MenuProvider`. `MAX_LINK_COUNT = 1`. The three top-face slots are `TelemetryAddressBehaviour` (extends Create's `FilteringBehaviour`, one item each, forced count 1) laid out via `Trio.makeSlots`; they form the terminal's own `GlareAddress` (`GlareAddress.of(item0, item1, item2)`). A legacy `AddressInventory` NBT layout is migrated on load.
 
 ## Inputs & Outputs
 
@@ -33,63 +38,82 @@ A horizontally rotatable SmartEntityBlock. Each Terminal can be assigned an Addr
 
 ## Operation
 
-The Telemetry Terminal can be right-clicked to open a versatile GUI that allows player to view, send, and automate the handling of inbox messages. A row of browser-like tabs along the top of the GUI allow the user to switch the terminal between its 3 modes; MANUAL, AUTO-SEND, and AUTO-RECEIVE. Each mode represents a different function of the terminal, and a different GUI state or sub-screen.
+The Telemetry Terminal can be right-clicked to open a versatile GUI that lets players view, send, and automate the handling of inbox messages. A row of browser-like tabs along the top switches the terminal between its 3 modes: MANUAL, AUTO-SEND, and AUTO-RECEIVE. Each mode represents a different function of the terminal, and a different GUI state or sub-screen.
 
-Where possible, reuse the existing confirm and trash button icons we have in our project textures.
+Where possible, existing confirm and trash button icons from the project textures are reused.
+
+> [!note] Implementation
+> Modes are the `TelemetryTerminalMode` enum `{ MANUAL, AUTO_SEND, AUTO_RECEIVE }`, cycled by right-clicking with a wrench (`cycleMode()`, action-bar message `telemetry_terminal.mode`). The screen (`TelemetryTerminalScreen`) maps each mode to a page: `ManualTelemetryTerminalPage`, `AutoSendTelemetryTerminalPage`, `AutoReceiveTelemetryTerminalPage` (the last two share `ComposeTelemetryTerminalPage`). Menu id `glare_telemetry_terminal` (`TelemetryTerminalMenu`, no player slots — the GUI is snapshot-driven).
 
 ### Manual
 
-In its default manual mode, the Telemetry Terminal GUI behaves like an email program. It itself has two sub-screens it toggles between using tabs on the top-left; An 'Inbox' view, and a 'Compose  Message' view.
+In its default manual mode, the Telemetry Terminal GUI behaves like an email program. It has two sub-screens toggled by tabs on the top-left: an 'Inbox' view and a 'Compose Message' view.
 
 #### Inbox
 
 The tab for the Inbox view says "Inbox (X messages)" when the address is storing 1 or more messages, or "Inbox" otherwise.
 
-This view consists of a scroll-view along the left-hand edge showing a summary of each message currently in the inbox, with a top-row showing the sender's Address code as rendered items, and bottom row of grey text showing the first few characters of the message.
+This view consists of a scroll-view along the left-hand edge showing a summary of each message currently in the inbox, with a top row showing the sender's Address code as rendered items, and a bottom row of grey text showing the first few characters of the message.
 
-The right-hand two thirds of the view shows a large readout of the message content itself. When a message tab is selected in the left-side scrollview, it is displayed in full on the right hand side, with the address code along the top, and the sent datetime anchored to the top-right. The full text message is then printed below.
-The method for rendering the text content over multiple lines should be defined in a generalized way that allows us to adjust the size and width of the right-hand-side panel when we come to making proper UI assets.
-At the bottom-right of this content panel should be a button which says "Discard". Pressing this removes the message form the inbox.
+The right-hand two thirds of the view shows a large readout of the message content itself. When a message tab is selected in the left-side scroll-view, it is displayed in full on the right-hand side, with the address code along the top, and the sent date/time anchored to the top-right. The full text message is then printed below. The method for rendering the text content over multiple lines is defined in a generalised way that allows adjusting the size and width of the right-hand-side panel when proper UI assets are made. At the bottom-right of the content panel is a "Discard" button; pressing it removes the message from the inbox.
 
-#### Compose  Message
+#### Compose Message
 
-The Compose Message view allows the user to type a new message to send to an address.
+The Compose Message view lets the user type a new message to send to an address.
 
-On the left-hand edge of the view, is a scroll-view of all the terminal's 'saved' Addresses. Clicking on one will clear the current address and repopulate it with the saved one.
+On the left-hand edge of the view is a scroll-view of all the terminal's 'saved' Addresses (contacts). Clicking one clears the current address and repopulates it with the saved one.
 
-The rest of the view is taken up by the message editor:
+The rest of the view is the message editor. Along the top, it has 3 item-slot buttons for setting the receiver's address code — pressing these opens a mini Creative-mode-style search window for finding any Minecraft item (its own screen). There is also a small 'Save' button to the right, which saves the current code as a saved contact if fully populated and not already listed.
 
-Along the top, it has 3 item-slot buttons for setting the receiver's address code - Pressing these buttons opens a mini Creative-mode-style search window and search-box for finding any minecraft item (This should likely be it's own screen/class if possible). There is also a small 'Save' button to the right of this, which saves the current code as a saved contact if fully populated, and not already in the list.
+The middle of the viewer is a large text field for the message body text, wrapping text that goes over the panel's width. In the bottom-left corner is a 'Clear' button which clears all text.
 
-The middle of the viewer is a large text field for the user to enter their messages body text. If possible, we should set this to warp text that goes over the panel's width. In the bottom-left corner of this is a 'Clear' button which clears all text
+At the bottom of the view is a "Send" button, enabled and functional only if the address is filled out and the body is non-empty. Pressing 'Send' sends the message to the target address if it exists on the network. If the address does not exist, the warning line along the bottom says "Address not found on this network"; otherwise it briefly says "Message sent!" and resets the view.
 
-At the bottom of the view is a "Send" button. This button should only be enabled and function if the address is filled out, and the text body is non-empty. Pressing 'Send' sends the message to the target address if it exists on the network. If the address does not exist, the warning message along the bottom of the view will say "Address not found on this network". Otherwise, it briefly says "Message sent!", and resets the view.
+> [!note] Implementation
+> The item-code picker is `TelemetryItemPickerScreen`. Compose actions map to `TelemetryTerminalActionPayload` actions `SET_MANUAL_VIEW`, `SAVE_MANUAL_DRAFT`, `ADD_CONTACT`, `SEND_MANUAL`, `DISCARD_MESSAGE`. The inbox list shows 6 visible rows with a scrollbar; the contacts list likewise.
 
 ### Auto-Send
 
-In auto send mode, the Telemetry Terminal GUI utilises an altered variant of the 'Compose  Message' view;
+In auto-send mode, the GUI uses an altered variant of the Compose Message view. The address code and body behave the same. There is no 'Send' button; instead, whenever the user edits the view, the terminal caches the content and sends it to the address whenever it receives a redstone pulse. The bottom of the UI shows warning labels that now display either "Last message successfully sent" or "Last message unable to find address", depending on the most-recent operation.
 
-The address code and text body portions behave the same, allowing the user to set a new address and message.
+Alternatively, if the Telemetry Terminal is the display target of one or more Create Display Links, the body editor is disabled and a "Readout from Display Link" header is shown, with the text produced by all attached display links below. In this mode, the combined content of the linked display links is sent as the body on a redstone pulse (truncated if needed).
 
-In Auto-Send mode, there is no 'Send' button. Instead, whenever a user edits the the 'Compose  Message' view, the terminal caches this content and sends it to the address whenever it receives a redstone pulse. The bottom of the UI still shows the warning labels, which now displays either "Last message successfully sent" or "Last message unable to find address", depending on the success state of the most-recent operation.
-
-Alternatively, if the Telemetry Terminal is the display target of one or more Create Display Links, the text body editor is disabled, and a header saying "Readout from Display Link" is instead shown, with the text produced by all attached display links shown below. In this mode, the combined content of the linked display links is sent as the text body on a redstone pulse (truncated if needed).
+> [!note] Implementation
+> AUTO_SEND is a rising-edge trigger: `onNeighborChanged` calls `performAutoSend` when neighbour signal goes high (tracked via `wasRedstonePowered`). `TelemetryTerminalDisplayTarget extends DisplayTarget` provides `DisplayTargetStats(8, 64)` (8 lines × 64 chars). Readouts are stored per source `BlockPos`, pruned after 100 ticks, joined and sanitised to 512 chars; `effectiveAutoSendBody()` prefers the display-link text over the cached body. Drafts persist via `SAVE_AUTO_DRAFT`.
 
 ### Auto-Receive
 
-In auto receive mode, the Telemetry Terminal GUI has a unique view. It consists of a wide scroll-view which shows all current string-filters cached on the terminal. Each entry lists the string, and a small 'delete' button anchored to the far right (use the trash icon from our existing GUI assets) - Pressing this remove the string-filter from the terminal.
+In auto-receive mode, the GUI has a unique view: a wide scroll-view of all current string-filters cached on the terminal, each with a small 'delete' (trash) button anchored to the right. Below the scroll-view is a text input field with a confirm button; entering text and pressing confirm adds it as a new filter entry (if not already present) and clears the input. Above the scroll-view is a centred button that toggles between "Keep Messages" and "Discard Messages".
 
-Below this scroll-view is a text input field, with a confirm button anchored to its right. Entering text into this field and pressing 'confirm' adds it as a new filter entry (if not already present), and clears the input field. 
+When an auto-receive terminal receives a message containing any of its string-filters, it emits a redstone pulse for 1 tick (even if already emitting). If set to "Discard Messages", it then discards the triggering message from the inbox. String-filters are always compared case-insensitively.
 
-Above the scroll view is a centred button which toggles between "Keep Messages" and "Discard Messages".
+Auto-discarding is deferred so that any other auto-receive terminals listening to the same address still trigger their comparison-and-emit logic for that same message that tick.
 
-When an auto-receive terminal receives a message containing any of its string-filters, the terminal emits a redstone pulse for 1 tick (even if already emitting). If set to "Discard Messages", this then discards the triggering message from the inbox. String-filters, when set or when being compared to messages, should always be treated as case-invariant.
+> [!note] Implementation
+> The filter list shows 7 visible rows. Actions: `ADD_FILTER`, `REMOVE_FILTER`, `SAVE_FILTER_DRAFT` (10-tick debounce), `SET_DISCARD`. Filters are sanitised (trimmed, lowercased, truncated to `MAX_FILTER_LENGTH = 64`). The pulse is implemented as a deferred `TickTask` setting `pulseTicks = 2` (≈2-tick, 15-strength signal at the terminal and the block below); `tick()` clears it. Discard-after-match runs via `TelemetryService.discard` only after the pulse, so concurrent listeners still see the message that tick.
 
-Auto-discarding received messages should be done in a way that any other auto-receive terminals listening to the same address will still trigger their 'comparison and emit' logic for that message that tick (i.e. We shouldn't immediately discard on processing, in-case other terminals also need to respond to this same message later during this tick).
+## Rendering
+
+`TelemetryTerminalRenderer extends SmartBlockEntityRenderer`; the 3 address slots render their filter items on the top face (`TelemetryAddressRenderer` / `TelemetryAddressBehaviour`).
 
 ## Implementation
 
-Not yet implemented — design target for v0.4.
+**Package:** `content/glare/terminal/`.
+
+**Key classes:** `TelemetryTerminalBlock`, `TelemetryTerminalBlockEntity`, `TelemetryTerminalMenu`, `TelemetryTerminalScreen`, `TelemetryItemPickerScreen`, `TelemetryTerminalRenderer`, `TelemetryAddressBehaviour`, `TelemetryAddressRenderer`, `TelemetryTerminalMode`, `TelemetryTerminalSnapshot`, `TelemetryTerminalResult`, `TelemetryTerminalDisplayTarget`, and the GUI pages `TelemetryTerminalPage` / `Manual…` / `Compose…` / `AutoSend…` / `AutoReceive…`.
+
+**Registry IDs:** block/item/BE `glare_telemetry_terminal`; menu `glare_telemetry_terminal`.
+
+**Caps & constants:**
+- `TelemetryService.MAX_MESSAGES = 16` (per-inbox cap, enforced on send).
+- `GlareMessage.MAX_BODY_LENGTH = 512` (message body cap).
+- `TelemetryTerminalSnapshot.MAX_CONTACTS = 32`, `MAX_FILTERS = 32`, `MAX_FILTER_LENGTH = 64`, `MAX_SYNCED_MESSAGES = 256` (the client snapshot may sync up to 256 messages, but the actual inbox never exceeds 16).
+
+**State sync:** the terminal broadcasts a revisioned `TelemetryTerminalSnapshot` — every mutation calls `changed()` which does `revision++`, then (server-side) refreshes the inbox subscription, saves, and calls `TelemetryTerminalStatePayload.broadcast` to all players viewing that terminal. The client `TelemetryTerminalMenu.applySnapshot` ignores stale packets (`revision` must be `>=` current); `revision` is persisted in NBT. Loaded-only automation is driven by a non-persisted `TelemetryService.Subscription`.
+
+**Network payloads:** `telemetry_terminal_action` (`TelemetryTerminalActionPayload`, C2S; 12 actions — `SET_MODE`, `SET_MANUAL_VIEW`, `SAVE_MANUAL_DRAFT`, `SAVE_AUTO_DRAFT`, `ADD_CONTACT`, `REMOVE_CONTACT`, `ADD_FILTER`, `SAVE_FILTER_DRAFT`, `REMOVE_FILTER`, `SET_DISCARD`, `SEND_MANUAL`, `DISCARD_MESSAGE`) and `telemetry_terminal_state` (`TelemetryTerminalStatePayload`, S2C snapshot).
+
+**Redstone:** `isSignalSource() = true`; `getSignal` returns 15 while pulsing.
 
 ## Related
 

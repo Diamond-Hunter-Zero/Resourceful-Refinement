@@ -33,13 +33,13 @@ a stale table here.
 | Java | 21 (toolchain pinned in `gradle.properties`) |
 | Hard dependency | Create `6.0.11-283` (kinetics, processing recipes, ponder, JEI) |
 | Optional | JEI `19.27.0.336` (compile-only API + runtime jar), Registrate `MC1.21-1.3.3` |
-| Current version | `0.3.2` (Alpha) |
-| Java footprint | ~210 source files under `src/main/java` |
+| Current version | `0.4.0` (Alpha, branch `Alpha_v0.4-GLARE_Networks`) |
+| Java footprint | Several hundred source files under `src/main/java` (v0.4 added the large `glare` system plus PUG, Drill Pylon, Cyclotron Forge and Bucket Excavator) |
 
 **Design goal:** convert Create's mineral blocks and alloys back and forth between item and fluid form,
 routing them through new machines and multiblocks to build a factory-game progression — molten ores →
-catalysed → alloyed/purified → cast items, then branching into paint, gel, coating, heat, fuel and
-(planned) power/logistics systems.
+catalysed → alloyed/purified → cast items, then branching into paint, gel, coating, heat, fuel, and (as of
+v0.4) the **GLARE** power/messaging/teleport network and PUG logistics systems.
 
 ## Source Layout
 
@@ -83,16 +83,19 @@ structure types → entities → damage types → display sources → stress val
 | `ModBlocks` | All placeable blocks (machines, decoratives, 5 gel-splatter variants). Fluid liquid-blocks come via `FluidEntry`. |
 | `ModItems` | Block items, tools, moulds, materials, drinks/foods. Buckets come via `FluidEntry`. |
 | `ModBlockEntities` | BE type suppliers (one shared `GEL_SPLATTER_BE` across all gel variants). |
-| `ModMenus` | Menu types — currently only the Fluid Refill Station. |
-| `ModEntities` | `GEL_BLOB`, `THROWN_PLUNGER`, `SPORTS_BALL`, `MILKING_STATION_SEAT`. |
+| `ModMenus` | Fluid Refill Station, PUG `launchpad`, GLARE `power_terminal`, `glare_chromatic_transceiver`, `glare_telemetry_terminal`. |
+| `ModEntities` | `GEL_BLOB`, `THROWN_PLUNGER`, `SPORTS_BALL`, `MILKING_STATION_SEAT`, `PUG` (v0.4). |
 | `ModFluids` / `FluidEntry` / `ModFluidTypes` | Declarative fluid registration (type + source + flowing + block + bucket in one call). |
 | `ModRecipeTypes` | Custom recipe types, serializers, Create `IRecipeTypeInfo` wrappers. |
-| `ModDataComponents` | `coating_data`, `hosegun_fluid`, `fuel_tank_fluid`, `hosegun_tracking_id`, `hosegun_gloopy`, `plunger_charging`, `flavour`, `ball_type`. |
+| `ModDataComponents` | `coating_data`, `hosegun_fluid`, `fuel_tank_fluid`, `hosegun_tracking_id`, `hosegun_gloopy`, `plunger_charging`, `flavour`, `ball_type`, and (v0.4) `glare_targets`, `relay_wrench_target`. |
 | `ModCreativeTab` | Two tabs: `main` (items/blocks) and `fluids` (buckets). |
 | `ModStructureTypes` | `nether_ground_jigsaw` → `NetherSurfaceJigsawStructure`. |
 | `ModDamageTypes` | `molten_gel_damage`. |
 | `ModDisplaySources` | Create display source for the Refill Station. |
-| `ModStressValues` | Impacts: Refinery 12, Fracking 16, Sieve 4, Forge 8, Advanced Pump 8, Milking 4. Capacity: Combustion Chamber 10. |
+| `ModStressValues` | Impacts: Refinery 12, Fracking 16, Sieve 4, Forge 8, Advanced Pump 8, Milking 4, Bucket Excavator 16, Drill Pylon 16, Cyclotron 32, GLARE Emitter 8. Capacity: Combustion Chamber 10. |
+| `ModSounds` (v0.4) | PUG sounds: `pug_launch`, `pug_flight`, `pug_land`, `pug_crash`. |
+| `ModEffects` (v0.4) | Mob effect registration. |
+| `ModNetworking` | C2S/S2C payloads incl. Refill Station tracking id and the GLARE payloads (`glare_link_sync`, `configure_glare_transceiver`, `telemetry_terminal_action`/`_state`, `toggle_glare_network`). |
 | `ModPartialModels` | Flywheel partials (shafts, geyser casings, heater stand, pump cog, combustion fans). |
 | `ModJeiPlugin` | JEI recipe categories (incl. virtual `RadiatorVirtualHeatingCategory`). |
 | `ModClientEvents` / `ModClientGameEvents` | Fluid fog/tint, gel colours, coating decorator, ponder plugin, tooltips. |
@@ -117,7 +120,34 @@ Feature packages under `content/`. Category tags match the doc-template categori
 Declared via `ModFluids` + `FluidEntry`, grouped by `FluidGroup`: `RAW`, `CATALYSED`, `ALLOYED`,
 `PURIFIED`, `CARBORAX`, `CONCRETE`, `DRINK`, `PAINT`. Framework in `content/fluids/base/`
 (`GeneralizedFlowingFluid`, `GeneralizedFluidType`). `PouredCementBlock` is a special liquid block that
-solidifies. See [[Fluid Properties]] for group-by-group tables.
+solidifies. v0.4 adds `liquid_chorus` (ALLOYED) — fuel for the Remote Entanglement Transporter. See
+[[Fluid Properties]] for group-by-group tables.
+
+### GLARE network & logistics (v0.4)
+- **`glare`** — the [[GLARE Networks]] system: a server-side graph of line-of-sight-linked nodes carrying
+  **Lux** power, colour charge, an email-style telemetry system, and teleportation. Subpackages `graph`,
+  `lux`, `remote`, `telemetry`, `terminal`, `common`, `rendering`, `ui`. Blocks: [[GLARE Emitter Dish]],
+  [[GLARE Relay]], [[GLARE Kinetic Receiver]], [[GLARE Chromatic Transceiver]], [[GLARE  Lux Transceiver]]
+  (LuxSocket bridge), [[Telemetry Terminal GUI]], [[Remote Entanglement]] (depot + transporter),
+  [[Resonance Crystal]]. Linked with the [[Relay Wrench]]. `GlareService`/`GlareSavedData` own the graph;
+  `TelemetryService` the inboxes; `GlareCommands` (`/rrglare`) and `GlareGameTests` support it.
+- **`gui`** — shared GUI layer incl. the GLARE **Power Terminal** (`power_terminal` menu) and
+  `GlareNetworkSnapshot(Provider)` that machines expose for the Lux overlay. `client/gui/widget/` holds
+  reusable widgets (address editor, scrollbar, text area).
+- **`cyclotron_forge`** — [[Cyclotron Forge]] linear multiblock (item+fluid processing), `cyclotron_forge`
+  recipes; kinetic + variable-Lux driven via a LuxSocket. (The vault's "Harmonic Cyclotron" is the design
+  name for this same block.)
+- **`drill_pylon`** — [[Drill Pylon]] multiblock over a [[Crystal Fissure Bud]], `drill_pylon` recipes;
+  kinetic + variable-Lux (turbo) driven.
+- **`bucket_excavator`** — [[Bucket Excavator]] kinetic block extracting from a [[Mineral Deposit]] via
+  `excavation` recipes (extraction/destruction modes).
+- **`pug`** — [[PUG & Launch Pads]]: a 3×3 launch-pad multiblock and the `PUG` vehicle entity that carries
+  cargo between addressed pads (partly as a live entity, partly as simulated flight data).
+
+> [!note] v0.4 acquisition gaps
+> The v0.4 resource nodes have **no natural worldgen yet**: [[Mineral Deposit]], [[Crystal Fissure Bud]]
+> and [[Resonance Crystal]] are placeable/creative-only, and there is no Choral Clusters biome or Chorus
+> Crystal in code. The [[Resource Resonator]] and [[Conveyor Belt]]/[[Conveyor Rotator]] remain design-only.
 
 ### Paint, gel & tools (v0.2)
 - **`hosegun`** — [[Hosegun]] fluid tool firing `GelBlobEntity` projectiles; gloopy mode, tracking ids.
@@ -166,9 +196,13 @@ Registered in `ModRecipeTypes` (namespace `resourceful_refinement`):
 | `distillery` | `DistilleryRecipe` | bespoke | Distillery |
 | `milking_station` | `MilkingStationRecipe` | bespoke | Milking Station |
 | `brewers_tap` | `BrewersTapRecipe` | bespoke | [[Brewer's Tap]] |
+| `excavation` | `ExcavationRecipe` | bespoke (Create `StandardProcessingRecipe`-based) | [[Bucket Excavator]] |
+| `drill_pylon` | `DrillPylonRecipe` | bespoke | [[Drill Pylon]] |
+| `cyclotron_forge` | `CyclotronForgeRecipe` | bespoke | [[Cyclotron Forge]] |
 
-Datapack folders under `data/resourceful_refinement/recipe/` also carry `shaped_crafting`, Create
-`mixing`, `mechanical_crafting`, and the per-machine folders above. See [[Fluid Processing Recipes]].
+That is **11** registered recipe types. Datapack folders under `data/resourceful_refinement/recipe/` also
+carry `shaped_crafting`, Create `mixing`, `mechanical_crafting`, and the per-machine folders above. See
+[[Fluid Processing Recipes]].
 
 ## Rendering Architecture
 
@@ -238,10 +272,18 @@ despite some docs saying 3×3-or-5×5). Sieve/distillery stacks share one contro
 
 ## Planned / Not Yet Implemented
 
-Design docs exist but code does not (yet): [[GLARE Networks]], [[GLARE  Lux Transceiver]],
-[[Remote Entanglement]], [[Telemetry Terminal GUI]], [[Harmonic Cyclotron]], [[PUG & Launch Pads]],
-[[Bucket Excavator]], [[Drill Pylon]], [[Conveyor Belt]], [[Conveyor Rotator]]. These are the v0.4 / v1
-targets described in the [[Primary Design Doc]].
+The v0.4 branch implemented most of the former v0.4 design targets — GLARE (networks, emitter dish, relay,
+kinetic receiver, chromatic transceiver, lux transceiver, telemetry terminal, remote entanglement),
+[[Cyclotron Forge]], [[Drill Pylon]], [[Bucket Excavator]] and [[PUG & Launch Pads]] are all in code now.
+
+Still design-only (docs exist, no code): [[Conveyor Belt]], [[Conveyor Rotator]], [[Resource Resonator]].
+
+Partially implemented / known gaps:
+- **Worldgen for the v0.4 resource nodes** — [[Mineral Deposit]], [[Crystal Fissure Bud]] and
+  [[Resonance Crystal]] have no natural generation; no Choral Clusters biome or Chorus Crystal exists yet.
+- **[[GLARE Kinetic Receiver]]** allocates Lux but does not yet output Create Stress/RPM.
+- **[[Resonance Crystal]]** has no crafting recipe (artificial variant) or worldgen — acquisition unimplemented.
+- **[[Mineral Deposit]]** is a plain block, not yet the stored-resource-type block entity the design describes.
 
 ---
 

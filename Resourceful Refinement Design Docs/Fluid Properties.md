@@ -87,6 +87,8 @@ Fluids comprised of multiple ingredients, often used as inputs into other recipe
   biomatter. *(Added since v0.1.)*
 - Polymer Sludge (`polymer_sludge`) — refined organic feedstock for coolant and carborax refining.
   *(Added since v0.1.)*
+- Liquid Chorus (`liquid_chorus`) — purple teleportation fluid (colour `0x8E63C7`); the fuel for the
+  Remote Entanglement Transporter. *(Added in v0.4; see [[Remote Entanglement]].)*
 
 ### Purified Fluids (`PURIFIED`)
 Fluids which represent the end of their processing trees.

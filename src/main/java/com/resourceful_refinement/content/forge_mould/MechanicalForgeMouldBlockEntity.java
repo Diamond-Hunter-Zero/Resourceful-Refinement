@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.forge_mould;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.registry.ModStressValues;
@@ -239,7 +240,7 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
         if (inputTank.isEmpty()) return false;
 
         BlockPos target = worldPosition.below(2);
-        boolean isCastingDepot = level.getBlockState(target).getBlock() instanceof com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+        boolean isCastingDepot = level.getBlockState(target).getBlock() instanceof CastingDepotBlock;
 
         // Check target handler occupancy before processing
         IItemHandler targetHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, target, Direction.UP);

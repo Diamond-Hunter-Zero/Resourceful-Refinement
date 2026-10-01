@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationMenu;
 import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverMenu;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMenu;
 import com.resourceful_refinement.content.pug.LaunchpadMenu;
+import com.resourceful_refinement.content.resonator.ResourceResonatorMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
@@ -33,4 +34,7 @@ public class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<PowerTerminalMenu>> POWER_TERMINAL =
             MENUS.register("power_terminal", () -> IMenuTypeExtension.create(PowerTerminalMenu::fromNetwork));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ResourceResonatorMenu>> RESOURCE_RESONATOR =
+            MENUS.register("resource_resonator", () -> IMenuTypeExtension.create(ResourceResonatorMenu::fromNetwork));
 }

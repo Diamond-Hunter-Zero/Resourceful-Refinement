@@ -447,6 +447,7 @@ public class ResourcefulRefinementMain {
             event.register(ModMenus.GLARE_TELEMETRY_TERMINAL.get(), TelemetryTerminalScreen::new);
             event.register(ModMenus.LAUNCHPAD.get(), com.resourceful_refinement.content.pug.LaunchpadScreen::new);
             event.register(ModMenus.POWER_TERMINAL.get(), PowerTerminalScreen::new);
+            event.register(ModMenus.RESOURCE_RESONATOR.get(), com.resourceful_refinement.content.resonator.ResourceResonatorScreen::new);
         }
 
         @SubscribeEvent

@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlockEntity;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlockEntity;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlockEntity;
+import com.resourceful_refinement.content.resonator.ResourceResonatorBlockEntity;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlockEntity;
 import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlockEntity;
 import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlockEntity;
@@ -158,6 +159,11 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<GlareKineticReceiverBlockEntity>> GLARE_KINETIC_RECEIVER_BE = BLOCK_ENTITIES.register("glare_kinetic_receiver",
             () -> BlockEntityType.Builder.of(GlareKineticReceiverBlockEntity::new, ModBlocks.GLARE_KINETIC_RECEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<ResourceResonatorBlockEntity>> RESOURCE_RESONATOR_BE = BLOCK_ENTITIES.register(
+            "resource_resonator", () -> BlockEntityType.Builder.of(
+                    (pos, state) -> new ResourceResonatorBlockEntity(ModBlockEntities.RESOURCE_RESONATOR_BE.get(), pos, state),
+                    ModBlocks.RESOURCE_RESONATOR.get()).build(null));
 
     public static final Supplier<BlockEntityType<GlareChromaticTransceiverBlockEntity>> GLARE_CHROMATIC_TRANSCEIVER_BE = BLOCK_ENTITIES.register("glare_chromatic_transceiver",
             () -> BlockEntityType.Builder.of(GlareChromaticTransceiverBlockEntity::new, ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get()).build(null));

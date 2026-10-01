@@ -23,16 +23,13 @@ positions on a radar-style GUI, so players can locate resource nodes before digg
 
 **ID:** `resource_resonator`
 
-> [!warning] Not yet implemented
-> This is a v0.4 design target. No `resource_resonator` block, block entity, menu or renderer exists in
-> code yet — the page captures intent only. Note the name collides only lexically with the
-> [[Resonance Crystal]] used by the GLARE [[GLARE Emitter Dish]]; they are unrelated features.
-
 ## Gameplay Role
 
 A prospecting aid for the v0.4 extraction loop. Rather than wandering to find [[Geyser Block]] deposits,
 [[Mineral Deposit]] surface nodes, or [[Crystal Fissure Bud]] drill sites, the player places a Resonator
 and scans for them, reading off coordinates from a radar screen.
+
+The Resource Resonator interface allows users to filter for deposit types (surface geyser, cave geyser, mineral, crystal fissure), only showing map pins for those enabled by the current GUI filter.
 
 ## Construction & Placement
 
@@ -44,14 +41,17 @@ A horizontally directional block. Placed down, then interacted with by right-cli
   choosing which world-gen feature type(s) to scan for and a **Scan** button.
 - A scan analyses every chunk within a configurable chunk distance (server config) and locates the spawn
   positions of all features matching the current filter. The scan is **seed-based**, so it can assess
-  chunks that have not generated yet without loading them.
+  chunks that have not generated yet without loading or generating them.
 - Results are cached locally in the Resonator (persistence across sessions is not required) and drawn on
   the radar as per-type icons. Hovering a point shows its block coordinates and type. Each scan refreshes
   the cache and the display.
 
+Refer to the GUI mock-up below for functionality layout:
+![[Resource Resonator GUI.png|557]]
+
 ## Rendering
 
-Intended to use a `BlockEntityRenderer` with a Java entity model for its visuals and animation.
+Intended to use a `BlockEntityRenderer` with a modded Java entity model for its visuals and animation.
 
 ## Implementation
 

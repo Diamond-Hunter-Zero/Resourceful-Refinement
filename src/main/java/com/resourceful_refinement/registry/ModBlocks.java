@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.resonator.ResourceResonatorBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
 import com.resourceful_refinement.content.cyclotron_forge.CyclotronControllerBlock;
 import com.resourceful_refinement.content.cyclotron_forge.CyclotronKineticProxyBlock;
@@ -277,6 +278,13 @@ public class ModBlocks {
 
     public static final DeferredBlock<GlareKineticReceiverBlock> GLARE_KINETIC_RECEIVER = BLOCKS.register("glare_kinetic_receiver",
             () -> new GlareKineticReceiverBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<ResourceResonatorBlock> RESOURCE_RESONATOR = BLOCKS.register("resource_resonator",
+            () -> new ResourceResonatorBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()

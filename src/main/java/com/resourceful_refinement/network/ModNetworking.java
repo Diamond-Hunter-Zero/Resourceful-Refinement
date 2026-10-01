@@ -51,6 +51,21 @@ public final class ModNetworking {
                         LaunchpadStatePayload.TYPE,
                         LaunchpadStatePayload.STREAM_CODEC,
                         ModNetworking::handleLaunchpadState
+                )
+                .playToServer(
+                        ResonatorScanRequestPayload.TYPE,
+                        ResonatorScanRequestPayload.STREAM_CODEC,
+                        ModNetworking::handleResonatorScanRequest
+                )
+                .playToServer(
+                        SetResonatorFilterPayload.TYPE,
+                        SetResonatorFilterPayload.STREAM_CODEC,
+                        ModNetworking::handleSetResonatorFilter
+                )
+                .playToClient(
+                        ResonatorScanResultPayload.TYPE,
+                        ResonatorScanResultPayload.STREAM_CODEC,
+                        ModNetworking::handleResonatorScanResult
                 );
     }
 
@@ -102,5 +117,25 @@ public final class ModNetworking {
                 ToggleGlareNetworkPayload.handle(payload, serverPlayer);
             }
         });
+    }
+
+    private static void handleResonatorScanRequest(ResonatorScanRequestPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                ResonatorScanRequestPayload.handle(payload, serverPlayer);
+            }
+        });
+    }
+
+    private static void handleSetResonatorFilter(SetResonatorFilterPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                SetResonatorFilterPayload.handle(payload, serverPlayer);
+            }
+        });
+    }
+
+    private static void handleResonatorScanResult(ResonatorScanResultPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ResonatorScanResultPayload.handleClient(payload));
     }
 }

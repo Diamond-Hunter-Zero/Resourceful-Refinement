@@ -42,6 +42,8 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_CAPACITY;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
 
+    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_CHUNKS;
+
 
     static {
         /*CONFIG_BUILDER.push("Config Section 1");
@@ -184,6 +186,14 @@ public class ServerConfig {
                 .comment("The amount of Lux a GLARE Kinetic Receiver allocates from its network to run (Value between 0 and 1000000)")
                 .defineInRange("kinetic_receiver_lux", 1, 0, 1000000);
 
+        CONFIG_BUILDER.pop();
+
+
+        CONFIG_BUILDER.push("Resource Resonator");
+        RESONATOR_SCAN_RADIUS_CHUNKS = CONFIG_BUILDER
+                .comment("Maximum radius, in chunks, the Resource Resonator predicts world-generation features within.",
+                        "Larger values scan a wider area per press but return more pins (Value between 1 and 512)")
+                .defineInRange("scan_radius_chunks", 128, 1, 512);
         CONFIG_BUILDER.pop();
 
 

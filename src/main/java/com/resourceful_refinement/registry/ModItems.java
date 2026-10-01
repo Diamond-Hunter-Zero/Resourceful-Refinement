@@ -86,6 +86,8 @@ public class ModItems {
     // v0.4 Content
     public static final DeferredItem<BlockItem> BUCKET_EXCAVATOR_ITEM = ITEMS.registerSimpleBlockItem("bucket_excavator", ModBlocks.BUCKET_EXCAVATOR);
 
+    public static final DeferredItem<BlockItem> RESOURCE_RESONATOR_ITEM = ITEMS.registerSimpleBlockItem("resource_resonator", ModBlocks.RESOURCE_RESONATOR);
+
     public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", ModBlocks.MINERAL_DEPOSIT);
 
     public static final DeferredItem<BlockItem> CRYSTAL_FISSURE_BUD_ITEM = ITEMS.registerSimpleBlockItem("crystal_fissure_bud", ModBlocks.CRYSTAL_FISSURE_BUD);

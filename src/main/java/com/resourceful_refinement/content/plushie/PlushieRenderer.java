@@ -29,7 +29,8 @@ public class PlushieRenderer implements BlockEntityRenderer<PlushieBlockEntity> 
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_plushie.png"),
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_engineer_plushie.png"),
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_derp_plushie.png"),
-            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_arctic_plushie.png")
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_arctic_plushie.png"),
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/block/plushie/fox_pink_plushie.png")
     };
 
     public PlushieRenderer(BlockEntityRendererProvider.Context context) {

@@ -30,6 +30,8 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import org.jetbrains.annotations.Nullable;
 
+import static com.resourceful_refinement.content.plushie.PlushieBlockEntity.PLUSHIE_VARIANT_COUNT;
+
 public class PlushieBlock extends Block implements EntityBlock {
 
     public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
@@ -82,8 +84,8 @@ public class PlushieBlock extends Block implements EntityBlock {
         if (stack.getItem() == Items.SHEARS) {
             if (level.getBlockEntity(pos) instanceof PlushieBlockEntity plushie) {
                 if (!level.isClientSide) {
-                    // Logic to cycle variants (e.g., 0 to 2)
-                    int nextVariant = (plushie.getVariant() + 1) % 4;
+                    // Logic to cycle variants
+                    int nextVariant = (plushie.getVariant() + 1) % PLUSHIE_VARIANT_COUNT;
                     plushie.setVariant(nextVariant);
 
                     // Play a sound for feedback

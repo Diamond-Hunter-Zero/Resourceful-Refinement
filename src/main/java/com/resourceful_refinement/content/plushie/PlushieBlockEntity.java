@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class PlushieBlockEntity extends BlockEntity {
 
+    public static final int PLUSHIE_VARIANT_COUNT = 5;
     private int variant = 0;
 
     public PlushieBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

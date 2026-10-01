@@ -78,7 +78,7 @@ public final class GlareService {
     }
 
     public static boolean removeLink(ServerLevel level, DimensionalNodePos from, DimensionalNodePos to) {
-        return GlareSavedData.get(level).removeLink(from, to);
+        return GlareSavedData.get(level).removeLink(level, from, to);
     }
 
     public static boolean tryResetNetwork(ServerLevel level, UUID networkId) {
@@ -111,6 +111,10 @@ public final class GlareService {
 
     public static void forceRebuild(ServerLevel level) {
         GlareSavedData.get(level).forceRebuild(level);
+    }
+
+    public static void pruneOrphanedDimensions(MinecraftServer server) {
+        GlareSavedData.get(server.overworld()).pruneOrphanedDimensions(server);
     }
 
     public static Optional<IGlareNode> ensureLiveNodeRegistered(Level level, BlockPos pos) {

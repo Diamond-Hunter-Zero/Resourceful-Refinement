@@ -10,12 +10,19 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = ResourcefulRefinementMain.MOD_ID)
 public final class ModGlareEvents {
     private ModGlareEvents() {}
+
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent event) {
+        // Once every dimension is known, drop GLARE nodes left behind in dimensions the server no longer has.
+        GlareService.pruneOrphanedDimensions(event.getServer());
+    }
 
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event) {

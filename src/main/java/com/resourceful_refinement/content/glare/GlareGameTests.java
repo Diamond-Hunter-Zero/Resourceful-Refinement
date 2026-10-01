@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMode;
 import com.resourceful_refinement.content.glare.remote.IRemoteEntanglementEndpoint;
@@ -59,7 +60,7 @@ public final class GlareGameTests {
         data.registerNode(level, nodes.c);
         data.tryAddLink(level, nodes.a.pos, nodes.b.pos);
         data.tryAddLink(level, nodes.b.pos, nodes.c.pos);
-        data.removeLink(nodes.b.pos, nodes.c.pos);
+        data.removeLink(level, nodes.b.pos, nodes.c.pos);
 
         require(requireNetwork(data, nodes.a.pos).equals(requireNetwork(data, nodes.b.pos)), "a and b should remain connected");
         require(!requireNetwork(data, nodes.a.pos).equals(requireNetwork(data, nodes.c.pos)), "c should split into a separate network");

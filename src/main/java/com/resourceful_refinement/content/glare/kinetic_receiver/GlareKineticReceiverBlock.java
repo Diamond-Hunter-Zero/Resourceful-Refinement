@@ -1,6 +1,7 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.kinetic_receiver;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.glare.*;
 import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;

@@ -1,6 +1,10 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.emitter;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.glare.DimensionalNodePos;
+import com.resourceful_refinement.content.glare.GlareNodeBlockItem;
+import com.resourceful_refinement.content.glare.GlareService;
+import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
@@ -56,7 +60,7 @@ public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE
 
     @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
-        return face.getAxis() == getRotationAxis(state);
+        return face == state.getValue(HORIZONTAL_FACING).getOpposite();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.content.gui.PowerTerminalMenu;
 import com.resourceful_refinement.content.glare.remote.IRemoteEntanglementEndpoint;
 import com.resourceful_refinement.content.glare.remote.RemoteEndpointKind;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementMode;
@@ -13,7 +14,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -38,6 +41,8 @@ public class GlareSavedData extends SavedData {
     private static final String DATA_NAME = "resourceful_refinement_glare_networks";
 
     private final Map<DimensionalNodePos, NodeRecord> nodes = new HashMap<>();
+    /** Spatial index of node positions by dimension → packed chunk key, so chunk-scoped work never scans every node. */
+    private final Map<ResourceKey<Level>, Map<Long, Set<DimensionalNodePos>>> nodesByChunk = new HashMap<>();
     private final Set<GlareLink> links = new LinkedHashSet<>();
     private final Map<DimensionalNodePos, LinkedHashSet<GlareLink>> linksByNode = new HashMap<>();
     private final Map<ResourceKey<Level>, ArrayList<GlareLink>> linksByDimension = new HashMap<>();
@@ -103,6 +108,7 @@ public class GlareSavedData extends SavedData {
 
     private void read(CompoundTag tag) {
         nodes.clear();
+        nodesByChunk.clear();
         links.clear();
         linksByNode.clear();
         linksByDimension.clear();
@@ -113,7 +119,11 @@ public class GlareSavedData extends SavedData {
         ListTag nodeList = tag.getList("Nodes", Tag.TAG_COMPOUND);
         for (int i = 0; i < nodeList.size(); i++) {
             NodeRecord node = NodeRecord.load(nodeList.getCompound(i));
+            if (node == null) {
+                continue;
+            }
             nodes.put(node.pos, node);
+            indexNode(node.pos);
         }
 
         ListTag linkList = tag.getList("Links", Tag.TAG_COMPOUND);
@@ -177,6 +187,32 @@ public class GlareSavedData extends SavedData {
         setDirty();
         notifyLoadedEndpoints(level, nodes.keySet());
         GlareDebug.log("Forced full rebuild: {} nodes, {} links, {} networks", nodes.size(), links.size(), networks.size());
+    }
+
+    /**
+     * Drops nodes (and their links) that live in a dimension the server no longer has — e.g. a datapack
+     * dimension that was removed. Without this, such nodes and their networks persist forever, bloating the
+     * save and every rebuild. Nodes in valid but currently-unloaded dimensions are left untouched.
+     */
+    public void pruneOrphanedDimensions(MinecraftServer server) {
+        Set<ResourceKey<Level>> knownDimensions = new HashSet<>(server.levelKeys());
+        List<DimensionalNodePos> orphaned = new ArrayList<>();
+        for (DimensionalNodePos pos : nodes.keySet()) {
+            if (!knownDimensions.contains(pos.levelKey())) {
+                orphaned.add(pos);
+            }
+        }
+        if (orphaned.isEmpty()) {
+            return;
+        }
+        for (DimensionalNodePos pos : orphaned) {
+            nodes.remove(pos);
+            unindexNode(pos);
+            removeLinksIf(link -> link.contains(pos));
+        }
+        rebuildNetworks();
+        setDirty();
+        GlareDebug.log("Pruned {} GLARE node(s) from unknown dimensions", orphaned.size());
     }
 
     public Optional<NodeRecord> getNode(DimensionalNodePos pos) {
@@ -318,6 +354,7 @@ public class GlareSavedData extends SavedData {
         if (record == null) {
             record = new NodeRecord(pos);
             nodes.put(pos, record);
+            indexNode(pos);
         }
         record.maxLinks = Math.max(0, glareNode.getMaxGlareLinks());
         record.manualLinkingEnabled = glareNode.allowsManualGlareLinks();
@@ -326,8 +363,8 @@ public class GlareSavedData extends SavedData {
         updateLuxState(record, glareNode);
         topologyChanged |= trimLinksToLimit(record);
         if (topologyChanged || record.networkId == null || !networks.containsKey(record.networkId)) {
-            setDirtyAndRebuild();
-            notifyLoadedEndpoints(level, topologyAffected);
+            Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(topologyAffected);
+            notifyLoadedEndpoints(level, touched);
         } else {
             refreshNetworkAggregates(record.networkId);
             setDirty();
@@ -346,27 +383,37 @@ public class GlareSavedData extends SavedData {
     }
 
     public void unregisterLoadedNode(DimensionalNodePos pos) {
-        NodeRecord removed = nodes.remove(pos);
-        if (removed != null) {
-            removeLinksIf(link -> link.contains(pos));
-            setDirtyAndRebuild();
+        NodeRecord removed = nodes.get(pos);
+        if (removed == null) {
+            return;
         }
+        UUID oldNetworkId = removed.networkId;
+        Set<DimensionalNodePos> seeds = new LinkedHashSet<>();
+        for (GlareLink link : getLinksFor(pos)) {
+            seeds.add(link.other(pos));
+        }
+        nodes.remove(pos);
+        unindexNode(pos);
+        removeLinksIf(link -> link.contains(pos));
+        setDirtyAndRebuildAround(seeds, oldNetworkId == null ? List.of() : List.of(oldNetworkId));
     }
 
     public void unregisterLoadedNode(ServerLevel level, DimensionalNodePos pos) {
-        NodeRecord removed = nodes.remove(pos);
+        NodeRecord removed = nodes.get(pos);
         if (removed == null) {
             return;
         }
 
-        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
-        affected.add(pos);
+        UUID oldNetworkId = removed.networkId;
+        Set<DimensionalNodePos> seeds = new LinkedHashSet<>();
         for (GlareLink link : getLinksFor(pos)) {
-            affected.add(link.other(pos));
+            seeds.add(link.other(pos));
         }
+        nodes.remove(pos);
+        unindexNode(pos);
         removeLinksIf(link -> link.contains(pos));
-        setDirtyAndRebuild();
-        notifyLoadedEndpoints(level, affected);
+        Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(seeds, oldNetworkId == null ? List.of() : List.of(oldNetworkId));
+        notifyLoadedEndpoints(level, touched);
     }
 
     public void updateNodeState(ServerLevel level, IGlareNode glareNode) {
@@ -378,6 +425,7 @@ public class GlareSavedData extends SavedData {
         if (record == null) {
             record = new NodeRecord(pos);
             nodes.put(pos, record);
+            indexNode(pos);
         }
         record.maxLinks = Math.max(0, glareNode.getMaxGlareLinks());
         record.manualLinkingEnabled = glareNode.allowsManualGlareLinks();
@@ -386,8 +434,8 @@ public class GlareSavedData extends SavedData {
         updateLuxState(record, glareNode);
         topologyChanged |= trimLinksToLimit(record);
         if (topologyChanged || record.networkId == null || !networks.containsKey(record.networkId)) {
-            setDirtyAndRebuild();
-            notifyLoadedEndpoints(level, topologyAffected);
+            Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(topologyAffected);
+            notifyLoadedEndpoints(level, touched);
         } else {
             refreshNetworkAggregates(record.networkId);
             setDirty();
@@ -464,15 +512,8 @@ public class GlareSavedData extends SavedData {
         indexLink(link);
         linkValidity.put(link, canValidate ? LinkValidity.VALID : LinkValidity.UNKNOWN);
         linkKinds.put(link, LinkKind.NORMAL);
-        setDirtyAndRebuild();
-        notifyLoadedEndpoints(level, affected);
-        NodeRecord rebuiltFirst = nodes.get(a);
-        if (rebuiltFirst != null && rebuiltFirst.networkId != null) {
-            NetworkRecord network = networks.get(rebuiltFirst.networkId);
-            if (network != null) {
-                notifyLoadedEndpoints(level, network.nodes);
-            }
-        }
+        Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(affected);
+        notifyLoadedEndpoints(level, touched);
         GlareDebug.log("Created link {} <-> {} ({})", a.toShortString(), b.toShortString(), getLinkValidity(link));
         return LinkResult.CREATED;
     }
@@ -499,9 +540,8 @@ public class GlareSavedData extends SavedData {
         indexLink(link);
         linkValidity.put(link, LinkValidity.VALID);
         linkKinds.put(link, LinkKind.SOCKET);
-        setDirtyAndRebuild();
-        for (DimensionalNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
-        notifyLoadedEndpoints(level, affected);
+        Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(affected);
+        notifyLoadedEndpoints(level, touched);
         GlareDebug.log("Created socket link {} <-> {}", a.toShortString(), b.toShortString());
         return LinkResult.CREATED;
     }
@@ -534,14 +574,15 @@ public class GlareSavedData extends SavedData {
         return changed;
     }
 
-    public boolean removeLink(DimensionalNodePos a, DimensionalNodePos b) {
+    public boolean removeLink(ServerLevel level, DimensionalNodePos a, DimensionalNodePos b) {
         GlareLink link = new GlareLink(a, b);
         boolean removed = links.remove(link);
         if (removed) {
             unindexLink(link);
             linkValidity.remove(link);
             linkKinds.remove(link);
-            setDirtyAndRebuild();
+            Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(List.of(a, b));
+            notifyLoadedEndpoints(level, touched);
             GlareDebug.log("Removed link {} <-> {}", a.toShortString(), b.toShortString());
         }
         return removed;
@@ -584,11 +625,8 @@ public class GlareSavedData extends SavedData {
         }
         linkValidationCursors.put(level.dimension(), (start + examined) % dimensionLinks.size());
         if (changed) {
-            setDirtyAndRebuild();
-            for (DimensionalNodePos pos : new ArrayList<>(affected)) {
-                affected.addAll(getNetworkNodesFor(pos));
-            }
-            notifyLoadedEndpoints(level, affected);
+            Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(affected);
+            notifyLoadedEndpoints(level, touched);
             GlareDebug.log("LoS batch changed topology after examining {} links ({} fully validated)", examined, validated);
         }
         return validated;
@@ -643,8 +681,7 @@ public class GlareSavedData extends SavedData {
         int interval = Math.max(1, sampleIntervalTicks);
         int limit = Math.max(1, maxSamples);
         long gameTime = server.getTickCount();
-        Set<DimensionalNodePos> affected = new LinkedHashSet<>();
-        boolean changed = false;
+        Set<UUID> sampledNetworkIds = new HashSet<>();
         for (NetworkRecord network : networks.values()) {
             if (network.lastLuxSampleGameTime != Long.MIN_VALUE
                     && gameTime - network.lastLuxSampleGameTime < interval) {
@@ -655,30 +692,50 @@ public class GlareSavedData extends SavedData {
             while (network.luxHistory.size() > limit) {
                 network.luxHistory.removeFirst();
             }
-            affected.addAll(network.nodes);
-            changed = true;
+            sampledNetworkIds.add(network.id);
         }
-        if (!changed) {
+        if (sampledNetworkIds.isEmpty()) {
             return;
         }
         setDirty();
-        notifyLoadedEndpoints(server, affected);
+        // The Lux history graph is only shown in the Power Terminal GUI, so only re-sync nodes a player is
+        // actively viewing through one — not every node in the network. Goggle tooltips don't show history,
+        // and lux totals don't change on a pure history sample, so nothing else needs a resync here.
+        notifyPowerTerminalViewers(server, sampledNetworkIds);
+    }
+
+    private void notifyPowerTerminalViewers(MinecraftServer server, Set<UUID> sampledNetworkIds) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (!(player.containerMenu instanceof PowerTerminalMenu terminal)) {
+                continue;
+            }
+            DimensionalNodePos pos = new DimensionalNodePos(player.level().dimension(), terminal.getBlockPos());
+            NodeRecord record = nodes.get(pos);
+            if (record == null || record.networkId == null || !sampledNetworkIds.contains(record.networkId)) {
+                continue;
+            }
+            notifyLoadedEndpoint(server, pos);
+        }
     }
 
     public void reconcileLoadedChunk(ServerLevel level, BlockPos chunkOrigin) {
-        int minX = chunkOrigin.getX();
-        int minZ = chunkOrigin.getZ();
-        int maxX = minX + 15;
-        int maxZ = minZ + 15;
+        int chunkX = chunkOrigin.getX() >> 4;
+        int chunkZ = chunkOrigin.getZ() >> 4;
+        Set<DimensionalNodePos> inChunk = nodesInChunk(level.dimension(), ChunkPos.asLong(chunkX, chunkZ));
+        if (inChunk.isEmpty()) {
+            return;
+        }
         boolean topologyChanged = false;
         boolean stateChanged = false;
         Set<UUID> networksToRefresh = new LinkedHashSet<>();
         Set<DimensionalNodePos> affected = new LinkedHashSet<>();
-        for (NodeRecord record : new ArrayList<>(nodes.values())) {
-            BlockPos pos = record.pos.pos();
-            if (!record.pos.levelKey().equals(level.dimension()) || pos.getX() < minX || pos.getX() > maxX || pos.getZ() < minZ || pos.getZ() > maxZ) {
+        Set<UUID> removedNetworkIds = new LinkedHashSet<>();
+        for (DimensionalNodePos nodePos : new ArrayList<>(inChunk)) {
+            NodeRecord record = nodes.get(nodePos);
+            if (record == null) {
                 continue;
             }
+            BlockPos pos = record.pos.pos();
             if (!level.isLoaded(pos)) {
                 continue;
             }
@@ -700,15 +757,17 @@ public class GlareSavedData extends SavedData {
                 for (GlareLink link : getLinksFor(record.pos)) {
                     affected.add(link.other(record.pos));
                 }
+                if (record.networkId != null) removedNetworkIds.add(record.networkId);
                 nodes.remove(record.pos);
+                unindexNode(record.pos);
                 removeLinksIf(link -> link.contains(record.pos));
                 topologyChanged = true;
             }
         }
         if (topologyChanged) {
-            setDirtyAndRebuild();
-            notifyLoadedEndpoints(level, affected);
-            GlareDebug.log("Chunk {},{} reconciliation removed stale nodes or links", minX >> 4, minZ >> 4);
+            Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(affected, removedNetworkIds);
+            notifyLoadedEndpoints(level, touched);
+            GlareDebug.log("Chunk {},{} reconciliation removed stale nodes or links", chunkX, chunkZ);
         } else if (stateChanged) {
             for (UUID networkId : networksToRefresh) refreshNetworkAggregates(networkId);
             setDirty();
@@ -722,11 +781,14 @@ public class GlareSavedData extends SavedData {
     public void markChunkUnloaded(ServerLevel level, BlockPos chunkOrigin) {
         int chunkX = chunkOrigin.getX() >> 4;
         int chunkZ = chunkOrigin.getZ() >> 4;
+        Set<DimensionalNodePos> inChunk = nodesInChunk(level.dimension(), ChunkPos.asLong(chunkX, chunkZ));
+        if (inChunk.isEmpty()) {
+            return;
+        }
         boolean changed = false;
-        for (NodeRecord record : nodes.values()) {
-            BlockPos pos = record.pos.pos();
-            if (record.pos.levelKey().equals(level.dimension()) && (pos.getX() >> 4) == chunkX
-                    && (pos.getZ() >> 4) == chunkZ && record.loaded) {
+        for (DimensionalNodePos nodePos : inChunk) {
+            NodeRecord record = nodes.get(nodePos);
+            if (record != null && record.loaded) {
                 record.loaded = false;
                 changed = true;
             }
@@ -755,56 +817,158 @@ public class GlareSavedData extends SavedData {
             if (!visited.add(start)) {
                 continue;
             }
-            Set<DimensionalNodePos> component = new LinkedHashSet<>();
-            ArrayDeque<DimensionalNodePos> queue = new ArrayDeque<>();
-            queue.add(start);
-            while (!queue.isEmpty()) {
-                DimensionalNodePos current = queue.removeFirst();
-                component.add(current);
-                for (DimensionalNodePos neighbour : getActiveNeighbours(current)) {
-                    if (nodes.containsKey(neighbour) && visited.add(neighbour)) {
-                        queue.addLast(neighbour);
-                    }
-                }
-            }
-
-            UUID id = chooseNetworkId(component, oldNetworks, claimedNetworkIds);
-            claimedNetworkIds.add(id);
-            boolean preserveOverload = shouldPreserveOverload(component, oldNetworks);
-            boolean mergedFromMultipleNetworks = oldNetworkOverlapCount(component, oldNetworks) > 1;
-            NetworkRecord oldNetwork = oldNetworks.get(id);
-            NetworkRecord network = oldNetwork == null ? new NetworkRecord(id) : oldNetwork.copyForRebuild(preserveOverload);
-            if (oldNetwork == null) {
-                network.overloaded = preserveOverload;
-            }
-            for (NetworkRecord candidate : oldNetworks.values()) {
-                if (candidate.nodes.stream().anyMatch(component::contains)) {
-                    network.mergeTelemetryFrom(candidate);
-                }
-            }
-            network.nodes.addAll(component);
-            for (DimensionalNodePos current : component) {
-                NodeRecord node = nodes.get(current);
-                if (node != null) {
-                    node.networkId = id;
-                    applyLux(network, node);
-                    if (node.telemetryAddress.isComplete()) {
-                        network.registeredTelemetryAddresses.add(node.telemetryAddress);
-                    }
-                }
-            }
-            boolean mergedOverloadRecovered = mergedFromMultipleNetworks
-                    && network.overloaded
-                    && network.luxAllocated <= network.luxCapacity;
-            if (network.luxAllocated > network.luxCapacity || (network.overloaded && !mergedOverloadRecovered)) {
-                markNetworkOverloaded(network);
-            } else {
-                markNetworkOnline(network);
-            }
-            networks.put(id, network);
+            Set<DimensionalNodePos> component = collectComponent(start, visited, null);
+            processComponent(component, oldNetworks, claimedNetworkIds);
         }
-        notifyTelemetryRebuildChanges(oldNetworks);
+        notifyTelemetryRebuildChanges(oldNetworks, null);
         GlareDebug.log("Rebuilt graph: {} nodes, {} links, {} networks", nodes.size(), links.size(), networks.size());
+    }
+
+    /**
+     * Scoped rebuild: recomputes only the network component(s) reachable from {@code seeds} (and from
+     * {@code extraNetworkIds}), leaving every other network untouched. Because networks never share a
+     * node, an unaffected network can never overlap the recomputed universe, so this produces identical
+     * membership, id-preservation, overload and telemetry results to {@link #rebuildNetworks()} for the
+     * affected networks — it is a pure performance scoping of the same algorithm.
+     *
+     * <p>{@code extraNetworkIds} lets callers force-recompute a network even when no seed still resolves
+     * to it (e.g. a lone node was removed and its network must be dropped).</p>
+     */
+    private Set<DimensionalNodePos> rebuildNetworksAround(Collection<DimensionalNodePos> seeds) {
+        return rebuildNetworksAround(seeds, List.of());
+    }
+
+    /**
+     * @return every node whose network was recomputed (the "universe") — exactly the nodes whose derived
+     *         state (network id, overload status, receiver operation status) may have changed, so callers
+     *         must notify all of them, not just the seeds. Returning this is what makes an overload (or any
+     *         state change) reach every node in the affected network, not only the source's neighbours.
+     */
+    private Set<DimensionalNodePos> rebuildNetworksAround(Collection<DimensionalNodePos> seeds, Collection<UUID> extraNetworkIds) {
+        Set<UUID> affectedNetworkIds = new HashSet<>();
+        Set<DimensionalNodePos> universe = new HashSet<>();
+        ArrayDeque<DimensionalNodePos> worklist = new ArrayDeque<>(seeds);
+        for (UUID id : extraNetworkIds) {
+            NetworkRecord network = networks.get(id);
+            if (network != null && affectedNetworkIds.add(id)) {
+                worklist.addAll(network.nodes);
+            }
+        }
+        // Closure: pull in every node reachable via active links from a seed, plus every node of any old
+        // network a reached node belonged to (so a split recomputes all resulting components, and a merge
+        // pulls in both prior networks).
+        while (!worklist.isEmpty()) {
+            DimensionalNodePos pos = worklist.removeFirst();
+            NodeRecord record = nodes.get(pos);
+            if (record == null || !universe.add(pos)) {
+                continue;
+            }
+            UUID networkId = record.networkId;
+            if (networkId != null && networks.containsKey(networkId) && affectedNetworkIds.add(networkId)) {
+                worklist.addAll(networks.get(networkId).nodes);
+            }
+            for (DimensionalNodePos neighbour : getActiveNeighbours(pos)) {
+                if (nodes.containsKey(neighbour)) {
+                    worklist.add(neighbour);
+                }
+            }
+        }
+
+        Map<UUID, NetworkRecord> oldNetworks = new HashMap<>();
+        for (UUID id : affectedNetworkIds) {
+            NetworkRecord removed = networks.remove(id);
+            if (removed != null) {
+                oldNetworks.put(id, removed);
+            }
+        }
+
+        if (universe.isEmpty()) {
+            // The affected networks had no surviving nodes (e.g. lone-node removal) — already dropped above.
+            if (!oldNetworks.isEmpty()) {
+                notifyTelemetryRebuildChanges(oldNetworks, universe);
+            }
+            return universe;
+        }
+
+        for (DimensionalNodePos pos : universe) {
+            NodeRecord record = nodes.get(pos);
+            if (record == null) {
+                continue;
+            }
+            record.lastKnownLinks.clear();
+            for (GlareLink link : getLinksFor(pos)) {
+                record.lastKnownLinks.add(link.other(pos));
+            }
+        }
+
+        Set<DimensionalNodePos> visited = new HashSet<>();
+        Set<UUID> claimedNetworkIds = new HashSet<>();
+        for (DimensionalNodePos start : universe) {
+            if (!visited.add(start)) {
+                continue;
+            }
+            Set<DimensionalNodePos> component = collectComponent(start, visited, universe);
+            processComponent(component, oldNetworks, claimedNetworkIds);
+        }
+        notifyTelemetryRebuildChanges(oldNetworks, universe);
+        GlareDebug.log("Scoped rebuild: {} nodes across {} network(s)", universe.size(), affectedNetworkIds.size());
+        return universe;
+    }
+
+    private Set<DimensionalNodePos> collectComponent(DimensionalNodePos start, Set<DimensionalNodePos> visited,
+            @Nullable Set<DimensionalNodePos> bounds) {
+        Set<DimensionalNodePos> component = new LinkedHashSet<>();
+        ArrayDeque<DimensionalNodePos> queue = new ArrayDeque<>();
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            DimensionalNodePos current = queue.removeFirst();
+            component.add(current);
+            for (DimensionalNodePos neighbour : getActiveNeighbours(current)) {
+                boolean inBounds = bounds == null ? nodes.containsKey(neighbour) : bounds.contains(neighbour);
+                if (inBounds && visited.add(neighbour)) {
+                    queue.addLast(neighbour);
+                }
+            }
+        }
+        return component;
+    }
+
+    private void processComponent(Set<DimensionalNodePos> component, Map<UUID, NetworkRecord> oldNetworks,
+            Set<UUID> claimedNetworkIds) {
+        UUID id = chooseNetworkId(component, oldNetworks, claimedNetworkIds);
+        claimedNetworkIds.add(id);
+        boolean preserveOverload = shouldPreserveOverload(component, oldNetworks);
+        boolean mergedFromMultipleNetworks = oldNetworkOverlapCount(component, oldNetworks) > 1;
+        NetworkRecord oldNetwork = oldNetworks.get(id);
+        NetworkRecord network = oldNetwork == null ? new NetworkRecord(id) : oldNetwork.copyForRebuild(preserveOverload);
+        if (oldNetwork == null) {
+            network.overloaded = preserveOverload;
+        }
+        for (NetworkRecord candidate : oldNetworks.values()) {
+            if (candidate.nodes.stream().anyMatch(component::contains)) {
+                network.mergeTelemetryFrom(candidate);
+            }
+        }
+        network.nodes.addAll(component);
+        for (DimensionalNodePos current : component) {
+            NodeRecord node = nodes.get(current);
+            if (node != null) {
+                node.networkId = id;
+                applyLux(network, node);
+                if (node.telemetryAddress.isComplete()) {
+                    network.registeredTelemetryAddresses.add(node.telemetryAddress);
+                }
+            }
+        }
+        boolean mergedOverloadRecovered = mergedFromMultipleNetworks
+                && network.overloaded
+                && network.luxAllocated <= network.luxCapacity;
+        if (network.luxAllocated > network.luxCapacity || (network.overloaded && !mergedOverloadRecovered)) {
+            markNetworkOverloaded(network);
+        } else {
+            markNetworkOnline(network);
+        }
+        networks.put(id, network);
     }
 
     private static boolean shouldPreserveOverload(Set<DimensionalNodePos> component, Map<UUID, NetworkRecord> oldNetworks) {
@@ -846,11 +1010,19 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    private void notifyTelemetryRebuildChanges(Map<UUID, NetworkRecord> oldNetworks) {
+    private void notifyTelemetryRebuildChanges(Map<UUID, NetworkRecord> oldNetworks, @Nullable Set<DimensionalNodePos> scope) {
         for (Map.Entry<Long, TelemetrySubscriber> entry : List.copyOf(telemetrySubscribers.entrySet())) {
             TelemetrySubscriber subscriber = entry.getValue();
             NodeRecord owner = nodes.get(subscriber.owner);
-            if (owner == null || owner.networkId == null) {
+            if (owner == null) {
+                telemetrySubscribers.remove(entry.getKey());
+                continue;
+            }
+            if (scope != null && !scope.contains(subscriber.owner)) {
+                // A scoped rebuild left this subscriber's network untouched — nothing changed for it.
+                continue;
+            }
+            if (owner.networkId == null) {
                 telemetrySubscribers.remove(entry.getKey());
                 continue;
             }
@@ -948,9 +1120,16 @@ public class GlareSavedData extends SavedData {
         }
     }
 
-    private void setDirtyAndRebuild() {
-        rebuildNetworks();
+    private Set<DimensionalNodePos> setDirtyAndRebuildAround(Collection<DimensionalNodePos> seeds) {
+        Set<DimensionalNodePos> touched = rebuildNetworksAround(seeds);
         setDirty();
+        return touched;
+    }
+
+    private Set<DimensionalNodePos> setDirtyAndRebuildAround(Collection<DimensionalNodePos> seeds, Collection<UUID> extraNetworkIds) {
+        Set<DimensionalNodePos> touched = rebuildNetworksAround(seeds, extraNetworkIds);
+        setDirty();
+        return touched;
     }
 
     private void notifyLoadedEndpoint(ServerLevel level, DimensionalNodePos pos) {
@@ -963,10 +1142,15 @@ public class GlareSavedData extends SavedData {
             if (record != null && record.receiver && be instanceof IGlareReceiver receiver) {
                 receiver.applyGlareOperationStatusFromNetwork(record.status);
             }
+            // Coalesce the endpoint refresh into a single callback + client sync. Every node BE's
+            // onGlareNetworkChanged performs a superset of onGlareLinksChanged (it additionally records
+            // the network id), so when the node is networked we only need the former; a node with no
+            // network id still needs the links refresh.
             if (record != null && record.networkId != null) {
                 glareNode.onGlareNetworkChanged(level, record.networkId);
+            } else {
+                glareNode.onGlareLinksChanged(level);
             }
-            glareNode.onGlareLinksChanged(level);
         }
     }
 
@@ -1061,11 +1245,39 @@ public class GlareSavedData extends SavedData {
             linkValidity.remove(link);
             linkKinds.remove(link);
         }
-        setDirtyAndRebuild();
-        for (DimensionalNodePos affectedPos : new ArrayList<>(affected)) affected.addAll(getNetworkNodesFor(affectedPos));
-        notifyLoadedEndpoints(level, affected);
+        Set<DimensionalNodePos> touched = setDirtyAndRebuildAround(affected);
+        notifyLoadedEndpoints(level, touched);
         GlareDebug.log("Removed all {} links from {}", incident.size(), pos.toShortString());
         return incident.size();
+    }
+
+    private static long chunkKeyOf(DimensionalNodePos pos) {
+        BlockPos block = pos.pos();
+        return ChunkPos.asLong(block.getX() >> 4, block.getZ() >> 4);
+    }
+
+    private void indexNode(DimensionalNodePos pos) {
+        nodesByChunk.computeIfAbsent(pos.levelKey(), ignored -> new HashMap<>())
+                .computeIfAbsent(chunkKeyOf(pos), ignored -> new LinkedHashSet<>())
+                .add(pos);
+    }
+
+    private void unindexNode(DimensionalNodePos pos) {
+        Map<Long, Set<DimensionalNodePos>> byChunk = nodesByChunk.get(pos.levelKey());
+        if (byChunk == null) return;
+        long key = chunkKeyOf(pos);
+        Set<DimensionalNodePos> bucket = byChunk.get(key);
+        if (bucket == null) return;
+        bucket.remove(pos);
+        if (bucket.isEmpty()) byChunk.remove(key);
+        if (byChunk.isEmpty()) nodesByChunk.remove(pos.levelKey());
+    }
+
+    private Set<DimensionalNodePos> nodesInChunk(ResourceKey<Level> dimension, long chunkKey) {
+        Map<Long, Set<DimensionalNodePos>> byChunk = nodesByChunk.get(dimension);
+        if (byChunk == null) return Set.of();
+        Set<DimensionalNodePos> bucket = byChunk.get(chunkKey);
+        return bucket == null ? Set.of() : bucket;
     }
 
     private void indexLink(GlareLink link) {
@@ -1204,8 +1416,16 @@ public class GlareSavedData extends SavedData {
             return tag;
         }
 
+        @Nullable
         static NodeRecord load(CompoundTag tag) {
-            DimensionalNodePos pos = DimensionalNodePos.readPos(tag, "").orElseThrow();
+            Optional<DimensionalNodePos> parsed = DimensionalNodePos.readPos(tag, "");
+            if (parsed.isEmpty()) {
+                // Skip a malformed persisted node (missing/invalid position) rather than aborting the whole
+                // saved-data load, which would crash world load. Mirrors the defensive link-loading path.
+                ResourcefulRefinementMain.LOGGER.warn("Skipping malformed GLARE node entry (missing or invalid position)");
+                return null;
+            }
+            DimensionalNodePos pos = parsed.get();
             NodeRecord record = new NodeRecord(pos);
             record.maxLinks = tag.getInt("MaxLinks");
             record.loaded = tag.getBoolean("Loaded");

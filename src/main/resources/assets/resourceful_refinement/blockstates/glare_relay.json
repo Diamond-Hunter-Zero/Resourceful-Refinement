@@ -1,8 +1,5 @@
 {
   "variants": {
-    "facing=north": { "model": "resourceful_refinement:block/glare_relay" },
-    "facing=east": { "model": "resourceful_refinement:block/glare_relay", "y": 90 },
-    "facing=south": { "model": "resourceful_refinement:block/glare_relay", "y": 180 },
-    "facing=west": { "model": "resourceful_refinement:block/glare_relay", "y": 270 }
+    "": { "model": "resourceful_refinement:block/glare/glare_relay" }
   }
 }

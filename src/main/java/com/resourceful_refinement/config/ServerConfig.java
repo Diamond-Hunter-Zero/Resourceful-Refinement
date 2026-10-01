@@ -19,6 +19,7 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue GLARE_LINK_SYNC_INTERVAL;
     public static final ModConfigSpec.IntValue GLARE_LUX_HISTORY_SAMPLE_INTERVAL;
     public static final ModConfigSpec.IntValue GLARE_LUX_HISTORY_SAMPLES;
+    public static final ModConfigSpec.IntValue GLARE_TELEMETRY_TERMINAL_LUX;
     public static final ModConfigSpec.IntValue PUG_TANK_CAPACITY_MB;
     public static final ModConfigSpec.IntValue PUG_BASE_FUEL_MB;
     public static final ModConfigSpec.IntValue PUG_FUEL_PER_STEP_MB;
@@ -34,6 +35,9 @@ public class ServerConfig {
 
     public static final ModConfigSpec.DoubleValue ADVANCED_PUMP_STRENGTH;
 
+    public static final ModConfigSpec.IntValue GLARE_EMITTER_RPM;
+    public static final ModConfigSpec.IntValue GLARE_EMITTER_STRESS;
+    public static final ModConfigSpec.IntValue GLARE_EMITTER_LUX;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_RPM;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_CAPACITY;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
@@ -95,6 +99,9 @@ public class ServerConfig {
         GLARE_LUX_HISTORY_SAMPLES = CONFIG_BUILDER
                 .comment("Maximum Lux history samples retained per GLARE network")
                 .defineInRange("lux_history_samples", 16, 1, 256);
+        GLARE_TELEMETRY_TERMINAL_LUX = CONFIG_BUILDER
+                .comment("The amount of Lux a GLARE Telemetry Terminal allocates from its network to operate (Value between 0 and 1000000)")
+                .defineInRange("telemetry_terminal_lux", 1, 0, 1000000);
         CONFIG_BUILDER.pop();
 
 
@@ -151,13 +158,27 @@ public class ServerConfig {
                 .comment("The pumping-distance multiplier for the Advanced Pump (Value between 0 and 1000)")
                 .defineInRange("advanced_pump_strength", 2f, 0f, 1000f);
 
+        GLARE_EMITTER_RPM = CONFIG_BUILDER
+                .comment("The rotation speed (RPM) a GLARE Emitter requires to operate, (Value between 1 and 4096)")
+                .comment("The total SU required by an emitter should be equal to or greater than the total SU producible by the maximum number of Kinetic Receivers it can support")
+                .comment("(i.e. EMITTER_RPM * EMITTER_STRESS >= (RECEIVER_RPM * RECEIVER_CAPACITY * GLARE_LUX) / RECEIVER_LUX)")
+                .defineInRange("glare_emitter_rpm", 32, 1, 4096);
+
+        GLARE_EMITTER_STRESS = CONFIG_BUILDER
+                .comment("The stress capacity a GLARE Emitter consumes while powered, (Value between 1 and 1000000)")
+                .defineInRange("glare_emitter_stress", 16, 1, 1000000);
+
+        GLARE_EMITTER_LUX = CONFIG_BUILDER
+                .comment("The amount of Lux a GLARE Emitter produces when operational (Value between 0 and 1000000)")
+                .defineInRange("glare_emitter_lux", 8, 0, 1000000);
+
         KINETIC_RECEIVER_RPM = CONFIG_BUILDER
                 .comment("The rotation speed (RPM) a GLARE Kinetic Receiver outputs on its back face while powered (Value between 0 and 4096)")
                 .defineInRange("kinetic_receiver_rpm", 32, 0, 4096);
 
         KINETIC_RECEIVER_CAPACITY = CONFIG_BUILDER
                 .comment("The stress capacity multiplier a GLARE Kinetic Receiver provides while powered, (Value between 1 and 1000000)")
-                .defineInRange("kinetic_receiver_stress", 4, 1, 1000000);
+                .defineInRange("kinetic_receiver_stress", 2, 1, 1000000);
 
         KINETIC_RECEIVER_LUX = CONFIG_BUILDER
                 .comment("The amount of Lux a GLARE Kinetic Receiver allocates from its network to run (Value between 0 and 1000000)")

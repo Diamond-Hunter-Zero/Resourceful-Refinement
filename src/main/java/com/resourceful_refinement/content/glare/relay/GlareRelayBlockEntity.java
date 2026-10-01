@@ -1,5 +1,6 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.relay;
 
+import com.resourceful_refinement.content.glare.GlareNodeBlockEntity;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;

@@ -53,7 +53,7 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
                 screen.send(TelemetryTerminalActionPayload.simple(screen.getMenu().getBlockPos(), TelemetryTerminalActionPayload.Action.SEND_MANUAL));
             }).bounds(x + 238, y + 149, 56, 18).build());
         }
-        contactsScroll = screen.addPageWidget(new VerticalScrollBar(x + 72, y + 24, 6, 126,
+        contactsScroll = screen.addPageWidget(new VerticalScrollBar(x + 78, y + 24, 6, 126,
                 screen.snapshot().contacts().size(), 6, contactOffset, offset -> contactOffset = offset));
     }
 
@@ -104,9 +104,18 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
         List<GlareAddress> contacts = screen.snapshot().contacts();
         for (int row = 0; row < 6 && contactOffset + row < contacts.size(); row++) {
             int rowY = y + 27 + row * 21;
-            boolean hovered = mouseX >= x + 2 && mouseX < x + 70 && mouseY >= rowY && mouseY < rowY + 19;
-            if (hovered) graphics.fill(x + 1, rowY - 1, x + 70, rowY + 19, 0x40FFFFFF);
+            boolean hovered = mouseX >= x + 1 && mouseX < x + 76 && mouseY >= rowY - 1 && mouseY < rowY + 19;
+            if (hovered) graphics.fill(x + 1, rowY - 1, x + 76, rowY + 19, 0x40FFFFFF);
             TelemetryAddressRenderer.render(graphics, contacts.get(contactOffset + row), x + 5, rowY, 20, 0.75f);
+            // Hovering a contact reveals a small square delete button at its right end.
+            if (hovered) {
+                int dx = x + 65;
+                int dy = rowY + 5;
+                boolean overDelete = mouseX >= dx && mouseX < dx + 9 && mouseY >= dy && mouseY < dy + 9;
+                graphics.fill(dx, dy, dx + 9, dy + 9, overDelete ? 0xFFB4302A : 0xFF5A2420);
+                graphics.renderOutline(dx, dy, 9, 9, 0xFF1D0F0E);
+                graphics.drawString(screen.getMinecraft().font, "x", dx + 3, dy + 1, overDelete ? 0xFFFFFFFF : 0xFFE0B4B0, false);
+            }
         }
         Component status = switch (screen.snapshot().lastResult()) {
             case MESSAGE_SENT -> Component.translatable(automatic
@@ -122,11 +131,19 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
         if (button != 0) return false;
         int x = screen.contentLeft();
         int y = screen.contentTop() + topOffset;
-        if (mouseX >= x + 2 && mouseX < x + 70 && mouseY >= y + 27 && mouseY < y + 153) {
+        if (mouseX >= x + 2 && mouseX < x + 76 && mouseY >= y + 27 && mouseY < y + 153) {
             int row = (int) (mouseY - (y + 27)) / 21;
             List<GlareAddress> contacts = screen.snapshot().contacts();
             if (contactOffset + row < contacts.size()) {
-                destination = contacts.get(contactOffset + row);
+                GlareAddress contact = contacts.get(contactOffset + row);
+                int rowY = y + 27 + row * 21;
+                int dx = x + 65;
+                int dy = rowY + 5;
+                if (mouseX >= dx && mouseX < dx + 9 && mouseY >= dy && mouseY < dy + 9) {
+                    screen.send(action(TelemetryTerminalActionPayload.Action.REMOVE_CONTACT, contact, "", false, new UUID(0, 0)));
+                    return true;
+                }
+                destination = contact;
                 dirty = true;
                 saveDelay = 0;
                 flush();

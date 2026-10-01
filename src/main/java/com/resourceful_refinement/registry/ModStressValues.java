@@ -1,5 +1,6 @@
 package com.resourceful_refinement.registry;
 
+import com.resourceful_refinement.config.ServerConfig;
 import com.simibubi.create.api.stress.BlockStressValues;
 import net.minecraft.world.level.block.Block;
 
@@ -13,7 +14,6 @@ public class ModStressValues {
     public static final double FORGE_STRESS = 8;
     public static final double ADVANCED_PUMP_STRESS = 8;
     public static final double MILKING_STATION_STRESS = 4;
-    public static final double GLARE_EMITTER_STRESS = 8;
     public static final double BUCKET_EXCAVATOR_STRESS = 16;
     public static final double DRILL_PYLON_STRESS = 16;
     public static final double CYCLOTRON_STRESS = 32;
@@ -34,7 +34,7 @@ public class ModStressValues {
 
         // Register generation capacities
         registerCapacity(ModBlocks.COMBUSTION_CHAMBER.get(), () -> 10);
-        registerImpact(ModBlocks.GLARE_EMITTER_DISH.get(), () -> GLARE_EMITTER_STRESS);
+        registerImpact(ModBlocks.GLARE_EMITTER_DISH.get(), ServerConfig.GLARE_EMITTER_STRESS::getAsInt);
     }
 
     private static void registerImpact(Block block, DoubleSupplier impact) {

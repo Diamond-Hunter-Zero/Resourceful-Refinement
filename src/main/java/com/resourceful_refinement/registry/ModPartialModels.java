@@ -6,6 +6,11 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ModPartialModels {
 
+    // Partial model consts
+    public static final float PRISM_ROTATE_DURATION = 8;
+    public static final int PRISM_DEFAULT_COLOUR = 0xcae6f5;
+    public static final int PRISM_OFFLINE_COLOUR = 0xf5d1e0;
+
     // Shafts
     public static final PartialModel SHAFT_X = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_axis_x"));
     public static final PartialModel SHAFT_Z = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/shaft_axis_z"));
@@ -23,6 +28,8 @@ public class ModPartialModels {
     public static final PartialModel NETHERRACK_GEYSER_CASING = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/netherrack_geyser_block"));
     public static final PartialModel INDUSTRIAL_HEATER_STAND = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/distillery/industrial_heater_stand"));
     public static final PartialModel ADVANCED_PUMP_COG = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/advanced_pump/advanced_pump_cog"));
+    public static final PartialModel GLARE_COG_SHAFT = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/glare_cog_shaft"));
+    public static final PartialModel GLARE_PRISM_SMALL = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/glare/glare_prism_small"));
 
     // Combustion Chamber
     public static final PartialModel COMBUSTION_FAN_NORTH = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/combustion_chamber/combustion_chamber_fan_casing_north"));

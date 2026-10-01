@@ -1,13 +1,18 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.chromatic_transceiver;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class GlareChromaticTransceiverBlock extends GlareNodeBlock {
@@ -20,6 +25,18 @@ public class GlareChromaticTransceiverBlock extends GlareNodeBlock {
     @Override
     protected MapCodec<? extends GlareNodeBlock> codec() {
         return CODEC;
+    }
+
+    // Fully directional (pillar) placement across all six faces, matching the Kinetic Receiver:
+    // FACING points toward the player, so the front faces the player.
+    @Override
+    protected DirectionProperty getFacingProperty() {
+        return BlockStateProperties.FACING;
+    }
+
+    @Override
+    protected Direction getPlacementFacing(BlockPlaceContext context) {
+        return context.getNearestLookingDirection().getOpposite();
     }
 
     @Override

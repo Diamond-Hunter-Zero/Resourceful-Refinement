@@ -2,6 +2,8 @@ package com.resourceful_refinement.content.glare.terminal;
 
 import com.resourceful_refinement.network.TelemetryTerminalActionPayload;
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
+import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -104,6 +106,27 @@ public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTe
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         if (page != null) page.render(graphics, mouseX, mouseY, partialTick);
+        drawFloatingSections(graphics);
+    }
+
+    /** Floating panels above the frame: the terminal's own address (top-left) and a No-Lux warning (top-right). */
+    private void drawFloatingSections(GuiGraphics graphics) {
+        Component label = Component.translatable("gui.resourceful_refinement.telemetry_terminal.local_address");
+        graphics.drawString(font, label, leftPos, topPos - 23, 0xFFF2C744, false);
+        int itemsX = leftPos + font.width(label) + 6;
+        TelemetryAddressRenderer.render(graphics, snapshot().ownAddress(), itemsX, topPos - 30, 20, 1f);
+
+        // The No-Lux warning shows only while the connected network is overloaded (insufficient Lux).
+        if (networkSnapshot().overloaded()) {
+            Component warning = Component.translatable("gui.resourceful_refinement.telemetry_terminal.no_lux");
+            graphics.drawString(font, warning, leftPos + WIDTH - font.width(warning), topPos - 23, 0xFFFF5A1F, false);
+        }
+    }
+
+    private GlareNetworkSnapshot networkSnapshot() {
+        if (getMinecraft().level == null) return GlareNetworkSnapshot.EMPTY;
+        return getMinecraft().level.getBlockEntity(menu.getBlockPos()) instanceof GlareNetworkSnapshotProvider provider
+                ? provider.getSyncedGlareNetworkSnapshot() : GlareNetworkSnapshot.EMPTY;
     }
 
     @Override protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {}

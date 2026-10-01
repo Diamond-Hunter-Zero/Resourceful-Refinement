@@ -1,10 +1,10 @@
-package com.resourceful_refinement.content.glare.lux;
+package com.resourceful_refinement.content.glare.relay;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.resourceful_refinement.ResourcefulRefinementMain;
-import com.resourceful_refinement.content.glare.GlareOperationStatus;
+import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.registry.ModPartialModels;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
@@ -18,15 +18,15 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import static com.resourceful_refinement.registry.ModPartialModels.PRISM_ROTATE_DURATION;
 
-public class LuxTransceiverRenderer extends SafeBlockEntityRenderer<LuxTransceiverBlockEntity> {
+public class GlareRelayRenderer extends SafeBlockEntityRenderer<GlareRelayBlockEntity> {
 
     public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             ResourcefulRefinementMain.MOD_ID, "textures/block/glare/glare_relay.png");
 
-    private final GlareLuxTransceiverModel model;
+    private final GlareRelayModel model;
 
-    public LuxTransceiverRenderer(BlockEntityRendererProvider.Context context) {
-        this.model = new GlareLuxTransceiverModel(context.bakeLayer(GlareLuxTransceiverModel.LAYER_LOCATION));
+    public GlareRelayRenderer(BlockEntityRendererProvider.Context context) {
+        this.model = new GlareRelayModel(context.bakeLayer(GlareRelayModel.LAYER_LOCATION));
     }
 
     @Override
@@ -35,28 +35,16 @@ public class LuxTransceiverRenderer extends SafeBlockEntityRenderer<LuxTransceiv
     }
 
     @Override
-    public void renderSafe(LuxTransceiverBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
+    public void renderSafe(GlareRelayBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
                            int light, int overlay) {
 
         BlockState state = be.getBlockState();
-        Direction facing = state.getValue(LuxTransceiverBlock.FACING);
         VertexConsumer casingBuffer = buffer.getBuffer(RenderType.entityCutout(TEXTURE));
 
         ms.pushPose();
 
-        if (facing.getAxis().isVertical())
-        {
-            boolean isUp = facing == Direction.UP;
-            ms.translate(0.5, 0.5, isUp? -0.5 : 1.5);
-            ms.scale(1, -1, -1);
-            ms.mulPose(Axis.XP.rotationDegrees(isUp? -90 : 90));
-        }
-        else
-        {
-            ms.translate(0.5, 1.5, 0.5);
-            ms.scale(-1, -1, 1);
-            ms.mulPose(Axis.YP.rotationDegrees(facing.getOpposite().toYRot()));
-        }
+        ms.translate(0.5, 1.5, 0.5);
+        ms.scale(-1, -1, 1);
 
 
         // --- Render Block Model ---
@@ -66,12 +54,12 @@ public class LuxTransceiverRenderer extends SafeBlockEntityRenderer<LuxTransceiv
         ms.popPose();
 
         // --- Prism Rendering ---
-        SuperByteBuffer prism = CachedBuffers.partialFacing(ModPartialModels.GLARE_PRISM_SMALL, state);
+        SuperByteBuffer prism = CachedBuffers.partialFacing(ModPartialModels.GLARE_PRISM_SMALL, state, Direction.NORTH);
 
         prism.light(light);
         prism.rotateCentered((float) ((effectiveGameTime/(20*PRISM_ROTATE_DURATION)) * 2f * Math.PI), Direction.Axis.Y);
         prism.rotateCentered((float) ((effectiveGameTime/(20*PRISM_ROTATE_DURATION)) * 2f * Math.PI), Direction.Axis.Z);
-        prism.color(be.getGlareOperationStatus() == GlareOperationStatus.OVERLOADED ?  ModPartialModels.PRISM_OFFLINE_COLOUR : ModPartialModels.PRISM_DEFAULT_COLOUR);
+        prism.color(be.getSyncedGlareNetworkSnapshot().overloaded() ?  ModPartialModels.PRISM_OFFLINE_COLOUR : ModPartialModels.PRISM_DEFAULT_COLOUR);
         prism.renderInto(ms, buffer.getBuffer(net.minecraft.client.renderer.Sheets.translucentCullBlockSheet()));
 
     }

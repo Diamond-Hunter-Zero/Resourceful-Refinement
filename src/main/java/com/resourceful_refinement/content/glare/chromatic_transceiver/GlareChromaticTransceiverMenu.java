@@ -1,5 +1,7 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.chromatic_transceiver;
 
+import com.resourceful_refinement.content.glare.GlareComparison;
+import com.resourceful_refinement.content.glare.GlareLogicMode;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModMenus;
 import net.minecraft.core.BlockPos;

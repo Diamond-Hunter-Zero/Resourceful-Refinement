@@ -1,7 +1,7 @@
 package com.resourceful_refinement.network;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
-import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.GlareLogicMode;
 import com.resourceful_refinement.content.glare.GlareComparison;
 import net.minecraft.core.BlockPos;

@@ -1,5 +1,6 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.chromatic_transceiver;
 
+import com.resourceful_refinement.content.glare.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -115,13 +116,13 @@ public class GlareChromaticTransceiverBlockEntity extends GlareNodeBlockEntity i
         }
     }
 
-    static boolean matchesFilters(GlareLogicMode mode, int[] thresholds, int[] charges) {
+    public static boolean matchesFilters(GlareLogicMode mode, int[] thresholds, int[] charges) {
         GlareComparison[] defaultComparisons = new GlareComparison[DyeColor.values().length];
         Arrays.fill(defaultComparisons, GlareComparison.GREATER_THAN_OR_EQUAL);
         return matchesFilters(mode, thresholds, defaultComparisons, charges);
     }
 
-    static boolean matchesFilters(GlareLogicMode mode, int[] thresholds, GlareComparison[] comparisons, int[] charges) {
+    public static boolean matchesFilters(GlareLogicMode mode, int[] thresholds, GlareComparison[] comparisons, int[] charges) {
         int enabled = 0;
         int matches = 0;
         for (int i = 0; i < DyeColor.values().length; i++) {

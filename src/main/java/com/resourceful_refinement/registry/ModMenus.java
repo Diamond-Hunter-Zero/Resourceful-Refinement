@@ -3,7 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.gui.PowerTerminalMenu;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationMenu;
-import com.resourceful_refinement.content.glare.GlareChromaticTransceiverMenu;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverMenu;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalMenu;
 import com.resourceful_refinement.content.pug.LaunchpadMenu;
 import net.minecraft.core.registries.Registries;

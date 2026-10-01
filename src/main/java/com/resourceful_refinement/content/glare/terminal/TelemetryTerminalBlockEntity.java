@@ -1,19 +1,24 @@
 package com.resourceful_refinement.content.glare.terminal;
 
+import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.content.glare.GlareAddress;
 import com.resourceful_refinement.content.glare.GlareMessage;
 import com.resourceful_refinement.content.glare.GlareSmartNodeBlockEntity;
 import com.resourceful_refinement.content.glare.DimensionalNodePos;
 import com.resourceful_refinement.content.glare.GlareOperationStatus;
+import com.resourceful_refinement.content.glare.IGlareNode;
 import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.IGlareTelemetryEndpoint;
 import com.resourceful_refinement.content.glare.TelemetryService;
 import com.resourceful_refinement.content.glare.common.Trio;
 import com.resourceful_refinement.content.glare.common.TrioAddressSlot;
+import com.resourceful_refinement.content.glare.lux.LuxSocket;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.network.TelemetryTerminalStatePayload;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -45,10 +50,12 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  * to all open viewers, while loaded-only subscriptions drive automatic receive behavior.
  */
 public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
-        implements IGlareReceiver, IGlareTelemetryEndpoint, MenuProvider {
+        implements IGlareReceiver, IGlareTelemetryEndpoint, LuxSocket, MenuProvider {
     public static final int MAX_LINK_COUNT = 1;
+    public static final int INBOX_RECEIVED_PULSE_LENGTH = 4;
+    public static final int AUTO_SEND_PULSE_LENGTH = 4;
     public static final GlareAddress DEFAULT_GUI_ADDRESS = GlareAddress.of(
-            Blocks.GRASS_BLOCK.asItem(), Blocks.GRASS_BLOCK.asItem(), Blocks.GRASS_BLOCK.asItem());
+            Blocks.COBBLESTONE.asItem(), Blocks.COBBLESTONE.asItem(), Blocks.COBBLESTONE.asItem());
 
     // Persistent address and per-mode user configuration.
     private List<TelemetryAddressBehaviour> addressSlots;
@@ -69,6 +76,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     // Runtime automation state. Subscriptions and pulses are deliberately never persisted across unloaded chunks.
     private boolean wasRedstonePowered;
     private int pulseTicks;
+    private int sendPulseTicks;
     private long lastPulseGameTime = Long.MIN_VALUE;
     private int revision;
     private TelemetryService.Subscription inboxSubscription;
@@ -79,7 +87,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15.9f, 8f, 90f));
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15f, 3f, 90f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);
@@ -89,8 +97,31 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
         }
     }
 
-    @Override public int getAllocatedLux() { return 0; }
+    @Override public int getAllocatedLux() { return ServerConfig.GLARE_TELEMETRY_TERMINAL_LUX.getAsInt(); }
     @Override public GlareOperationStatus getGlareOperationStatus() { return status; }
+
+    // Telemetry Terminals cannot form direct GLARE links; they join a network only through a Lux Transceiver
+    // attached to the socket on their local-back face (see getLuxSocketNode).
+    @Override public boolean allowsManualGlareLinks() { return false; }
+
+    /** Exposes this terminal as a Lux Socket on its local-back face for an adjacent Lux Transceiver to bridge. */
+    @Override
+    public IGlareNode getLuxSocketNode(Direction side) {
+        Direction back = getBlockState().getValue(TelemetryTerminalBlock.FACING).getOpposite();
+        return side == back ? this : null;
+    }
+
+    /** Nudge a Lux Transceiver seated on the back face to (re)form its socket link once this node is registered. */
+    private void refreshAdjacentLuxTransceiver() {
+        if (!(level instanceof ServerLevel server)) return;
+        Direction back = getBlockState().getValue(TelemetryTerminalBlock.FACING).getOpposite();
+        BlockPos transceiverPos = worldPosition.relative(back);
+        if (!server.isLoaded(transceiverPos)) return;
+        if (server.getBlockEntity(transceiverPos) instanceof LuxTransceiverBlockEntity transceiver) {
+            transceiver.refreshSocketLink();
+        }
+    }
+
     @Override public void setGlareOperationStatus(GlareOperationStatus status) { this.status = status; pushGlareState(); sendData(); }
     @Override public void applyGlareOperationStatusFromNetwork(GlareOperationStatus status) { this.status = status; }
 
@@ -103,6 +134,8 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     public void setAddressSlot(int slot, ItemStack stack) { addressSlots.get(slot).setFilter(stack); }
     public TelemetryTerminalMode getMode() { return mode; }
     public boolean isPulsing() { return pulseTicks > 0; }
+    public boolean isSendPulsing() { return sendPulseTicks > 0; }
+    public int getSendPulseTicks() { return sendPulseTicks; }
     public long getLastPulseGameTime() { return lastPulseGameTime; }
     public int getRevision() { return revision; }
 
@@ -112,6 +145,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
         if (level instanceof ServerLevel server) {
             wasRedstonePowered = server.hasNeighborSignal(worldPosition);
             refreshSubscription(server);
+            refreshAdjacentLuxTransceiver();
         }
     }
 
@@ -119,6 +153,15 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     public void remove() {
         closeSubscription();
         super.remove();
+    }
+
+    @Override
+    public void invalidate() {
+        // Create's SmartBlockEntity.setRemoved() skips remove() on chunk unload but always calls
+        // invalidate(), so releasing the telemetry subscription here prevents a leaked subscriber (and a
+        // pinned dead block entity) each time the terminal's chunk unloads. closeSubscription() is idempotent.
+        closeSubscription();
+        super.invalidate();
     }
 
     @Override
@@ -134,6 +177,11 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
         if (level == null || level.isClientSide) return;
         if (pulseTicks > 0 && --pulseTicks == 0) {
             updateRedstoneOutput();
+        }
+        if (sendPulseTicks > 0) {
+            sendPulseTicks--;
+            // Sync each step so client renderers can track the countdown; the client BE does not tick.
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
         if (level.getGameTime() % 20L == 0L) refreshDisplayLinkText();
     }
@@ -249,6 +297,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
 
     private void performAutoSend(ServerLevel server) {
         lastResult = send(server, autoSendDestination, effectiveAutoSendBody());
+        sendPulseTicks = AUTO_SEND_PULSE_LENGTH;
         changed(false);
     }
 
@@ -306,7 +355,7 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
         int runAt = server.getServer().getTickCount() + 1;
         server.getServer().tell(new TickTask(runAt, () -> {
             if (isRemoved() || level != server || mode != TelemetryTerminalMode.AUTO_RECEIVE) return;
-            pulseTicks = 2;
+            pulseTicks = INBOX_RECEIVED_PULSE_LENGTH;
             lastPulseGameTime = server.getGameTime();
             updateRedstoneOutput();
             if (discardMatchingMessages && getNetworkId() != null) {
@@ -362,6 +411,10 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
+        // Pulse state is runtime-only, but it drives the world renderer's powered texture, so sync it to
+        // clients on the update packet. Not written to disk (it clears within two ticks anyway).
+        if (clientPacket) tag.putInt("PulseTicks", pulseTicks);
+        if (clientPacket) tag.putInt("SendPulseTicks", sendPulseTicks);
         tag.putString("Mode", mode.name());
         tag.putString("Status", status.name());
         tag.putString("LastResult", lastResult.name());
@@ -390,6 +443,8 @@ public class TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
+        if (clientPacket) pulseTicks = tag.getInt("PulseTicks");
+        if (clientPacket) sendPulseTicks = tag.getInt("SendPulseTicks");
         if (tag.contains("AddressInventory", Tag.TAG_COMPOUND) && !tag.contains("TelemetryAddressSlot0", Tag.TAG_COMPOUND)) {
             ItemStackHandler legacyAddress = new ItemStackHandler(3);
             legacyAddress.deserializeNBT(registries, tag.getCompound("AddressInventory"));

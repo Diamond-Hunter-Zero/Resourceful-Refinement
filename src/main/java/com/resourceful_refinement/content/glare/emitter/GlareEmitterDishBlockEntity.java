@@ -1,5 +1,7 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.emitter;
 
+import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.glare.*;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
@@ -22,12 +24,12 @@ import java.util.UUID;
 
 public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements IGlareNode, IGlareEmitter, GlareNetworkSnapshotProvider {
     public static final int MAX_LINK_COUNT = 1;
-    public static final int BASE_LUX = 8;
-    public static final float REQUIRED_RPM = 32.0F;
 
     private DyeColor colour = DyeColor.WHITE;
     private boolean redstonePowered;
     private boolean hasCrystal;
+    private int lastPushedLux = -1;
+    private DyeColor lastPushedColour = null;
     private UUID networkId;
     private int syncedLinkCount;
     private int syncedLuxCapacity;
@@ -95,13 +97,29 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
         if (!(level instanceof ServerLevel server)) {
             return;
         }
-        redstonePowered = level.hasNeighborSignal(worldPosition);
-        hasCrystal = level.getBlockState(worldPosition.below()).is(ModBlocks.RESONANCE_CRYSTAL.get())
+        boolean newRedstone = level.hasNeighborSignal(worldPosition);
+        boolean newCrystal = level.getBlockState(worldPosition.below()).is(ModBlocks.RESONANCE_CRYSTAL.get())
                 || level.getBlockState(worldPosition.below()).is(ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL.get());
-        GlareService.updateNodeState(server, this);
-        refreshSyncedGlareSummary(server);
-        syncToClient();
+        boolean localChanged = newRedstone != redstonePowered || newCrystal != hasCrystal;
+        redstonePowered = newRedstone;
+        hasCrystal = newCrystal;
+
+        // Only push to the whole network when this emitter's actual contribution (Lux + colour) changes,
+        // rather than every second. Local goggle state (crystal/signal) still refreshes when it changes.
+        int effectiveLux = isGlareEmitterEnabled() ? Math.max(0, getProducedLux()) : 0;
+        boolean outputChanged = effectiveLux != lastPushedLux || colour != lastPushedColour;
+        if (outputChanged) {
+            lastPushedLux = effectiveLux;
+            lastPushedColour = colour;
+            GlareService.updateNodeState(server, this);
+        }
+        if (localChanged || outputChanged) {
+            refreshSyncedGlareSummary(server);
+            syncToClient();
+        }
     }
+
+    public boolean isOnCrystal() {return hasCrystal; }
 
     public void setColour(DyeColor colour) {
         this.colour = colour;
@@ -114,7 +132,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
 
     @Override
     public int getProducedLux() {
-        return BASE_LUX;
+        return ServerConfig.GLARE_EMITTER_LUX.getAsInt();
     }
 
     @Override
@@ -124,7 +142,7 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
 
     @Override
     public boolean isGlareEmitterEnabled() {
-        return hasCrystal && !redstonePowered && Math.abs(getSpeed()) >= REQUIRED_RPM && !isOverStressed();
+        return hasCrystal && !redstonePowered && Math.abs(getSpeed()) >= ServerConfig.GLARE_EMITTER_RPM.getAsInt() && !isOverStressed();
     }
 
     private void refreshSyncedGlareSummary(ServerLevel server) {
@@ -212,8 +230,8 @@ public class GlareEmitterDishBlockEntity extends KineticBlockEntity implements I
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
         tooltip.add(Component.literal("     GLARE Emitter:"));
         tooltip.add(Component.literal("Links: " + syncedLinkCount + "/" + MAX_LINK_COUNT));
-        tooltip.add(Component.literal("Lux Output: " + (isGlareEmitterEnabled() ? BASE_LUX : 0) + "/" + BASE_LUX));
-        tooltip.add(Component.literal("Required RPM: " + (int) REQUIRED_RPM));
+        tooltip.add(Component.literal("Lux Output: " + (isGlareEmitterEnabled() ? ServerConfig.GLARE_EMITTER_LUX.getAsInt() : 0) + "/" + ServerConfig.GLARE_EMITTER_LUX.getAsInt()));
+        tooltip.add(Component.literal("Required RPM: " + ServerConfig.GLARE_EMITTER_RPM.getAsInt()));
         tooltip.add(Component.literal("Crystal: " + (hasCrystal ? "present" : "missing")));
         tooltip.add(Component.literal("Signal: " + (redstonePowered ? "disabled" : "clear")));
         if (networkId != null) {

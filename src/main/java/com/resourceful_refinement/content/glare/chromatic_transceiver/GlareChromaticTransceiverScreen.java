@@ -1,6 +1,8 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.chromatic_transceiver;
 
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
+import com.resourceful_refinement.content.glare.GlareComparison;
+import com.resourceful_refinement.content.glare.GlareLogicMode;
 import com.resourceful_refinement.content.gui.GlareNetworkGuiData;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
@@ -66,7 +68,9 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
             field.setMaxLength(7);
             field.setFilter(value -> value.isEmpty() || value.chars().allMatch(Character::isDigit));
             int threshold = menu.getInitialThreshold(colour);
-            field.setValue(Integer.toString(Math.max(0, threshold)));
+            // Enabled filters show their saved threshold; unset (disabled) filters default to 1 so that
+            // enabling a filter does not power the transceiver by default (charge >= 0 is always true).
+            field.setValue(Integer.toString(threshold >= 0 ? threshold : 1));
             thresholdFields[index] = addRenderableWidget(field);
         }
         modeButton = addRenderableWidget(Button.builder(modeLabel(), button -> cycleMode())
@@ -98,6 +102,9 @@ public class GlareChromaticTransceiverScreen extends AbstractContainerScreen<Gla
         toggles[index].setMessage(toggleLabel(index));
         thresholdFields[index].setEditable(enabled[index]);
         comparisonButtons[index].active = enabled[index];
+        if (enabled[index] && thresholdFields[index].getValue().isEmpty()) {
+            thresholdFields[index].setValue("1");
+        }
     }
 
     private Component toggleLabel(int index) {

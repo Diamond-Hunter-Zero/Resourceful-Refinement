@@ -16,6 +16,8 @@ tags:
 
 The Telemetry Terminal is a horizontally rotatable Create SmartBlockEntity which connects to a [[GLARE Networks|GLARE network]] as a receiver, and enables network-wide communication through the telemetry system.
 
+The Terminal cannot form direct GLARE links itself. Instead it exposes a **Lux Socket** on its local-back face; a [[GLARE Networks|Lux Transceiver]] seated against that face bridges the Terminal into the Transceiver's connected network. While bridged, the Terminal allocates a configurable amount of Lux (default 1).
+
 **ID:** *glare_telemetry_terminal*
 
 ## Gameplay Role
@@ -27,11 +29,13 @@ The Telemetry Terminal is the player-facing front-end for the GLARE network's Te
 A horizontally rotatable Create SmartBlockEntity. Each Terminal is assigned an Address by using a row of 3 Create item-slot behaviours positioned on the top face of the block (similar to the implementation in Redstone Links).
 
 > [!note] Implementation
-> `TelemetryTerminalBlock extends GlareNodeBlock` (horizontal `FACING`, default NORTH); `TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity implements IGlareReceiver, IGlareTelemetryEndpoint, MenuProvider`. `MAX_LINK_COUNT = 1`. The three top-face slots are `TelemetryAddressBehaviour` (extends Create's `FilteringBehaviour`, one item each, forced count 1) laid out via `Trio.makeSlots`; they form the terminal's own `GlareAddress` (`GlareAddress.of(item0, item1, item2)`). A legacy `AddressInventory` NBT layout is migrated on load.
+> `TelemetryTerminalBlock extends GlareNodeBlock` (horizontal `FACING`, default NORTH); `TelemetryTerminalBlockEntity extends GlareSmartNodeBlockEntity implements IGlareReceiver, IGlareTelemetryEndpoint, LuxSocket, MenuProvider`. `MAX_LINK_COUNT = 1`. The three top-face slots are `TelemetryAddressBehaviour` (extends Create's `FilteringBehaviour`, one item each, forced count 1) laid out via `Trio.makeSlots`; they form the terminal's own `GlareAddress` (`GlareAddress.of(item0, item1, item2)`). A legacy `AddressInventory` NBT layout is migrated on load.
+>
+> **Lux Socket connectivity:** `allowsManualGlareLinks()` returns `false`, so the Terminal is rejected by every manual-link path (`GlareSavedData.tryAddLink`/`canAcceptLink` and the Relay Wrench all gate on this flag). It implements `LuxSocket.getLuxSocketNode(side)`, returning itself on its local-back face (`FACING.getOpposite()`); an adjacent `LuxTransceiverBlockEntity` bridges it via `GlareService.trySocketLink` (a socket link, which bypasses the manual-link flag). `onLoad` calls `refreshAdjacentLuxTransceiver()` to (re)form the socket link once the node is registered — the Transceiver's own `neighborChanged`/`onPlace`/`onRemove` handle placement and teardown. `getAllocatedLux()` returns `ServerConfig.GLARE_TELEMETRY_TERMINAL_LUX` (default 1).
 
 ## Inputs & Outputs
 
-- **GLARE link:** connects to any relay node in a network as a receiver.
+- **GLARE link:** the Terminal does not link directly to relay nodes. It exposes a Lux Socket on its local-back face; a Lux Transceiver placed against that face joins the Terminal to the Transceiver's network. The Terminal allocates `telemetry_terminal_lux` Lux (default 1) while bridged.
 - **Address slots:** the 3 top-face item-slot behaviours set the terminal's Address ID.
 - **Redstone:** in Auto-Send mode a redstone pulse triggers a send; in Auto-Receive mode a matching message emits a redstone pulse.
 - **Create Display Links:** in Auto-Send mode, a terminal that is the display target of one or more Display Links reads its outgoing body from them (see Operation).
@@ -108,6 +112,7 @@ Auto-discarding is deferred so that any other auto-receive terminals listening t
 - `TelemetryService.MAX_MESSAGES = 16` (per-inbox cap, enforced on send).
 - `GlareMessage.MAX_BODY_LENGTH = 512` (message body cap).
 - `TelemetryTerminalSnapshot.MAX_CONTACTS = 32`, `MAX_FILTERS = 32`, `MAX_FILTER_LENGTH = 64`, `MAX_SYNCED_MESSAGES = 256` (the client snapshot may sync up to 256 messages, but the actual inbox never exceeds 16).
+- `ServerConfig.GLARE_TELEMETRY_TERMINAL_LUX` (`telemetry_terminal_lux`, default 1, range 0–1000000, under *GLARE Networks*) — Lux the Terminal allocates from its network while bridged.
 
 **State sync:** the terminal broadcasts a revisioned `TelemetryTerminalSnapshot` — every mutation calls `changed()` which does `revision++`, then (server-side) refreshes the inbox subscription, saves, and calls `TelemetryTerminalStatePayload.broadcast` to all players viewing that terminal. The client `TelemetryTerminalMenu.applySnapshot` ignores stale packets (`revision` must be `>=` current); `revision` is persisted in NBT. Loaded-only automation is driven by a non-persisted `TelemetryService.Subscription`.
 

@@ -41,6 +41,12 @@ public class GlareNodeBlockItem extends BlockItem {
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
         if (player != null && player.isShiftKeyDown()) {
+            GlareTargetsData targets = stack.getOrDefault(ModDataComponents.GLARE_TARGETS.get(), GlareTargetsData.EMPTY);
+            // Only intercept the crouch interaction to clear targets when there is something to clear;
+            // otherwise let the interaction pass through (e.g. crouch-placing on an interactable block).
+            if (targets.isEmpty()) {
+                return super.useOn(context);
+            }
             if (!context.getLevel().isClientSide) {
                 GlareService.clearTargets(stack, player);
             }

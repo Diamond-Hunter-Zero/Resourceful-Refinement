@@ -591,6 +591,8 @@
   "gui.resourceful_refinement.telemetry_terminal.item_picker": "Select Address Item",
   "gui.resourceful_refinement.telemetry_terminal.search_items": "Search items...",
   "gui.resourceful_refinement.telemetry_terminal.close": "Close",
+  "gui.resourceful_refinement.telemetry_terminal.local_address": "Local Address:",
+  "gui.resourceful_refinement.telemetry_terminal.no_lux": "No Lux!",
   "message.resourceful_refinement.telemetry_terminal.mode": "Telemetry Terminal mode: %s",
   "resourceful_refinement.display_source.fluid_refill_station": "Fluid Refill Station",
 

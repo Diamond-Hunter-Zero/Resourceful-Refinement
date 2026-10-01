@@ -1,6 +1,7 @@
-package com.resourceful_refinement.content.glare;
+package com.resourceful_refinement.content.glare.kinetic_receiver;
 
 import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.glare.*;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.registry.ModBlockEntities;
@@ -152,7 +153,7 @@ public class GlareKineticReceiverBlockEntity extends GeneratingKineticBlockEntit
     }
 
     /** Powered only while linked to a network that is online (not overloaded). */
-    private boolean isReceiverPowered() {
+    public boolean isReceiverPowered() {
         return networkId != null && status == GlareOperationStatus.ONLINE;
     }
 

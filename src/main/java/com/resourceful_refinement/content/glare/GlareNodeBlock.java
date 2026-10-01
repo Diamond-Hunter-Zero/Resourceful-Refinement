@@ -1,6 +1,7 @@
 package com.resourceful_refinement.content.glare;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishBlockEntity;
 import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +35,20 @@ public class GlareNodeBlock extends HorizontalDirectionalBlock implements Entity
     public GlareNodeBlock(Properties properties, @Nullable BiFunction<BlockPos, BlockState, BlockEntity> blockEntityFactory) {
         super(properties);
         this.blockEntityFactory = blockEntityFactory;
-        registerDefaultState(defaultBlockState().setValue(FACING, net.minecraft.core.Direction.NORTH));
+        registerDefaultState(defaultBlockState().setValue(getFacingProperty(), net.minecraft.core.Direction.NORTH));
+    }
+
+    /**
+     * The facing property this node uses. Defaults to the 4-way horizontal facing;
+     * subclasses may override to a fully-directional (6-way) property for pillar-style placement.
+     */
+    protected DirectionProperty getFacingProperty() {
+        return FACING;
+    }
+
+    /** The direction the block faces when placed. Defaults to facing the player horizontally. */
+    protected net.minecraft.core.Direction getPlacementFacing(BlockPlaceContext context) {
+        return context.getHorizontalDirection().getOpposite();
     }
 
     @Override
@@ -44,22 +58,22 @@ public class GlareNodeBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(getFacingProperty());
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return defaultBlockState().setValue(getFacingProperty(), getPlacementFacing(context));
     }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+        return state.setValue(getFacingProperty(), rotation.rotate(state.getValue(getFacingProperty())));
     }
 
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+        return state.rotate(mirror.getRotation(state.getValue(getFacingProperty())));
     }
 
     @Nullable

@@ -22,12 +22,21 @@ import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
-import com.resourceful_refinement.content.drill_pylon.DrillPylonHeadBlock;
 import com.resourceful_refinement.content.drill_pylon.DrillPylonRenderer;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
 import com.resourceful_refinement.content.geyser.GeyserRenderer;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverModel;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverRenderer;
+import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishModel;
+import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishRenderer;
+import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverModel;
+import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverRenderer;
+import com.resourceful_refinement.content.glare.lux.GlareLuxTransceiverModel;
+import com.resourceful_refinement.content.glare.relay.GlareRelayModel;
+import com.resourceful_refinement.content.glare.relay.GlareRelayRenderer;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalModel;
 import com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer;
 import com.resourceful_refinement.content.hosegun.HosegunItem;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterRenderer;
@@ -37,6 +46,9 @@ import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalRender
 import com.resourceful_refinement.content.milking_station.MilkingStationModel;
 import com.resourceful_refinement.content.milking_station.MilkingStationRenderer;
 import com.resourceful_refinement.content.milking_station.MilkingStationSeatRenderer;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositModel;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositRenderer;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositVisuals;
 import com.resourceful_refinement.content.plunger.ThrownPlungerRenderer;
 import com.resourceful_refinement.content.plushie.PlushieModel;
 import com.resourceful_refinement.content.plushie.PlushieRenderer;
@@ -45,7 +57,6 @@ import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
-import com.resourceful_refinement.content.sports_ball.SportsBallDebugModel;
 import com.resourceful_refinement.content.sports_ball.SportsBallModel;
 import com.resourceful_refinement.content.sports_ball.SportsBallRenderer;
 import com.resourceful_refinement.content.sieve.*;
@@ -71,6 +82,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -87,7 +99,7 @@ import com.resourceful_refinement.content.refill_station.FluidRefillStationBlock
 import com.resourceful_refinement.content.refill_station.FluidRefillStationLayers;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationRenderer;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationScreen;
-import com.resourceful_refinement.content.glare.GlareChromaticTransceiverScreen;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverScreen;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen;
 import com.resourceful_refinement.content.gui.PowerTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
@@ -438,6 +450,11 @@ public class ResourcefulRefinementMain {
         }
 
         @SubscribeEvent
+        public static void registerClientReloadListeners(RegisterClientReloadListenersEvent event) {
+            event.registerReloadListener(MineralDepositVisuals.INSTANCE);
+        }
+
+        @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.BLENDER_BLADE.get(), BlenderBladeRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REFINERY_KINETIC_PROXY.get(), RefineryKineticProxyRenderer::new);
@@ -462,9 +479,16 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CYCLOTRON_CONTROLLER_BE.get(), CyclotronForgeRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.MINERAL_DEPOSIT_BE.get(), MineralDepositRenderer::new);
+
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_KINETIC_RECEIVER_BE.get(), GlareKineticReceiverRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_EMITTER_DISH_BE.get(), GlareEmitterDishRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_CHROMATIC_TRANSCEIVER_BE.get(), GlareChromaticTransceiverRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.GLARE_RELAY_BE.get(), GlareRelayRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(), TelemetryTerminalRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLER_DEPOT_BE.get(), RemoteEntanglerDepotRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), RemoteEntanglementTransporterRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LAUNCHPAD_CONTROLLER_BE.get(), LaunchpadControllerRenderer::new);
@@ -506,6 +530,9 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_EAST.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_SOUTH.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_WEST.modelLocation(), "standalone"));
+
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GLARE_COG_SHAFT.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GLARE_PRISM_SMALL.modelLocation(), "standalone"));
         }
 
         @SubscribeEvent
@@ -546,10 +573,18 @@ public class ResourcefulRefinementMain {
 
             event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
             event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
+            event.registerLayerDefinition(MineralDepositModel.LAYER_LOCATION, MineralDepositModel::createBodyLayer);
 
             event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronBackModel.LAYER_LOCATION, CyclotronBackModel::createBodyLayer);
+
+            event.registerLayerDefinition(GlareKineticReceiverModel.LAYER_LOCATION, GlareKineticReceiverModel::createBodyLayer);
+            event.registerLayerDefinition(GlareEmitterDishModel.LAYER_LOCATION, GlareEmitterDishModel::createBodyLayer);
+            event.registerLayerDefinition(GlareChromaticTransceiverModel.LAYER_LOCATION, GlareChromaticTransceiverModel::createBodyLayer);
+            event.registerLayerDefinition(GlareLuxTransceiverModel.LAYER_LOCATION, GlareLuxTransceiverModel::createBodyLayer);
+            event.registerLayerDefinition(TelemetryTerminalModel.LAYER_LOCATION, TelemetryTerminalModel::createBodyLayer);
+            event.registerLayerDefinition(GlareRelayModel.LAYER_LOCATION, GlareRelayModel::createBodyLayer);
         }
     }
 

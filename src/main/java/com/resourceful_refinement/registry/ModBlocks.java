@@ -19,11 +19,11 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlock;
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlock;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlock;
 import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
-import com.resourceful_refinement.content.glare.GlareEmitterDishBlock;
-import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlock;
-import com.resourceful_refinement.content.glare.GlareKineticReceiverBlock;
+import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishBlock;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlock;
+import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverBlock;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
-import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.relay.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlock;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlock;
@@ -31,6 +31,7 @@ import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlock
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock;
 import com.resourceful_refinement.content.glare.remote.RemoteTransporterProxyBlock;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlock;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositBlock;
 import com.resourceful_refinement.content.pug.LaunchpadControllerBlock;
 import com.resourceful_refinement.content.pug.LaunchpadProxyBlock;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlock;
@@ -188,9 +189,10 @@ public class ModBlocks {
                     .noOcclusion()));
 
     public static final DeferredBlock<Block> MINERAL_DEPOSIT = BLOCKS.register("mineral_deposit",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(2f)
-                    .sound(SoundType.STONE)));
+            () -> new MineralDepositBlock(BlockBehaviour.Properties.of()
+                    .strength(3f)
+                    .sound(SoundType.STONE)
+                    .noOcclusion()));
 
     public static final DeferredBlock<CrystalFissureBudBlock> CRYSTAL_FISSURE_BUD = BLOCKS.register("crystal_fissure_bud",
             () -> new CrystalFissureBudBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)

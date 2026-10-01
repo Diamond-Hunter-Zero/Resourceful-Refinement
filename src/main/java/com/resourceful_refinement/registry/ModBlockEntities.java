@@ -18,6 +18,7 @@ import com.resourceful_refinement.content.fracking_pump.FrackingPumpOutletBlockE
 import com.resourceful_refinement.content.fracking_pump.FrackingPumpProxyBlockEntity;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockEntity;
 import com.resourceful_refinement.content.milking_station.MilkingStationBlockEntity;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositBlockEntity;
 import com.resourceful_refinement.content.paint_nozzle.PaintNozzleBlockEntity;
 import com.resourceful_refinement.content.plushie.PlushieBlockEntity;
 import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
@@ -28,10 +29,10 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlockEnti
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlockEntity;
 import com.resourceful_refinement.content.forge_mould.MechanicalForgeMouldBlockEntity;
 import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
-import com.resourceful_refinement.content.glare.GlareEmitterDishBlockEntity;
-import com.resourceful_refinement.content.glare.GlareChromaticTransceiverBlockEntity;
-import com.resourceful_refinement.content.glare.GlareKineticReceiverBlockEntity;
-import com.resourceful_refinement.content.glare.GlareRelayBlockEntity;
+import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishBlockEntity;
+import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlockEntity;
+import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.glare.relay.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglerDepotBlockEntity;
@@ -48,6 +49,8 @@ import java.util.function.Supplier;
 public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ResourcefulRefinementMain.MOD_ID);
 
+
+    // V0.1 - v0.2 content
     public static final Supplier<BlockEntityType<BlenderBladeBlockEntity>> BLENDER_BLADE = BLOCK_ENTITIES.register("blender_blade",
             () -> BlockEntityType.Builder.of((pos, state) -> new BlenderBladeBlockEntity(ModBlockEntities.BLENDER_BLADE.get(), pos, state), ModBlocks.BLENDER_BLADE.get()).build(null));
 
@@ -90,6 +93,31 @@ public class ModBlockEntities {
                     ModBlocks.FLUID_REFILL_STATION.get()
             ).build(null));
 
+
+    // V0.3 content
+    public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
+            () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));
+
+    public static final Supplier<BlockEntityType<RadiatorBlockEntity>> RADIATOR_PIPE_BE = BLOCK_ENTITIES.register("radiator_pipe",
+            () -> BlockEntityType.Builder.of((pos, state) -> new RadiatorBlockEntity(ModBlockEntities.RADIATOR_PIPE_BE.get(), pos, state), ModBlocks.RADIATOR_PIPE.get()).build(null));
+
+    public static final Supplier<BlockEntityType<CombustionChamberBlockEntity>> COMBUSTION_CHAMBER_BE = BLOCK_ENTITIES.register("combustion_chamber",
+            () -> BlockEntityType.Builder.of((pos, state) -> new CombustionChamberBlockEntity(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), pos, state), ModBlocks.COMBUSTION_CHAMBER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<FuelTankBlockEntity>> FUEL_TANK_BE = BLOCK_ENTITIES.register("fuel_tank",
+            () -> BlockEntityType.Builder.of((pos, state) -> new FuelTankBlockEntity(ModBlockEntities.FUEL_TANK_BE.get(), pos, state), ModBlocks.FUEL_TANK.get()).build(null));
+
+    public static final Supplier<BlockEntityType<AdvancedPumpBlockEntity>> ADVANCED_PUMP_BE = BLOCK_ENTITIES.register("advanced_pump",
+            () -> BlockEntityType.Builder.of((pos, state) -> new AdvancedPumpBlockEntity(ModBlockEntities.ADVANCED_PUMP_BE.get(), pos, state), ModBlocks.ADVANCED_PUMP.get()).build(null));
+
+    public static final Supplier<BlockEntityType<MilkingStationBlockEntity>> MILKING_STATION_BE = BLOCK_ENTITIES.register("milking_station",
+            () -> BlockEntityType.Builder.of((pos, state) -> new MilkingStationBlockEntity(ModBlockEntities.MILKING_STATION_BE.get(), pos, state), ModBlocks.MILKING_STATION.get()).build(null));
+
+    public static final Supplier<BlockEntityType<BrewersTapBlockEntity>> BREWERS_TAP_BE = BLOCK_ENTITIES.register("brewers_tap",
+            () -> BlockEntityType.Builder.of((pos, state) -> new BrewersTapBlockEntity(ModBlockEntities.BREWERS_TAP_BE.get(), pos, state), ModBlocks.BREWERS_TAP.get()).build(null));
+
+
+    // V0.4 generic blocks
     public static final Supplier<BlockEntityType<BucketExcavatorBlockEntity>> BUCKET_EXCAVATOR_BE = BLOCK_ENTITIES.register("bucket_excavator",
             () -> BlockEntityType.Builder.of((pos, state) -> new BucketExcavatorBlockEntity(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), pos, state), ModBlocks.BUCKET_EXCAVATOR.get()).build(null));
 
@@ -114,8 +142,13 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<CyclotronKineticProxyBlockEntity>> CYCLOTRON_KINETIC_PROXY_BE = BLOCK_ENTITIES.register("cyclotron_kinetic_proxy",
             () -> BlockEntityType.Builder.of(CyclotronKineticProxyBlockEntity::new, ModBlocks.CYCLOTRON_KINETIC_PROXY.get()).build(null));
 
+    public static final Supplier<BlockEntityType<MineralDepositBlockEntity>> MINERAL_DEPOSIT_BE = BLOCK_ENTITIES.register("mineral_deposit",
+            () -> BlockEntityType.Builder.of((pos, state) -> new MineralDepositBlockEntity(ModBlockEntities.MINERAL_DEPOSIT_BE.get(), pos, state), ModBlocks.MINERAL_DEPOSIT.get()).build(null));
 
-    // GLARE blocks
+
+
+
+    // V0.4 GLARE blocks
 
     public static final Supplier<BlockEntityType<GlareRelayBlockEntity>> GLARE_RELAY_BE = BLOCK_ENTITIES.register("glare_relay",
             () -> BlockEntityType.Builder.of(GlareRelayBlockEntity::new, ModBlocks.GLARE_RELAY.get()).build(null));
@@ -157,26 +190,6 @@ public class ModBlockEntities {
             "launchpad_proxy", () -> BlockEntityType.Builder.of(LaunchpadProxyBlockEntity::new,
                     ModBlocks.LAUNCHPAD_PROXY.get()).build(null));
 
-    public static final Supplier<BlockEntityType<DistilleryBlockEntity>> DISTILLERY_BE = BLOCK_ENTITIES.register("distillery",
-            () -> BlockEntityType.Builder.of((pos, state) -> new DistilleryBlockEntity(ModBlockEntities.DISTILLERY_BE.get(), pos, state), ModBlocks.DISTILLERY.get()).build(null));
-
-    public static final Supplier<BlockEntityType<RadiatorBlockEntity>> RADIATOR_PIPE_BE = BLOCK_ENTITIES.register("radiator_pipe",
-            () -> BlockEntityType.Builder.of((pos, state) -> new RadiatorBlockEntity(ModBlockEntities.RADIATOR_PIPE_BE.get(), pos, state), ModBlocks.RADIATOR_PIPE.get()).build(null));
-
-    public static final Supplier<BlockEntityType<CombustionChamberBlockEntity>> COMBUSTION_CHAMBER_BE = BLOCK_ENTITIES.register("combustion_chamber",
-            () -> BlockEntityType.Builder.of((pos, state) -> new CombustionChamberBlockEntity(ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), pos, state), ModBlocks.COMBUSTION_CHAMBER.get()).build(null));
-
-    public static final Supplier<BlockEntityType<FuelTankBlockEntity>> FUEL_TANK_BE = BLOCK_ENTITIES.register("fuel_tank",
-            () -> BlockEntityType.Builder.of((pos, state) -> new FuelTankBlockEntity(ModBlockEntities.FUEL_TANK_BE.get(), pos, state), ModBlocks.FUEL_TANK.get()).build(null));
-
-    public static final Supplier<BlockEntityType<AdvancedPumpBlockEntity>> ADVANCED_PUMP_BE = BLOCK_ENTITIES.register("advanced_pump",
-            () -> BlockEntityType.Builder.of((pos, state) -> new AdvancedPumpBlockEntity(ModBlockEntities.ADVANCED_PUMP_BE.get(), pos, state), ModBlocks.ADVANCED_PUMP.get()).build(null));
-
-    public static final Supplier<BlockEntityType<MilkingStationBlockEntity>> MILKING_STATION_BE = BLOCK_ENTITIES.register("milking_station",
-            () -> BlockEntityType.Builder.of((pos, state) -> new MilkingStationBlockEntity(ModBlockEntities.MILKING_STATION_BE.get(), pos, state), ModBlocks.MILKING_STATION.get()).build(null));
-
-    public static final Supplier<BlockEntityType<BrewersTapBlockEntity>> BREWERS_TAP_BE = BLOCK_ENTITIES.register("brewers_tap",
-            () -> BlockEntityType.Builder.of((pos, state) -> new BrewersTapBlockEntity(ModBlockEntities.BREWERS_TAP_BE.get(), pos, state), ModBlocks.BREWERS_TAP.get()).build(null));
 
 
 

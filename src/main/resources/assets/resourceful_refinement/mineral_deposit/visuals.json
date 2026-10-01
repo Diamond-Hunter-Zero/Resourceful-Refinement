@@ -1,0 +1,19 @@
+{
+  "minecraft:andesite":     { "base_mineral": "minecraft:andesite", "deposit_material": "minecraft:tuff" },
+  "minecraft:granite":     { "base_mineral": "minecraft:granite", "deposit_material": "minecraft:red_sand" },
+  "minecraft:diorite":     { "base_mineral": "minecraft:diorite", "deposit_material": "minecraft:gravel" },
+  "minecraft:stone":     { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:basalt" },
+  "minecraft:sand":     { "base_mineral": "minecraft:sand", "deposit_material": "minecraft:packed_mud" },
+  "minecraft:dirt":     { "base_mineral": "minecraft:dirt", "deposit_material": "minecraft:gravel" },
+  "minecraft:end_stone":     { "base_mineral": "minecraft:end_stone", "deposit_material": "minecraft:chorus_plant" },
+  "minecraft:coal_ore":     { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:coal_block" },
+  "minecraft:raw_copper_block":   { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:raw_copper_block" },
+  "minecraft:raw_iron_block":     { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:raw_iron_block" },
+  "minecraft:raw_gold_block":     { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:raw_gold_block" },
+  "minecraft:redstone_ore": { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:redstone_block" },
+  "minecraft:lapis_ore":    { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:lapis_block" },
+  "minecraft:diamond_ore":  { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:diamond_ore" },
+  "minecraft:emerald_ore":  { "base_mineral": "minecraft:stone", "deposit_material": "minecraft:emerald_ore" },
+  "minecraft:deepslate_diamond_ore":    { "base_mineral": "minecraft:deepslate", "deposit_material": "minecraft:deepslate_diamond_ore" },
+  "minecraft:deepslate_emerald_ore":    { "base_mineral": "minecraft:deepslate", "deposit_material": "minecraft:deepslate_emerald_ore" }
+}

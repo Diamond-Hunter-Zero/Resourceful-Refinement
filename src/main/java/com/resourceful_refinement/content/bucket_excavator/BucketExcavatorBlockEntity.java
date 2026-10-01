@@ -5,6 +5,9 @@ import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.bucket_excavator.recipe.ExcavationRecipeInput;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipeInput;
 import com.resourceful_refinement.content.glare.DimensionalNodePos;
+import com.resourceful_refinement.content.mineral_deposit.MineralDepositBlockEntity;
+import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModRecipeTypes;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.resourceful_refinement.utilities.GoggleUtilities;
@@ -153,8 +156,12 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
                     if (targetState.isAir())
                         continue;
 
+                    Block mineralBlock = null;
+                    if (level.getBlockEntity(targetPos) instanceof MineralDepositBlockEntity mineralDepositBe)
+                        mineralBlock = mineralDepositBe.getAssociatedBlock();
+
                     // Find a matching recipe for conditions
-                    ExcavationRecipeInput input = new ExcavationRecipeInput(targetState.getBlock(), null);
+                    ExcavationRecipeInput input = new ExcavationRecipeInput(targetState.getBlock(), mineralBlock);
                     var recipeHolder = level.getRecipeManager().getRecipeFor(ModRecipeTypes.EXCAVATION_TYPE.get(), input, level);
                     if (recipeHolder.isPresent())
                     {

@@ -10,6 +10,8 @@
     "JigsawStructureAccessor",
     "StructurePoolElementMixin",
     "JigsawPlacementMixin",
+    "BiomeSourceMixin",
+    "ChoralClustersEndBiomeSourceMixin",
     "WolfCollarInvoker",
     "CatCollarInvoker",
     "BasinOperatingBlockEntityMixin",

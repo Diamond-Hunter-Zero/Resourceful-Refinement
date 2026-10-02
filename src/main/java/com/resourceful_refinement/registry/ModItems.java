@@ -132,6 +132,13 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> ARTIFICIAL_RESONANCE_CRYSTAL = ITEMS.registerSimpleBlockItem("artificial_resonance_crystal", ModBlocks.ARTIFICIAL_RESONANCE_CRYSTAL);
 
+    // -------------------------------------------------------------------------
+    // Choral Clusters
+    // -------------------------------------------------------------------------
+
+    public static final DeferredItem<BlockItem> CHORUS_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("chorus_crystal", ModBlocks.CHORUS_CRYSTAL);
+    public static final DeferredItem<BlockItem> CHORAL_END_STONE_ITEM = ITEMS.registerSimpleBlockItem("choral_end_stone", ModBlocks.CHORAL_END_STONE);
+
 
     // -------------------------------------------------------------------------
     // Gel Items

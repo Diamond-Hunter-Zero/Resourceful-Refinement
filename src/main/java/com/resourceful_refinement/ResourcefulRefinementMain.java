@@ -105,6 +105,9 @@ import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChrom
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen;
 import com.resourceful_refinement.content.gui.PowerTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
+import com.resourceful_refinement.worldgen.choral.ChoralClustersBiomeHolder;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import com.simibubi.create.foundation.model.ModelSwapper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -133,7 +136,17 @@ public class ResourcefulRefinementMain {
         // Register NeoForge event listeners (world load, input)
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(GelPropertiesManager::onTagsUpdated);
+        NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
 
+    }
+
+    private void onServerAboutToStart(ServerAboutToStartEvent event) {
+        ChoralClustersBiomeHolder.resolve(event.getServer().registryAccess());
+    }
+
+    private void onServerStopping(ServerStoppingEvent event) {
+        ChoralClustersBiomeHolder.clear();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -439,6 +452,7 @@ public class ResourcefulRefinementMain {
                         ItemBlockRenderTypes.setRenderLayer(entry.flowing.get(), RenderType.TRANSLUCENT);
                     }
                 }
+                ItemBlockRenderTypes.setRenderLayer(ModBlocks.CHORUS_CRYSTAL.get(), RenderType.translucent());
             });
         }
 

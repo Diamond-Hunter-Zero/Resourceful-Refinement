@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Block entity for the Resource Resonator. Holds the per-type scan filter (persisted) and the most recent scan
@@ -58,24 +57,19 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
         }
     }
 
-    public Set<ResonatorTarget> enabledTargets() {
-        EnumSet<ResonatorTarget> enabled = EnumSet.noneOf(ResonatorTarget.class);
-        for (ResonatorTarget target : ResonatorTarget.values()) {
-            if (filter[target.ordinal()]) {
-                enabled.add(target);
-            }
-        }
-        return enabled;
-    }
-
     // --- Scanning -------------------------------------------------------------------------------------------
 
     /**
-     * Runs a seed-based scan for the currently-enabled targets, caches and returns the results. Server-side only.
+     * Runs a seed-based scan for <em>all</em> target types, caches and returns the results. Server-side only.
+     *
+     * <p>The scan deliberately ignores the GUI filter: it always predicts every generation type so the client holds
+     * the complete result set and can show/hide types instantly by toggling the filter, without re-scanning. The
+     * filter is purely a display control (applied client-side when drawing pins).</p>
      */
     public List<ScannedPoi> runScan(ServerLevel level) {
         int radius = ServerConfig.RESONATOR_SCAN_RADIUS_CHUNKS.get();
-        List<ScannedPoi> results = ResourceScanService.scan(level, getBlockPos(), radius, enabledTargets());
+        List<ScannedPoi> results = ResourceScanService.scan(level, getBlockPos(), radius,
+                EnumSet.allOf(ResonatorTarget.class));
         this.lastResults = results;
         return results;
     }

@@ -4,6 +4,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
@@ -70,6 +72,7 @@ public final class ResourceScanService {
         BiomeSource biomeSource = generator.getBiomeSource();
         Set<Holder<Biome>> possibleBiomes = biomeSource.possibleBiomes();
         long seed = structureState.getLevelSeed();
+        WorldGenerationContext heightContext = new WorldGenerationContext(generator, level);
 
         var setRegistry = level.registryAccess().registryOrThrow(Registries.STRUCTURE_SET);
 
@@ -92,11 +95,11 @@ public final class ResourceScanService {
 
                 // Restrict to structures whose biomes can occur in this dimension (vanilla's own gate). This also
                 // excludes nether sets while scanning the overworld and vice versa.
-                List<Structure> dimensionStructures = new ArrayList<>();
+                List<Holder<Structure>> dimensionStructures = new ArrayList<>();
                 for (StructureSet.StructureSelectionEntry entry : set.structures()) {
-                    Structure structure = entry.structure().value();
-                    if (structure.biomes().stream().anyMatch(possibleBiomes::contains)) {
-                        dimensionStructures.add(structure);
+                    Holder<Structure> structureHolder = entry.structure();
+                    if (structureHolder.value().biomes().stream().anyMatch(possibleBiomes::contains)) {
+                        dimensionStructures.add(structureHolder);
                     }
                 }
                 if (dimensionStructures.isEmpty()) {
@@ -131,20 +134,24 @@ public final class ResourceScanService {
                                 QuartPos.fromBlock(blockX), QuartPos.fromBlock(sampleY), QuartPos.fromBlock(blockZ),
                                 sampler);
 
-                        boolean matched = false;
-                        for (Structure structure : dimensionStructures) {
-                            if (structure.biomes().contains(biome)) {
-                                matched = true;
+                        Holder<Structure> matched = null;
+                        for (Holder<Structure> structureHolder : dimensionStructures) {
+                            if (structureHolder.value().biomes().contains(biome)) {
+                                matched = structureHolder;
                                 break;
                             }
                         }
-                        if (!matched) {
+                        if (matched == null) {
                             continue;
                         }
 
+                        ResourceLocation structureId = matched.unwrapKey().map(ResourceKey::location).orElse(null);
+                        String variant = GeyserVariants.predict(matched.value(), structureId, seed,
+                                candidate.x, candidate.z, heightContext);
+
                         boolean yApproximate = target != ResonatorTarget.SURFACE_GEYSER;
                         int reportedY = target == ResonatorTarget.SURFACE_GEYSER ? surfaceY : sampleY;
-                        results.add(new ScannedPoi(blockX, reportedY, blockZ, yApproximate, target));
+                        results.add(new ScannedPoi(blockX, reportedY, blockZ, yApproximate, target, variant));
 
                         if (results.size() >= MAX_RESULTS) {
                             return results;

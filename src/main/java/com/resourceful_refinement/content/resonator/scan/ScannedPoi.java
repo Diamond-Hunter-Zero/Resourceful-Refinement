@@ -11,8 +11,19 @@ import net.minecraft.network.codec.StreamCodec;
  * the seed). {@code y} is a best-effort vertical estimate: accurate for surface geysers (sampled from the
  * world-surface heightmap), and approximate for cave/nether geysers, whose true Y is drawn from a per-chunk
  * uniform band at generation time. {@code yApproximate} flags that distinction for the UI.</p>
+ *
+ * <p>{@code variant} is the predicted start-template name (e.g. {@code "crimsite_geyser"}) when known, or empty when
+ * the feature has no variant model or the prediction guard tripped.</p>
  */
-public record ScannedPoi(int x, int y, int z, boolean yApproximate, ResonatorTarget target) {
+public record ScannedPoi(int x, int y, int z, boolean yApproximate, ResonatorTarget target, String variant) {
+
+    public ScannedPoi {
+        variant = variant == null ? "" : variant;
+    }
+
+    public boolean hasVariant() {
+        return !variant.isEmpty();
+    }
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ScannedPoi> STREAM_CODEC = StreamCodec.of(
             ScannedPoi::write, ScannedPoi::read);
@@ -23,6 +34,7 @@ public record ScannedPoi(int x, int y, int z, boolean yApproximate, ResonatorTar
         buf.writeVarInt(poi.z);
         buf.writeBoolean(poi.yApproximate);
         buf.writeVarInt(poi.target.ordinal());
+        buf.writeUtf(poi.variant);
     }
 
     private static ScannedPoi read(RegistryFriendlyByteBuf buf) {
@@ -34,7 +46,8 @@ public record ScannedPoi(int x, int y, int z, boolean yApproximate, ResonatorTar
         if (target == null) {
             target = ResonatorTarget.SURFACE_GEYSER;
         }
-        return new ScannedPoi(x, y, z, approx, target);
+        String variant = buf.readUtf();
+        return new ScannedPoi(x, y, z, approx, target, variant);
     }
 
     /** List codec for syncing a whole scan result. */

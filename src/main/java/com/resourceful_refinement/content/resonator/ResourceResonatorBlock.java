@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -17,6 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -27,6 +31,12 @@ public class ResourceResonatorBlock extends HorizontalDirectionalBlock implement
 
     public static final MapCodec<ResourceResonatorBlock> CODEC = simpleCodec(ResourceResonatorBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
+    private static final VoxelShape RESONATOR_SHAPE = Shapes.or(
+            Block.box(4, 2, 4, 12, 13, 12),
+            Block.box(0, 13, 0, 16, 16, 16),
+            Block.box(5, 1, 5, 11, 12, 11)
+    );
 
     public ResourceResonatorBlock(Properties properties) {
         super(properties);
@@ -46,6 +56,11 @@ public class ResourceResonatorBlock extends HorizontalDirectionalBlock implement
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return RESONATOR_SHAPE;
     }
 
     @Nullable

@@ -56,6 +56,8 @@ import com.resourceful_refinement.content.pug.LaunchpadControllerRenderer;
 import com.resourceful_refinement.content.pug.PugLanderModel;
 import com.resourceful_refinement.content.radiator.RadiatorModel;
 import com.resourceful_refinement.content.refinery.rendering.*;
+import com.resourceful_refinement.content.resonator.ResourceResonatorModel;
+import com.resourceful_refinement.content.resonator.ResourceResonatorRenderer;
 import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
 import com.resourceful_refinement.content.sports_ball.SportsBallModel;
 import com.resourceful_refinement.content.sports_ball.SportsBallRenderer;
@@ -481,6 +483,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CYCLOTRON_CONTROLLER_BE.get(), CyclotronForgeRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MINERAL_DEPOSIT_BE.get(), MineralDepositRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.RESOURCE_RESONATOR_BE.get(), ResourceResonatorRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_KINETIC_RECEIVER_BE.get(), GlareKineticReceiverRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_EMITTER_DISH_BE.get(), GlareEmitterDishRenderer::new);
@@ -575,6 +578,7 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(PugLanderModel.LAYER_LOCATION, PugLanderModel::createBodyLayer);
             event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
             event.registerLayerDefinition(MineralDepositModel.LAYER_LOCATION, MineralDepositModel::createBodyLayer);
+            event.registerLayerDefinition(ResourceResonatorModel.LAYER_LOCATION, ResourceResonatorModel::createBodyLayer);
 
             event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);

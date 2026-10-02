@@ -189,11 +189,12 @@ public class ServerConfig {
         CONFIG_BUILDER.pop();
 
 
+        // Resource Resonator Parameters
         CONFIG_BUILDER.push("Resource Resonator");
         RESONATOR_SCAN_RADIUS_CHUNKS = CONFIG_BUILDER
                 .comment("Maximum radius, in chunks, the Resource Resonator predicts world-generation features within.",
                         "Larger values scan a wider area per press but return more pins (Value between 1 and 512)")
-                .defineInRange("scan_radius_chunks", 128, 1, 512);
+                .defineInRange("scan_radius_chunks", 64, 1, 512);
         CONFIG_BUILDER.pop();
 
 

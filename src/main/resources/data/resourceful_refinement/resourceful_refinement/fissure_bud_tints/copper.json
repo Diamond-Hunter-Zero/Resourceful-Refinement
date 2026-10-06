@@ -1,0 +1,5 @@
+{
+  "colors": ["#ff9d6e", "#e2703a", "#7bbfa0", "#e2703a"],
+  "seconds_per_color": 3.5,
+  "source_items": ["minecraft:raw_copper", "minecraft:copper_ingot"]
+}

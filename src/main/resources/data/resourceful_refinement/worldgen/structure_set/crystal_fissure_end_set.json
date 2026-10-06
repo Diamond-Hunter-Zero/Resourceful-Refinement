@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:crystal_fissure_end",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 10,
+    "separation": 5,
+    "spread_type": "linear",
+    "salt": 73410014
+  }
+}

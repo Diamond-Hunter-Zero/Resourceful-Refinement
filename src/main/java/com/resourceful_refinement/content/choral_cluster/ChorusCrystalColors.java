@@ -63,11 +63,14 @@ public class ChorusCrystalColors {
         if (level == null || pos == null) {
             return itemTint(tintIndex);
         }
+        Level resolved = getLevelSafely(level);
         double phaseBlocks = pos.getX() * ChorusCrystalColorSettings.X_AXIS_SLOPE
                 + pos.getY()
                 + pos.getZ() * ChorusCrystalColorSettings.Z_AXIS_SLOPE
                 + ChorusCrystalColorSettings.PHASE_OFFSET;
-        return colorAtPhase(phaseBlocks / ChorusCrystalColorSettings.PERIOD_BLOCKS, getLevelSafely(level));
+        // Per-world phase offset makes the colour banding seed-driven and deterministic.
+        double phase = phaseBlocks / ChorusCrystalColorSettings.PERIOD_BLOCKS + ChoralClientSeed.seedPhase(resolved);
+        return colorAtPhase(phase, resolved);
     }
 
     public static int itemTint(int tintIndex) {

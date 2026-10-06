@@ -11,6 +11,7 @@
     "StructurePoolElementMixin",
     "JigsawPlacementMixin",
     "BiomeSourceMixin",
+    "BiomeManagerAccessor",
     "ChoralClustersEndBiomeSourceMixin",
     "WolfCollarInvoker",
     "CatCollarInvoker",

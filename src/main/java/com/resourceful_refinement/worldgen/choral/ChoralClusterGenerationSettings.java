@@ -25,6 +25,18 @@ public class ChoralClusterGenerationSettings {
     public static final double TERRAIN_SECONDARY_NOISE_SCALE = 0.095D;
     public static final double VALLEY_SHARPNESS = 0.3D;
 
+    // Surface Choral End Stone patches.
+    // Terrain is filled with vanilla end stone; Choral End Stone is painted only onto the exposed
+    // surface layer where the patch noise crosses SURFACE_PATCH_THRESHOLD, giving naturalistic blotches.
+    // The patch seed is a fixed global constant (NOT the per-piece terrain seed) so patches stay
+    // continuous across the overlapping mountain pieces that tile the biome.
+    public static final double SURFACE_PATCH_NOISE_SCALE = 0.055D;
+    public static final double SURFACE_PATCH_DETAIL_SCALE = 0.13D;
+    public static final double SURFACE_PATCH_THRESHOLD = 0.07D;
+    public static final int SURFACE_PATCH_SEED = 0x53A7C1;
+    /** Number of exposed surface blocks painted with Choral End Stone inside a patch (1 = top layer only). */
+    public static final int SURFACE_LAYER_DEPTH = 1;
+
 
     // Presets
     public static final ChorusCrystalPillarPreset MODEST = new ChorusCrystalPillarPreset(

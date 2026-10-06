@@ -1,0 +1,5 @@
+{
+  "colors": ["#fbf5e6", "#ffffff", "#e7d9b8", "#fff6df"],
+  "seconds_per_color": 3.5,
+  "source_items": ["minecraft:quartz"]
+}

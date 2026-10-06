@@ -1,0 +1,5 @@
+{
+  "colors": ["#fff4b0", "#ffd84a", "#f0a92b", "#ffd84a"],
+  "seconds_per_color": 3.0,
+  "source_items": ["minecraft:raw_gold", "minecraft:gold_ingot"]
+}

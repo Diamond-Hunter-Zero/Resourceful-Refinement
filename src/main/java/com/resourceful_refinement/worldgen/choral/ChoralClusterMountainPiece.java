@@ -76,12 +76,13 @@ public class ChoralClusterMountainPiece extends StructurePiece {
         ChunkAccess chunk = world.getChunk(chunkPos.x, chunkPos.z);
         Heightmap surface = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE);
         Heightmap worldgenSurface = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-        BlockState terrainState = ModBlocks.CHORAL_END_STONE.get().defaultBlockState();
+        BlockState fillState = Blocks.END_STONE.defaultBlockState();
+        BlockState surfaceState = ModBlocks.CHORAL_END_STONE.get().defaultBlockState();
         BlockPos.MutableBlockPos local = new BlockPos.MutableBlockPos();
-        BlockPos.MutableBlockPos worldPos = new BlockPos.MutableBlockPos();
 
         int chunkMinX = chunkPos.getMinBlockX();
         int chunkMinZ = chunkPos.getMinBlockZ();
+        int maxBuild = chunk.getMaxBuildHeight();
         for (int localX = 0; localX < 16; localX++) {
             int x = chunkMinX + localX;
             int dx = x - center.getX();
@@ -94,6 +95,8 @@ public class ChoralClusterMountainPiece extends StructurePiece {
                     continue;
                 }
 
+                // Pre-fill surface of this column (vanilla island, or terrain raised by an earlier
+                // overlapping piece). We weld the mound down to this so there is never a floating lip.
                 int baseY = Math.max(surface.getFirstAvailable(localX, localZ), worldgenSurface.getFirstAvailable(localX, localZ));
                 if (baseY < 10) {
                     continue;
@@ -110,12 +113,49 @@ public class ChoralClusterMountainPiece extends StructurePiece {
                 float terrainHeight = radialFalloff * height * edgeClamp;
                 terrainHeight *= (float) (0.78D + primary * 0.28D + secondary * 0.12D);
 
-                int maxY = Mth.floor(center.getY() + Math.max(0.0F, terrainHeight));
-                int minY = Math.max(baseY - 1, center.getY() - 10);
-                for (int y = minY; y < maxY && y < chunk.getMaxBuildHeight(); y++) {
+                int surfaceY = Mth.floor(center.getY() + Math.max(0.0F, terrainHeight));
+                if (surfaceY >= maxBuild) {
+                    surfaceY = maxBuild - 1;
+                }
+                // Mound top is at or below the existing surface here — nothing to raise, leave terrain intact.
+                if (surfaceY < baseY) {
+                    continue;
+                }
+
+                // Fill the whole column from the mound top down to the pre-fill surface so the mound
+                // is solid all the way to the ground it sits on (fixes the floating-lip seam).
+                // We extend one surface layer past baseY so that any Choral End Stone an earlier
+                // overlapping piece painted on the old surface is reclaimed to plain End stone rather
+                // than being left sandwiched beneath this piece's fill. Those blocks are always solid
+                // ground, so the extension never drips fill into the void below the island.
+                int weldFloor = Math.max(chunk.getMinBuildHeight(), baseY - ChoralClusterGenerationSettings.SURFACE_LAYER_DEPTH);
+                for (int y = surfaceY; y >= weldFloor; y--) {
                     local.set(localX, y, localZ);
                     if (canReplaceTerrain(chunk.getBlockState(local))) {
-                        chunk.setBlockState(local, terrainState, false);
+                        chunk.setBlockState(local, fillState, false);
+                    }
+                }
+
+                // Paint the exposed surface layer with Choral End Stone in noise-driven patches.
+                if (ChoralClusterNoise.isSurfacePatch(world.getSeed(), x, z)) {
+                    boolean exposed = surfaceY + 1 >= maxBuild;
+                    if (!exposed) {
+                        local.set(localX, surfaceY + 1, localZ);
+                        BlockState above = chunk.getBlockState(local);
+                        exposed = above.isAir() || above.is(Blocks.CAVE_AIR);
+                    }
+                    if (exposed) {
+                        for (int d = 0; d < ChoralClusterGenerationSettings.SURFACE_LAYER_DEPTH; d++) {
+                            int y = surfaceY - d;
+                            if (y < baseY) {
+                                break;
+                            }
+                            local.set(localX, y, localZ);
+                            if (!chunk.getBlockState(local).is(Blocks.END_STONE)) {
+                                break;
+                            }
+                            chunk.setBlockState(local, surfaceState, false);
+                        }
                     }
                 }
             }

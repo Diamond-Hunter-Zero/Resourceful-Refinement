@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CrystalFissureBudBlockEntity extends BlockEntity {
-    private Item sourceItem = Items.RAW_IRON;
+    private Item sourceItem = Items.AIR;
 
     public CrystalFissureBudBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.CRYSTAL_FISSURE_BUD_BE.get(), pos, state);
@@ -24,9 +24,20 @@ public class CrystalFissureBudBlockEntity extends BlockEntity {
     }
 
     public void setSourceItem(Item item) {
-        if (item == null || item == Items.AIR) return;
+        if (item == null) return;
         sourceItem = item;
         syncData();
+    }
+
+    /**
+     * Sets the source item during worldgen. Unlike {@link #setSourceItem(Item)} this does not send a block
+     * update (there are no tracking clients for an ungenerated chunk, and {@code WorldGenRegion} does not
+     * support block-update packets) — the value persists via the chunk's saved block-entity NBT.
+     */
+    public void setSourceItemOnGenerate(Item item) {
+        if (item == null || item == Items.AIR) return;
+        sourceItem = item;
+        setChanged();
     }
 
     @Override
@@ -41,10 +52,7 @@ public class CrystalFissureBudBlockEntity extends BlockEntity {
         if (!tag.contains("SourceItem")) return;
         ResourceLocation id = ResourceLocation.tryParse(tag.getString("SourceItem"));
         if (id == null) return;
-        Item item = BuiltInRegistries.ITEM.get(id);
-        if (item != null && item != Items.AIR) {
-            sourceItem = item;
-        }
+        sourceItem = BuiltInRegistries.ITEM.get(id);
     }
 
     @Override

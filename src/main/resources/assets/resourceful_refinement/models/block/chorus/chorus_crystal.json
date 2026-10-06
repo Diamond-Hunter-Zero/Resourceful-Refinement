@@ -2,8 +2,8 @@
   "parent": "minecraft:block/block",
   "render_type": "minecraft:translucent",
   "textures": {
-    "particle": "resourceful_refinement:block/chorus_crystal_block",
-    "all": "resourceful_refinement:block/chorus_crystal_block"
+    "particle": "resourceful_refinement:block/chorus/chorus_crystal_block",
+    "all": "resourceful_refinement:block/chorus/chorus_crystal_block"
   },
   "elements": [
     {

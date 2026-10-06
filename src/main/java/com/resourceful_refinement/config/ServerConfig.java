@@ -43,6 +43,7 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
 
     public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_PING_RANGE_CHUNKS;
 
 
     static {
@@ -194,7 +195,11 @@ public class ServerConfig {
         RESONATOR_SCAN_RADIUS_CHUNKS = CONFIG_BUILDER
                 .comment("Maximum radius, in chunks, the Resource Resonator predicts world-generation features within.",
                         "Larger values scan a wider area per press but return more pins (Value between 1 and 512)")
-                .defineInRange("scan_radius_chunks", 64, 1, 512);
+                .defineInRange("scan_radius_chunks", 48, 1, 512);
+        RESONATOR_PING_RANGE_CHUNKS = CONFIG_BUILDER
+                .comment("Maximum distance, in chunks, from a Resource Resonator at which a radar pin may deploy a",
+                        "Ping Beacon. The target chunk must also be loaded (Value between 1 and 512)")
+                .defineInRange("ping_range_chunks", 10, 1, 512);
         CONFIG_BUILDER.pop();
 
 

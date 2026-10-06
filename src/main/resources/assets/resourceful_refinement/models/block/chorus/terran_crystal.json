@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "particle": "resourceful_refinement:block/chorus/terran_crystal_block",
+    "all": "resourceful_refinement:block/chorus/terran_crystal_block"
+  }
+}

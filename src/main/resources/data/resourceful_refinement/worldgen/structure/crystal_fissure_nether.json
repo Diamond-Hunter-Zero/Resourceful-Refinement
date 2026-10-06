@@ -1,0 +1,15 @@
+{
+  "type": "resourceful_refinement:crystal_node",
+  "biomes": "#resourceful_refinement:has_structure/crystal_fissure_nether",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "node_block": {"Name": "resourceful_refinement:crystal_fissure_bud"},
+  "source_item": "minecraft:quartz",
+  "scatter_block": {"Name": "minecraft:nether_quartz_ore"},
+  "scatter_count": 20,
+  "scatter_radius": 3,
+  "scatter_mode": "below",
+  "footprint_radius": 3,
+  "anchor": "nether_floor"
+}

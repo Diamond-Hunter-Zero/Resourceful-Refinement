@@ -1,0 +1,5 @@
+{
+  "colors": ["#38aab6", "#31ffcc", "#3bd66b", "#2ac57b"],
+  "seconds_per_color": 3.0,
+  "source_items": ["minecraft:emerald"]
+}

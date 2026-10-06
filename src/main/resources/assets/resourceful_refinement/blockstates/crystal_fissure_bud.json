@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "resourceful_refinement:block/crystal_fissure_bud"
+      "model": "resourceful_refinement:block/chorus/crystal_fissure_bud"
     }
   }
 }

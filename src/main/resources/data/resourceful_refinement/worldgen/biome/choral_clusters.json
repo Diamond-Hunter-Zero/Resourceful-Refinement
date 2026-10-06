@@ -5,15 +5,15 @@
   "effects": {
     "sky_color": 2631720,
     "fog_color": 9868950,
-    "water_color": 4159204,
-    "water_fog_color": 329011,
+    "water_color": 9068525,
+    "water_fog_color": 10715885,
     "foliage_color": 16745939,
     "grass_color": 16745939,
     "ambient_particle": {
       "options": {
         "type": "minecraft:end_rod"
       },
-      "probability": 0.004
+      "probability": 0.008
     },
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
@@ -26,9 +26,9 @@
     "monster": [
       {
         "type": "minecraft:enderman",
-        "weight": 50,
+        "weight": 30,
         "minCount": 1,
-        "maxCount": 3
+        "maxCount": 1
       }
     ]
   },
@@ -44,7 +44,12 @@
     [],
     [],
     [],
-    [],
+    [
+      "resourceful_refinement:chorus_crystal_growth_crystal",
+      "resourceful_refinement:chorus_crystal_growth_surface",
+      "resourceful_refinement:choral_sprouts",
+      "resourceful_refinement:sparse_chorus_plant"
+    ],
     []
   ]
 }

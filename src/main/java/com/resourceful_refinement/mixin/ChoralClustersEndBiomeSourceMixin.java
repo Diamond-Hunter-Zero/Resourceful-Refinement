@@ -3,6 +3,7 @@ package com.resourceful_refinement.mixin;
 import com.resourceful_refinement.registry.ModBiomes;
 import com.resourceful_refinement.worldgen.choral.ChoralClustersBiomeHolder;
 import com.resourceful_refinement.worldgen.choral.ChoralClusterNoise;
+import com.resourceful_refinement.worldgen.choral.ChoralSeed;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.world.level.biome.Biome;
@@ -70,7 +71,7 @@ public abstract class ChoralClustersEndBiomeSourceMixin {
             return;
         }
         if ((original == highlands || original == midlands || original.is(Biomes.END_HIGHLANDS) || original.is(Biomes.END_MIDLANDS))
-                && ChoralClusterNoise.shouldPlaceChoralBiome(x, z)) {
+                && ChoralClusterNoise.shouldPlaceChoralBiome(ChoralSeed.worldSeed(), x, z)) {
             cir.setReturnValue(choralClusters);
         }
     }

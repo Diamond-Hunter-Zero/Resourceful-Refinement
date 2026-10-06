@@ -27,7 +27,14 @@ public enum ResonatorTarget {
             rr("nether_scorchia_basalt_geyser_set")),
     // Worldgen not yet implemented — present in the filter UI but currently produces no pins.
     MINERAL_DEPOSIT("mineral_deposit"),
-    CRYSTAL_FISSURE("crystal_fissure");
+    CRYSTAL_FISSURE("crystal_fissure",
+            rr("crystal_fissure_end_set"),
+            rr("crystal_fissure_nether_set"),
+            rr("crystal_fissure_overworld_set")),
+    RESONANCE_CRYSTAL("resonance_crystal",
+            rr("resonance_crystal_end_set"),
+            rr("resonance_crystal_nether_set"),
+            rr("resonance_crystal_overworld_set"));
 
     private static final ResonatorTarget[] VALUES = values();
 

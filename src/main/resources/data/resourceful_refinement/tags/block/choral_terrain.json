@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:end_stone",
+    "resourceful_refinement:choral_end_stone"
+  ]
+}

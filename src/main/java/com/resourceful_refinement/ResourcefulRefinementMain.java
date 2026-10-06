@@ -36,6 +36,7 @@ import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticRec
 import com.resourceful_refinement.content.glare.lux.GlareLuxTransceiverModel;
 import com.resourceful_refinement.content.glare.relay.GlareRelayModel;
 import com.resourceful_refinement.content.glare.relay.GlareRelayRenderer;
+import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalDisplayTarget;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalModel;
 import com.resourceful_refinement.content.hosegun.GelBlobEntityRenderer;
 import com.resourceful_refinement.content.hosegun.HosegunItem;
@@ -59,18 +60,23 @@ import com.resourceful_refinement.content.refinery.rendering.*;
 import com.resourceful_refinement.content.resonator.ResourceResonatorModel;
 import com.resourceful_refinement.content.resonator.ResourceResonatorRenderer;
 import com.resourceful_refinement.content.sieve.MechanicalSieveRenderer;
+import com.resourceful_refinement.content.sports_ball.SportsBallDispenseBehavior;
 import com.resourceful_refinement.content.sports_ball.SportsBallModel;
 import com.resourceful_refinement.content.sports_ball.SportsBallRenderer;
 import com.resourceful_refinement.content.sieve.*;
 import com.simibubi.create.AllBlocks;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.resourceful_refinement.registry.ModBlocks;
+import com.simibubi.create.api.behaviour.display.DisplayTarget;
 import com.simibubi.create.api.boiler.BoilerHeater;
 import com.resourceful_refinement.content.radiator.RadiatorBlockEntity;
 import com.resourceful_refinement.content.radiator.RadiatorRenderer;
+import com.resourceful_refinement.content.choral_cluster.ChoralEndStoneColors;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
+import net.minecraft.util.FastColor;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -82,10 +88,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import com.resourceful_refinement.registry.*;
@@ -106,6 +109,7 @@ import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalScreen
 import com.resourceful_refinement.content.gui.PowerTerminalScreen;
 import com.resourceful_refinement.network.ModNetworking;
 import com.resourceful_refinement.worldgen.choral.ChoralClustersBiomeHolder;
+import com.resourceful_refinement.worldgen.choral.ChoralSeed;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import com.simibubi.create.foundation.model.ModelSwapper;
@@ -130,6 +134,7 @@ public class ResourcefulRefinementMain {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(this::registerDatapackRegistries);
         modEventBus.addListener(ModNetworking::registerPayloadHandlers);
         modEventBus.addListener(com.resourceful_refinement.content.pug.PugChunkLoading::registerTicketController);
 
@@ -141,12 +146,23 @@ public class ResourcefulRefinementMain {
 
     }
 
+    private void registerDatapackRegistries(net.neoforged.neoforge.registries.DataPackRegistryEvent.NewRegistry event) {
+        // Synced datapack registry (third arg = network codec) so Crystal Fissure Bud tint profiles
+        // defined in datapacks reach clients for rendering.
+        event.dataPackRegistry(
+                com.resourceful_refinement.content.drill_pylon.tint.FissureTintProfiles.REGISTRY_KEY,
+                com.resourceful_refinement.content.drill_pylon.tint.FissureTintProfile.CODEC,
+                com.resourceful_refinement.content.drill_pylon.tint.FissureTintProfile.CODEC);
+    }
+
     private void onServerAboutToStart(ServerAboutToStartEvent event) {
         ChoralClustersBiomeHolder.resolve(event.getServer().registryAccess());
+        ChoralSeed.setWorldSeed(event.getServer().getWorldData().worldGenOptions().seed());
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
         ChoralClustersBiomeHolder.clear();
+        ChoralSeed.clear();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -156,11 +172,9 @@ public class ResourcefulRefinementMain {
         }
 
         // Register telemetry terminals as display targets
-        event.enqueueWork(() -> {
-            com.simibubi.create.api.behaviour.display.DisplayTarget.BY_BLOCK_ENTITY.register(
-                    ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
-                    new com.resourceful_refinement.content.glare.terminal.TelemetryTerminalDisplayTarget());
-        });
+        event.enqueueWork(() -> DisplayTarget.BY_BLOCK_ENTITY.register(
+                ModBlockEntities.GLARE_TELEMETRY_TERMINAL_BE.get(),
+                new TelemetryTerminalDisplayTarget()));
 
         // Register stress values
         event.enqueueWork(ModStressValues::register);
@@ -178,9 +192,9 @@ public class ResourcefulRefinementMain {
 
         // Dispensers spawn the ball as a live entity rather than tossing an item. The dispenser
         // registry isn't thread-safe, so this must go inside enqueueWork.
-        event.enqueueWork(() -> net.minecraft.world.level.block.DispenserBlock.registerBehavior(
+        event.enqueueWork(() -> DispenserBlock.registerBehavior(
                 ModItems.SPORTS_BALL.get(),
-                new com.resourceful_refinement.content.sports_ball.SportsBallDispenseBehavior()
+                new SportsBallDispenseBehavior()
         ));
     }
 
@@ -375,14 +389,12 @@ public class ResourcefulRefinementMain {
         );
 
         // --- Combustion Chamber ---
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.COMBUSTION_CHAMBER_BE.get(), (be, side) -> {
-            return side != null ? be.getFluidHandler(side) : null;
-        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.COMBUSTION_CHAMBER_BE.get(),
+                (be, side) -> side != null ? be.getFluidHandler(side) : null);
 
         // --- Fuel Tank ---
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FUEL_TANK_BE.get(), (be, side) -> {
-            return side != null ? be.tank : null;
-        });
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.FUEL_TANK_BE.get(),
+                (be, side) -> side != null ? be.tank : null);
 
         // --- Milking Station ---
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MILKING_STATION_BE.get(), (be, side) -> {
@@ -495,6 +507,7 @@ public class ResourcefulRefinementMain {
 
             event.registerBlockEntityRenderer(ModBlockEntities.BUCKET_EXCAVATOR_BE.get(), BucketExcavatorRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.DRILL_PYLON_HEAD_BE.get(), DrillPylonRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.CRYSTAL_FISSURE_BUD_BE.get(), com.resourceful_refinement.content.drill_pylon.CrystalFissureBudRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.CYCLOTRON_CONTROLLER_BE.get(), CyclotronForgeRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.MINERAL_DEPOSIT_BE.get(), MineralDepositRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.RESOURCE_RESONATOR_BE.get(), ResourceResonatorRenderer::new);
@@ -520,10 +533,32 @@ public class ResourcefulRefinementMain {
         }
 
         @SubscribeEvent
+        public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+            event.register(ChoralEndStoneColors::blockTint, ModBlocks.CHORAL_END_STONE.get());
+        }
+
+        @SubscribeEvent
         public static void registerItemColors(net.neoforged.neoforge.client.event.RegisterColorHandlersEvent.Item event) {
             for (FluidEntry entry : ModFluids.ENTRIES) {
                 event.register((stack, tintIndex) -> tintIndex == 1 ? entry.color : -1, entry.bucket.get());
             }
+
+            event.register((stack, tintIndex) -> ChoralEndStoneColors.itemTint(tintIndex),
+                    ModBlocks.CHORAL_END_STONE.get().asItem());
+
+            // Crystal Fissure Bud item: animate the inventory/hand tint with game-time using the
+            // default profile (a loose item stack has no stored source item).
+            event.register((stack, tintIndex) -> {
+                if (tintIndex != 0) {
+                    return -1;
+                }
+                net.minecraft.world.level.Level level = net.minecraft.client.Minecraft.getInstance().level;
+                if (level == null) {
+                    return 0xFFFFFF | 0xFF000000;
+                }
+                var profile = com.resourceful_refinement.content.drill_pylon.tint.FissureTintProfiles.getDefault(level.registryAccess());
+                return 0xFF000000 | profile.colorAt(level.getGameTime());
+            }, ModBlocks.CRYSTAL_FISSURE_BUD.get().asItem());
         }
 
         @SubscribeEvent

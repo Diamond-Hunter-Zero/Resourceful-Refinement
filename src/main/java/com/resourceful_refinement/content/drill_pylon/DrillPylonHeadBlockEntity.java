@@ -174,7 +174,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     private DrillPylonRecipe findActiveRecipe(Item sourceItem) {
-        if (sourceItem == Items.AIR) return null;
+        if (sourceItem == null || sourceItem == Items.AIR) return null;
         DrillPylonRecipeInput input = new DrillPylonRecipeInput(sourceItem);
         if (lastRecipe != null && lastRecipe.matches(input, level)) return lastRecipe;
 

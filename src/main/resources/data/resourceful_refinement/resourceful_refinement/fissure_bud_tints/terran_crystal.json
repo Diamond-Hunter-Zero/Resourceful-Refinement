@@ -1,0 +1,5 @@
+{
+  "colors": ["#43e6c2", "#5fffb0", "#49c6ff", "#7affda", "#39d0e0"],
+  "seconds_per_color": 3.0,
+  "source_items": ["resourceful_refinement:terran_crystal"]
+}

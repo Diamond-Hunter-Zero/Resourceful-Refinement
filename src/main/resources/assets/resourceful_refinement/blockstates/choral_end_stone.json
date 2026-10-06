@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "resourceful_refinement:block/choral_end_stone"
-    }
+    "": [
+      {"model": "resourceful_refinement:block/chorus/choral_end_stone"},
+      {"model": "resourceful_refinement:block/chorus/choral_end_stone", "y": 90 },
+      {"model": "resourceful_refinement:block/chorus/choral_end_stone", "y": 180 },
+      {"model": "resourceful_refinement:block/chorus/choral_end_stone", "y": 270 }
+    ]
   }
 }

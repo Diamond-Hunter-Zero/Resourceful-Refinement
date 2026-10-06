@@ -36,5 +36,6 @@ public class ModClientGameEvents {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         GlareClientLinks.render(event);
+        com.resourceful_refinement.content.resonator.ping.PingBeaconRenderer.render(event);
     }
 }

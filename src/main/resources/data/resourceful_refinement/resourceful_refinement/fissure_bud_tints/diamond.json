@@ -1,0 +1,5 @@
+{
+  "colors": ["#8bf7ec", "#58d7e0", "#7ad3ff", "#b6f5ef"],
+  "seconds_per_color": 3.0,
+  "source_items": ["minecraft:diamond"]
+}

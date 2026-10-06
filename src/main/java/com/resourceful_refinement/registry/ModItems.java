@@ -138,6 +138,10 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> CHORUS_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("chorus_crystal", ModBlocks.CHORUS_CRYSTAL);
     public static final DeferredItem<BlockItem> CHORAL_END_STONE_ITEM = ITEMS.registerSimpleBlockItem("choral_end_stone", ModBlocks.CHORAL_END_STONE);
+    public static final DeferredItem<BlockItem> CHORUS_CRYSTAL_GROWTH_ITEM = ITEMS.registerSimpleBlockItem("chorus_crystal_growth", ModBlocks.CHORUS_CRYSTAL_GROWTH);
+    public static final DeferredItem<BlockItem> TERRAN_CRYSTAL_ITEM = ITEMS.registerSimpleBlockItem("terran_crystal", ModBlocks.TERRAN_CRYSTAL);
+    public static final DeferredItem<BlockItem> TERRAN_CRYSTAL_GROWTH_ITEM = ITEMS.registerSimpleBlockItem("terran_crystal_growth", ModBlocks.TERRAN_CRYSTAL_GROWTH);
+    public static final DeferredItem<BlockItem> CHORAL_SPROUTS_ITEM = ITEMS.registerSimpleBlockItem("choral_sprouts", ModBlocks.CHORAL_SPROUTS);
 
 
     // -------------------------------------------------------------------------

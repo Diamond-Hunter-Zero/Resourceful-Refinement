@@ -70,6 +70,7 @@ public final class ResonatorPinIcons {
         generic(ResonatorTarget.CAVE_GEYSER, "cave_geyser");
         generic(ResonatorTarget.MINERAL_DEPOSIT, "mineral_deposit");
         generic(ResonatorTarget.CRYSTAL_FISSURE, "crystal_fissure");
+        generic(ResonatorTarget.RESONANCE_CRYSTAL, "resonance_crystal");
 
         // --- Surface geyser sub-types (ore_geyser + carbonox_geyser pools) ---
         // "_small" variants share their material's icon; carbonox maps to the carborax texture.
@@ -111,5 +112,6 @@ public final class ResonatorPinIcons {
         variant(ResonatorTarget.MINERAL_DEPOSIT, "endstone_deposit", "endstone_deposit");
         variant(ResonatorTarget.CRYSTAL_FISSURE, "chorus_crystal", "chorus_crystal");
         variant(ResonatorTarget.CRYSTAL_FISSURE, "terran_crystal", "terran_crystal");
+        variant(ResonatorTarget.CRYSTAL_FISSURE, "quartz", "quartz");
     }
 }

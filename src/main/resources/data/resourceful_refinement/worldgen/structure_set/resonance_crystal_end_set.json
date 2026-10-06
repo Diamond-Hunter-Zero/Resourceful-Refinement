@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:resonance_crystal_end",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 10,
+    "spread_type": "linear",
+    "salt": 73410011
+  }
+}

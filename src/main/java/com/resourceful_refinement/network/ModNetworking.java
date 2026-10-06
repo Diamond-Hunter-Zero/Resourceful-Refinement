@@ -66,6 +66,21 @@ public final class ModNetworking {
                         ResonatorScanResultPayload.TYPE,
                         ResonatorScanResultPayload.STREAM_CODEC,
                         ModNetworking::handleResonatorScanResult
+                )
+                .playToServer(
+                        PlacePingBeaconPayload.TYPE,
+                        PlacePingBeaconPayload.STREAM_CODEC,
+                        ModNetworking::handlePlacePingBeacon
+                )
+                .playToClient(
+                        PingBeaconResultPayload.TYPE,
+                        PingBeaconResultPayload.STREAM_CODEC,
+                        ModNetworking::handlePingBeaconResult
+                )
+                .playToClient(
+                        PingBeaconSyncPayload.TYPE,
+                        PingBeaconSyncPayload.STREAM_CODEC,
+                        ModNetworking::handlePingBeaconSync
                 );
     }
 
@@ -137,5 +152,21 @@ public final class ModNetworking {
 
     private static void handleResonatorScanResult(ResonatorScanResultPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> ResonatorScanResultPayload.handleClient(payload));
+    }
+
+    private static void handlePlacePingBeacon(PlacePingBeaconPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                PlacePingBeaconPayload.handle(payload, serverPlayer);
+            }
+        });
+    }
+
+    private static void handlePingBeaconResult(PingBeaconResultPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> PingBeaconResultPayload.handleClient(payload));
+    }
+
+    private static void handlePingBeaconSync(PingBeaconSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> PingBeaconSyncPayload.handleClient(payload));
     }
 }

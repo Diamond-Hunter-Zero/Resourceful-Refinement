@@ -8,6 +8,7 @@ related:
   - "[[Geyser Block]]"
   - "[[Mineral Deposit]]"
   - "[[Crystal Fissure Bud]]"
+  - "[[Choral Clusters]]"
   - "[[Codebase Overview]]"
 tags:
   - machine

@@ -1,5 +1,10 @@
 {
   "variants": {
-    "": { "model": "resourceful_refinement:block/artificial_resonance_crystal" }
+    "": [
+      { "model": "resourceful_refinement:block/chorus/artificial_resonance_crystal" },
+      { "model": "resourceful_refinement:block/chorus/artificial_resonance_crystal", "y": 90   },
+      { "model": "resourceful_refinement:block/chorus/artificial_resonance_crystal", "y": 180   },
+      { "model": "resourceful_refinement:block/chorus/artificial_resonance_crystal", "y": 270   }
+    ]
   }
 }

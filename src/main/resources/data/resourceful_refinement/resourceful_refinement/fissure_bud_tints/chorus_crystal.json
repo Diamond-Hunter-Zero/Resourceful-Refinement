@@ -1,0 +1,5 @@
+{
+  "colors": ["#d546ff", "#ff5fae", "#6c59ff", "#874cff", "#b254ff"],
+  "seconds_per_color": 3.0,
+  "source_items": ["resourceful_refinement:chorus_crystal"]
+}

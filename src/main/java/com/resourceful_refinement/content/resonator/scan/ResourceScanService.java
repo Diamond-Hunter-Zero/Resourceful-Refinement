@@ -123,11 +123,32 @@ public final class ResourceScanService {
                             continue;
                         }
 
+                        // Apply the full vanilla placement gate (frequency + exclusion zones), not just the
+                        // raw spread position — so pins respect e.g. a structure set's "avoid villages" rule.
+                        if (!spread.isStructureChunk(structureState, candidate.x, candidate.z)) {
+                            continue;
+                        }
+
                         int blockX = candidate.getMiddleBlockX();
                         int blockZ = candidate.getMiddleBlockZ();
 
                         int surfaceY = generator.getBaseHeight(blockX, blockZ, Heightmap.Types.WORLD_SURFACE_WG,
                                 level, randomState);
+
+                        // Crystal fissures / resonance crystals won't generate in the void or underwater —
+                        // mirror the structures' own rejects so no pin appears where nothing will spawn.
+                        // (No effect in the Nether/End for water; the void check mainly culls End-island gaps.)
+                        if (target == ResonatorTarget.CRYSTAL_FISSURE || target == ResonatorTarget.RESONANCE_CRYSTAL) {
+                            if (surfaceY <= level.getMinBuildHeight() + 5) {
+                                continue;
+                            }
+                            int oceanFloor = generator.getBaseHeight(blockX, blockZ, Heightmap.Types.OCEAN_FLOOR_WG,
+                                    level, randomState);
+                            if (surfaceY > oceanFloor) {
+                                continue;
+                            }
+                        }
+
                         int sampleY = nether ? 64 : surfaceY;
 
                         Holder<Biome> biome = biomeSource.getNoiseBiome(
@@ -146,8 +167,15 @@ public final class ResourceScanService {
                         }
 
                         ResourceLocation structureId = matched.unwrapKey().map(ResourceKey::location).orElse(null);
-                        String variant = GeyserVariants.predict(matched.value(), structureId, seed,
-                                candidate.x, candidate.z, heightContext);
+                        String variant;
+                        if (target == ResonatorTarget.CRYSTAL_FISSURE) {
+                            variant = CrystalFissureVariants.forStructure(structureId);
+                        } else if (target == ResonatorTarget.RESONANCE_CRYSTAL) {
+                            variant = null; // single icon
+                        } else {
+                            variant = GeyserVariants.predict(matched.value(), structureId, seed,
+                                    candidate.x, candidate.z, heightContext);
+                        }
 
                         boolean yApproximate = target != ResonatorTarget.SURFACE_GEYSER;
                         int reportedY = target == ResonatorTarget.SURFACE_GEYSER ? surfaceY : sampleY;

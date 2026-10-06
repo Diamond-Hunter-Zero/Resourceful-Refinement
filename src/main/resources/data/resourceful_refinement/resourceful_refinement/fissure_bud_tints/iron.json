@@ -1,0 +1,5 @@
+{
+  "colors": ["#f0f0f0", "#c7cfd8", "#9aa4b2", "#c7cfd8"],
+  "seconds_per_color": 3.5,
+  "source_items": ["minecraft:raw_iron","minecraft:iron_ingot"]
+}

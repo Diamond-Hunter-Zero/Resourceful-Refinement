@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:resonance_crystal_overworld",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 28,
+    "separation": 16,
+    "spread_type": "linear",
+    "salt": 73410013,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 6
+    }
+  }
+}

@@ -2,14 +2,20 @@ package com.resourceful_refinement.content.resonator;
 
 import com.resourceful_refinement.content.resonator.scan.ResonatorTarget;
 import com.resourceful_refinement.content.resonator.scan.ScannedPoi;
+import com.resourceful_refinement.network.PlacePingBeaconPayload;
 import com.resourceful_refinement.network.ResonatorScanRequestPayload;
 import com.resourceful_refinement.network.SetResonatorFilterPayload;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -33,6 +39,7 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     private static final int COLOR_RADAR_GRID_BRIGHT = 0xFF2E7D2E;
     private static final int COLOR_READOUT_BG = 0xFF0C1A0C;
     private static final int COLOR_READOUT_TEXT = 0xFF53C653;
+    private static final int COLOR_ERROR_TEXT = 0xFFE05A3C;
     private static final int COLOR_LABEL = 0xFFBFBFBF;
     private static final int COLOR_CHECK = 0xFFBFBFBF;
     private static final int COLOR_SLIDER_TRACK = 0xFF555555;
@@ -68,6 +75,13 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     /** Safety net: if no scan response arrives within this window, re-enable the UI anyway. */
     private static final long SCAN_TIMEOUT_MS = 10_000L;
 
+    /** Duration and depth of the shrink-grow "button press" pulse when a pin is clicked. */
+    private static final long PULSE_MS = 180L;
+    private static final double PULSE_DEPTH = 0.3D;
+
+    /** How long a ping status message (success or failure) lingers in the details panel. */
+    private static final long PING_STATUS_MS = 3_250L;
+
     private final boolean[] filter;
     private List<ScannedPoi> results = new ArrayList<>();
     private double zoom = 0.5D; // 0 = fully zoomed out (whole scan radius), 1 = zoomed in (MIN_VIEW_BLOCKS)
@@ -75,6 +89,13 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
 
     private boolean scanning;
     private long scanStartMillis;
+
+    private ScannedPoi pulsingPoi;
+    private long pulseStartMillis;
+
+    private String pingStatus;
+    private int pingStatusColor;
+    private long pingStatusExpiryMillis;
 
     private Button scanButton;
     private ScannedPoi hovered;
@@ -136,7 +157,49 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
             setZoomFromMouse(mouseX);
             return true;
         }
+        // Clicking a hovered radar pin deploys a Ping Beacon at its location.
+        if (button == 0 && hovered != null) {
+            deployPing(hovered);
+            return true;
+        }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private void deployPing(ScannedPoi poi) {
+        pulsingPoi = poi;
+        pulseStartMillis = Util.getMillis();
+        PacketDistributor.sendToServer(new PlacePingBeaconPayload(menu.getBlockPos(),
+                new BlockPos(poi.x(), poi.y(), poi.z())));
+    }
+
+    /**
+     * Called by the S2C result payload: shows a transient status message in the details panel and plays a feedback
+     * sound — a "Pinged Location" confirmation + beacon chime on success, or the failure message + a short deny
+     * sound otherwise.
+     */
+    public void acceptPingResult(boolean success, String messageKey) {
+        if (success) {
+            setPingStatus(Component.translatable("message.resourceful_refinement.resonator.ping_success").getString(),
+                    COLOR_READOUT_TEXT);
+            playPingSound(SoundEvents.BEACON_POWER_SELECT, 1.4F);
+        } else {
+            setPingStatus(Component.translatable(messageKey).getString(), COLOR_ERROR_TEXT);
+            playPingSound(SoundEvents.DISPENSER_FAIL, 0.8F);
+        }
+    }
+
+    private void setPingStatus(String message, int color) {
+        pingStatus = message;
+        pingStatusColor = color;
+        pingStatusExpiryMillis = Util.getMillis() + PING_STATUS_MS;
+    }
+
+    private static void playPingSound(SoundEvent sound, float pitch) {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch));
+    }
+
+    private boolean pingStatusActive() {
+        return pingStatus != null && Util.getMillis() < pingStatusExpiryMillis;
     }
 
     @Override
@@ -324,7 +387,7 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
             }
             int px = cx + (int) Math.round(dx / viewBlocks * radius);
             int py = cy + (int) Math.round(dz / viewBlocks * radius);
-            drawIcon(graphics, ResonatorPinIcons.iconFor(poi), px - 8, py - 8);
+            drawPin(graphics, ResonatorPinIcons.iconFor(poi), px, py, poi);
             if (mouseX >= px - 8 && mouseX <= px + 8 && mouseY >= py - 8 && mouseY <= py + 8) {
                 newHover = poi;
             }
@@ -345,7 +408,9 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         framedPanel(graphics, rx, ry, RADAR_SIZE + 8, READOUT_H + 8);
         graphics.fill(rx + 4, ry + 4, rx + RADAR_SIZE + 4, ry + READOUT_H + 4, COLOR_READOUT_BG);
 
-        if (hovered != null) {
+        if (pingStatusActive()) {
+            graphics.drawString(this.font, pingStatus, rx + 10, ry + 14, pingStatusColor, false);
+        } else if (hovered != null) {
             drawIcon(graphics, ResonatorPinIcons.iconFor(hovered), rx + 8, ry + 8);
             String coords = "X: " + hovered.x() + "      Z: " + hovered.z();
             graphics.drawString(this.font, coords, rx + 32, ry + 8, COLOR_READOUT_TEXT, false);
@@ -463,5 +528,29 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     /** Draws a 16×16 radar-pin texture at the given top-left position. */
     private void drawIcon(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
         graphics.blit(texture, x, y, 0, 0.0F, 0.0F, 16, 16, 16, 16);
+    }
+
+    /** Draws a pin centred at (px, py), applying the shrink-grow press pulse if this pin was just clicked. */
+    private void drawPin(GuiGraphics graphics, ResourceLocation texture, int px, int py, ScannedPoi poi) {
+        float scale = 1.0F;
+        if (poi == pulsingPoi) {
+            long elapsed = Util.getMillis() - pulseStartMillis;
+            if (elapsed >= PULSE_MS) {
+                pulsingPoi = null;
+            } else {
+                double progress = elapsed / (double) PULSE_MS;
+                scale = (float) (1.0D - PULSE_DEPTH * Math.sin(progress * Math.PI));
+            }
+        }
+        if (scale == 1.0F) {
+            drawIcon(graphics, texture, px - 8, py - 8);
+            return;
+        }
+        graphics.pose().pushPose();
+        graphics.pose().translate(px, py, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.pose().translate(-px, -py, 0.0F);
+        drawIcon(graphics, texture, px - 8, py - 8);
+        graphics.pose().popPose();
     }
 }

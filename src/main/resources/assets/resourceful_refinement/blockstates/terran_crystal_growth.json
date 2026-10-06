@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=up": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth"},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth"},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth"}
+    ],
+    "facing=down": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth", "x": 180},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth", "x": 180},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth", "x": 180}
+    ],
+    "facing=north": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth", "x": 90},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth", "x": 90},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth", "x": 90}
+    ],
+    "facing=east": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth", "x": 90, "y": 90},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth", "x": 90, "y": 90},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth", "x": 90, "y": 90}
+    ],
+    "facing=south": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth", "x": 90, "y": 180},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth", "x": 90, "y": 180},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth", "x": 90, "y": 180}
+    ],
+    "facing=west": [
+      {"model": "resourceful_refinement:block/chorus/terran_pillar_crystal_growth", "x": 90, "y": 270},
+      {"model": "resourceful_refinement:block/chorus/terran_pointed_crystal_growth", "x": 90, "y": 270},
+      {"model": "resourceful_refinement:block/chorus/terran_stunted_crystal_growth", "x": 90, "y": 270}
+    ]
+  }
+}

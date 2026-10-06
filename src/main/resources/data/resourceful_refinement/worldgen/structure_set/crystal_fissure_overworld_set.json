@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:crystal_fissure_overworld",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 36,
+    "separation": 16,
+    "spread_type": "linear",
+    "salt": 73410016,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 6
+    }
+  }
+}

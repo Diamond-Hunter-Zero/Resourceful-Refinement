@@ -1,0 +1,21 @@
+{
+  "type": "resourceful_refinement:overworld_sinkhole",
+  "biomes": "#resourceful_refinement:has_structure/crystal_fissure_overworld",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "radius": 10,
+  "min_depth": 3,
+  "max_depth": 8,
+  "crystal_blocks": [
+    {"block": {"Name": "resourceful_refinement:terran_crystal"}, "weight": 3},
+    {"block": {"Name": "create:veridium"}, "weight": 2}
+  ],
+  "stone_block": {"Name": "minecraft:stone"},
+  "crystal_center_chance": 0.98,
+  "crystal_falloff": 0.7,
+  "growth_block": {"Name": "resourceful_refinement:terran_crystal_growth"},
+  "growth_chance": 0.18,
+  "bud_block": {"Name": "resourceful_refinement:crystal_fissure_bud"},
+  "source_item": "resourceful_refinement:terran_crystal"
+}

@@ -1,0 +1,18 @@
+{
+  "type": "resourceful_refinement:crystal_node",
+  "biomes": "#resourceful_refinement:has_structure/resonance_crystal_overworld",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "node_block": {"Name": "resourceful_refinement:resonance_crystal"},
+  "base_blocks": [
+    {"block": {"Name": "minecraft:stone"}, "weight": 3},
+    {"block": {"Name": "minecraft:tuff"}, "weight": 2},
+    {"block": {"Name": "minecraft:andesite"}, "weight": 2}
+  ],
+  "base_radius": 3,
+  "decor_block": {"Name": "minecraft:small_amethyst_bud"},
+  "decor_count": 6,
+  "footprint_radius": 4,
+  "anchor": "surface"
+}

@@ -1,0 +1,20 @@
+{
+  "type": "resourceful_refinement:crystal_node",
+  "biomes": "#resourceful_refinement:has_structure/crystal_fissure_end",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "node_block": {"Name": "resourceful_refinement:crystal_fissure_bud"},
+  "source_item": "resourceful_refinement:chorus_crystal",
+  "base_blocks": [
+    {"block": {"Name": "resourceful_refinement:chorus_crystal"}, "weight": 1}
+  ],
+  "base_radius": 3,
+  "base_fill_chance": 0.85,
+  "scatter_block": {"Name": "resourceful_refinement:chorus_crystal_growth"},
+  "scatter_count": 16,
+  "scatter_radius": 4,
+  "scatter_mode": "around_surface",
+  "footprint_radius": 3,
+  "anchor": "surface"
+}

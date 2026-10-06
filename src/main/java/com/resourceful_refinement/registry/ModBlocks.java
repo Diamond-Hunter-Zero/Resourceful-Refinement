@@ -47,10 +47,8 @@ import com.resourceful_refinement.content.refinery.RefineryKineticProxyBlock;
 import com.resourceful_refinement.content.sieve.MechanicalFluidSieveBlock;
 import com.resourceful_refinement.content.geyser.GeyserBlock;
 import com.simibubi.create.AllBlocks;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -340,14 +338,12 @@ public class ModBlocks {
 
     public static final DeferredBlock<ResonanceCrystalBlock> RESONANCE_CRYSTAL = BLOCKS.register("resonance_crystal",
             () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
-                    .strength(2.0f)
-                    .requiresCorrectToolForDrops()
+                    .strength(10.0f)
                     .noOcclusion(), false));
 
     public static final DeferredBlock<ResonanceCrystalBlock> ARTIFICIAL_RESONANCE_CRYSTAL = BLOCKS.register("artificial_resonance_crystal",
             () -> new ResonanceCrystalBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
-                    .strength(2.0f)
-                    .requiresCorrectToolForDrops()
+                    .strength(10.0f)
                     .noOcclusion(), true));
 
     // -------------------------------------------------------------------------
@@ -365,10 +361,40 @@ public class ModBlocks {
                     .isSuffocating((state, getter, pos) -> false)
                     .isViewBlocking((state, getter, pos) -> false)));
 
+    public static final DeferredBlock<Block> TERRAN_CRYSTAL = BLOCKS.register("terran_crystal",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK)
+                    .strength(2.0f, 12.0f)
+                    .sound(SoundType.AMETHYST)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 10)));
+
     public static final DeferredBlock<Block> CHORAL_END_STONE = BLOCKS.register("choral_end_stone",
             () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.END_STONE)
                     .strength(3.0f, 9.0f)
                     .requiresCorrectToolForDrops()));
+
+    public static final DeferredBlock<AmethystClusterBlock> CHORUS_CRYSTAL_GROWTH = BLOCKS.register("chorus_crystal_growth",
+            () -> new AmethystClusterBlock(
+                    7,
+                    5,
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER)
+                            .noCollission()
+            ));
+
+    public static final DeferredBlock<AmethystClusterBlock> TERRAN_CRYSTAL_GROWTH = BLOCKS.register("terran_crystal_growth",
+        () -> new AmethystClusterBlock(
+                7,
+                5,
+                BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_CLUSTER)
+                        .noCollission()
+        ));
+
+    public static final DeferredBlock<Block> CHORAL_SPROUTS = BLOCKS.register("choral_sprouts",
+            () -> new Block(
+                    BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)
+                            .noCollission()
+                            .offsetType(BlockBehaviour.OffsetType.XZ)
+            ));
 
 
     // -------------------------------------------------------------------------

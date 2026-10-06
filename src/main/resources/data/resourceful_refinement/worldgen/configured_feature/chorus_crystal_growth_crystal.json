@@ -1,0 +1,12 @@
+{
+  "type": "resourceful_refinement:attached_growth",
+  "config": {
+    "growth": {
+      "Name": "resourceful_refinement:chorus_crystal_growth"
+    },
+    "attach_to": ["resourceful_refinement:chorus_crystal"],
+    "tries": 64,
+    "xz_spread": 7,
+    "y_spread": 16
+  }
+}

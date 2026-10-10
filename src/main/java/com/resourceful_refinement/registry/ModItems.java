@@ -12,7 +12,11 @@ import com.resourceful_refinement.content.glare.RelayWrenchItem;
 import com.resourceful_refinement.content.milking_station.MilkingStationItem;
 import com.resourceful_refinement.content.moulds.MouldItem;
 import com.resourceful_refinement.content.plushie.PlushieItem;
+import com.resourceful_refinement.content.prism_cell.PrismCellBatteryComponent;
+import com.resourceful_refinement.content.prism_cell.PrismCellItem;
+import com.resourceful_refinement.content.prism_cell.PrismCellTier;
 import com.resourceful_refinement.content.refill_station.FluidRefillStationItem;
+import com.resourceful_refinement.content.resonator.ResourceResonatorBlockItem;
 import com.resourceful_refinement.content.sieve.MechanicalSieveItem;
 import com.resourceful_refinement.content.plunger.PlungerItem;
 import com.resourceful_refinement.content.refinery.BlenderBladeItem;
@@ -86,7 +90,8 @@ public class ModItems {
     // v0.4 Content
     public static final DeferredItem<BlockItem> BUCKET_EXCAVATOR_ITEM = ITEMS.registerSimpleBlockItem("bucket_excavator", ModBlocks.BUCKET_EXCAVATOR);
 
-    public static final DeferredItem<BlockItem> RESOURCE_RESONATOR_ITEM = ITEMS.registerSimpleBlockItem("resource_resonator", ModBlocks.RESOURCE_RESONATOR);
+    public static final DeferredItem<ResourceResonatorBlockItem> RESOURCE_RESONATOR_ITEM = ITEMS.register("resource_resonator",
+            () -> new ResourceResonatorBlockItem(ModBlocks.RESOURCE_RESONATOR.get(), new Item.Properties()));
 
     public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", ModBlocks.MINERAL_DEPOSIT);
 
@@ -187,6 +192,28 @@ public class ModItems {
     public static final DeferredItem<Item> GRAPHITE = ITEMS.registerItem("graphite", Item::new, new Item.Properties());
     public static final DeferredItem<Item> GRAPHENE_MESH = ITEMS.registerItem("graphene_mesh", Item::new, new Item.Properties());
     public static final DeferredItem<Item> INCOMPLETE_GRAPHENE_MESH = ITEMS.registerItem("incomplete_graphene_mesh", SequencedAssemblyItem::new, new Item.Properties());
+
+
+    // -------------------------------------------------------------------------
+    // Prism Cells
+    // -------------------------------------------------------------------------
+    // Each grade is a distinct item with a pre-filled prism_cell_battery component preset (full charge on creation).
+
+    public static final DeferredItem<PrismCellItem> LOW_GRADE_PRISM_CELL = ITEMS.register("low_grade_prism_cell",
+            () -> new PrismCellItem(PrismCellTier.LOW, new Item.Properties().stacksTo(16)
+                    .component(ModDataComponents.PRISM_CELL_BATTERY.get(), PrismCellBatteryComponent.forTier(PrismCellTier.LOW))));
+
+    public static final DeferredItem<PrismCellItem> MID_GRADE_PRISM_CELL = ITEMS.register("mid_grade_prism_cell",
+            () -> new PrismCellItem(PrismCellTier.MID, new Item.Properties().stacksTo(16)
+                    .component(ModDataComponents.PRISM_CELL_BATTERY.get(), PrismCellBatteryComponent.forTier(PrismCellTier.MID))));
+
+    public static final DeferredItem<PrismCellItem> HIGH_GRADE_PRISM_CELL = ITEMS.register("high_grade_prism_cell",
+            () -> new PrismCellItem(PrismCellTier.HIGH, new Item.Properties().stacksTo(16)
+                    .component(ModDataComponents.PRISM_CELL_BATTERY.get(), PrismCellBatteryComponent.forTier(PrismCellTier.HIGH))));
+
+    public static final DeferredItem<PrismCellItem> CREATIVE_PRISM_CELL = ITEMS.register("creative_prism_cell",
+            () -> new PrismCellItem(PrismCellTier.CREATIVE, new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.EPIC)
+                    .component(ModDataComponents.PRISM_CELL_BATTERY.get(), PrismCellBatteryComponent.forTier(PrismCellTier.CREATIVE))));
 
 
     // -------------------------------------------------------------------------

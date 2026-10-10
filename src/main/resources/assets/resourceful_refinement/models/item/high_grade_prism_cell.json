@@ -1,0 +1,7 @@
+{
+	"parent": "resourceful_refinement:item/prism_cell",
+	"textures": {
+		"0": "resourceful_refinement:item/prism_cells/high_grade_prism_cell",
+		"particle": "resourceful_refinement:item/prism_cells/high_grade_prism_cell"
+	}
+}

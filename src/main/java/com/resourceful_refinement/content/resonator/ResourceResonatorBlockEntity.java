@@ -1,6 +1,9 @@
 package com.resourceful_refinement.content.resonator;
 
 import com.resourceful_refinement.config.ServerConfig;
+import com.resourceful_refinement.content.prism_cell.IPrismCellBlockConsumer;
+import com.resourceful_refinement.content.prism_cell.PrismCell;
+import com.resourceful_refinement.content.prism_cell.PrismCellTier;
 import com.resourceful_refinement.content.resonator.scan.ResonatorTarget;
 import com.resourceful_refinement.content.resonator.scan.ResourceScanService;
 import com.resourceful_refinement.content.resonator.scan.ScannedPoi;
@@ -29,9 +32,10 @@ import java.util.List;
  * result set (in-memory only — persistence across sessions is not required per the design). Acts as the
  * {@link MenuProvider} for the radar GUI.
  */
-public class ResourceResonatorBlockEntity extends BlockEntity implements MenuProvider {
+public class ResourceResonatorBlockEntity extends BlockEntity implements MenuProvider, IPrismCellBlockConsumer {
 
     private static final String TAG_FILTER_MASK = "FilterMask";
+    private static final String TAG_PRISM_CELL = "PrismCell";
 
     /** One enabled flag per {@link ResonatorTarget}, indexed by ordinal. All enabled by default. */
     private final boolean[] filter = new boolean[ResonatorTarget.count()];
@@ -39,9 +43,59 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
     /** Last scan output; rebuilt on every scan, synced to the client menu on open and after each scan. */
     private List<ScannedPoi> lastResults = List.of();
 
+    /** Installed Prism Cell that powers the Ping Beacon and sets the scan radius; {@code null} when none is loaded. */
+    @Nullable
+    private PrismCell prismCell;
+
     public ResourceResonatorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         Arrays.fill(filter, true);
+    }
+
+    // --- Prism Cell (IPrismCellBlockConsumer) ---------------------------------------------------------------
+
+    @Nullable
+    @Override
+    public PrismCell getPrismCell() {
+        return prismCell;
+    }
+
+    @Override
+    public void setPrismCell(@Nullable PrismCell cell) {
+        this.prismCell = cell;
+    }
+
+    @Override
+    public void onPrismCellChanged() {
+        setChanged();
+    }
+
+    /**
+     * Consumes the Ping Beacon charge cost from the installed cell, destroying the cell if the draw empties it.
+     * Callers must have already confirmed a cell is present with enough charge (via {@link #getPrismCell()}).
+     */
+    public void consumePingCharge(int cost) {
+        if (prismCell == null) {
+            return;
+        }
+        prismCell.drainCellCharge(cost, true);
+        if (prismCell.isDepleted()) {
+            prismCell = null;
+        }
+        setChanged();
+    }
+
+    /** Scan radius (chunks) for the installed cell's grade, or the no-cell base radius when empty. */
+    public int getEffectiveScanRadiusChunks() {
+        if (prismCell == null) {
+            return ServerConfig.RESONATOR_SCAN_RADIUS_BASE_CHUNKS.get();
+        }
+        PrismCellTier tier = prismCell.tier();
+        return switch (tier) {
+            case LOW -> ServerConfig.RESONATOR_SCAN_RADIUS_LOW_CHUNKS.get();
+            case MID -> ServerConfig.RESONATOR_SCAN_RADIUS_MID_CHUNKS.get();
+            case HIGH, CREATIVE -> ServerConfig.RESONATOR_SCAN_RADIUS_HIGH_CHUNKS.get();
+        };
     }
 
     // --- Filter state ---------------------------------------------------------------------------------------
@@ -67,7 +121,7 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
      * filter is purely a display control (applied client-side when drawing pins).</p>
      */
     public List<ScannedPoi> runScan(ServerLevel level) {
-        int radius = ServerConfig.RESONATOR_SCAN_RADIUS_CHUNKS.get();
+        int radius = getEffectiveScanRadiusChunks();
         List<ScannedPoi> results = ResourceScanService.scan(level, getBlockPos(), radius,
                 EnumSet.allOf(ResonatorTarget.class));
         this.lastResults = results;
@@ -94,6 +148,9 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
             }
         }
         tag.putInt(TAG_FILTER_MASK, mask);
+        if (prismCell != null) {
+            tag.put(TAG_PRISM_CELL, prismCell.save());
+        }
     }
 
     @Override
@@ -105,6 +162,7 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
                 filter[i] = (mask & (1 << i)) != 0;
             }
         }
+        this.prismCell = tag.contains(TAG_PRISM_CELL) ? PrismCell.load(tag.getCompound(TAG_PRISM_CELL)) : null;
     }
 
     // --- MenuProvider ---------------------------------------------------------------------------------------

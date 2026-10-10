@@ -1,12 +1,19 @@
 package com.resourceful_refinement.content.resonator;
 
 import com.mojang.serialization.MapCodec;
+import com.resourceful_refinement.content.prism_cell.PrismCell;
 import com.resourceful_refinement.registry.ModBlockEntities;
+import com.resourceful_refinement.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -17,11 +24,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * The Resource Resonator: a horizontally directional prospecting block. Right-clicking opens its radar GUI,
@@ -70,13 +81,64 @@ public class ResourceResonatorBlock extends HorizontalDirectionalBlock implement
     }
 
     @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        // Right-clicking with a Prism Cell in hand installs it into an empty Resonator; anything else opens the GUI.
+        if (!(level.getBlockEntity(pos) instanceof ResourceResonatorBlockEntity resonator)) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        boolean canInstall = !resonator.hasPrismCell()
+                && stack.has(ModDataComponents.PRISM_CELL_BATTERY.get());
+        if (!canInstall) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+        if (resonator.tryInsertCell(player, stack)) {
+            player.getInventory().setChanged();
+            level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_PLACE, SoundSource.BLOCKS, 0.8F, 1.2F);
+            return ItemInteractionResult.SUCCESS;
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof ResourceResonatorBlockEntity resonator) {
+            // Crouch + empty hand removes the installed cell; a plain right-click opens the radar GUI.
+            if (player.isSecondaryUseActive() && resonator.hasPrismCell()) {
+                if (!level.isClientSide) {
+                    resonator.tryExtractCell(player);
+                    level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                }
+                return InteractionResult.sidedSuccess(level.isClientSide);
+            }
             if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.openMenu(resonator, pos);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return super.useWithoutItem(state, level, pos, player, hit);
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        List<ItemStack> drops = super.getDrops(state, builder);
+        BlockEntity be = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be == null && builder.getOptionalParameter(LootContextParams.ORIGIN) != null) {
+            be = builder.getLevel().getBlockEntity(BlockPos.containing(builder.getParameter(LootContextParams.ORIGIN)));
+        }
+        if (be instanceof ResourceResonatorBlockEntity resonator) {
+            PrismCell cell = resonator.getPrismCell();
+            if (cell != null) {
+                for (ItemStack stack : drops) {
+                    if (stack.is(this.asItem())) {
+                        stack.set(ModDataComponents.PRISM_CELL_BATTERY.get(), cell.toComponent());
+                    }
+                }
+            }
+        }
+        return drops;
     }
 }

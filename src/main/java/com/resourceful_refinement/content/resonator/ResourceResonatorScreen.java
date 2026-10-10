@@ -1,7 +1,9 @@
 package com.resourceful_refinement.content.resonator;
 
+import com.resourceful_refinement.content.prism_cell.PrismCellTier;
 import com.resourceful_refinement.content.resonator.scan.ResonatorTarget;
 import com.resourceful_refinement.content.resonator.scan.ScannedPoi;
+import com.resourceful_refinement.network.PingBeaconResultPayload;
 import com.resourceful_refinement.network.PlacePingBeaconPayload;
 import com.resourceful_refinement.network.ResonatorScanRequestPayload;
 import com.resourceful_refinement.network.SetResonatorFilterPayload;
@@ -54,6 +56,8 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     private static final int PANEL_W = 100;
     private static final int FILTER_Y = 8;
     private static final int FILTER_ROW_H = 22;
+    private static final int CELL_Y = 126;
+    private static final int CELL_H = 16;
     private static final int ZOOM_Y = 162;
     private static final int SCAN_Y = 196;
     private static final int READOUT_Y = 208;
@@ -82,8 +86,20 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     /** How long a ping status message (success or failure) lingers in the details panel. */
     private static final long PING_STATUS_MS = 3_250L;
 
+    // Installed Prism Cell colours.
+    private static final int COLOR_CELL_BAR = 0xFF3CC8E6;
+    private static final int COLOR_CELL_BAR_BG = 0xFF0C1A0C;
+    private static final int COLOR_CELL_EMPTY = 0xFF8A8A8A;
+
     private final boolean[] filter;
     private List<ScannedPoi> results = new ArrayList<>();
+
+    // Installed-cell state, synced from the menu on open and refreshed by ping results.
+    private boolean cellPresent;
+    private int cellTier;
+    private int cellCharge;
+    private int cellMaxCharge;
+    private final int pingChargeCost;
     private double zoom = 0.5D; // 0 = fully zoomed out (whole scan radius), 1 = zoomed in (MIN_VIEW_BLOCKS)
     private boolean draggingZoom;
 
@@ -106,6 +122,19 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         this.imageHeight = 252;
         this.filter = menu.getInitialFilter().clone();
         this.results = new ArrayList<>(menu.getInitialResults());
+        this.cellPresent = menu.isCellPresent();
+        this.cellTier = menu.getCellTier();
+        this.cellCharge = menu.getCellCharge();
+        this.cellMaxCharge = menu.getCellMaxCharge();
+        this.pingChargeCost = menu.getPingChargeCost();
+    }
+
+    /** Whether the installed cell can currently power a Ping Beacon (creative cells always can). */
+    private boolean canPing() {
+        if (!cellPresent) {
+            return false;
+        }
+        return PrismCellTier.byIndex(cellTier).isCreative() || cellCharge >= pingChargeCost;
     }
 
     @Override
@@ -166,6 +195,15 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     }
 
     private void deployPing(ScannedPoi poi) {
+        // The Ping Beacon runs on the installed cell's charge; block the request (and explain) when it can't fire.
+        if (!canPing()) {
+            String key = cellPresent
+                    ? "message.resourceful_refinement.resonator.ping_no_charge"
+                    : "message.resourceful_refinement.resonator.ping_no_cell";
+            setPingStatus(Component.translatable(key).getString(), COLOR_ERROR_TEXT);
+            playPingSound(SoundEvents.DISPENSER_FAIL, 0.8F);
+            return;
+        }
         pulsingPoi = poi;
         pulseStartMillis = Util.getMillis();
         PacketDistributor.sendToServer(new PlacePingBeaconPayload(menu.getBlockPos(),
@@ -177,13 +215,19 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
      * sound — a "Pinged Location" confirmation + beacon chime on success, or the failure message + a short deny
      * sound otherwise.
      */
-    public void acceptPingResult(boolean success, String messageKey) {
-        if (success) {
+    public void acceptPingResult(PingBeaconResultPayload result) {
+        // Keep the installed-cell readout and Ping availability in sync with the server's post-action state.
+        this.cellPresent = result.cellPresent();
+        this.cellTier = result.cellTier();
+        this.cellCharge = result.cellCharge();
+        this.cellMaxCharge = result.cellMaxCharge();
+
+        if (result.success()) {
             setPingStatus(Component.translatable("message.resourceful_refinement.resonator.ping_success").getString(),
                     COLOR_READOUT_TEXT);
             playPingSound(SoundEvents.BEACON_POWER_SELECT, 1.4F);
         } else {
-            setPingStatus(Component.translatable(messageKey).getString(), COLOR_ERROR_TEXT);
+            setPingStatus(Component.translatable(result.messageKey()).getString(), COLOR_ERROR_TEXT);
             playPingSound(SoundEvents.DISPENSER_FAIL, 0.8F);
         }
     }
@@ -296,6 +340,9 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         // Pins.
         renderPins(graphics, cx, cy, radius, mouseX, mouseY);
 
+        // Installed Prism Cell readout.
+        renderCellReadout(graphics, left, top);
+
         // Zoom label + slider.
         renderZoom(graphics, left, top);
 
@@ -332,6 +379,33 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
                 drawCheck(graphics, boxX, boxY);
             }
         }
+    }
+
+    /** Small panel in the right column showing the installed Prism Cell's grade and remaining charge (or "No Cell"). */
+    private void renderCellReadout(GuiGraphics graphics, int left, int top) {
+        int px = left + PANEL_X;
+        int py = top + CELL_Y;
+        framedPanel(graphics, px - 4, py - 4, PANEL_W + 8, CELL_H + 8);
+
+        if (!cellPresent) {
+            String none = Component.translatable("gui.resourceful_refinement.resonator.cell_none").getString();
+            graphics.drawString(this.font, none, px, py + 4, COLOR_CELL_EMPTY, false);
+            return;
+        }
+
+        PrismCellTier tier = PrismCellTier.byIndex(cellTier);
+        String name = Component.translatable("gui.resourceful_refinement.resonator.cell_" + tier.id()).getString();
+        graphics.drawString(this.font, name, px, py, COLOR_LABEL, false);
+
+        String charge = tier.isCreative() ? "∞" : Integer.toString(cellCharge);
+        graphics.drawString(this.font, charge, px + PANEL_W - this.font.width(charge), py, COLOR_CELL_BAR, false);
+
+        int barY = py + 11;
+        int barW = PANEL_W;
+        graphics.fill(px, barY, px + barW, barY + 3, COLOR_CELL_BAR_BG);
+        float frac = tier.isCreative() ? 1.0F : (cellMaxCharge > 0 ? (float) cellCharge / cellMaxCharge : 0.0F);
+        int fillW = Math.round(barW * Mth.clamp(frac, 0.0F, 1.0F));
+        graphics.fill(px, barY, px + fillW, barY + 3, COLOR_CELL_BAR);
     }
 
     private void renderZoom(GuiGraphics graphics, int left, int top) {

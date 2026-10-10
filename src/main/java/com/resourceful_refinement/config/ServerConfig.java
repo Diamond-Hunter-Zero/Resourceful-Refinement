@@ -42,8 +42,12 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_CAPACITY;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
 
-    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_BASE_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_LOW_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_MID_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_HIGH_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_PING_RANGE_CHUNKS;
+    public static final ModConfigSpec.IntValue RESONATOR_PING_CHARGE_COST;
 
 
     static {
@@ -192,14 +196,29 @@ public class ServerConfig {
 
         // Resource Resonator Parameters
         CONFIG_BUILDER.push("Resource Resonator");
-        RESONATOR_SCAN_RADIUS_CHUNKS = CONFIG_BUILDER
-                .comment("Maximum radius, in chunks, the Resource Resonator predicts world-generation features within.",
-                        "Larger values scan a wider area per press but return more pins (Value between 1 and 512)")
-                .defineInRange("scan_radius_chunks", 48, 1, 512);
+        CONFIG_BUILDER.comment("Maximum radius, in chunks, the Resource Resonator predicts world-generation features within.",
+                "The effective radius is set by the installed Prism Cell's grade; larger values scan a wider area per",
+                "press but return more pins (Value between 1 and 512)");
+        RESONATOR_SCAN_RADIUS_BASE_CHUNKS = CONFIG_BUILDER
+                .comment("Scan radius with no Prism Cell installed (scanning still works, at reduced range)")
+                .defineInRange("scan_radius_base_chunks", 8, 1, 512);
+        RESONATOR_SCAN_RADIUS_LOW_CHUNKS = CONFIG_BUILDER
+                .comment("Scan radius with a Low-Grade Prism Cell installed")
+                .defineInRange("scan_radius_low_chunks", 16, 1, 512);
+        RESONATOR_SCAN_RADIUS_MID_CHUNKS = CONFIG_BUILDER
+                .comment("Scan radius with a Mid-Grade Prism Cell installed")
+                .defineInRange("scan_radius_mid_chunks", 32, 1, 512);
+        RESONATOR_SCAN_RADIUS_HIGH_CHUNKS = CONFIG_BUILDER
+                .comment("Scan radius with a High-Grade (or Creative) Prism Cell installed")
+                .defineInRange("scan_radius_high_chunks", 48, 1, 512);
         RESONATOR_PING_RANGE_CHUNKS = CONFIG_BUILDER
                 .comment("Maximum distance, in chunks, from a Resource Resonator at which a radar pin may deploy a",
                         "Ping Beacon. The target chunk must also be loaded (Value between 1 and 512)")
                 .defineInRange("ping_range_chunks", 10, 1, 512);
+        RESONATOR_PING_CHARGE_COST = CONFIG_BUILDER
+                .comment("Prism Cell charge consumed each time the Resource Resonator deploys a Ping Beacon.",
+                        "With no installed cell, or insufficient charge, the ping fails (Value between 0 and 1000000)")
+                .defineInRange("ping_charge_cost", 1000, 0, 1_000_000);
         CONFIG_BUILDER.pop();
 
 

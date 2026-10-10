@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.glare.GlareTargetsData;
 import com.resourceful_refinement.content.glare.DimensionalNodePos;
+import com.resourceful_refinement.content.prism_cell.PrismCellBatteryComponent;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -72,6 +73,13 @@ public class ModDataComponents {
             () -> DataComponentType.<Integer>builder()
                     .persistent(Codec.INT)
                     .networkSynchronized(ByteBufCodecs.INT)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PrismCellBatteryComponent>> PRISM_CELL_BATTERY = DATA_COMPONENTS.register("prism_cell_battery",
+            () -> DataComponentType.<PrismCellBatteryComponent>builder()
+                    .persistent(PrismCellBatteryComponent.CODEC)
+                    .networkSynchronized(PrismCellBatteryComponent.STREAM_CODEC)
                     .build()
     );
 }

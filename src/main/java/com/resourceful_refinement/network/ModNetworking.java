@@ -81,7 +81,20 @@ public final class ModNetworking {
                         PingBeaconSyncPayload.TYPE,
                         PingBeaconSyncPayload.STREAM_CODEC,
                         ModNetworking::handlePingBeaconSync
+                )
+                .playToServer(
+                        HoverpackLaunchPayload.TYPE,
+                        HoverpackLaunchPayload.STREAM_CODEC,
+                        ModNetworking::handleHoverpackLaunch
                 );
+    }
+
+    private static void handleHoverpackLaunch(HoverpackLaunchPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer serverPlayer) {
+                HoverpackLaunchPayload.handle(payload, serverPlayer);
+            }
+        });
     }
 
     private static void handleSetTrackingId(SetRefillStationTrackingIdPayload payload, IPayloadContext context) {

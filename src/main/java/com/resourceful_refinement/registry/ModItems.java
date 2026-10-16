@@ -217,6 +217,16 @@ public class ModItems {
 
 
     // -------------------------------------------------------------------------
+    // Hoverpack
+    // -------------------------------------------------------------------------
+    // A Prism-Cell-powered elytra alternative (chest slot, glide + launch). See content/hoverpack/.
+
+    public static final DeferredItem<com.resourceful_refinement.content.hoverpack.HoverpackItem> HOVERPACK = ITEMS.register("hoverpack",
+            () -> new com.resourceful_refinement.content.hoverpack.HoverpackItem(
+                    com.resourceful_refinement.content.hoverpack.HoverpackItem.createProperties()));
+
+
+    // -------------------------------------------------------------------------
     // Foods Properties
     // -------------------------------------------------------------------------
 

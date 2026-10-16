@@ -1,7 +1,7 @@
 ---
 title: Prism Cell
 category: Item
-status: Planned
+status: Implemented
 introduced: v0.4
 recipe_type: n/a
 related:
@@ -85,8 +85,10 @@ Implemented in v0.4 under the new `content/prism_cell/` package.
   `drainCellCharge(amount, destroyOnEmpty)`, `fillCellCharge(amount)`, charge/max/tier accessors, and
   NBT + item-stack conversion. `PrismCellTier` holds the four grade presets.
 - **Block interface:** `IPrismCellBlockConsumer` — default `tryInsertCell` / `tryExtractCell` helpers plus
-  `getPrismCell`/`setPrismCell`/`onPrismCellChanged`. The `IPrismCellItemConsumer` item variant from the design
-  above is **not yet implemented** (no item consumer exists yet).
+  `getPrismCell`/`setPrismCell`/`onPrismCellChanged`.
+- **Item interface:** `IPrismCellItemConsumer` — the item variant from the design above. Because items are
+  singletons, it stores the cell directly on the consumer stack as the `prism_cell_battery` component and realises
+  the bundle-style exchange (`handleOtherStackedOnMe` / `handleStackedOnOther`). First used by the [[Hoverpack]].
 
 ### Resource Resonator integration
 

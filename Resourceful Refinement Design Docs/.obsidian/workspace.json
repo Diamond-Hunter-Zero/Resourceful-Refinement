@@ -83,12 +83,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Prism Cell.md",
+                "file": "Drill Pylon.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Prism Cell"
+              "title": "Drill Pylon"
             }
           },
           {
@@ -175,7 +175,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 334.8333435058594
   },
   "right": {
     "id": "726b9ba427b6c15f",
@@ -284,30 +284,32 @@
   },
   "active": "41affd3c7048bffe",
   "lastOpenFiles": [
-    "Prism Cell.md.tmp.3248.44c9c8e130b0",
+    "Drill Pylon.md.tmp.92256.8736a0c27856",
+    "Drill Pylon.md.tmp.92256.480e1434ce9f",
+    "Drill Pylon.md.tmp.92256.3d5bd45ff629",
+    "Drill Pylon.md.tmp.92256.3f984c2484e9",
+    "Drill Pylon.md.tmp.92256.e2aa04a8c615",
+    "Drill Pylon.md.tmp.92256.e003be2521fa",
+    "Drill Pylon.md.tmp.92256.2babba3bd59a",
+    "Drill Pylon.md.tmp.92256.af2aad8d964f",
+    "Drill Pylon.md.tmp.92256.329d3dbc6a29",
+    "Drill Pylon.md.tmp.92256.5dceb4ed8591",
+    "Drill Pylon.md.tmp.92256.2688767d5744",
+    "Hoverpack.md",
+    "Resource Resonator.md",
     "v0.4 Crafting Trees.excalidraw.md",
-    "Relay Wrench.md",
     "Prism Cell.md",
+    "Primary Design Doc.md",
+    "Relay Wrench.md",
     "Remote Entanglement.md",
     "Resonance Crystal.md",
-    "Crystal Fissure Bud Tints.md.tmp.32180.1d33fe222aec",
-    "Crystal Fissure Bud Tints.md.tmp.32180.ac739d57c102",
-    "Crystal Fissure Bud.md.tmp.30180.f7e8af8a2efd",
-    "Crystal Fissure Bud.md.tmp.30180.fd642bbd671a",
-    "Crystal Fissure Bud.md.tmp.30180.705cc492fadf",
     "Crystal Fissure Bud Tints.md",
     "Choral Clusters Worldgen.md",
-    "Chorus Crystal.md.tmp.32360.6e0098557171",
-    "Choral End Stone.md.tmp.32360.ff59b58a5f9f",
-    "Choral End Stone.md.tmp.32360.e21bb71abe35",
-    "Choral Clusters Worldgen.md.tmp.32360.635ca2b34705",
-    "Choral Clusters Worldgen.md.tmp.32360.9061ebef4f7d",
     "Chorus Crystal Pillars.md",
     "Chorus Crystal.md",
     "Choral End Stone.md",
     "Choral Clusters.md",
     "Crystal Fissure Bud.md",
-    "Resource Resonator.md",
     "Drill Pylon.md",
     "Resource Resonator GUI.png",
     "Telemetry Terminal GUI.md",
@@ -319,8 +321,6 @@
     "GLARE Chromatic Transceiver.md",
     "GLARE Relay.md",
     "Coating.md",
-    "Cyclotron Forge.md",
-    "Bucket Excavator.md",
     "bucket_wheel_excavator_volumes.png",
     "bucket_wheel_excavator_block_test_render.png",
     "Launchpad Controller Receive GUI Mock-up.png",

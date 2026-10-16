@@ -22,7 +22,9 @@ import com.resourceful_refinement.content.distillery.DistilleryBlock;
 import com.resourceful_refinement.content.distillery.DistilleryBlockEntity;
 import com.resourceful_refinement.content.distillery.DistilleryModel;
 import com.resourceful_refinement.content.distillery.DistilleryRenderer;
-import com.resourceful_refinement.content.drill_pylon.DrillPylonRenderer;
+import com.resourceful_refinement.content.drill_pylon.*;
+import com.simibubi.create.api.behaviour.movement.MovementBehaviour;
+import com.simibubi.create.api.contraption.BlockMovementChecks;
 import com.resourceful_refinement.content.fracking_pump.*;
 import com.resourceful_refinement.content.fuel_tank.FuelTankBlockItem;
 import com.resourceful_refinement.content.fuel_tank.FuelTankRenderer;
@@ -178,6 +180,18 @@ public class ResourcefulRefinementMain {
 
         // Register stress values
         event.enqueueWork(ModStressValues::register);
+
+        // Drill Pylon Head: standalone heads act as 3x3 contraption drills; assembled heads refuse to be moved,
+        // so Create can't carry the controller away from its multiblock
+        event.enqueueWork(() -> {
+            MovementBehaviour.REGISTRY.register(ModBlocks.DRILL_PYLON_HEAD.get(), new DrillPylonHeadMovementBehaviour());
+            BlockMovementChecks.registerMovementAllowedCheck((state, level, pos) ->
+                    state.is(ModBlocks.DRILL_PYLON_HEAD.get())
+                            && level.getBlockEntity(pos) instanceof DrillPylonHeadBlockEntity head
+                            && head.isAssembled()
+                            ? BlockMovementChecks.CheckResult.FAIL
+                            : BlockMovementChecks.CheckResult.PASS);
+        });
 
         // Register boiler heaters
         event.enqueueWork(() -> BoilerHeater.REGISTRY.register(
@@ -628,6 +642,8 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(BucketExcavatorModel.LAYER_LOCATION, BucketExcavatorModel::createBodyLayer);
             event.registerLayerDefinition(MineralDepositModel.LAYER_LOCATION, MineralDepositModel::createBodyLayer);
             event.registerLayerDefinition(ResourceResonatorModel.LAYER_LOCATION, ResourceResonatorModel::createBodyLayer);
+            event.registerLayerDefinition(DrillPylonModel.LAYER_LOCATION, DrillPylonModel::createBodyLayer);
+            event.registerLayerDefinition(DrillPylonHeadModel.LAYER_LOCATION, DrillPylonHeadModel::createBodyLayer);
 
             event.registerLayerDefinition(CyclotronFrontModel.LAYER_LOCATION, CyclotronFrontModel::createBodyLayer);
             event.registerLayerDefinition(CyclotronCoilModel.LAYER_LOCATION, CyclotronCoilModel::createBodyLayer);

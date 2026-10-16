@@ -13,15 +13,18 @@ import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModRecipeTypes;
-import com.resourceful_refinement.registry.ModStressValues;
+import com.resourceful_refinement.config.ServerConfig;
 import com.resourceful_refinement.utilities.GoggleUtilities;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.kinetics.base.BlockBreakingKineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +44,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +62,19 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     public static final int MIN_RPM = 64;
     public static final int INVENTORY_SLOT_COUNT = 4;
     private static final int STANDALONE_DRILL_INTERVAL = 20;
+    private static final int DRILL_PARTICLES_PER_TICK = 8;
+    private static final int STANDALONE_TARGET_COUNT = 9;
+
+    // Structure layout, as y offsets from the head. The head sits one layer above the bud, in the drill bit's
+    // clearance layer; corner girder legs run from the bud's layer to the top, and the body is the 3x3 casing
+    // ring stack above the head.
+    public static final int LEG_BOTTOM_Y = -1;
+    public static final int LEG_TOP_Y = 3;
+    public static final int BODY_BOTTOM_Y = 1;
+    public static final int BODY_TOP_Y = 3;
+    public static final int OUTPUT_Y = 1;
+    public static final int KINETIC_Y = 2;
+    public static final int LUX_SOCKET_Y = 3;
 
     private boolean assembled;
     private Direction front = Direction.NORTH;
@@ -73,6 +90,16 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     private ResourceLocation displayedRecipeId;
     private DrillPylonRecipe lastRecipe;
     private Item lastSourceItem = Items.AIR;
+    private boolean drilling;
+
+    // Server-only standalone breaking overlay state; one breaker id per 3x3 target
+    private int[] breakerIds;
+    private int[] breakingStages;
+
+    // Client-only animation state, advanced by DrillPylonRenderer from the synced drilling flag
+    private DrillAnimationPhase animPhase;
+    private float animPhaseStart;
+    private float animSpinOffset;
 
     public final ItemStackHandler outputInv = new ItemStackHandler(INVENTORY_SLOT_COUNT) {
         @Override
@@ -88,7 +115,11 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     @Override
     public void tick() {
         super.tick();
-        if (level == null || level.isClientSide) return;
+        if (level == null) return;
+        if (level.isClientSide) {
+            tickDrillParticles();
+            return;
+        }
 
         if (!assembled) {
             tickStandaloneDrill();
@@ -110,6 +141,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         if (recipe == null) {
             progress = 0;
             setAllocatedLux(0);
+            setDrilling(false);
             return;
         }
 
@@ -118,11 +150,13 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         setAllocatedLux(requiredLux);
 
         if (getProxySpeed() < MIN_RPM || !hasLuxReady(recipe)) {
+            setDrilling(false);
             return;
         }
 
         progress++;
         if (progress < duration) {
+            setDrilling(true);
             syncData();
             return;
         }
@@ -130,6 +164,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         List<ItemStack> rolledResults = new ArrayList<>(recipe.rollResults(level.random));
         if (!canFitResults(rolledResults)) {
             progress = duration;
+            setDrilling(false);
             syncData();
             return;
         }
@@ -140,32 +175,107 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
             }
         }
         progress = 0;
+        setDrilling(true);
         syncData();
+    }
+
+    private void setDrilling(boolean value) {
+        if (drilling == value) return;
+        drilling = value;
+        syncData();
+    }
+
+    public boolean isDrilling() {
+        return assembled && drilling;
+    }
+
+    /**
+     * Client-only: while the bit is in its operating spin, sprays debris particles textured from the block
+     * being drilled outward around the bit's tip.
+     */
+    private void tickDrillParticles() {
+        if (!isDrilling() || animPhase != DrillAnimationPhase.RUNNING) return;
+
+        BlockPos drilledPos = worldPosition.below();
+        BlockState drilledState = level.getBlockState(drilledPos);
+        if (drilledState.isAir()) return;
+
+        BlockParticleOption particle = new BlockParticleOption(ParticleTypes.BLOCK, drilledState).setPos(drilledPos);
+        double tipX = worldPosition.getX() + 0.5;
+        double tipY = worldPosition.getY() + 0.05;
+        double tipZ = worldPosition.getZ() + 0.5;
+        for (int i = 0; i < DRILL_PARTICLES_PER_TICK; i++) {
+            double angle = level.random.nextDouble() * Math.PI * 2.0;
+            double speed = 0.15 + level.random.nextDouble() * 0.2;
+            double radius = 0.2 + level.random.nextDouble() * 0.3;
+            level.addParticle(particle,
+                    tipX + Math.cos(angle) * radius, tipY, tipZ + Math.sin(angle) * radius,
+                    Math.cos(angle) * speed, 0.2 + level.random.nextDouble() * 0.25, Math.sin(angle) * speed);
+        }
     }
 
     private void tickStandaloneDrill() {
         if (Math.abs(getSpeed()) < MIN_RPM) {
             standaloneDrillTimer = 0;
+            clearBreakingProgress();
             return;
         }
         standaloneDrillTimer++;
-        if (standaloneDrillTimer < STANDALONE_DRILL_INTERVAL) return;
-        standaloneDrillTimer = 0;
+        boolean breakNow = standaloneDrillTimer >= STANDALONE_DRILL_INTERVAL;
+        // Crack stages 0-9 across the interval, matching the vanilla/Create breaking overlay
+        int stage = Math.min(9, standaloneDrillTimer * 10 / STANDALONE_DRILL_INTERVAL);
 
         Direction facing = getBlockState().getValue(DrillPylonHeadBlock.FACING);
         BlockPos center = worldPosition.relative(facing);
         Direction.Axis axis = facing.getAxis();
+        int index = 0;
         for (int a = -1; a <= 1; a++) {
-            for (int b = -1; b <= 1; b++) {
+            for (int b = -1; b <= 1; b++, index++) {
                 BlockPos target = offsetInPlane(center, axis, a, b);
                 BlockState state = level.getBlockState(target);
-                if (state.isAir() || state.getDestroySpeed(level, target) < 0) continue;
-                level.destroyBlock(target, true);
+                boolean breakable = !state.isAir() && state.getDestroySpeed(level, target) >= 0;
+                if (breakNow && breakable) {
+                    level.destroyBlock(target, true);
+                }
+                setBreakingStage(index, target, breakable && !breakNow ? stage : -1);
+            }
+        }
+        if (breakNow) standaloneDrillTimer = 0;
+    }
+
+    private void setBreakingStage(int index, BlockPos pos, int stage) {
+        if (breakerIds == null) {
+            breakerIds = new int[STANDALONE_TARGET_COUNT];
+            for (int i = 0; i < breakerIds.length; i++) {
+                breakerIds[i] = BlockBreakingKineticBlockEntity.NEXT_BREAKER_ID.decrementAndGet();
+            }
+            breakingStages = new int[STANDALONE_TARGET_COUNT];
+            Arrays.fill(breakingStages, -1);
+        }
+        if (breakingStages[index] == stage) return;
+        breakingStages[index] = stage;
+        level.destroyBlockProgress(breakerIds[index], pos, stage);
+    }
+
+    private void clearBreakingProgress() {
+        if (breakingStages == null || level == null || level.isClientSide) return;
+        Direction facing = getBlockState().getValue(DrillPylonHeadBlock.FACING);
+        BlockPos center = worldPosition.relative(facing);
+        int index = 0;
+        for (int a = -1; a <= 1; a++) {
+            for (int b = -1; b <= 1; b++, index++) {
+                setBreakingStage(index, offsetInPlane(center, facing.getAxis(), a, b), -1);
             }
         }
     }
 
-    private static BlockPos offsetInPlane(BlockPos center, Direction.Axis axis, int a, int b) {
+    @Override
+    public void invalidate() {
+        clearBreakingProgress();
+        super.invalidate();
+    }
+
+    static BlockPos offsetInPlane(BlockPos center, Direction.Axis axis, int a, int b) {
         return switch (axis) {
             case X -> center.offset(0, a, b);
             case Y -> center.offset(a, 0, b);
@@ -224,7 +334,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         if (level == null || !assembled) return Math.abs(getSpeed());
         float speed = 0;
         for (Direction side : List.of(front.getClockWise(), front.getCounterClockWise())) {
-            BlockPos pos = worldPosition.above().relative(side);
+            BlockPos pos = worldPosition.above(KINETIC_Y).relative(side);
             if (level.getBlockEntity(pos) instanceof DrillPylonKineticProxyBlockEntity proxy) {
                 speed = Math.max(speed, Math.abs(proxy.getSpeed()));
             }
@@ -251,6 +361,8 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         AssemblyResult validation = validateStructure(assembledFront);
         if (!validation.success()) return validation;
 
+        clearBreakingProgress();
+        standaloneDrillTimer = 0;
         front = assembledFront;
         assembled = true;
         progress = 0;
@@ -264,7 +376,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     private AssemblyResult validateStructure(Direction assembledFront) {
-        for (int y = 1; y <= 3; y++) {
+        for (int y = BODY_BOTTOM_Y; y <= BODY_TOP_Y; y++) {
             BlockPos center = worldPosition.above(y);
             if (!AllBlocks.GEARBOX.has(level.getBlockState(center))) {
                 return AssemblyResult.fail("Missing gearbox at layer " + y);
@@ -280,7 +392,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
             }
         }
 
-        for (int y = 0; y <= 3; y++) {
+        for (int y = LEG_BOTTOM_Y; y <= LEG_TOP_Y; y++) {
             for (int dx : new int[]{-2, 2}) {
                 for (int dz : new int[]{-2, 2}) {
                     BlockPos pos = worldPosition.offset(dx, y, dz);
@@ -298,11 +410,12 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     private void convertStructureToProxies() {
-        for (int y = 1; y <= 3; y++) {
-            if (y == 1) {
-                convertToKineticProxy(worldPosition.above(y));
+        for (int y = BODY_BOTTOM_Y; y <= BODY_TOP_Y; y++) {
+            BlockPos center = worldPosition.above(y);
+            if (y == KINETIC_Y) {
+                convertToKineticProxy(center);
             } else {
-                convertToProxy(worldPosition.above(y), DrillPylonProxyRole.STRUCTURE);
+                convertToProxy(center, roleFor(center));
             }
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
@@ -318,7 +431,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
             }
         }
 
-        for (int y = 0; y <= 3; y++) {
+        for (int y = LEG_BOTTOM_Y; y <= LEG_TOP_Y; y++) {
             for (int dx : new int[]{-2, 2}) {
                 for (int dz : new int[]{-2, 2}) {
                     convertToProxy(worldPosition.offset(dx, y, dz), DrillPylonProxyRole.STRUCTURE);
@@ -328,24 +441,22 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     private DrillPylonProxyRole roleFor(BlockPos pos) {
-        BlockPos output = worldPosition.above().relative(front);
+        BlockPos output = worldPosition.above(OUTPUT_Y).relative(front);
         if (pos.equals(output)) return DrillPylonProxyRole.OUTPUT;
-        BlockPos left = worldPosition.above().relative(front.getCounterClockWise());
-        BlockPos right = worldPosition.above().relative(front.getClockWise());
+        BlockPos left = worldPosition.above(KINETIC_Y).relative(front.getCounterClockWise());
+        BlockPos right = worldPosition.above(KINETIC_Y).relative(front.getClockWise());
         if (pos.equals(left) || pos.equals(right)) return DrillPylonProxyRole.KINETIC;
-        BlockPos lux = worldPosition.above(2).relative(front.getOpposite());
-        if (pos.equals(lux)) return DrillPylonProxyRole.LUX_SOCKET;
+        if (pos.equals(getLuxSocketProxyPos())) return DrillPylonProxyRole.LUX_SOCKET;
         return DrillPylonProxyRole.STRUCTURE;
     }
 
     private BlockPos getLuxSocketProxyPos() {
-        return worldPosition.above(2).relative(front.getOpposite());
+        return worldPosition.above(LUX_SOCKET_Y);
     }
 
     private void refreshAdjacentLuxTransceiver() {
         if (!(level instanceof ServerLevel server)) return;
-        BlockPos socketPos = getLuxSocketProxyPos();
-        BlockPos transceiverPos = socketPos.relative(front.getOpposite());
+        BlockPos transceiverPos = getLuxSocketProxyPos().above();
         if (!server.isLoaded(transceiverPos)) return;
         if (server.getBlockEntity(transceiverPos) instanceof LuxTransceiverBlockEntity transceiver) {
             transceiver.refreshSocketLink();
@@ -376,13 +487,14 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         if (!assembled || level == null) return;
         assembled = false;
         progress = 0;
+        drilling = false;
         setAllocatedLux(0);
         if (level instanceof ServerLevel server) {
             GlareService.removeAllLinks(server, getGlareNodePos());
             GlareService.onNodeRemoved(server, getGlareNodePos());
         }
 
-        for (int y = 1; y <= 3; y++) {
+        for (int y = BODY_BOTTOM_Y; y <= BODY_TOP_Y; y++) {
             restoreFromProxy(worldPosition.above(y));
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
@@ -392,7 +504,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
             }
         }
 
-        for (int y = 0; y <= 3; y++) {
+        for (int y = LEG_BOTTOM_Y; y <= LEG_TOP_Y; y++) {
             for (int dx : new int[]{-2, 2}) {
                 for (int dz : new int[]{-2, 2}) {
                     restoreFromProxy(worldPosition.offset(dx, y, dz));
@@ -422,7 +534,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     }
 
     public boolean isLuxSocketSide(DrillPylonProxyBlockEntity proxy, Direction side) {
-        return assembled && proxy.getRole() == DrillPylonProxyRole.LUX_SOCKET && side == front.getOpposite();
+        return assembled && proxy.getRole() == DrillPylonProxyRole.LUX_SOCKET && side == Direction.UP;
     }
 
     public ItemStackHandler getOutputInventory() {
@@ -457,7 +569,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
 
     @Override
     public Vec3 getGlareLinkEndpoint() {
-        return Vec3.atCenterOf(worldPosition.above(2).relative(front.getOpposite()));
+        return Vec3.atCenterOf(getLuxSocketProxyPos());
     }
 
     @Override
@@ -516,6 +628,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         tag.putBoolean("Assembled", assembled);
         tag.putString("Front", front.getName());
         tag.putInt("Progress", progress);
+        tag.putBoolean("Drilling", drilling);
         tag.putInt("StandaloneDrillTimer", standaloneDrillTimer);
         tag.putInt("AllocatedLux", allocatedLux);
         tag.putString("OperationStatus", operationStatus.name());
@@ -535,6 +648,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         front = Direction.byName(tag.getString("Front"));
         if (front == null || front.getAxis() == Direction.Axis.Y) front = Direction.NORTH;
         progress = tag.getInt("Progress");
+        drilling = tag.getBoolean("Drilling");
         standaloneDrillTimer = tag.getInt("StandaloneDrillTimer");
         allocatedLux = tag.getInt("AllocatedLux");
         try {
@@ -576,8 +690,8 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
     public AABB getRenderBoundingBox() {
         if (!assembled) return super.getRenderBoundingBox();
         return new AABB(
-                worldPosition.getX() - 2, worldPosition.getY(), worldPosition.getZ() - 2,
-                worldPosition.getX() + 3, worldPosition.getY() + 4, worldPosition.getZ() + 3
+                worldPosition.getX() - 2, worldPosition.getY() + LEG_BOTTOM_Y, worldPosition.getZ() - 2,
+                worldPosition.getX() + 3, worldPosition.getY() + LEG_TOP_Y + 1, worldPosition.getZ() + 3
         );
     }
 
@@ -586,7 +700,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         tooltip.add(Component.literal("     Drill Pylon:"));
         if (!assembled) {
             tooltip.add(Component.literal("     \u00a77Unassembled; right-click when built."));
-            tooltip.add(Component.literal("     \u00a7b" + (int) (Math.abs(getSpeed()) * ModStressValues.DRILL_PYLON_STRESS) + "su \u00a78at current speed"));
+            tooltip.add(Component.literal("     \u00a7b" + (int) (Math.abs(getSpeed()) * ServerConfig.DRILL_PYLON_HEAD_STRESS.getAsInt()) + "su \u00a78at current speed"));
             return true;
         }
 
@@ -607,6 +721,24 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
             }
         }
         return true;
+    }
+
+    public DrillAnimationPhase getAnimPhase() {
+        return animPhase;
+    }
+
+    public float getAnimPhaseStart() {
+        return animPhaseStart;
+    }
+
+    public float getAnimSpinOffset() {
+        return animSpinOffset;
+    }
+
+    public void setAnimState(DrillAnimationPhase phase, float phaseStart, float spinOffset) {
+        animPhase = phase;
+        animPhaseStart = phaseStart;
+        animSpinOffset = spinOffset;
     }
 
     private void syncData() {

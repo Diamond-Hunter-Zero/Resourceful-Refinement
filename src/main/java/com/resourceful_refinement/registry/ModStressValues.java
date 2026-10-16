@@ -15,7 +15,6 @@ public class ModStressValues {
     public static final double ADVANCED_PUMP_STRESS = 8;
     public static final double MILKING_STATION_STRESS = 4;
     public static final double BUCKET_EXCAVATOR_STRESS = 16;
-    public static final double DRILL_PYLON_STRESS = 16;
     public static final double CYCLOTRON_STRESS = 32;
 
 
@@ -28,8 +27,9 @@ public class ModStressValues {
         registerImpact(ModBlocks.ADVANCED_PUMP.get(), () -> ADVANCED_PUMP_STRESS);
         registerImpact(ModBlocks.MILKING_STATION.get(), () -> MILKING_STATION_STRESS);
         registerImpact(ModBlocks.BUCKET_EXCAVATOR.get(), () -> BUCKET_EXCAVATOR_STRESS);
-        registerImpact(ModBlocks.DRILL_PYLON_HEAD.get(), () -> DRILL_PYLON_STRESS);
-        registerImpact(ModBlocks.DRILL_PYLON_KINETIC_PROXY.get(), () -> DRILL_PYLON_STRESS);
+        registerImpact(ModBlocks.DRILL_PYLON_HEAD.get(), ServerConfig.DRILL_PYLON_HEAD_STRESS::getAsInt);
+        // An assembled pylon has two stressed kinetic inputs (the centre link proxy applies none), so each takes half
+        registerImpact(ModBlocks.DRILL_PYLON_KINETIC_PROXY.get(), () -> ServerConfig.DRILL_PYLON_STRESS.getAsInt() / 2.0);
         registerImpact(ModBlocks.CYCLOTRON_KINETIC_PROXY.get(), () -> CYCLOTRON_STRESS);
 
         // Register generation capacities

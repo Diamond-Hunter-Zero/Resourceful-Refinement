@@ -41,6 +41,20 @@ public class DrillPylonKineticProxyBlockEntity extends KineticBlockEntity {
         this.dy = dy;
         this.dz = dz;
         setChanged();
+        // Stress may already have been reported with default offsets; correct it now the role is known
+        if (hasNetwork()) getOrCreateNetwork().updateStressFor(this, calculateStressApplied());
+    }
+
+    /// The centre gearbox proxy only links the two shaft inputs, so the pylon's stress is carried by those alone
+    public boolean isCentreLink() {
+        return dx == 0 && dz == 0;
+    }
+
+    @Override
+    public float calculateStressApplied() {
+        if (!isCentreLink()) return super.calculateStressApplied();
+        lastStressApplied = 0;
+        return 0;
     }
 
     public int getDx() {

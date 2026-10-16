@@ -30,12 +30,19 @@ The Drill Pylon is the deep-extraction counterpart to the [[Bucket Excavator]]: 
 
 ## Construction & Placement
 
-To build a Drill Pylon, players first place a **Drill Pylon Head** directly on top of a [[Crystal Fissure Bud]] block. Above the head they stack **3 layers (y = 1–3)**, each a 3×3 ring of `brass_casing` with a `gearbox` in the centre. Then, on each of the four corners of a 5×5 square centred on the head, they stack `metal_girder` blocks **from y = 0 to y = 3**. The total structure height is **5 blocks** (the Fissure Bud at y = 0, the head at y = 0's position, rings at y = 1–3).
+Layers below are numbered from the [[Crystal Fissure Bud]]'s layer (y = 0):
+
+- **Head (y = 1):** place the **Drill Pylon Head** directly on top of the Crystal Fissure Bud. Apart from the head and the corner legs, this layer is left open; it is the space the drill bit extends into.
+- **Legs (y = 0–4):** on each of the four corners of a 5×5 square centred on the bud, stack `metal_girder` blocks starting level with the bud (5 tall).
+- **Body (y = 2–4):** 3 layers above the head, each a 3×3 ring of `brass_casing` with a `gearbox` in the centre.
+
+The pylon is **5 blocks** tall (y = 0–4), plus a [[GLARE  Lux Transceiver]] on top if Lux is used.
 
 When the head is right-clicked, it attempts to assemble a Drill Pylon structure. The 'front' is taken to be the horizontal direction towards the activating player (`player.getDirection().getOpposite()`). Assembly requires a valid structure and a Crystal Fissure Bud directly below the head.
 
 > [!note] Implementation
-> `validateStructure` checks: for `y` in 1–3, a `gearbox` at the column centre and `brass_casing` filling the rest of that 3×3 ring; and for `y` in 0–3, a `metal_girder` at each of the four `(±2, y, ±2)` corners. The front must be horizontal. On success `convertStructureToProxies` swaps the built blocks for proxy block entities (storing their original states), and disassembly restores them. Assembly registers the head as a GLARE node and refreshes any adjacent Lux Transceiver.
+> Layout heights are constants on `DrillPylonHeadBlockEntity`, as offsets **from the head** (one less than the layer numbers above): `LEG_BOTTOM_Y = -1`, `LEG_TOP_Y = 3`, `BODY_BOTTOM_Y = 1`, `BODY_TOP_Y = 3`, `OUTPUT_Y = 1`, `KINETIC_Y = 2`, `LUX_SOCKET_Y = 3`.
+> `validateStructure` checks: for head offsets 1–3, a `gearbox` at the column centre and `brass_casing` filling the rest of that 3×3 ring; and for offsets −1–3, a `metal_girder` at each of the four `(±2, y, ±2)` corners. The rest of the head's layer is not validated. The front must be horizontal. On success `convertStructureToProxies` swaps the built blocks for proxy block entities (storing their original states), and disassembly restores them. Assembly registers the head as a GLARE node and refreshes any adjacent Lux Transceiver.
 
 If any block in an assembled Drill Pylon is removed or moved, the structure disassembles and reinstates all original blocks. Disassembly also removes any GLARE links and node registration.
 
@@ -45,10 +52,10 @@ Crystal Fissure Bud blocks (like [[Mineral Deposit|Mineral Deposits]] and [[Geys
 
 An assembled Drill Pylon exposes interfaces through its proxies, whose roles are assigned by `DrillPylonProxyRole`:
 
-- **OUTPUT** — the front-centre proxy of the lowest ring (y = 1) exposes an item-output interface on the front face.
-- **KINETIC** — the left/right-centre proxies of the lowest ring expose kinetic shafts (as `drill_pylon_kinetic_proxy`, axis = `front.getClockWise().getAxis()`) that power the drill.
-- **LUX_SOCKET** — the back-centre proxy of the 2nd ring (y = 2) exposes a Lux Socket on the rear face, where a [[GLARE  Lux Transceiver]] can attach.
-- **STRUCTURE** — all other proxies (including the corner girders and the central column) are inert structural proxies.
+- **OUTPUT** — the front-centre proxy of the lowest body ring (y = 2) exposes an item-output interface on the front face.
+- **KINETIC** — the left/right-centre proxies of the middle body ring (y = 3) expose kinetic shafts (as `drill_pylon_kinetic_proxy`, axis = `front.getClockWise().getAxis()`) that power the drill. The centre gearbox of that ring also becomes a kinetic proxy.
+- **LUX_SOCKET** — the top-centre proxy (the y = 4 gearbox position) exposes a Lux Socket on its **top** face, where a [[GLARE  Lux Transceiver]] can be placed facing down onto it.
+- **STRUCTURE** — all other proxies (including the corner legs and the rest of the central column) are inert structural proxies.
 
 A Drill Pylon has internal storage for 4 item slots (`outputInv`).
 
@@ -62,7 +69,17 @@ While a recipe is active, the drill samples the recipe's **Lux curve** via `Glar
 
 **Regular vs Amplified mode:** with only kinetic input the drill runs in regular mode. When a recipe specifies a non-zero Lux curve (`requiresLux()`), the drill needs an **online** [[GLARE Networks|GLARE network]] link — a bound `networkId`, `GlareOperationStatus.ONLINE`, and at least one live link via the Lux Socket (from a [[GLARE  Lux Transceiver]]) — to progress. If the network over-allocates and shuts down, or Lux otherwise drops out, operation pauses until requirements are met again.
 
-**Standalone (unassembled) mode:** an un-assembled Drill Pylon Head behaves as an independent mechanical drill. Every `STANDALONE_DRILL_INTERVAL = 20` ticks, while `|speed| >= MIN_RPM`, it mines the 3×3 face directly in front of it (skipping air and unbreakable blocks), like a Create Drill widened to 3×3.
+**Standalone (unassembled) mode:** an un-assembled Drill Pylon Head behaves as an independent mechanical drill. Every `STANDALONE_DRILL_INTERVAL = 20` ticks, while `|speed| >= MIN_RPM`, it mines the 3×3 face directly in front of it (skipping air and unbreakable blocks), like a Create Drill widened to 3×3. Between breaks, each breakable block in the face shows the block-breaking crack overlay, advancing through all 10 stages over the interval. Each of the 9 targets has its own breaker id, taken from Create's `BlockBreakingKineticBlockEntity.NEXT_BREAKER_ID`. The overlay is cleared when speed drops, when the head assembles, or when the block entity is invalidated.
+
+### Movement & Contraptions
+
+- **Standalone heads are movable.** The head keeps `PushReaction.NORMAL`, so Create contraptions (pistons, bearings, gantries, minecart contraptions) can carry it. On a contraption it uses `DrillPylonHeadMovementBehaviour`, which extends Create's `DrillMovementBehaviour`:
+  - It breaks the 3×3 face at the same speed and with the same stalling as a Create Drill.
+  - The centre block drives the breaking progress. When it breaks, the other 8 blocks in the face (in world space, accounting for contraption rotation) break with it, and their drops go to the contraption's storage.
+  - If the centre is empty or unbreakable, the first breakable block in the face drives the break instead.
+  - On a contraption the head draws through its own renderer rather than Create's drill model.
+- **Assembled heads cannot be moved.** A Create `MovementAllowedCheck` returns `FAIL` for any head whose block entity is assembled, so a contraption that includes one fails to assemble, just as it does with any other unmovable block. Vanilla pistons never push block entities, and every proxy block uses `PushReaction.BLOCK`, so nothing else can pull the multiblock apart.
+- **Fallback:** if an assembled head is still removed by any other route (broken, wrenched, or replaced by another mod), `onRemove` disassembles the structure and restores the original blocks.
 
 ## Recipes
 
@@ -86,7 +103,39 @@ Recipe JSON keys: `source_item`, `processing_time`, `ingredients`, `results` (ea
 
 ## Rendering
 
-The Drill Pylon Head uses `DrillPylonRenderer` (a `BlockEntityRenderer`) for its entity-model visuals. While part of an assembled pylon, the head renders the whole multiblock and reports an expanded render bounding box (`worldPosition ± 2` laterally, up to +4 in y).
+The Drill Pylon Head uses `DrillPylonRenderer` (a `BlockEntityRenderer`) to draw `DrillPylonModel`, a `HierarchicalModel` (texture `textures/block/drill_pylon.png`) of the whole multiblock: four angled legs, the octagonal drill body, and a three-tier drill bit hanging into the head's layer (y = 1). The model's ground plane sits on the bud's layer (y = 0) and is rotated to the head's `FACING`. While assembled, the head reports an expanded render bounding box (`worldPosition ± 2` laterally, from one below the head to four above it, covering y = 0–4). 
+
+An assembled pylon also renders a half shaft on the outer face of each kinetic input proxy (left and right of the front, at `KINETIC_Y`). Each shaft is turned at that proxy's kinetic angle (`getAngleForBe`) and lit by the block outside that face.
+
+### Standalone head
+
+An unassembled head draws `DrillPylonHeadModel` (layer `drill_pylon_head:main`, same texture), through `DrillPylonHeadRendering`:
+
+- **Orientation:** the model is authored facing north and is turned about the block centre to match any of the six `FACING` states.
+- **Drill bit:** the `drill_bit` bone spins about the facing axis at the head's kinetic angle (`getAngleForBe`), so it matches the speed and direction of the shaft driving it.
+- **Half shaft:** a half-shaft partial on the back face (`facing.getOpposite()`), drawn with `ShaftUtilities.RenderKineticShaft` and the same angle.
+- **On contraptions:** `DrillPylonHeadMovementBehaviour` turns off block-entity rendering and draws the same model and half shaft through `DrillPylonHeadRendering.renderInContraption`. As with Create's drill, the bit spins at the contraption's animation speed while the contraption is stalled or moving away from the head's back face, and holds still otherwise. Lighting is sampled from the real world at the head's current world position (found through the contraption's world matrix), because the contraption's own render world treats the head as enclosed in solid blocks.
+
+### Animation
+
+The drill bit has three keyframe animations defined in `DrillPylonModel`:
+
+| Animation | Length | Purpose |
+| --- | --- | --- |
+| `drill_extend` | 2.25 s | Start-up: the bit lowers out of the body while spinning up. |
+| `drill_spin_loop` | 0.75 s, looping | Operating: one full revolution per loop. |
+| `drill_retract` | 2.25 s | Wind-down: the bit spins down and lifts back into the body. |
+
+The animation follows a server-synced `drilling` flag on the head: it is true while the pylon is advancing recipe progress, and false when it has no recipe, too little speed, no Lux, or is blocked by a full output. The renderer runs a client-side state machine (`DrillAnimationPhase`):
+
+`RETRACTED` → (drilling) → `EXTENDING` → `RUNNING` → (not drilling) → `RETRACTING` → `RETRACTED`
+
+- Start-up and wind-down always play to completion. If drilling stops during start-up, the drill goes straight into wind-down when start-up finishes.
+- When drilling stops, the spin loop finishes its current revolution before wind-down begins.
+- The bit's end rotation from start-up (−540°) is carried as a yaw offset, so the bit doesn't snap between animations.
+- If a pylon is already drilling when it first renders (for example on chunk load), it starts in `RUNNING` and skips start-up.
+
+While in `RUNNING`, the head also sprays debris particles every client tick (`DRILL_PARTICLES_PER_TICK = 8`). They use the texture of the block being drilled (the Crystal Fissure Bud below the head) and fly outward and upward from the bit's tip.
 
 ## Implementation
 
@@ -95,9 +144,12 @@ The Drill Pylon Head uses `DrillPylonRenderer` (a `BlockEntityRenderer`) for its
 - **Proxies:** `DrillPylonProxyBlock` / `DrillPylonProxyBlockEntity` (id `drill_pylon_proxy`) and `DrillPylonKineticProxyBlock` / `DrillPylonKineticProxyBlockEntity` (id `drill_pylon_kinetic_proxy`, a `RotatedPillarKineticBlock`). Proxy roles: `DrillPylonProxyRole { STRUCTURE, OUTPUT, KINETIC, LUX_SOCKET }`.
 - **Resource node:** `CrystalFissureBudBlock` / `CrystalFissureBudBlockEntity` (id `crystal_fissure_bud`) — see [[Crystal Fissure Bud]].
 - **Recipe:** `recipe/DrillPylonRecipe` (extends `StandardProcessingRecipe`) + `recipe/DrillPylonRecipeInput` + `recipe/DrillPylonRecipeCategory` (JEI). Type/serializer registered in `ModRecipeTypes` as `drill_pylon`.
-- **GLARE integration:** `getMaxGlareLinks() = 1`, `allowsManualGlareLinks() = false`; Lux endpoint is the rear-centre y=2 proxy. Lux sampling via `GlareLuxCalculator`; network state via `GlareService`.
-- **Rendering:** `DrillPylonRenderer`.
-- **Stress:** `ModStressValues.DRILL_PYLON_STRESS = 16` (applied to both `drill_pylon_head` and `drill_pylon_kinetic_proxy`).
+- **GLARE integration:** `getMaxGlareLinks() = 1`, `allowsManualGlareLinks() = false`; Lux endpoint is the top-centre y=4 proxy (socket face `UP`; the transceiver is looked up at `socket.above()`). Lux sampling via `GlareLuxCalculator`; network state via `GlareService`.
+- **Contraptions:** `DrillPylonHeadMovementBehaviour` and the assembled-head `MovementAllowedCheck`, both registered in `ResourcefulRefinementMain.commonSetup`.
+- **Rendering:** `DrillPylonRenderer` + `DrillPylonModel` (layer `drill_pylon:main`); animation phases in `DrillAnimationPhase`.
+- **Stress:** two server config values in the `Kinetics` section, registered in `ModStressValues`:
+  - `drill_pylon_head_stress` (default 8) — the impact of the `drill_pylon_head` block, which drives it when used as a standalone drill. The goggle tooltip for an unassembled head uses this value.
+  - `drill_pylon_stress` (default 16) — the total impact of an assembled pylon. It has three `drill_pylon_kinetic_proxy` blocks (left input, centre gearbox, right input) on one shaft line, all in the same network whether one or both inputs are connected. The centre proxy only links the two inputs and applies no stress: `DrillPylonKineticProxyBlockEntity.calculateStressApplied()` returns 0 when the proxy sits on the head's column (`dx == 0 && dz == 0`). The two inputs are each registered with `drill_pylon_stress / 2`, so the total matches the config value exactly (the default 16 gives 8 + 8).
 - Constants: `MIN_RPM = 64`, `INVENTORY_SLOT_COUNT = 4`, `STANDALONE_DRILL_INTERVAL = 20`.
 
 ## Related

@@ -42,12 +42,21 @@ public class ServerConfig {
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_CAPACITY;
     public static final ModConfigSpec.IntValue KINETIC_RECEIVER_LUX;
 
+    public static final ModConfigSpec.IntValue DRILL_PYLON_HEAD_STRESS;
+    public static final ModConfigSpec.IntValue DRILL_PYLON_STRESS;
+
     public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_BASE_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_LOW_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_MID_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_SCAN_RADIUS_HIGH_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_PING_RANGE_CHUNKS;
     public static final ModConfigSpec.IntValue RESONATOR_PING_CHARGE_COST;
+
+    public static final ModConfigSpec.IntValue HOVERPACK_LAUNCH_CHARGE_COST;
+    public static final ModConfigSpec.DoubleValue HOVERPACK_LAUNCH_VERTICAL;
+    public static final ModConfigSpec.DoubleValue HOVERPACK_LAUNCH_FORWARD_GROUND;
+    public static final ModConfigSpec.DoubleValue HOVERPACK_LAUNCH_FORWARD_AIR;
+    public static final ModConfigSpec.DoubleValue HOVERPACK_GRADE_THRUST_STEP;
 
 
     static {
@@ -191,6 +200,15 @@ public class ServerConfig {
                 .comment("The amount of Lux a GLARE Kinetic Receiver allocates from its network to run (Value between 0 and 1000000)")
                 .defineInRange("kinetic_receiver_lux", 1, 0, 1000000);
 
+        DRILL_PYLON_HEAD_STRESS = CONFIG_BUILDER
+                .comment("The stress impact of an unassembled (standalone) Drill Pylon Head, (Value between 0 and 1000000)")
+                .defineInRange("drill_pylon_head_stress", 8, 0, 1000000);
+
+        DRILL_PYLON_STRESS = CONFIG_BUILDER
+                .comment("The total stress impact of an assembled Drill Pylon, (Value between 0 and 1000000)")
+                .comment("Split evenly across its two kinetic inputs (each takes this value / 2); use an even value, such as a power of 2")
+                .defineInRange("drill_pylon_stress", 16, 0, 1000000);
+
         CONFIG_BUILDER.pop();
 
 
@@ -219,6 +237,31 @@ public class ServerConfig {
                 .comment("Prism Cell charge consumed each time the Resource Resonator deploys a Ping Beacon.",
                         "With no installed cell, or insufficient charge, the ping fails (Value between 0 and 1000000)")
                 .defineInRange("ping_charge_cost", 1000, 0, 1_000_000);
+        CONFIG_BUILDER.pop();
+
+
+        // Hoverpack Parameters
+        CONFIG_BUILDER.push("Hoverpack");
+        HOVERPACK_LAUNCH_CHARGE_COST = CONFIG_BUILDER
+                .comment("Prism Cell charge consumed by each Hoverpack launch. With no installed cell, or insufficient",
+                        "charge, the launch fails (Value between 0 and 1000000)")
+                .defineInRange("launch_charge_cost", 250, 0, 1_000_000);
+        HOVERPACK_LAUNCH_VERTICAL = CONFIG_BUILDER
+                .comment("Upward velocity (blocks/tick) applied by a ground launch, before grade scaling.",
+                        "Grade scaling multiplies this (Value between 0 and 10)")
+                .defineInRange("launch_vertical_impulse", 1.1, 0.0, 10.0);
+        HOVERPACK_LAUNCH_FORWARD_GROUND = CONFIG_BUILDER
+                .comment("Forward velocity (blocks/tick) along the look vector added by a ground launch, before grade",
+                        "scaling (Value between 0 and 10)")
+                .defineInRange("launch_forward_ground", 0.35, 0.0, 10.0);
+        HOVERPACK_LAUNCH_FORWARD_AIR = CONFIG_BUILDER
+                .comment("Scalar on the firework-style forward boost applied when launching while already gliding,",
+                        "before grade scaling. 1.0 matches a vanilla firework rocket (Value between 0 and 10)")
+                .defineInRange("launch_forward_air", 1.0, 0.0, 10.0);
+        HOVERPACK_GRADE_THRUST_STEP = CONFIG_BUILDER
+                .comment("Cumulative thrust increase per Prism Cell grade above Low (Low x1, Mid x(1+step),",
+                        "High/Creative x(1+step)^2). Default 0.25 = +25% per grade (Value between 0 and 4)")
+                .defineInRange("grade_thrust_step", 0.25, 0.0, 4.0);
         CONFIG_BUILDER.pop();
 
 

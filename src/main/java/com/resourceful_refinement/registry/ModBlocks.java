@@ -203,7 +203,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<DrillPylonHeadBlock> DRILL_PYLON_HEAD = BLOCKS.register("drill_pylon_head",
             () -> new DrillPylonHeadBlock(BlockBehaviour.Properties.of()
-                    .pushReaction(PushReaction.BLOCK)
+                    .pushReaction(PushReaction.NORMAL)
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
                     .requiresCorrectToolForDrops()

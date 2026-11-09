@@ -162,7 +162,7 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
 
                     // Find a matching recipe for conditions
                     ExcavationRecipeInput input = new ExcavationRecipeInput(targetState.getBlock(), mineralBlock);
-                    var recipeHolder = level.getRecipeManager().getRecipeFor(ModRecipeTypes.EXCAVATION_TYPE.get(), input, level);
+                    var recipeHolder = com.resourceful_refinement.utilities.recipe.RecipeSelection.findBestMatch(level, ModRecipeTypes.EXCAVATION_TYPE.get(), input, "BucketExcavator@" + worldPosition.toShortString());
                     if (recipeHolder.isPresent())
                     {
                         var recipe = recipeHolder.get().value();

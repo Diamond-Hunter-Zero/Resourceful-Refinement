@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.bucket_excavator.recipe;
 
+import com.resourceful_refinement.utilities.recipe.IRecipeSpecificity;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ExcavationRecipe extends StandardProcessingRecipe<ExcavationRecipeInput> {
+public class ExcavationRecipe extends StandardProcessingRecipe<ExcavationRecipeInput> implements IRecipeSpecificity {
 
     private final ResourceLocation minedBlockId;
     private Block cachedMinedBlock;
@@ -109,6 +110,12 @@ public class ExcavationRecipe extends StandardProcessingRecipe<ExcavationRecipeI
             }
         }
         return cachedMineralBlock;
+    }
+
+    /** Mineral-specific recipes win over generic ones for the same mined block. */
+    @Override
+    public int getSpecificity() {
+        return requiresMineralType() ? 1 : 0;
     }
 
     public boolean requiresMineralType() {

@@ -456,15 +456,21 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     }
 
     private RecipeSelection findRecipe(CyclotronForgeRecipeInput input) {
-        RecipeSelection wrongLengthMatch = null;
-        for (RecipeHolder<CyclotronForgeRecipe> holder : level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.CYCLOTRON_FORGE_TYPE.get())) {
-            CyclotronForgeRecipe recipe = holder.value();
-            if (!recipe.matches(input, level)) continue;
-            RecipeSelection selection = new RecipeSelection(holder.id(), recipe, recipe.getCoilLength() == coilLength);
-            if (selection.lengthMatches()) return selection;
-            if (wrongLengthMatch == null) wrongLengthMatch = selection;
+        // Keep the active recipe while it can still be fulfilled (ingredients and coil length)
+        if (lastRecipe != null && displayedRecipeId != null
+                && lastRecipe.matches(input, level) && lastRecipe.getCoilLength() == coilLength) {
+            return new RecipeSelection(displayedRecipeId, lastRecipe, true);
         }
-        return wrongLengthMatch;
+
+        // Otherwise: prefer a recipe matching the current coil length, then most specific, then by ID.
+        // A wrong-length match is still returned so its coil requirement can be shown.
+        return com.resourceful_refinement.utilities.recipe.RecipeSelection.findBestMatch(level,
+                        ModRecipeTypes.CYCLOTRON_FORGE_TYPE.get(), input,
+                        r -> true,
+                        r -> r.getCoilLength() == coilLength,
+                        "CyclotronForge@" + worldPosition.toShortString())
+                .map(holder -> new RecipeSelection(holder.id(), holder.value(), holder.value().getCoilLength() == coilLength))
+                .orElse(null);
     }
 
     private boolean canProcess(CyclotronForgeRecipe recipe) {

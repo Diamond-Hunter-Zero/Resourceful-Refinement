@@ -288,8 +288,7 @@ public class DrillPylonHeadBlockEntity extends KineticBlockEntity implements IHa
         DrillPylonRecipeInput input = new DrillPylonRecipeInput(sourceItem);
         if (lastRecipe != null && lastRecipe.matches(input, level)) return lastRecipe;
 
-        RecipeHolder<DrillPylonRecipe> holder = level.getRecipeManager()
-                .getRecipeFor(ModRecipeTypes.DRILL_PYLON_TYPE.get(), input, level)
+        RecipeHolder<DrillPylonRecipe> holder = com.resourceful_refinement.utilities.recipe.RecipeSelection.findBestMatch(level, ModRecipeTypes.DRILL_PYLON_TYPE.get(), input, "DrillPylon@" + worldPosition.toShortString())
                 .orElse(null);
         if (holder == null) return null;
         lastRecipe = holder.value();

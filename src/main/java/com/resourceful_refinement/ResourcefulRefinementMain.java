@@ -276,8 +276,9 @@ public class ResourcefulRefinementMain {
             if (controller == null) return null;
 
             // Only bottom block accepts input from FRONT
-            if (be.stackIndex == 0 && be.getBlockState().hasProperty(DistilleryBlock.FACING)) {
-                if (side == be.getBlockState().getValue(DistilleryBlock.FACING)) {
+            // Use the controller's facing, matching the fluid handler above
+            if (be.stackIndex == 0 && controller.getBlockState().hasProperty(DistilleryBlock.FACING)) {
+                if (side == controller.getBlockState().getValue(DistilleryBlock.FACING)) {
                     return controller.inputInv;
                 }
             }

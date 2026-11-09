@@ -19,6 +19,8 @@ public class ServerConfig {
 
     public static final ModConfigSpec.DoubleValue ADVANCED_PUMP_STRENGTH;
 
+    public static final ModConfigSpec.BooleanValue DEBUG_RECIPE_SELECTION;
+
 
     static {
         /*CONFIG_BUILDER.push("Config Section 1");
@@ -77,6 +79,16 @@ public class ServerConfig {
         ADVANCED_PUMP_STRENGTH = CONFIG_BUILDER
                 .comment("The pumping-distance multiplier for the Advanced Pump (Value between 0 and 1000)")
                 .defineInRange("advanced_pump_strength", 2f, 0f, 1000f);
+
+        CONFIG_BUILDER.pop();
+
+        // Debug
+        CONFIG_BUILDER.push("Debug");
+
+        DEBUG_RECIPE_SELECTION = CONFIG_BUILDER
+                .comment("Logs every machine recipe lookup with all matching candidates and the chosen recipe")
+                .comment("Verbose - enable only while diagnosing recipe conflicts")
+                .define("debug_recipe_selection", false);
 
         CONFIG_BUILDER.pop();
 

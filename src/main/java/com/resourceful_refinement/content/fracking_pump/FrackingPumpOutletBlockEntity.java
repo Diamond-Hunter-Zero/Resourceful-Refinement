@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.fracking_pump;
 
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.resourceful_refinement.registry.ModStressValues;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.block.IBE;
@@ -102,8 +103,7 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
         FrackingPumpRecipeInput input = new FrackingPumpRecipeInput(sourceBlock, inputTank.getFluid(), geyserFluid);
 
         if (lastRecipe == null || !lastRecipe.matches(input, level)) {
-            var recipe = level.getRecipeManager()
-                .getRecipeFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get(), input, level);
+            var recipe = RecipeSelection.findBestMatch(level, com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get(), input, "FrackingPump@" + worldPosition.toShortString());
             if (recipe.isPresent()) {
                 lastRecipe = recipe.get().value();
                 if (!recipe.get().id().equals(displayedRecipeId)) {
@@ -199,6 +199,8 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
     private RecipeHolder<FrackingPumpRecipe> findRecipeHolderForSource(Block sourceBlock, Fluid geyserFluid) {
         if (level == null) return null;
 
+        // Prefer fluid-specific geyser recipes over generic ones, independent of recipe load order
+        RecipeHolder<FrackingPumpRecipe> best = null;
         for (var holder : level.getRecipeManager().getAllRecipesFor(com.resourceful_refinement.registry.ModRecipeTypes.FRACKING_PUMP_TYPE.get())) {
             FrackingPumpRecipe recipe = holder.value();
             if (recipe.getSourceBlock() != sourceBlock) continue;
@@ -208,9 +210,14 @@ public class FrackingPumpOutletBlockEntity extends KineticBlockEntity implements
                 if (recipe.getSourceFluid() != geyserFluid) continue;
             }
 
-            return holder;
+            if (best == null
+                    || recipe.getSpecificity() > best.value().getSpecificity()
+                    || (recipe.getSpecificity() == best.value().getSpecificity()
+                        && holder.id().toString().compareTo(best.id().toString()) < 0)) {
+                best = holder;
+            }
         }
-        return null;
+        return best;
     }
 
     /**

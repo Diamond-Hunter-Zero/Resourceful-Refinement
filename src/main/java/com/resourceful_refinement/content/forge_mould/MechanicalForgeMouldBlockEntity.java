@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.forge_mould;
 
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
 import com.resourceful_refinement.content.forge_mould.recipe.CoatingRecipe;
@@ -266,14 +267,13 @@ public class MechanicalForgeMouldBlockEntity extends KineticBlockEntity {
 
             // 1. Try to find a Coating recipe if the depot is occupied
             if (hasItem) {
-                recipe = level.getRecipeManager()
-                        .getRecipeFor(ModRecipeTypes.COATING_TYPE.get(), input, level);
+                recipe = RecipeSelection.findBestMatch(level, ModRecipeTypes.COATING_TYPE.get(), input, "ForgeMould(Coating)@" + worldPosition.toShortString());
             }
             
             // 2. If no coating recipe found (or depot empty), try standard Forge Mould recipe
             if (recipe.isEmpty()) {
-                recipe = level.getRecipeManager()
-                        .getRecipeFor(ModRecipeTypes.MECHANICAL_FORGE_MOULD_TYPE.get(), input, level);
+                recipe = RecipeSelection.findBestMatch(level, ModRecipeTypes.MECHANICAL_FORGE_MOULD_TYPE.get(), input,
+                        r -> r.matchesFilter(filtering), "ForgeMould@" + worldPosition.toShortString());
                 
                 // If we found a standard recipe but the depot is occupied, it's an invalid state (can't forge on top of an item)
                 if (recipe.isPresent() && hasItem) {

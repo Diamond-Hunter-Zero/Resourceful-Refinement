@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.distillery.recipe;
 
+import com.resourceful_refinement.utilities.recipe.IRecipeSpecificity;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -27,7 +28,7 @@ import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DistilleryRecipe extends StandardProcessingRecipe<DistilleryRecipeInput> {
+public class DistilleryRecipe extends StandardProcessingRecipe<DistilleryRecipeInput> implements IRecipeSpecificity {
 
     private ExtendedHeatCondition heatRequirement;
     private int heightRequirement;
@@ -92,6 +93,11 @@ public class DistilleryRecipe extends StandardProcessingRecipe<DistilleryRecipeI
 
     public List<SizedIngredient> getSizedIngredients() { return sizedIngredients; }
     public List<SizedIngredient> getCombinedIngredients() { return combinedIngredients; }
+
+    @Override
+    public int getSpecificity() {
+        return combinedIngredients.size() + fluidIngredients.size();
+    }
 
     private DistilleryProcessingRecipeParams getDistilleryParams() {
         return (DistilleryProcessingRecipeParams) getParams();

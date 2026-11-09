@@ -1,5 +1,8 @@
 package com.resourceful_refinement.content.distillery;
 
+import com.resourceful_refinement.utilities.StackNeighbourNotifier;
+import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipe;
 import com.resourceful_refinement.content.distillery.recipe.DistilleryRecipeInput;
@@ -126,10 +129,18 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         List<BlockPos> column = collectColumn(columnBottom);
         if (column.isEmpty()) return;
 
+        boolean assignmentChanged = false;
         for (int segmentStart = 0; segmentStart < column.size(); segmentStart += MAX_STACK_HEIGHT) {
             int segmentSize = Math.min(MAX_STACK_HEIGHT, column.size() - segmentStart);
-            applyStackSegment(column, segmentStart, segmentSize);
+            assignmentChanged |= applyStackSegment(column, segmentStart, segmentSize);
         }
+
+        // Only once the whole stack is consistent: make adjacent pipes re-detect the exposed tanks
+        if (assignmentChanged)
+            StackNeighbourNotifier.notifyExternalNeighbours(level, column, getBlockState().getBlock());
+
+        if (isController())
+            debugTimer("neighbour/connectivity update");
 
         // Update heat conditions
         int newHeatingLevel = getHeatingLevel();
@@ -159,10 +170,12 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         return column;
     }
 
-    private void applyStackSegment(List<BlockPos> column, int segmentStart, int segmentSize) {
+    /** @return true if any block's controller/index/size assignment changed. */
+    private boolean applyStackSegment(List<BlockPos> column, int segmentStart, int segmentSize) {
+        boolean anyAssignmentChanged = false;
         BlockPos controllerPos = column.get(segmentStart);
         if (!(level.getBlockEntity(controllerPos) instanceof DistilleryBlockEntity controller)) {
-            return;
+            return false;
         }
 
         Direction controllerFacing = controller.getBlockState().getValue(DistilleryBlock.FACING);
@@ -178,6 +191,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
                     || distillery.stackSize != segmentSize
                     || distillery.controllerPos == null
                     || !distillery.controllerPos.equals(controllerPos);
+            anyAssignmentChanged |= assignmentChanged;
 
             if (i == 0 && wasController && distillery.timer > 0 && distillery.lastRecipe != null) {
                 // Check if recipe is now invalidated due to stack-size change, or due to a change in heating level
@@ -206,7 +220,22 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
 
             distillery.setChanged();
             distillery.sendData();
+
+            // Which faces expose which tank depends on controller/index/size, which NeoForge's
+            // capability caches (used by pipes) can't see changing. Tell them to re-query.
+            level.invalidateCapabilities(currentPos);
         }
+        return anyAssignmentChanged;
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
+        // A pipe may have checked this block before its controller was resolved on load and marked
+        // the face blocked. Once initialised, make adjacent pipes re-detect it.
+        if (level != null && !level.isClientSide)
+            StackNeighbourNotifier.notifyExternalNeighbours(level, List.of(worldPosition), getBlockState().getBlock());
     }
 
     private void clearMemberInventory(DistilleryBlockEntity distillery, BlockPos pos) {
@@ -317,6 +346,13 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             return;
         }
 
+        // The active recipe isn't saved, only its ID; and level is null while read() runs on chunk load.
+        // Restore it here so a cycle interrupted by a save/reload still consumes and produces.
+        if (lastRecipe == null && displayedRecipeId != null && timer > 0) {
+            lastRecipe = resolveRecipe(displayedRecipeId);
+            if (lastRecipe != null && !level.isClientSide)
+                debugTimer("restored recipe after load");
+        }
 
         // Decrement timer
         if (timer > 0) {
@@ -325,10 +361,29 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             DistilleryErrorCode processingError = canProcess();
             if (lastRecipe != null && processingError != DistilleryErrorCode.NO_ERROR)
             {
+                if (processingError != lastTracedError && level != null && !level.isClientSide)
+                    debugTimer("paused");
+                lastTracedError = processingError;
+
+                // The active recipe can't run under the current heat/height. If another recipe with the same
+                // ingredients can, switch to it rather than staying stuck (e.g. Slush <-> Syrup from Beetroot).
+                if ((processingError == DistilleryErrorCode.HEAT || processingError == DistilleryErrorCode.STACK_HEIGHT)
+                        && level != null && !level.isClientSide && level.getGameTime() % 20 == 0) {
+                    Optional<RecipeHolder<DistilleryRecipe>> better = findRecipe(buildRecipeInput());
+                    if (better.isPresent() && better.get().value() != lastRecipe && meetsConditions(better.get().value())) {
+                        startRecipe(better.get(), "switched recipe (conditions)");
+                        return;
+                    }
+                }
+
                 // Check for exploding distilleries
                 explodeDistillery(processingError);
                 return;
             }
+
+            if (lastTracedError != DistilleryErrorCode.NO_ERROR && level != null && !level.isClientSide)
+                debugTimer("resumed");
+            lastTracedError = DistilleryErrorCode.NO_ERROR;
 
             tankFullTime = 0;
             timer -= 1;
@@ -338,7 +393,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             }
 
             if (timer <= 0) {
-                process();
+                debugTimer(process() ? "cycle complete" : "cycle ended WITHOUT processing");
             }
 
             return;
@@ -357,20 +412,14 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             return;
         }
 
-        // Find any matching recipes for current controller state
-        List<ItemStack> items = new ArrayList<>();
-        for (int i = 0; i < inputInv.getSlots(); i++) {
-            ItemStack stack = inputInv.getStackInSlot(i);
-            if (!stack.isEmpty()) items.add(stack);
-        }
-        DistilleryRecipeInput input = new DistilleryRecipeInput(items, List.of(inputTank.getFluid()));
+        DistilleryRecipeInput input = buildRecipeInput();
 
-        if (lastRecipe == null || !lastRecipe.matches(input, level)) {
-            Optional<RecipeHolder<DistilleryRecipe>> recipe = level.getRecipeManager()
-                    .getRecipeFor(ModRecipeTypes.DISTILLERY_TYPE.get(), input, level);
+        // Keep the active recipe while it can still be fulfilled (ingredients AND heat/height);
+        // only re-select once it can't
+        if (lastRecipe == null || !lastRecipe.matches(input, level) || !meetsConditions(lastRecipe)) {
+            Optional<RecipeHolder<DistilleryRecipe>> recipe = findRecipe(input);
 
-            // Use top block's filter for matching
-            if (recipe.isEmpty() || !recipe.get().value().matchesFilter(getTopBlock().getFiltering())) {
+            if (recipe.isEmpty()) {
                 timer = 20; // wait before checking again
                 lastRecipe = null;
                 displayedRecipeId = null;
@@ -378,12 +427,12 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
                 return;
             }
 
-            lastRecipe = recipe.get().value();
-            displayedRecipeId = recipe.get().id();
-            timer = lastRecipe.getProcessingDuration();
-            if (timer <= 0) timer = 20;
-            sendData();
-            return;
+            // A different recipe was chosen: start it. If the same recipe came back (no alternative meets
+            // the conditions), keep it and fall through so canProcess() reports the failing condition.
+            if (recipe.get().value() != lastRecipe) {
+                startRecipe(recipe.get(), "cycle start (new recipe)");
+                return;
+            }
         }
 
         // Use top block's filter for matching
@@ -400,11 +449,47 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
         }
 
         timer = lastRecipe.getProcessingDuration();
+        debugTimer("cycle start (same recipe)");
         sendData();
     }
 
-    private void process() {
-        if (canProcess() != DistilleryErrorCode.NO_ERROR) return;
+    private DistilleryErrorCode lastTracedError = DistilleryErrorCode.NO_ERROR;
+
+    private DistilleryRecipeInput buildRecipeInput() {
+        List<ItemStack> items = new ArrayList<>();
+        for (int i = 0; i < inputInv.getSlots(); i++) {
+            ItemStack stack = inputInv.getStackInSlot(i);
+            if (!stack.isEmpty()) items.add(stack);
+        }
+        return new DistilleryRecipeInput(items, List.of(inputTank.getFluid()));
+    }
+
+    /** Filter-allowed, ingredient-matching recipe; prefers one whose heat and height are met. */
+    private Optional<RecipeHolder<DistilleryRecipe>> findRecipe(DistilleryRecipeInput input) {
+        return RecipeSelection.findBestMatch(level, ModRecipeTypes.DISTILLERY_TYPE.get(), input,
+                r -> r.matchesFilter(getTopBlock().getFiltering()),
+                this::meetsConditions,
+                "Distillery@" + worldPosition.toShortString());
+    }
+
+    /** Machine conditions not covered by DistilleryRecipe#matches. Keep in sync with canProcess(). */
+    private boolean meetsConditions(DistilleryRecipe recipe) {
+        return recipe.getRequiredHeatCondition() == HeatUtilities.ConvertHeatLevelToExtendedCondition(heatLevel)
+                && recipe.getRequiredHeight() == stackSize;
+    }
+
+    private void startRecipe(RecipeHolder<DistilleryRecipe> recipe, String traceEvent) {
+        lastRecipe = recipe.value();
+        displayedRecipeId = recipe.id();
+        timer = lastRecipe.getProcessingDuration();
+        if (timer <= 0) timer = 20;
+        debugTimer(traceEvent);
+        sendData();
+    }
+
+    /** @return true if inputs were consumed and output produced. */
+    private boolean process() {
+        if (canProcess() != DistilleryErrorCode.NO_ERROR) return false;
 
         // Drain input
         if (lastRecipe.getCombinedIngredients() != null && !lastRecipe.getCombinedIngredients().isEmpty()) {
@@ -439,6 +524,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
 
         setChanged();
         sendData();
+        return true;
     }
 
     private DistilleryErrorCode canProcess() {
@@ -616,6 +702,7 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
 
+        clientTimerBeforeSync = timer;
         timer = tag.getInt("Timer");
         stackSize = tag.getInt("StackSize");
         stackIndex = tag.getInt("StackIndex");
@@ -633,9 +720,35 @@ public class DistilleryBlockEntity extends SmartBlockEntity implements IHaveGogg
             displayedRecipeId = null;
         }
 
-        // Locally cache current recipe on client
-        if (level != null && level.isClientSide)
-            lastRecipe = getLocalRecipe();
+        // Re-resolve the client's recipe from the server's DisplayedRecipe on every sync.
+        // Previously a cached client recipe was never replaced, so the client could keep
+        // counting down a stale recipe after the server changed or dropped it.
+        if (level != null && level.isClientSide) {
+            int previousClientTimer = clientTimerBeforeSync;
+            lastRecipe = resolveRecipe(displayedRecipeId);
+            if (clientPacket && isController())
+                debugTimer("client sync (client timer was " + previousClientTimer + ")");
+        }
+    }
+
+    private int clientTimerBeforeSync;
+
+    private DistilleryRecipe resolveRecipe(ResourceLocation id) {
+        if (level == null || id == null) return null;
+        var holder = level.getRecipeManager().byKey(id);
+        return holder.isPresent() && holder.get().value() instanceof DistilleryRecipe recipe ? recipe : null;
+    }
+
+    /**
+     * Debug trace for cycle timing (enabled by debug_recipe_selection). Logs on both sides, so a
+     * "client sync" line whose timer jumps back to full while the server's last line shows it counting
+     * means display desync; a server stuck at full duration with a repeating pause reason means the machine is stuck.
+     */
+    private void debugTimer(String event) {
+        if (!RecipeSelection.isDebugEnabled()) return;
+        ResourcefulRefinementMain.LOGGER.info("[DistilleryTimer] {} {} | {} | timer={} recipe={} heat={} stack={} error={}",
+                level != null && level.isClientSide ? "CLIENT" : "SERVER", worldPosition.toShortString(), event,
+                timer, displayedRecipeId, heatLevel, stackSize, processErrorString);
     }
 
     // -------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.milking_station;
 
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipe;
 import com.resourceful_refinement.content.milking_station.recipe.MilkingStationRecipeInput;
 import com.resourceful_refinement.registry.ModRecipeTypes;
@@ -345,8 +346,7 @@ public class MilkingStationBlockEntity extends KineticBlockEntity {
             return lastRecipe;
         }
 
-        Optional<RecipeHolder<MilkingStationRecipe>> recipe = level.getRecipeManager()
-                .getRecipeFor(ModRecipeTypes.MILKING_STATION_TYPE.get(), input, level);
+        Optional<RecipeHolder<MilkingStationRecipe>> recipe = RecipeSelection.findBestMatch(level, ModRecipeTypes.MILKING_STATION_TYPE.get(), input, "MilkingStation@" + worldPosition.toShortString());
         if (recipe.isEmpty()) {
             lastRecipe = null;
             displayedRecipeId = null;

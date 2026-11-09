@@ -1,5 +1,7 @@
 package com.resourceful_refinement.content.sieve;
 
+import com.resourceful_refinement.utilities.StackNeighbourNotifier;
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
@@ -124,6 +126,14 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
             return;
         }
 
+        // The active recipe isn't saved, only its ID; and level is null while read() runs on chunk load.
+        // Restore it here so a cycle interrupted by a save/reload still consumes and produces.
+        if (lastRecipe == null && displayedRecipeId != null && timer > 0 && level != null) {
+            var holder = level.getRecipeManager().byKey(displayedRecipeId);
+            if (holder.isPresent() && holder.get().value() instanceof MechanicalSieveRecipe recipe)
+                lastRecipe = recipe;
+        }
+
         if (getSpeed() == 0) return;
 
         if (timer > 0) {
@@ -156,12 +166,15 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
         MechanicalSieveRecipeInput input = new MechanicalSieveRecipeInput(List.of(inputTank.getFluid()));
 
+        // Keep the active recipe while it can still be fulfilled; only re-select once it can't.
+        // The filter is applied to every candidate, so it can reach any matching recipe, not just the first.
         if (lastRecipe == null || !lastRecipe.matches(input, level)) {
-            Optional<RecipeHolder<MechanicalSieveRecipe>> recipe = level.getRecipeManager()
-                    .getRecipeFor(ModRecipeTypes.MECHANICAL_SIEVE_TYPE.get(), input, level);
+            Optional<RecipeHolder<MechanicalSieveRecipe>> recipe = RecipeSelection.findBestMatch(level,
+                    ModRecipeTypes.MECHANICAL_SIEVE_TYPE.get(), input,
+                    r -> r.matchesFilter(getTopBlock().getFiltering()),
+                    "Sieve@" + worldPosition.toShortString());
 
-            // Use top block's filter for matching
-            if (recipe.isEmpty() || !recipe.get().value().matchesFilter(getTopBlock().getFiltering())) {
+            if (recipe.isEmpty()) {
                 timer = 20; // wait before checking again
                 lastRecipe = null;
                 displayedRecipeId = null;
@@ -278,10 +291,25 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
         List<BlockPos> column = collectColumn(columnBottom);
         if (column.isEmpty()) return;
 
+        boolean assignmentChanged = false;
         for (int segmentStart = 0; segmentStart < column.size(); segmentStart += MAX_STACK_HEIGHT) {
             int segmentSize = Math.min(MAX_STACK_HEIGHT, column.size() - segmentStart);
-            applyStackSegment(column, segmentStart, segmentSize);
+            assignmentChanged |= applyStackSegment(column, segmentStart, segmentSize);
         }
+
+        // Only once the whole stack is consistent: make adjacent pipes re-detect the exposed tanks
+        if (assignmentChanged)
+            StackNeighbourNotifier.notifyExternalNeighbours(level, column, getBlockState().getBlock());
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
+        // A pipe may have checked this block before its controller was resolved on load and marked
+        // the face blocked. Once initialised, make adjacent pipes re-detect it.
+        if (level != null && !level.isClientSide)
+            StackNeighbourNotifier.notifyExternalNeighbours(level, List.of(worldPosition), getBlockState().getBlock());
     }
 
     private BlockPos findColumnBottom(BlockPos start) {
@@ -302,10 +330,12 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
         return column;
     }
 
-    private void applyStackSegment(List<BlockPos> column, int segmentStart, int segmentSize) {
+    /** @return true if any block's controller/index/size assignment changed. */
+    private boolean applyStackSegment(List<BlockPos> column, int segmentStart, int segmentSize) {
+        boolean anyAssignmentChanged = false;
         BlockPos controllerPos = column.get(segmentStart);
         if (!(level.getBlockEntity(controllerPos) instanceof MechanicalFluidSieveBlockEntity controller)) {
-            return;
+            return false;
         }
 
         Direction controllerFacing = controller.getBlockState().getValue(MechanicalFluidSieveBlock.FACING);
@@ -321,6 +351,7 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
                     || sieve.stackSize != segmentSize
                     || sieve.controllerPos == null
                     || !sieve.controllerPos.equals(controllerPos);
+            anyAssignmentChanged |= assignmentChanged;
 
             if (i == 0 && wasController && sieve.timer > 0 && sieve.lastRecipe != null && sieve.stackSize != segmentSize) {
                 preserveRecipeProgress(sieve, sieve.stackSize, segmentSize);
@@ -340,7 +371,11 @@ public class MechanicalFluidSieveBlockEntity extends KineticBlockEntity {
 
             sieve.setChanged();
             sieve.sendData();
+
+            // Exposed handlers depend on controller/index/size; refresh pipes' capability caches
+            level.invalidateCapabilities(currentPos);
         }
+        return anyAssignmentChanged;
     }
 
     private void preserveRecipeProgress(MechanicalFluidSieveBlockEntity controller, int oldStackSize, int newStackSize) {

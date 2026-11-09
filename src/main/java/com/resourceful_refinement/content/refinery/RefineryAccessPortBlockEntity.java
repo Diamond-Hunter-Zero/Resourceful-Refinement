@@ -480,28 +480,38 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
             }
         }
 
+        // Select when there is no active recipe, or when the active one can't run at the current heat
+        // (another recipe with the same ingredients may need this heat level instead).
+        if (currentRecipe == null || !isHeatSatisfied()) {
+            java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe>> match =
+                com.resourceful_refinement.utilities.recipe.RecipeSelection.findBestMatch(level,
+                        com.resourceful_refinement.registry.ModRecipeTypes.FLUID_REFINERY_TYPE.get(), recipeInput,
+                        recipe -> recipe.matchesFilter(filtering),
+                        recipe -> recipe.getRequiredHeatCondition() == heatLevel,
+                        "Refinery@" + worldPosition.toShortString());
+
+            // Switch away from an active recipe only to one that can actually run; otherwise keep it
+            // (its progress included) so goggles keep showing its heat requirement.
+            boolean canSwitch = match.isPresent() && (currentRecipe == null
+                    || (!match.get().id().equals(currentRecipe.id())
+                        && match.get().value().getRequiredHeatCondition() == heatLevel));
+
+            if (canSwitch) {
+                currentRecipe = match.get();
+                craftingProgress = 0;
+                activeRecipeDuration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());
+                if (activeRecipeDuration <= 0) activeRecipeDuration = 100;
+                requiredHeat = currentRecipe.value().getRequiredHeatCondition().getBlazeHeatLevel();
+                syncData();
+            }
+        }
+
         if (currentRecipe == null) {
-            java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe>> match = 
-                level.getRecipeManager().getRecipeFor(com.resourceful_refinement.registry.ModRecipeTypes.FLUID_REFINERY_TYPE.get(), recipeInput, level);
-            
-            if (match.isPresent()) {
-                if (match.get().value().matchesFilter(filtering)) {
-                    currentRecipe = match.get();
-                    craftingProgress = 0;
-                    activeRecipeDuration = (int)(currentRecipe.value().getProcessingDuration() / StructureProcessingSpeedModifier());
-                    if (activeRecipeDuration <= 0) activeRecipeDuration = 100;
-                    requiredHeat = currentRecipe.value().getRequiredHeatCondition().getBlazeHeatLevel();
-                    syncData();
-                }
+            if (craftingProgress > 0) {
+                craftingProgress = 0;
+                syncData();
             }
-            
-            if (currentRecipe == null) {
-                if (craftingProgress > 0) {
-                    craftingProgress = 0;
-                    syncData();
-                }
-                return;
-            }
+            return;
         }
 
         boolean heatSatisfied = isHeatSatisfied();

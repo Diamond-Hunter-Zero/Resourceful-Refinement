@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.brewers_tap;
 
+import com.resourceful_refinement.utilities.recipe.RecipeSelection;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipe;
 import com.resourceful_refinement.content.brewers_tap.recipe.BrewersTapRecipeInput;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
@@ -301,8 +302,7 @@ public class BrewersTapBlockEntity extends SmartBlockEntity implements IHaveGogg
 
         BrewersTapRecipeInput input = new BrewersTapRecipeInput(workStack.copyWithCount(1), sourceFluid, flavourInv.getStackInSlot(0));
         if (lastRecipe == null || !lastRecipe.matches(input, level)) {
-            Optional<RecipeHolder<BrewersTapRecipe>> recipe = level.getRecipeManager()
-                    .getRecipeFor(ModRecipeTypes.BREWERS_TAP_TYPE.get(), input, level);
+            Optional<RecipeHolder<BrewersTapRecipe>> recipe = RecipeSelection.findBestMatch(level, ModRecipeTypes.BREWERS_TAP_TYPE.get(), input, "BrewersTap@" + worldPosition.toShortString());
             if (recipe.isEmpty()) {
                 lastRecipe = null;
                 displayedRecipeId = null;

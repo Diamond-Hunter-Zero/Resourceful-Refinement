@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.fracking_pump.recipe;
 
+import com.resourceful_refinement.utilities.recipe.IRecipeSpecificity;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.resourceful_refinement.ResourcefulRefinementMain;
@@ -21,7 +22,7 @@ import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import java.io.Console;
 import java.util.Optional;
 
-public class FrackingPumpRecipe extends StandardProcessingRecipe<FrackingPumpRecipeInput> {
+public class FrackingPumpRecipe extends StandardProcessingRecipe<FrackingPumpRecipeInput> implements IRecipeSpecificity {
 
     private final ResourceLocation sourceBlockId;
     private Block cachedSourceBlock;
@@ -60,6 +61,11 @@ public class FrackingPumpRecipe extends StandardProcessingRecipe<FrackingPumpRec
             if (cachedSourceFluid == null) cachedSourceFluid = Fluids.EMPTY;
         }
         return cachedSourceFluid;
+    }
+
+    @Override
+    public int getSpecificity() {
+        return fluidIngredients.size() + (requiresGeyserFluid() ? 1 : 0);
     }
 
     /** True when this recipe requires a specific fluid inside a geyser source block. */

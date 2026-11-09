@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.forge_mould.recipe;
 
+import com.resourceful_refinement.utilities.recipe.IRecipeSpecificity;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.resourceful_refinement.registry.ModRecipeTypes;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MechanicalForgeMouldRecipe extends StandardProcessingRecipe<MechanicalForgeMouldRecipeInput> {
+public class MechanicalForgeMouldRecipe extends StandardProcessingRecipe<MechanicalForgeMouldRecipeInput> implements IRecipeSpecificity {
 
     /** Whether this recipe requires a CastingDepot at the target workspace. */
     private final boolean casting;
@@ -73,6 +74,11 @@ public class MechanicalForgeMouldRecipe extends StandardProcessingRecipe<Mechani
         if (this.casting && !input.hasCastingDepot()) return false;
 
         return true;
+    }
+
+    @Override
+    public int getSpecificity() {
+        return ingredients.size() + fluidIngredients.size() + (casting ? 1 : 0);
     }
 
     public boolean isCasting() {

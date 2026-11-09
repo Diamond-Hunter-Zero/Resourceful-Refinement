@@ -6,7 +6,7 @@ public class ServerConfig {
     public static final ModConfigSpec.Builder CONFIG_BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec SPEC;
 
-    //public static final ModConfigSpec.IntValue EXAMPLE_SETTING;
+    public static final ModConfigSpec.BooleanValue DEBUG_RECIPE_SELECTION;
 
     public static final ModConfigSpec.DoubleValue CHILLED_COOLANT_CONSUMPTION;
     public static final ModConfigSpec.DoubleValue COOLED_COOLANT_CONSUMPTION;
@@ -262,6 +262,17 @@ public class ServerConfig {
                 .comment("Cumulative thrust increase per Prism Cell grade above Low (Low x1, Mid x(1+step),",
                         "High/Creative x(1+step)^2). Default 0.25 = +25% per grade (Value between 0 and 4)")
                 .defineInRange("grade_thrust_step", 0.25, 0.0, 4.0);
+        CONFIG_BUILDER.pop();
+
+
+        // Debug
+        CONFIG_BUILDER.push("Debug");
+
+        DEBUG_RECIPE_SELECTION = CONFIG_BUILDER
+                .comment("Logs every machine recipe lookup with all matching candidates and the chosen recipe")
+                .comment("Verbose - enable only while diagnosing recipe conflicts")
+                .define("debug_recipe_selection", false);
+
         CONFIG_BUILDER.pop();
 
 

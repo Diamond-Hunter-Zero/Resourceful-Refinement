@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.refinery.recipe;
 
+import com.resourceful_refinement.utilities.recipe.IRecipeSpecificity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -31,7 +32,7 @@ import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryRecipeInput> {
+public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryRecipeInput> implements IRecipeSpecificity {
 
     private final ExtendedHeatCondition heatRequirement;
     private final List<SizedIngredient> sizedIngredients;
@@ -89,6 +90,11 @@ public class FluidRefineryRecipe extends StandardProcessingRecipe<FluidRefineryR
     public ExtendedHeatCondition getRequiredHeatCondition() { return heatRequirement; }
     public List<SizedIngredient> getSizedIngredients() { return sizedIngredients; }
     public List<SizedIngredient> getCombinedIngredients() { return combinedIngredients; }
+
+    @Override
+    public int getSpecificity() {
+        return combinedIngredients.size() + fluidIngredients.size();
+    }
 
     private FluidRefineryProcessingRecipeParams getFluidRefineryParams() {
         return (FluidRefineryProcessingRecipeParams) getParams();

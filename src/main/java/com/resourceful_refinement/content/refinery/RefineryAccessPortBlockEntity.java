@@ -123,6 +123,8 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
     /// Fake heating visuals to display client-side
     private ExtendedHeatCondition falseRenderedHeat = ExtendedHeatCondition.NONE;
     private int requiredHeat = 0;
+    /** True while the active recipe's output can't be inserted (tank full or holding another fluid). */
+    private boolean outputBlocked = false;
 
     private FilteringBehaviour filtering;
     private int activeRecipeDuration = 0; // Synced for client visuals
@@ -168,6 +170,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                     if (level != null && !level.isClientSide) {
                         currentRecipe = null; // Reset recipe matching when filter changes
                         requiredHeat = 0;
+                        outputBlocked = false;
                         syncData();
                     }
                 })
@@ -476,6 +479,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
                 activeRecipeDuration = 0;
                 craftingProgress = 0;
                 requiredHeat = 0;
+                outputBlocked = false;
                 syncData();
             }
         }
@@ -515,13 +519,27 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         }
 
         boolean heatSatisfied = isHeatSatisfied();
-        if (!heatSatisfied) return;
+        if (!heatSatisfied) {
+            // Heat is the blocking condition; don't let a stale output flag hide its message
+            if (outputBlocked) {
+                outputBlocked = false;
+                syncData();
+            }
+            return;
+        }
 
         java.util.List<FluidStack> results = currentRecipe.value().getFluidResults();
         if (results.isEmpty()) return;
         FluidStack resultFluid = results.get(0);
         int fillAmount = outputTank.fill(resultFluid, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
-        if (fillAmount < resultFluid.getAmount()) return;
+
+        // Blocked by a full tank OR an incompatible fluid; synced so goggles can report it
+        boolean blocked = fillAmount < resultFluid.getAmount();
+        if (blocked != outputBlocked) {
+            outputBlocked = blocked;
+            syncData();
+        }
+        if (blocked) return;
 
         craftingProgress++;
         
@@ -564,6 +582,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
             currentRecipe = null;
             activeRecipeDuration = 0;
             requiredHeat = 0;
+            outputBlocked = false;
             syncData();
         }
     }
@@ -762,7 +781,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         // Progress
         if (activeRecipeDuration > 0) {
 
-            if (!tankOutputFluid.isEmpty() && tankOutputFluid.getAmount() >= outputTank.getCapacity())
+            if (outputBlocked || (!tankOutputFluid.isEmpty() && tankOutputFluid.getAmount() >= outputTank.getCapacity()))
                 tooltip.add(Component.literal("§cOutput Tank Full!"));
             else if (heatLevel.getBlazeHeatLevel() != requiredHeat)
             {
@@ -788,6 +807,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
         tag.putInt("fuelHeatLevel", fuelHeatLevel.getBlazeHeatLevel());
         tag.putInt("falseRenderedHeat", falseRenderedHeat.getBlazeHeatLevel());
         tag.putInt("requiredHeat", requiredHeat);
+        tag.putBoolean("outputBlocked", outputBlocked);
         tag.putInt("burnTimeRemaining", burnTimeRemaining);
         tag.putInt("craftingProgress", craftingProgress);
         tag.putInt("activeRecipeDuration", activeRecipeDuration);
@@ -834,6 +854,7 @@ public class RefineryAccessPortBlockEntity extends SmartBlockEntity implements I
             falseRenderedHeat = ExtendedHeatCondition.NONE;
 
         requiredHeat = tag.getInt("requiredHeat");
+        outputBlocked = tag.getBoolean("outputBlocked");
         burnTimeRemaining = tag.getInt("burnTimeRemaining");
         craftingProgress = tag.getInt("craftingProgress");
         activeRecipeDuration = tag.getInt("activeRecipeDuration");

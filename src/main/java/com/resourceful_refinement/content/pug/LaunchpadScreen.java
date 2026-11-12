@@ -1,5 +1,6 @@
 package com.resourceful_refinement.content.pug;
 
+import com.resourceful_refinement.client.gui.ScaledContainerScreen;
 import com.resourceful_refinement.client.gui.widget.GlareAddressEditor;
 import com.resourceful_refinement.content.gui.CommonSqrButtonTextures;
 import com.resourceful_refinement.content.gui.SqrHoverButton;
@@ -9,13 +10,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public class LaunchpadScreen extends AbstractContainerScreen<LaunchpadMenu> {
+/**
+ * Launchpad controller UI. Laid out 1:1 on the panel art and scaled to the window by {@link ScaledContainerScreen}.
+ */
+public class LaunchpadScreen extends ScaledContainerScreen<LaunchpadMenu> {
     public static final int WIDTH = LaunchControllerGuiTextures.PANEL_WIDTH;
     public static final int HEIGHT = LaunchControllerGuiTextures.PANEL_HEIGHT;
     private LaunchpadConfiguration draft;
@@ -28,9 +31,7 @@ public class LaunchpadScreen extends AbstractContainerScreen<LaunchpadMenu> {
     private boolean applyingSnapshot;
 
     public LaunchpadScreen(LaunchpadMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = WIDTH;
-        imageHeight = HEIGHT;
+        super(menu, inventory, title, WIDTH, HEIGHT);
         inventoryLabelY = 1_000;
         titleLabelY = 1_000;
         draft = menu.getSnapshot().configuration();
@@ -158,12 +159,7 @@ public class LaunchpadScreen extends AbstractContainerScreen<LaunchpadMenu> {
 
     private void renderSendBackground(GuiGraphics graphics) {
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(leftPos, topPos-1, 0);
-        graphics.pose().scale(2f, 2f, 1.0f);
-        graphics.blit(LaunchControllerGuiTextures.SEND_PANEL.location,0,0,
-                0,0, LaunchControllerGuiTextures.PANEL_WIDTH, LaunchControllerGuiTextures.PANEL_HEIGHT);
-        graphics.pose().popPose();
+        LaunchControllerGuiTextures.SEND_PANEL.render(graphics, leftPos, topPos - 1);
 
         LaunchpadSnapshot snapshot = menu.getSnapshot();
         int barX = leftPos + 78;
@@ -183,20 +179,13 @@ public class LaunchpadScreen extends AbstractContainerScreen<LaunchpadMenu> {
 
     private void renderReceiveBackground(GuiGraphics graphics) {
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(leftPos, topPos-1, 0);
-        graphics.pose().scale(2f, 2f, 1.0f);
-        graphics.blit(LaunchControllerGuiTextures.RECEIVE_PANEL.location,0,0,
-                0,0, LaunchControllerGuiTextures.PANEL_WIDTH, LaunchControllerGuiTextures.PANEL_HEIGHT);
-        graphics.pose().popPose();
+        LaunchControllerGuiTextures.RECEIVE_PANEL.render(graphics, leftPos, topPos - 1);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    protected void renderPanelForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (draft.mode().canSend()) renderSendDetails(graphics);
         else renderReceiveDetails(graphics);
-        renderTooltip(graphics, mouseX, mouseY);
     }
 
     private void renderSendDetails(GuiGraphics graphics) {

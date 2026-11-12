@@ -6,7 +6,11 @@ import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
+import com.simibubi.create.content.contraptions.bearing.WindmillBearingBlockEntity;
 import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollOptionBehaviour;
+import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -40,6 +44,7 @@ public class GlareKineticReceiverBlockEntity extends GeneratingKineticBlockEntit
     private boolean syncedOverloaded;
     private final int[] syncedColourCharges = new int[DyeColor.values().length];
     private int[] syncedLuxHistory = new int[0];
+    private ScrollOptionBehaviour<WindmillBearingBlockEntity.RotationDirection> rotationDirection;
 
     public GlareKineticReceiverBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.GLARE_KINETIC_RECEIVER_BE.get(), pos, blockState);
@@ -161,8 +166,21 @@ public class GlareKineticReceiverBlockEntity extends GeneratingKineticBlockEntit
     //  Kinetic generation
     // -------------------------------------------------------------------------
     @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        // Reuses Create's windmill "Rotation Direction" option (icons + localisation) on the base plate's sides.
+        rotationDirection = new ScrollOptionBehaviour<>(WindmillBearingBlockEntity.RotationDirection.class,
+                CreateLang.translateDirect("contraptions.windmill.rotation_direction"), this, new KineticReceiverDirectionSlot());
+        rotationDirection.withCallback(value -> updateGeneratedRotation());
+        behaviours.add(rotationDirection);
+    }
+
+    @Override
     public float getGeneratedSpeed() {
-        return isReceiverPowered() ? ServerConfig.KINETIC_RECEIVER_RPM.getAsInt() : 0f;
+        if (!isReceiverPowered()) return 0f;
+        float speed = ServerConfig.KINETIC_RECEIVER_RPM.getAsInt();
+        return rotationDirection != null && rotationDirection.get() == WindmillBearingBlockEntity.RotationDirection.COUNTER_CLOCKWISE
+                ? -speed : speed;
     }
 
     @Override

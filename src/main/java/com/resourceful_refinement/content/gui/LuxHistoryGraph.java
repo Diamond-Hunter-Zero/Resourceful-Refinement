@@ -18,6 +18,10 @@ public class LuxHistoryGraph {
     private int width;
     private int height;
     private final Supplier<? extends GlareNetworkGuiData> data;
+    private boolean drawBackground = true;
+
+    /** Minimum number of bar slots, so a young history grows in from the right instead of drawing a few huge bars. */
+    private static final int MIN_SLOTS = 16;
 
     public LuxHistoryGraph(int x, int y, int width, int height, Supplier<? extends GlareNetworkGuiData> data) {
         this.data = data;
@@ -31,14 +35,24 @@ public class LuxHistoryGraph {
         this.height = Math.max(1, height);
     }
 
+    /** Skip the black backing fill when the graph sits in a well already drawn by panel art. */
+    public LuxHistoryGraph withoutBackground() {
+        this.drawBackground = false;
+        return this;
+    }
+
     public void render(GuiGraphics graphics) {
-        render(graphics, x, y, width, height, data.get());
+        render(graphics, x, y, width, height, data.get(), drawBackground);
     }
 
     public static void render(GuiGraphics graphics, int x, int y, int width, int height, GlareNetworkGuiData data) {
+        render(graphics, x, y, width, height, data, true);
+    }
+
+    public static void render(GuiGraphics graphics, int x, int y, int width, int height, GlareNetworkGuiData data, boolean drawBackground) {
         int safeWidth = Math.max(1, width);
         int safeHeight = Math.max(1, height);
-        graphics.fill(x, y, x + safeWidth, y + safeHeight, BACKGROUND);
+        if (drawBackground) graphics.fill(x, y, x + safeWidth, y + safeHeight, BACKGROUND);
 
         int innerX = x + Math.max(2, safeWidth / 40);
         int innerY = y + Math.max(2, safeHeight / 24);
@@ -59,11 +73,12 @@ public class LuxHistoryGraph {
             return;
         }
 
-        int gap = samples.length > 1 && innerWidth >= samples.length * 3 ? 2 : 1;
-        int totalGap = gap * Math.max(0, samples.length - 1);
-        int barWidth = Math.max(1, (innerWidth - totalGap) / samples.length);
-        int usedWidth = samples.length * barWidth + totalGap;
-        int startX = innerX + Math.max(0, innerWidth - usedWidth);
+        // Fixed slots, newest sample on the right; older samples slide left as new ones arrive.
+        int slots = Math.max(MIN_SLOTS, samples.length);
+        int gap = innerWidth >= slots * 3 ? 2 : 1;
+        int barWidth = Math.max(1, (innerWidth - gap * (slots - 1)) / slots);
+        int usedWidth = slots * barWidth + gap * (slots - 1);
+        int startX = innerX + Math.max(0, innerWidth - usedWidth) + (slots - samples.length) * (barWidth + gap);
         int barColor = data != null && data.overloaded() ? OVERLOAD_BAR : BAR;
 
         for (int i = 0; i < samples.length; i++) {

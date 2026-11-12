@@ -16,7 +16,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
-public class GlareChromaticTransceiverMenu extends AbstractContainerMenu {
+public class GlareChromaticTransceiverMenu extends AbstractContainerMenu implements com.resourceful_refinement.content.gui.PowerTerminalViewer {
     private static final int COLOUR_COUNT = 16;
     private final BlockPos blockPos;
     private final ContainerLevelAccess access;
@@ -84,6 +84,7 @@ public class GlareChromaticTransceiverMenu extends AbstractContainerMenu {
         };
     }
 
+    @Override public BlockPos getPowerTerminalPos() { return getBlockPos(); }
     public BlockPos getBlockPos() { return blockPosFromNetwork != null ? blockPosFromNetwork : blockPos; }
     public GlareLogicMode getInitialMode() { return initialMode; }
     public int getInitialThreshold(DyeColor colour) { return initialThresholds[colour.ordinal()]; }

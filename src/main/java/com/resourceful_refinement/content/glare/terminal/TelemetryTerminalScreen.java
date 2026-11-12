@@ -1,14 +1,19 @@
 package com.resourceful_refinement.content.glare.terminal;
 
-import com.resourceful_refinement.network.TelemetryTerminalActionPayload;
+import com.resourceful_refinement.client.gui.PanelText;
+import com.resourceful_refinement.client.gui.ScaledContainerScreen;
+import com.resourceful_refinement.client.gui.widget.ThreeStateButton;
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
+import com.resourceful_refinement.content.glare.GlareAddress;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures.ButtonStyle;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshot;
 import com.resourceful_refinement.content.gui.GlareNetworkSnapshotProvider;
+import com.resourceful_refinement.content.gui.SqrHoverButton;
+import com.resourceful_refinement.network.TelemetryTerminalActionPayload;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -16,35 +21,53 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-/** Shared terminal frame; mode-specific controls live in independent page classes. */
-public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTerminalMenu> {
-    public static final int WIDTH = 320;
-    public static final int HEIGHT = 230;
+import static com.resourceful_refinement.content.glare.terminal.TelemetryTerminalLayout.*;
+
+/**
+ * Shared terminal frame; mode-specific controls live in independent page classes.
+ * <p>
+ * Everything is laid out in panel texels and scaled to the window by {@link ScaledContainerScreen}, so the panel
+ * stays fully visible and legible at any window size and GUI-scale setting.
+ */
+public class TelemetryTerminalScreen extends ScaledContainerScreen<TelemetryTerminalMenu> {
+    public static final int WIDTH = TelemetryTerminalGuiTextures.PANEL_WIDTH;
+    public static final int HEIGHT = TelemetryTerminalGuiTextures.PANEL_HEIGHT;
+    private static final String[] TAB_KEYS = {
+            "gui.resourceful_refinement.telemetry_terminal.manual",
+            "gui.resourceful_refinement.telemetry_terminal.auto_send",
+            "gui.resourceful_refinement.telemetry_terminal.auto_receive"};
+
     private final List<AbstractWidget> pageWidgets = new ArrayList<>();
+    private final List<ThreeStateButton> modeButtons = new ArrayList<>();
     private TelemetryTerminalPage page;
     private TelemetryTerminalMode displayedMode;
-    private final List<Button> modeButtons = new ArrayList<>();
 
     public TelemetryTerminalScreen(TelemetryTerminalMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = WIDTH;
-        imageHeight = HEIGHT;
+        super(menu, inventory, title, WIDTH, HEIGHT);
         inventoryLabelY = 1000;
+        titleLabelY = 1000;
     }
 
     @Override protected void init() {
         super.init();
         modeButtons.clear();
-        modeButtons.add(addRenderableWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.manual"), b -> setMode(TelemetryTerminalMode.MANUAL))
-                .bounds(leftPos + 8, topPos + 5, 96, 20).build()));
-        modeButtons.add(addRenderableWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.auto_send"), b -> setMode(TelemetryTerminalMode.AUTO_SEND))
-                .bounds(leftPos + 106, topPos + 5, 96, 20).build()));
-        modeButtons.add(addRenderableWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.auto_receive"), b -> setMode(TelemetryTerminalMode.AUTO_RECEIVE))
-                .bounds(leftPos + 204, topPos + 5, 108, 20).build()));
-        Button closeButton = addRenderableWidget(Button.builder(Component.literal("x"), button -> onClose())
-                .bounds(leftPos + WIDTH + 4, topPos + 4, 18, 18).build());
-        closeButton.setTooltip(Tooltip.create(Component.translatable("gui.resourceful_refinement.telemetry_terminal.close")));
+        pageWidgets.clear();
+
+        // All three tabs share one label size: the largest that fits the widest label.
+        float tabScale = SCALE_TAB;
+        for (String key : TAB_KEYS) {
+            tabScale = Math.min(tabScale, (TAB_WIDTH - 8f) / font.width(Component.translatable(key)));
+        }
+        TelemetryTerminalMode[] modes = TelemetryTerminalMode.values();
+        for (int i = 0; i < modes.length; i++) {
+            TelemetryTerminalMode mode = modes[i];
+            modeButtons.add(addRenderableWidget(new ThreeStateButton(TAB_X[i], TAB_Y, TAB_WIDTH, TAB_HEIGHT,
+                    Component.translatable(TAB_KEYS[i]), ButtonStyle.BRASS, () -> setMode(mode))
+                    .label(tabScale, true).snapLabelDown()));
+        }
+        addRenderableWidget(new SqrHoverButton(CLOSE_X, CLOSE_Y, CommonSqrButtonTextures.HOVER_CLOSE, this::onClose));
         switchPage(menu.getSnapshot().mode());
     }
 
@@ -52,15 +75,14 @@ public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTe
         if (mode == menu.getSnapshot().mode()) return;
         if (page != null) page.flush();
         send(new TelemetryTerminalActionPayload(menu.getBlockPos(), TelemetryTerminalActionPayload.Action.SET_MODE,
-                mode, com.resourceful_refinement.content.glare.GlareAddress.empty(), "", false, new java.util.UUID(0, 0)));
+                mode, GlareAddress.empty(), "", false, new UUID(0, 0)));
     }
 
     private void switchPage(TelemetryTerminalMode mode) {
         if (page != null) page.removed();
-        for (AbstractWidget widget : List.copyOf(pageWidgets)) removeWidget(widget);
-        pageWidgets.clear();
+        clearPageWidgets();
         displayedMode = mode;
-        for (int i = 0; i < modeButtons.size(); i++) modeButtons.get(i).active = i != mode.ordinal();
+        for (int i = 0; i < modeButtons.size(); i++) modeButtons.get(i).setToggled(i == mode.ordinal());
         page = switch (mode) {
             case MANUAL -> new ManualTelemetryTerminalPage(this);
             case AUTO_SEND -> new AutoSendTelemetryTerminalPage(this);
@@ -80,8 +102,6 @@ public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTe
     }
 
     public TelemetryTerminalSnapshot snapshot() { return menu.getSnapshot(); }
-    public int contentLeft() { return leftPos + 8; }
-    public int contentTop() { return topPos + 31; }
     public void send(TelemetryTerminalActionPayload payload) { PacketDistributor.sendToServer(payload); }
 
     public void applySnapshot(TelemetryTerminalSnapshot snapshot) {
@@ -98,28 +118,39 @@ public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTe
     }
 
     @Override protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + WIDTH, topPos + HEIGHT, 0xFF252A2D);
-        graphics.fill(leftPos + 5, topPos + 28, leftPos + WIDTH - 5, topPos + HEIGHT - 5, 0xFF343B3F);
-        graphics.renderOutline(leftPos, topPos, WIDTH, HEIGHT, 0xFF69757A);
+        RenderSystem.enableBlend();
+        (displayedMode == TelemetryTerminalMode.AUTO_RECEIVE
+                ? TelemetryTerminalGuiTextures.FILTER_PANEL
+                : TelemetryTerminalGuiTextures.SEND_PANEL).render(graphics, 0, 0);
+        RenderSystem.disableBlend();
+        if (page != null) page.renderBackground(graphics, mouseX, mouseY, partialTick);
     }
 
-    @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    @Override protected void renderPanelForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         if (page != null) page.render(graphics, mouseX, mouseY, partialTick);
-        drawFloatingSections(graphics);
+        drawLocalAddressTab(graphics);
     }
 
-    /** Floating panels above the frame: the terminal's own address (top-left) and a No-Lux warning (top-right). */
-    private void drawFloatingSections(GuiGraphics graphics) {
-        Component label = Component.translatable("gui.resourceful_refinement.telemetry_terminal.local_address");
-        graphics.drawString(font, label, leftPos, topPos - 23, 0xFFF2C744, false);
-        int itemsX = leftPos + font.width(label) + 6;
-        TelemetryAddressRenderer.render(graphics, snapshot().ownAddress(), itemsX, topPos - 30, 20, 1f);
+    /** The floating tab above the frame: this terminal's own address, plus a No-Lux warning when underpowered. */
+    private void drawLocalAddressTab(GuiGraphics graphics) {
+        RenderSystem.enableBlend();
+        graphics.pose().pushPose();
+        graphics.pose().translate(HOME_ICON_X, HOME_ICON_Y, 0);
+        graphics.pose().scale(SCALE_SMALL, SCALE_SMALL, 1);
+        CommonSqrButtonTextures.HOME_ICON.render(graphics, 0, 0);
+        graphics.pose().popPose();
+        RenderSystem.disableBlend();
 
-        // The No-Lux warning shows only while the connected network is overloaded (insufficient Lux).
+        float labelScale = PanelText.snap(graphics, LOCAL_LABEL_SCALE);
+        PanelText.draw(graphics, font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.local_address_line_1"),
+                LOCAL_LABEL_X, LOCAL_LABEL_Y, TEXT_CREAM, false, labelScale);
+        PanelText.draw(graphics, font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.local_address_line_2"),
+                LOCAL_LABEL_X, LOCAL_LABEL_Y + LOCAL_LABEL_LINE, TEXT_CREAM, false, labelScale);
+        TelemetryAddressRenderer.render(graphics, snapshot().ownAddress(), LOCAL_ADDRESS_X, LOCAL_ADDRESS_Y, ADDRESS_SPACING, 1f);
+
         if (networkSnapshot().overloaded()) {
-            Component warning = Component.translatable("gui.resourceful_refinement.telemetry_terminal.no_lux");
-            graphics.drawString(font, warning, leftPos + WIDTH - font.width(warning), topPos - 23, 0xFFFF5A1F, false);
+            PanelText.drawRight(graphics, font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.no_lux"),
+                    WARNING_RIGHT, WARNING_Y, 0xFFFF5A1F, true, 1f);
         }
     }
 
@@ -129,32 +160,30 @@ public class TelemetryTerminalScreen extends AbstractContainerScreen<TelemetryTe
                 ? provider.getSyncedGlareNetworkSnapshot() : GlareNetworkSnapshot.EMPTY;
     }
 
-    @Override protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {}
-
-    @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    @Override protected boolean panelMouseClicked(double mouseX, double mouseY, int button) {
         if (page != null && page.mouseClicked(mouseX, mouseY, button)) return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.panelMouseClicked(mouseX, mouseY, button);
     }
 
-    @Override public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    @Override protected boolean panelMouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (page != null && page.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.panelMouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
-    @Override public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    @Override protected boolean panelMouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         for (AbstractWidget widget : pageWidgets) {
             if (widget instanceof VerticalScrollBar scrollBar && scrollBar.isDraggingThumb()
                     && scrollBar.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.panelMouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
-    @Override public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    @Override protected boolean panelMouseReleased(double mouseX, double mouseY, int button) {
         for (AbstractWidget widget : pageWidgets) {
             if (widget instanceof VerticalScrollBar scrollBar && scrollBar.isDraggingThumb()
                     && scrollBar.mouseReleased(mouseX, mouseY, button)) return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.panelMouseReleased(mouseX, mouseY, button);
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 
-public class PowerTerminalMenu extends AbstractContainerMenu {
+public class PowerTerminalMenu extends AbstractContainerMenu implements PowerTerminalViewer {
     private final BlockPos blockPos;
     private final BlockPos validationPos;
 
@@ -24,6 +24,11 @@ public class PowerTerminalMenu extends AbstractContainerMenu {
 
     public static PowerTerminalMenu fromNetwork(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         return new PowerTerminalMenu(id, inventory, buf.readBlockPos());
+    }
+
+    @Override
+    public BlockPos getPowerTerminalPos() {
+        return blockPos;
     }
 
     public BlockPos getBlockPos() {

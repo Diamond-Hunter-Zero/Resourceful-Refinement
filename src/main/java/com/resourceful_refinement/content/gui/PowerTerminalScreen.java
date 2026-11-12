@@ -1,19 +1,17 @@
 package com.resourceful_refinement.content.gui;
 
+import com.resourceful_refinement.client.gui.ScaledContainerScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class PowerTerminalScreen extends AbstractContainerScreen<PowerTerminalMenu> {
+public class PowerTerminalScreen extends ScaledContainerScreen<PowerTerminalMenu> {
     private PowerTerminal terminal;
 
     public PowerTerminalScreen(PowerTerminalMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        imageWidth = 192;
-        imageHeight = 176;
+        super(menu, inventory, title, PowerTerminal.WIDTH, PowerTerminal.HEIGHT);
         inventoryLabelY = 1000;
         titleLabelY = 1000;
     }
@@ -21,7 +19,7 @@ public class PowerTerminalScreen extends AbstractContainerScreen<PowerTerminalMe
     @Override
     protected void init() {
         super.init();
-        terminal = new PowerTerminal(leftPos, topPos, imageWidth, imageHeight, menu.getBlockPos(), this::snapshot);
+        terminal = new PowerTerminal(leftPos, topPos, menu.getBlockPos(), this::snapshot);
     }
 
     private GlareNetworkGuiData snapshot() {
@@ -42,17 +40,8 @@ public class PowerTerminalScreen extends AbstractContainerScreen<PowerTerminalMe
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    protected boolean panelMouseClicked(double mouseX, double mouseY, int button) {
         return terminal != null && terminal.mouseClicked(mouseX, mouseY, button)
-                || super.mouseClicked(mouseX, mouseY, button);
+                || super.panelMouseClicked(mouseX, mouseY, button);
     }
-
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {}
 }

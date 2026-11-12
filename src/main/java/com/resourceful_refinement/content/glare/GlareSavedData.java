@@ -2,6 +2,7 @@ package com.resourceful_refinement.content.glare;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.content.gui.PowerTerminalMenu;
+import com.resourceful_refinement.content.gui.PowerTerminalViewer;
 import com.resourceful_refinement.content.glare.remote.IRemoteEntanglementEndpoint;
 import com.resourceful_refinement.content.glare.remote.RemoteEndpointKind;
 import com.resourceful_refinement.content.glare.remote.RemoteEntanglementMode;
@@ -680,10 +681,14 @@ public class GlareSavedData extends SavedData {
     public void sampleLuxHistories(MinecraftServer server, int sampleIntervalTicks, int maxSamples) {
         int interval = Math.max(1, sampleIntervalTicks);
         int limit = Math.max(1, maxSamples);
-        long gameTime = server.getTickCount();
+        // Overworld game time persists with the world, matching the saved lastLuxSampleGameTime. (The server's
+        // tick count restarts at 0 on every launch, which left the saved timestamp "in the future" and froze
+        // sampling - and so the history graph - until the new session's uptime caught up.)
+        long gameTime = server.overworld().getGameTime();
         Set<UUID> sampledNetworkIds = new HashSet<>();
         for (NetworkRecord network : networks.values()) {
-            if (network.lastLuxSampleGameTime != Long.MIN_VALUE
+            boolean clockWentBackwards = gameTime < network.lastLuxSampleGameTime;
+            if (network.lastLuxSampleGameTime != Long.MIN_VALUE && !clockWentBackwards
                     && gameTime - network.lastLuxSampleGameTime < interval) {
                 continue;
             }
@@ -706,10 +711,11 @@ public class GlareSavedData extends SavedData {
 
     private void notifyPowerTerminalViewers(MinecraftServer server, Set<UUID> sampledNetworkIds) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (!(player.containerMenu instanceof PowerTerminalMenu terminal)) {
+            // Any screen embedding a Power Terminal (standalone terminal, Chromatic Transceiver, ...) needs the resync.
+            if (!(player.containerMenu instanceof PowerTerminalViewer terminal)) {
                 continue;
             }
-            DimensionalNodePos pos = new DimensionalNodePos(player.level().dimension(), terminal.getBlockPos());
+            DimensionalNodePos pos = new DimensionalNodePos(player.level().dimension(), terminal.getPowerTerminalPos());
             NodeRecord record = nodes.get(pos);
             if (record == null || record.networkId == null || !sampledNetworkIds.contains(record.networkId)) {
                 continue;

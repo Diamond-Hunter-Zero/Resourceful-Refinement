@@ -1,5 +1,6 @@
 package com.resourceful_refinement.client.gui.widget;
 
+import com.google.common.collect.Lists;
 import com.resourceful_refinement.content.glare.GlareAddress;
 import com.resourceful_refinement.content.glare.terminal.TelemetryItemPickerScreen;
 import net.minecraft.client.Minecraft;
@@ -21,6 +22,7 @@ public class GlareAddressEditor extends AbstractWidget {
     private GlareAddress address;
     private int slotSize = 1;
     private int spacing = 1;
+    private int hoverColour = 0xff4d5459;
 
     public GlareAddressEditor(Screen parent, int x, int y, int slotSize, int spacing, GlareAddress address, Consumer<GlareAddress> responder) {
         super(x, y, spacing * 3 - 3, slotSize, Component.empty());
@@ -29,6 +31,11 @@ public class GlareAddressEditor extends AbstractWidget {
         this.responder = responder;
         this.slotSize = slotSize;
         this.spacing = spacing;
+    }
+
+    public GlareAddressEditor withHoverColour(int colour) {
+        this.hoverColour = colour;
+        return this;
     }
 
     public GlareAddress getAddress() {
@@ -47,18 +54,16 @@ public class GlareAddressEditor extends AbstractWidget {
             boolean hovered = mouseX >= slotX && mouseX < slotX + slotSize
                     && mouseY >= getY() && mouseY < getY() + slotSize;
 
-            if (isHovered)
-                graphics.fill(slotX, getY(), slotX + slotSize, getY() + slotSize, 0xff4d5459);
-
-
-            /*graphics.fill(slotX, getY(), slotX + slotSize, getY() + slotSize,
-                    hovered ? 0xFF69757A : 0xFF171B1E);
-            graphics.renderOutline(slotX, getY(), slotSize, slotSize, active ? 0xFF899499 : 0xFF4D5559);*/
+            if (active && hovered)
+                graphics.fill(slotX, getY(), slotX + slotSize, getY() + slotSize, hoverColour);
 
             Item item = BuiltInRegistries.ITEM.get(ids[slot]);
-            graphics.renderItem(new ItemStack(item), slotX, getY());
+            int inset = (slotSize - 16) / 2;
+            graphics.renderItem(new ItemStack(item), slotX + Math.max(0, inset), getY() + Math.max(0, inset));
             if (hovered && item != net.minecraft.world.item.Items.AIR) {
-                graphics.renderTooltip(Minecraft.getInstance().font, new ItemStack(item), mouseX, mouseY);
+                // Deferred so it renders at the real cursor, outside any scaled panel transform.
+                parent.setTooltipForNextRenderPass(Lists.transform(
+                        Screen.getTooltipFromItem(Minecraft.getInstance(), new ItemStack(item)), Component::getVisualOrderText));
             }
         }
     }

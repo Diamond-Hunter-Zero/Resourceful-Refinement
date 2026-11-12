@@ -14,6 +14,10 @@ public class VerticalScrollBar extends AbstractSimiWidget {
     private static final int THUMB_COLOUR = 0xFF8C969B;
     private static final int THUMB_HOVERED_COLOUR = 0xFFBCC4C7;
 
+    private boolean drawTrack = true;
+    private int thumbColour = THUMB_COLOUR;
+    private int thumbHoveredColour = THUMB_HOVERED_COLOUR;
+    private int thumbInset = 1;
     private int totalItems;
     private final int visibleItems;
     private final IntConsumer onOffsetChanged;
@@ -29,6 +33,18 @@ public class VerticalScrollBar extends AbstractSimiWidget {
         this.onOffsetChanged = onOffsetChanged;
         this.offset = clamp(initialOffset);
         this.active = maxOffset() > 0;
+    }
+
+    /**
+     * Restyles the bar for use over panel art that already contains the track: when {@code drawTrack} is false only
+     * the thumb is drawn, inset horizontally by {@code thumbInset}.
+     */
+    public VerticalScrollBar withStyle(boolean drawTrack, int thumbColour, int thumbHoveredColour, int thumbInset) {
+        this.drawTrack = drawTrack;
+        this.thumbColour = thumbColour;
+        this.thumbHoveredColour = thumbHoveredColour;
+        this.thumbInset = thumbInset;
+        return this;
     }
 
     public int getOffset() {
@@ -61,13 +77,13 @@ public class VerticalScrollBar extends AbstractSimiWidget {
 
     @Override
     protected void doRender(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(getX(), getY(), getX() + width, getY() + height, TRACK_COLOUR);
+        if (drawTrack) graphics.fill(getX(), getY(), getX() + width, getY() + height, TRACK_COLOUR);
         if (!active) {
             return;
         }
         int thumbY = thumbY();
-        int colour = dragging || isMouseOverThumb(mouseX, mouseY) ? THUMB_HOVERED_COLOUR : THUMB_COLOUR;
-        graphics.fill(getX() + 1, thumbY, getX() + width - 1, thumbY + thumbHeight(), colour);
+        int colour = dragging || isMouseOverThumb(mouseX, mouseY) ? thumbHoveredColour : thumbColour;
+        graphics.fill(getX() + thumbInset, thumbY, getX() + width - thumbInset, thumbY + thumbHeight(), colour);
     }
 
     @Override

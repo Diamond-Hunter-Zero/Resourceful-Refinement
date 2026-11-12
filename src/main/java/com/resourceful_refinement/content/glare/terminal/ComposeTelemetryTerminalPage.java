@@ -1,22 +1,34 @@
 package com.resourceful_refinement.content.glare.terminal;
 
+import com.resourceful_refinement.client.gui.widget.GlareAddressEditor;
 import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
 import com.resourceful_refinement.client.gui.widget.WrappedTextArea;
-import com.resourceful_refinement.client.gui.widget.GlareAddressEditor;
 import com.resourceful_refinement.content.glare.GlareAddress;
+import com.resourceful_refinement.content.glare.GlareMessage;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures;
 import com.resourceful_refinement.network.TelemetryTerminalActionPayload;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
 import java.util.UUID;
 
-/** Shared compose editor used by Manual and Auto-Send pages. */
+import static com.resourceful_refinement.content.glare.terminal.TelemetryTerminalLayout.*;
+import static com.resourceful_refinement.content.glare.terminal.TelemetryTerminalWidgets.*;
+
+/**
+ * Shared compose editor used by the Manual (Compose view) and Auto-Send pages. Manual compose has a Clear (trash)
+ * button and a Send action; Auto-Send has no manual send, so its footer action clears the draft instead.
+ */
 class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
+    private static final int VISIBLE_CONTACTS = 6;
+    private static final int CONTACT_ROW_HEIGHT = LIST[3] / VISIBLE_CONTACTS;
+    private static final int CONTACT_ITEM_SPACING = 18;
+    private static final int DELETE_SIZE = 10;
+    private static final int DELETE_X = LIST[0] + LIST[2] - DELETE_SIZE - 3;
+
     private final TelemetryTerminalScreen screen;
     private final boolean automatic;
-    private final int topOffset;
     private GlareAddress destination;
     private GlareAddressEditor addressEditor;
     private WrappedTextArea bodyEditor;
@@ -25,36 +37,43 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     private boolean dirty;
     private int saveDelay;
 
-    ComposeTelemetryTerminalPage(TelemetryTerminalScreen screen, boolean automatic, int topOffset) {
+    ComposeTelemetryTerminalPage(TelemetryTerminalScreen screen, boolean automatic) {
         this.screen = screen;
         this.automatic = automatic;
-        this.topOffset = topOffset;
         TelemetryTerminalSnapshot snapshot = screen.snapshot();
         destination = automatic ? snapshot.autoSendDestination() : snapshot.manualDestination();
     }
 
     @Override public void init() {
-        int x = screen.contentLeft();
-        int y = screen.contentTop() + topOffset;
-        addressEditor = screen.addPageWidget(new GlareAddressEditor(screen, x + 86, y + 2, 22, 25, destination,
-                this::setDestination));
-        screen.addPageWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.save_contact"), b -> saveContact())
-                .bounds(x + 164, y + 2, 48, 22).build());
-        bodyEditor = screen.addPageWidget(new WrappedTextArea(screen.getMinecraft().font, x + 84, y + 29, 210, 117,
-                512, value -> { dirty = true; saveDelay = 10; }));
+        addressEditor = screen.addPageWidget(new GlareAddressEditor(screen, ADDRESS_SLOTS_X, ADDRESS_SLOTS_Y, 16, ADDRESS_SPACING,
+                destination, this::setDestination).withHoverColour(SLOT_HOVER));
+        screen.addPageWidget(iconButton(SAVE_BUTTON, CommonSqrButtonTextures.SAVE_ICON, 1f, this::saveContact));
+
+        bodyEditor = screen.addPageWidget(new WrappedTextArea(font(), MESSAGE_AREA[0], MESSAGE_AREA[1], MESSAGE_AREA[2], MESSAGE_AREA[3],
+                GlareMessage.MAX_BODY_LENGTH, value -> { dirty = true; saveDelay = 10; }).withStyle(false, TEXT_BRIGHT));
         bodyEditor.setValue(automatic ? screen.snapshot().autoSendBody() : screen.snapshot().manualBody());
         if (automatic && screen.snapshot().displayLinkActive()) bodyEditor.active = false;
-        screen.addPageWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.clear"), b -> {
-            bodyEditor.setValue(""); dirty = true; saveDelay = 0; flush();
-        }).bounds(x + 84, y + 149, 48, 18).build());
-        if (!automatic) {
-            screen.addPageWidget(Button.builder(Component.translatable("gui.resourceful_refinement.telemetry_terminal.send"), b -> {
-                flush();
-                screen.send(TelemetryTerminalActionPayload.simple(screen.getMenu().getBlockPos(), TelemetryTerminalActionPayload.Action.SEND_MANUAL));
-            }).bounds(x + 238, y + 149, 56, 18).build());
+
+        if (automatic) {
+            screen.addPageWidget(actionButton(ACTION_BUTTON, "gui.resourceful_refinement.telemetry_terminal.discard",
+                    CommonSqrButtonTextures.TRASH_ICON, this::clearBody));
+        } else {
+            screen.addPageWidget(iconButton(CLEAR_BUTTON, CommonSqrButtonTextures.TRASH_ICON, SCALE_SMALL, this::clearBody));
+            screen.addPageWidget(actionButton(ACTION_BUTTON, "gui.resourceful_refinement.telemetry_terminal.send",
+                    CommonSqrButtonTextures.SEND_ICON, () -> {
+                        flush();
+                        screen.send(TelemetryTerminalActionPayload.simple(screen.getMenu().getBlockPos(), TelemetryTerminalActionPayload.Action.SEND_MANUAL));
+                    }));
         }
-        contactsScroll = screen.addPageWidget(new VerticalScrollBar(x + 78, y + 24, 6, 126,
-                screen.snapshot().contacts().size(), 6, contactOffset, offset -> contactOffset = offset));
+        contactsScroll = screen.addPageWidget(scrollBar(LIST_SCROLL, screen.snapshot().contacts().size(), VISIBLE_CONTACTS,
+                contactOffset, offset -> contactOffset = offset));
+    }
+
+    private void clearBody() {
+        bodyEditor.setValue("");
+        dirty = true;
+        saveDelay = 0;
+        flush();
     }
 
     private void setDestination(GlareAddress address) {
@@ -86,6 +105,7 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     }
 
     @Override public void snapshotUpdated(TelemetryTerminalSnapshot snapshot) {
+        if (contactsScroll != null) contactsScroll.setTotalItems(snapshot.contacts().size());
         if (!dirty) {
             destination = automatic ? snapshot.autoSendDestination() : snapshot.manualDestination();
             if (addressEditor != null) addressEditor.setAddress(destination);
@@ -94,70 +114,66 @@ class ComposeTelemetryTerminalPage implements TelemetryTerminalPage {
     }
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        int x = screen.contentLeft();
-        int y = screen.contentTop() + topOffset;
-        graphics.drawString(screen.getMinecraft().font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.contacts"), x + 4, y + 5, 0xFFE2E5E6, false);
-        graphics.drawString(screen.getMinecraft().font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.to"), x + 84, y + 8, 0xFFB8C0C3, false);
-        if (automatic && screen.snapshot().displayLinkActive()) {
-            graphics.drawString(screen.getMinecraft().font, Component.translatable("gui.resourceful_refinement.telemetry_terminal.display_link_readout"), x + 84, y + 27, 0xFF9FC4D0, false);
-        }
-        List<GlareAddress> contacts = screen.snapshot().contacts();
-        for (int row = 0; row < 6 && contactOffset + row < contacts.size(); row++) {
-            int rowY = y + 27 + row * 21;
-            boolean hovered = mouseX >= x + 1 && mouseX < x + 76 && mouseY >= rowY - 1 && mouseY < rowY + 19;
-            if (hovered) graphics.fill(x + 1, rowY - 1, x + 76, rowY + 19, 0x40FFFFFF);
-            TelemetryAddressRenderer.render(graphics, contacts.get(contactOffset + row), x + 5, rowY, 20, 0.75f);
-            // Hovering a contact reveals a small square delete button at its right end.
+        TelemetryTerminalSnapshot snapshot = screen.snapshot();
+        List<GlareAddress> contacts = snapshot.contacts();
+        listHeader(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.contact_count", contacts.size()));
+        addressLabel(graphics, "gui.resourceful_refinement.telemetry_terminal.target_address");
+        infoText(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.characters_remaining",
+                bodyEditor == null ? GlareMessage.MAX_BODY_LENGTH : bodyEditor.remaining()), TEXT_DIM);
+
+        for (int row = 0; row < VISIBLE_CONTACTS && contactOffset + row < contacts.size(); row++) {
+            int rowY = LIST[1] + row * CONTACT_ROW_HEIGHT;
+            boolean hovered = inRect(mouseX, mouseY, LIST[0], rowY, LIST[2], CONTACT_ROW_HEIGHT);
+            GlareAddress contact = contacts.get(contactOffset + row);
+            if (contact.equals(destination)) fill(graphics, LIST[0], rowY, LIST[2], CONTACT_ROW_HEIGHT, ROW_SELECTED);
+            else if (hovered) fill(graphics, LIST[0], rowY, LIST[2], CONTACT_ROW_HEIGHT, ROW_HOVER);
+            TelemetryAddressRenderer.render(graphics, contact, LIST[0] + 3, rowY + (CONTACT_ROW_HEIGHT - 16) / 2,
+                    CONTACT_ITEM_SPACING, 1f);
+            // Hovering a contact reveals a small delete button at its right end.
             if (hovered) {
-                int dx = x + 65;
-                int dy = rowY + 5;
-                boolean overDelete = mouseX >= dx && mouseX < dx + 9 && mouseY >= dy && mouseY < dy + 9;
-                graphics.fill(dx, dy, dx + 9, dy + 9, overDelete ? 0xFFB4302A : 0xFF5A2420);
-                graphics.renderOutline(dx, dy, 9, 9, 0xFF1D0F0E);
-                graphics.drawString(screen.getMinecraft().font, "x", dx + 3, dy + 1, overDelete ? 0xFFFFFFFF : 0xFFE0B4B0, false);
+                int dy = deleteY(rowY);
+                deleteBox(graphics, DELETE_X, dy, DELETE_SIZE, inRect(mouseX, mouseY, DELETE_X, dy, DELETE_SIZE, DELETE_SIZE));
             }
         }
-        Component status = switch (screen.snapshot().lastResult()) {
-            case MESSAGE_SENT -> Component.translatable(automatic
-                    ? "gui.resourceful_refinement.telemetry_terminal.last_sent" : "gui.resourceful_refinement.telemetry_terminal.sent");
-            case ADDRESS_NOT_FOUND -> Component.translatable("gui.resourceful_refinement.telemetry_terminal.address_not_found");
-            case INVALID_CONFIGURATION -> Component.translatable("gui.resourceful_refinement.telemetry_terminal.incomplete");
-            default -> Component.empty();
-        };
-        graphics.drawString(screen.getMinecraft().font, status, x + 138, y + 154, 0xFFB7C2C6, false);
+
+        if (automatic && snapshot.displayLinkActive()) {
+            statusText(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.display_link_readout"), TEXT_HINT);
+            return;
+        }
+        switch (snapshot.lastResult()) {
+            case ADDRESS_NOT_FOUND -> statusText(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.address_not_found"), TEXT_ERROR);
+            case INVALID_CONFIGURATION -> statusText(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.incomplete"), TEXT_ERROR);
+            case MESSAGE_SENT -> statusText(graphics, Component.translatable(automatic
+                    ? "gui.resourceful_refinement.telemetry_terminal.last_sent" : "gui.resourceful_refinement.telemetry_terminal.sent"), TEXT_OK);
+            default -> {
+                if (automatic) statusText(graphics, Component.translatable("gui.resourceful_refinement.telemetry_terminal.auto_send_hint"), TEXT_HINT);
+            }
+        }
+    }
+
+    private static int deleteY(int rowY) {
+        return rowY + (CONTACT_ROW_HEIGHT - DELETE_SIZE) / 2;
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button != 0) return false;
-        int x = screen.contentLeft();
-        int y = screen.contentTop() + topOffset;
-        if (mouseX >= x + 2 && mouseX < x + 76 && mouseY >= y + 27 && mouseY < y + 153) {
-            int row = (int) (mouseY - (y + 27)) / 21;
-            List<GlareAddress> contacts = screen.snapshot().contacts();
-            if (contactOffset + row < contacts.size()) {
-                GlareAddress contact = contacts.get(contactOffset + row);
-                int rowY = y + 27 + row * 21;
-                int dx = x + 65;
-                int dy = rowY + 5;
-                if (mouseX >= dx && mouseX < dx + 9 && mouseY >= dy && mouseY < dy + 9) {
-                    screen.send(action(TelemetryTerminalActionPayload.Action.REMOVE_CONTACT, contact, "", false, new UUID(0, 0)));
-                    return true;
-                }
-                destination = contact;
-                dirty = true;
-                saveDelay = 0;
-                flush();
-                return true;
-            }
+        if (button != 0 || !TelemetryTerminalLayout.inside(LIST, mouseX, mouseY)) return false;
+        int row = (int) (mouseY - LIST[1]) / CONTACT_ROW_HEIGHT;
+        List<GlareAddress> contacts = screen.snapshot().contacts();
+        if (row >= VISIBLE_CONTACTS || contactOffset + row >= contacts.size()) return false;
+        GlareAddress contact = contacts.get(contactOffset + row);
+        int rowY = LIST[1] + row * CONTACT_ROW_HEIGHT;
+        if (inRect(mouseX, mouseY, DELETE_X, deleteY(rowY), DELETE_SIZE, DELETE_SIZE)) {
+            screen.send(action(TelemetryTerminalActionPayload.Action.REMOVE_CONTACT, contact, "", false, new UUID(0, 0)));
+            return true;
         }
-        return false;
+        if (addressEditor != null) addressEditor.setAddress(contact);
+        setDestination(contact);
+        return true;
     }
 
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int x = screen.contentLeft();
-        int y = screen.contentTop() + topOffset;
-        return mouseX >= x && mouseX < x + 80 && mouseY >= y + 20 && mouseY < y + 155
-                && contactsScroll != null && contactsScroll.scrollBy(-(int) Math.signum(scrollY));
+        boolean overList = inRect(mouseX, mouseY, LIST[0], LIST[1], LIST_SCROLL[0] + LIST_SCROLL[2] - LIST[0], LIST[3]);
+        return overList && contactsScroll != null && contactsScroll.scrollBy(-(int) Math.signum(scrollY));
     }
 
     @Override public void removed() { flush(); }

@@ -6,6 +6,7 @@ import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -24,12 +25,35 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class GlareKineticReceiverBlock extends DirectionalKineticBlock implements IBE<GlareKineticReceiverBlockEntity> {
     public static final MapCodec<GlareKineticReceiverBlock> CODEC = simpleCodec(GlareKineticReceiverBlock::new);
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
 
+    private static final Map<Direction, VoxelShape> SHAPES = Util.make(new EnumMap<>(Direction.class), map -> {
+        map.put(Direction.NORTH, Shapes.or(
+                Block.box(0, 0, 12, 16, 16, 16),
+                Block.box(1, 1, 1, 15, 15, 12)));
+        map.put(Direction.EAST, Shapes.or(
+                Block.box(0, 0, 0, 4, 16, 16),
+                Block.box(4, 1, 1, 15, 15, 15)));
+        map.put(Direction.SOUTH, Shapes.or(
+                Block.box(0, 0, 0, 16, 16, 4),
+                Block.box(1, 1, 4, 15, 15, 15)));
+        map.put(Direction.WEST, Shapes.or(
+                Block.box(12, 0, 0, 16, 16, 16),
+                Block.box(1, 1, 1, 12, 15, 15)));
+        map.put(Direction.UP, Shapes.or(
+                Block.box(0, 0, 0, 16, 4, 16),
+                Block.box(1, 4, 1, 15, 15, 15)));
+        map.put(Direction.DOWN, Shapes.or(
+                Block.box(0, 12, 0, 16, 16, 16),
+                Block.box(1, 1, 1, 15, 12, 15)));
+    });
     public GlareKineticReceiverBlock(Properties properties) {
         super(properties);
     }
@@ -51,7 +75,7 @@ public class GlareKineticReceiverBlock extends DirectionalKineticBlock implement
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        return SHAPES.get(state.getValue(FACING));
     }
 
     // getStateForPlacement is inherited from DirectionalKineticBlock: FACING points toward the player
@@ -69,6 +93,10 @@ public class GlareKineticReceiverBlock extends DirectionalKineticBlock implement
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        // Let Create's wrench rotate the block (WrenchItem#useOn) instead of falling through to the GUI.
+        if (stack.is(com.simibubi.create.AllItems.WRENCH.get())) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
         if (stack.getItem() instanceof RelayWrenchItem wrench) {
             wrench.interactWithNode(stack, level, pos, player);
             return ItemInteractionResult.sidedSuccess(level.isClientSide);

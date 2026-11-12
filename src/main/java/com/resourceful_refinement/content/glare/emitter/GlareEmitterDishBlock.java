@@ -70,6 +70,10 @@ public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        // Let Create's wrench rotate the block (WrenchItem#useOn) instead of falling through to the GUI.
+        if (stack.is(com.simibubi.create.AllItems.WRENCH.get())) {
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        }
         if (stack.getItem() instanceof RelayWrenchItem wrench) {
             wrench.interactWithNode(stack, level, pos, player);
             return ItemInteractionResult.sidedSuccess(level.isClientSide);

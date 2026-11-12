@@ -58,6 +58,10 @@ public class ServerConfig {
     public static final ModConfigSpec.DoubleValue HOVERPACK_LAUNCH_FORWARD_AIR;
     public static final ModConfigSpec.DoubleValue HOVERPACK_GRADE_THRUST_STEP;
 
+    public static final ModConfigSpec.IntValue RAILGUN_CHARGE_COST;
+    public static final ModConfigSpec.DoubleValue RAILGUN_RANGE;
+    public static final ModConfigSpec.DoubleValue RAILGUN_DAMAGE;
+
 
     static {
         /*CONFIG_BUILDER.push("Config Section 1");
@@ -262,6 +266,23 @@ public class ServerConfig {
                 .comment("Cumulative thrust increase per Prism Cell grade above Low (Low x1, Mid x(1+step),",
                         "High/Creative x(1+step)^2). Default 0.25 = +25% per grade (Value between 0 and 4)")
                 .defineInRange("grade_thrust_step", 0.25, 0.0, 4.0);
+        CONFIG_BUILDER.pop();
+
+
+        // Railgun Parameters
+        CONFIG_BUILDER.push("Railgun");
+        RAILGUN_CHARGE_COST = CONFIG_BUILDER
+                .comment("Prism Cell charge consumed by each Railgun shot. With no installed cell, or insufficient",
+                        "charge, the Railgun will not charge (Value between 0 and 1000000)")
+                .defineInRange("charge_cost", 500, 0, 1_000_000);
+        RAILGUN_RANGE = CONFIG_BUILDER
+                .comment("Maximum beam length in blocks. A shot that hits no block within this distance ends at it",
+                        "(Value between 4 and 256)")
+                .defineInRange("range", 48.0, 4.0, 256.0);
+        RAILGUN_DAMAGE = CONFIG_BUILDER
+                .comment("Damage dealt to each living entity on the beam, per pulse. The beam pulses on firing and",
+                        "every 0.25s after, for 1s (Value between 0 and 1000)")
+                .defineInRange("damage", 4.0, 0.0, 1000.0);
         CONFIG_BUILDER.pop();
 
 

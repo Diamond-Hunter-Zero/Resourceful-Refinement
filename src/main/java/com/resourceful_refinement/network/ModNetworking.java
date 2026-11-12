@@ -86,7 +86,16 @@ public final class ModNetworking {
                         HoverpackLaunchPayload.TYPE,
                         HoverpackLaunchPayload.STREAM_CODEC,
                         ModNetworking::handleHoverpackLaunch
+                )
+                .playToClient(
+                        RailgunFirePayload.TYPE,
+                        RailgunFirePayload.STREAM_CODEC,
+                        ModNetworking::handleRailgunFire
                 );
+    }
+
+    private static void handleRailgunFire(RailgunFirePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> RailgunFirePayload.handleClient(payload));
     }
 
     private static void handleHoverpackLaunch(HoverpackLaunchPayload payload, IPayloadContext context) {

@@ -227,6 +227,16 @@ public class ModItems {
 
 
     // -------------------------------------------------------------------------
+    // Railgun
+    // -------------------------------------------------------------------------
+    // A Prism-Cell-powered charge-and-fire lightning beam weapon. See content/railgun/.
+
+    public static final DeferredItem<com.resourceful_refinement.content.railgun.RailgunItem> RAILGUN = ITEMS.register("railgun",
+            () -> new com.resourceful_refinement.content.railgun.RailgunItem(
+                    com.resourceful_refinement.content.railgun.RailgunItem.createProperties()));
+
+
+    // -------------------------------------------------------------------------
     // Foods Properties
     // -------------------------------------------------------------------------
 

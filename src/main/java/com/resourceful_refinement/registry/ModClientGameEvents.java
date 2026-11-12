@@ -1,6 +1,8 @@
 package com.resourceful_refinement.registry;
 
 import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.client.fx.lightning.ClientLightning;
+import com.resourceful_refinement.client.fx.lightning.LightningTestCommand;
 import com.resourceful_refinement.content.brewers_tap.FlavourType;
 import com.resourceful_refinement.content.coating.CoatingData;
 import com.resourceful_refinement.content.glare.rendering.GlareClientLinks;
@@ -9,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
@@ -37,5 +40,11 @@ public class ModClientGameEvents {
     public static void onRenderLevel(RenderLevelStageEvent event) {
         GlareClientLinks.render(event);
         com.resourceful_refinement.content.resonator.ping.PingBeaconRenderer.render(event);
+        ClientLightning.render(event);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        LightningTestCommand.register(event.getDispatcher());
     }
 }

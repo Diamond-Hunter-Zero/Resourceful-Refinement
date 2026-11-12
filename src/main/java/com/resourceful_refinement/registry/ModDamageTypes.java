@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ModDamageTypes {
 
     public static final ResourceKey<DamageType> MOLTEN_GEL_DAMAGE = key("molten_gel_damage");
+    public static final ResourceKey<DamageType> RAILGUN = key("railgun");
 
     private ModDamageTypes() {}
 
@@ -30,5 +31,10 @@ public final class ModDamageTypes {
     /** Molten gel from a projectile (e.g. hosegun blob); attributes kills to {@code owner} when present. */
     public static DamageSource moltenGel(Level level, Entity directEntity, @Nullable Entity owner) {
         return level.damageSources().source(MOLTEN_GEL_DAMAGE, directEntity, owner);
+    }
+
+    /** A railgun beam fired by {@code shooter}; attributes the kill to them. */
+    public static DamageSource railgun(Level level, Entity shooter) {
+        return level.damageSources().source(RAILGUN, shooter);
     }
 }

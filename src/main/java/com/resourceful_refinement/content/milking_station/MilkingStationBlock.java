@@ -42,7 +42,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStationBlockEntity> {
@@ -174,34 +173,64 @@ public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStat
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (!stack.is(Items.LEAD)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        if (level.isClientSide) {
-            return ItemInteractionResult.SUCCESS;
-        }
-
         if (!(level.getBlockEntity(pos) instanceof MilkingStationBlockEntity station)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
+        boolean holdingLead = stack.is(Items.LEAD);
+
+        // Releasing with a lead re-leashes the mob to the player; with both hands empty it is set loose.
         if (station.hasCapturedEntity()) {
-            if (station.releaseCapturedEntity(player, true)) {
+            boolean emptyHanded = player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty();
+            if (!holdingLead && !emptyHanded) {
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            }
+            if (level.isClientSide) {
+                return ItemInteractionResult.SUCCESS;
+            }
+            if (station.releaseCapturedEntity(player, holdingLead)) {
+                if (holdingLead) {
+                    stack.consume(1, player);
+                }
                 level.playSound(null, pos, SoundEvents.LEASH_KNOT_BREAK, SoundSource.BLOCKS, 0.8f, 1.0f);
                 return ItemInteractionResult.SUCCESS;
             }
             return ItemInteractionResult.CONSUME;
         }
 
-        Optional<Mob> mobToCapture = findNearestLeashedMob(level, pos, player)
-                .or(() -> findNearestMobPassengerInLeashedBoat(level, pos, player));
-        if (mobToCapture.isEmpty()) {
-            player.displayClientMessage(Component.literal("No leashed mob nearby."), true);
-            return ItemInteractionResult.CONSUME;
+        if (station.hasSeatedPlayer()) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        Mob mob = mobToCapture.get();
+        // Capturing only needs a mob leashed to the player; in survival the lead is no longer in hand.
+        Optional<Mob> leashedMob = findNearestLeashedMob(level, pos, player);
+        Optional<Boat> leashedBoat = leashedMob.isPresent()
+                ? Optional.empty()
+                : findNearestLeashedBoatWithMob(level, pos, player);
+        if (leashedMob.isEmpty() && leashedBoat.isEmpty()) {
+            if (holdingLead && !level.isClientSide) {
+                player.displayClientMessage(Component.literal("No leashed mob nearby."), true);
+                return ItemInteractionResult.CONSUME;
+            }
+            return holdingLead ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+
+        // Unhooking the leash drops the lead item, matching vanilla unleashing.
+        boolean dropLead = !player.hasInfiniteMaterials();
+        Mob mob;
+        if (leashedMob.isPresent()) {
+            mob = leashedMob.get();
+            ((Leashable) mob).dropLeash(true, dropLead);
+        } else {
+            Boat boat = leashedBoat.get();
+            mob = getCapturableBoatPassenger(boat).get();
+            ((Leashable) boat).dropLeash(true, dropLead);
+        }
+
         mob.stopRiding();
         if (station.captureEntity(mob)) {
             level.playSound(null, pos, SoundEvents.LEASH_KNOT_PLACE, SoundSource.BLOCKS, 0.8f, 1.0f);
@@ -218,29 +247,20 @@ public class MilkingStationBlock extends KineticBlock implements IBE<MilkingStat
                 .min(Comparator.comparingDouble(mob -> mob.distanceToSqr(player)));
     }
 
-    private Optional<Mob> findNearestMobPassengerInLeashedBoat(Level level, BlockPos pos, Player player) {
+    private Optional<Boat> findNearestLeashedBoatWithMob(Level level, BlockPos pos, Player player) {
         AABB searchBox = new AABB(pos).inflate(8.0);
-        List<Boat> boats = level.getEntitiesOfClass(Boat.class, searchBox, boat -> isLeashedToPlayer(boat, player))
+        return level.getEntitiesOfClass(Boat.class, searchBox,
+                        boat -> isLeashedToPlayer(boat, player) && getCapturableBoatPassenger(boat).isPresent())
                 .stream()
-                .sorted(Comparator.comparingDouble(boat -> boat.distanceToSqr(player)))
-                .toList();
+                .min(Comparator.comparingDouble(boat -> boat.distanceToSqr(player)));
+    }
 
-        for (Boat boat : boats) {
-            Optional<Mob> passenger = boat.getPassengers().stream()
-                    .filter(Mob.class::isInstance)
-                    .map(Mob.class::cast)
-                    .filter(this::canCaptureBoatPassenger)
-                    .findFirst();
-
-            if (passenger.isPresent()) {
-                if (boat instanceof Leashable leashable) {
-                    leashable.dropLeash(false, false);
-                }
-                return passenger;
-            }
-        }
-
-        return Optional.empty();
+    private Optional<Mob> getCapturableBoatPassenger(Boat boat) {
+        return boat.getPassengers().stream()
+                .filter(Mob.class::isInstance)
+                .map(Mob.class::cast)
+                .filter(this::canCaptureBoatPassenger)
+                .findFirst();
     }
 
     private boolean canCapture(Mob mob, Player player) {

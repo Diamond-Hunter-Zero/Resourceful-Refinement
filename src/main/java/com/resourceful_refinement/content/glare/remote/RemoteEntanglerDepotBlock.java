@@ -34,22 +34,24 @@ public class RemoteEntanglerDepotBlock extends DepotBlock {
     public static final MapCodec<RemoteEntanglerDepotBlock> CODEC = simpleCodec(RemoteEntanglerDepotBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty RECEIVING = BooleanProperty.create("receiving");
+    /** Incomplete address, not chilled, or no healthy (non-overloaded) GLARE network. Drives the offline texture. */
+    public static final BooleanProperty OFFLINE = BooleanProperty.create("offline");
 
     public RemoteEntanglerDepotBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(RECEIVING, false));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(RECEIVING, false).setValue(OFFLINE, true));
     }
 
     @Override protected MapCodec<? extends DepotBlock> codec() { return CODEC; }
 
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(FACING, RECEIVING);
+        builder.add(FACING, RECEIVING, OFFLINE);
     }
 
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
         return super.getStateForPlacement(context).setValue(FACING, context.getHorizontalDirection().getOpposite())
-                .setValue(RECEIVING, false);
+                .setValue(RECEIVING, false).setValue(OFFLINE, true);
     }
 
     @Override

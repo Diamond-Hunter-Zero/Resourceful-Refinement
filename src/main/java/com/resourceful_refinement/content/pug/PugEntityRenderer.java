@@ -39,7 +39,23 @@ public class PugEntityRenderer extends EntityRenderer<PugEntity> {
         poseStack.translate(0D, -1.5D, 0D);
         poseStack.mulPose(Axis.YP.rotationDegrees(entityYaw));
 
-        model.render(poseStack, casingBuffer, packedLight, OverlayTexture.NO_OVERLAY);
+        int overlay = OverlayTexture.NO_OVERLAY;
+        if (entity.getFlightState() == PugFlightState.CRASHED && entity.hasCrashLanded()) {
+            // Wrecks sit at a slight, per-PUG tilt, and judder with a red flash for a moment when hit.
+            long seed = entity.getUUID().getLeastSignificantBits();
+            poseStack.mulPose(Axis.ZP.rotationDegrees(4.0F + (seed & 7)));
+            poseStack.mulPose(Axis.XP.rotationDegrees(((seed >> 3) & 7) - 3.5F));
+            float hit = Math.max(0, entity.getHitTicks() - partialTick);
+            if (hit > 0) {
+                float strength = hit / PugEntity.HIT_REACTION_TICKS;
+                float t = (entity.tickCount + partialTick) * 2.4F;
+                poseStack.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(t) * 5.0F * strength));
+                poseStack.mulPose(Axis.XP.rotationDegrees((float) Math.cos(t * 1.3F) * 3.0F * strength));
+                overlay = OverlayTexture.pack(OverlayTexture.u(0), OverlayTexture.v(true));
+            }
+        }
+
+        model.render(poseStack, casingBuffer, packedLight, overlay);
 
         poseStack.popPose();
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);

@@ -1,0 +1,103 @@
+{
+	"parent": "minecraft:block/block",
+	"texture_size": [
+		128,
+		128
+	],
+	"textures": {
+		"1": "resourceful_refinement:block/glare/remote_entanglement_glow",
+		"particle": "resourceful_refinement:block/particles/durasteel_particle"
+	},
+	"elements": [
+		{
+			"name": "transporter_pad_glow",
+			"from": [
+				0,
+				1.075,
+				-16
+			],
+			"to": [
+				16,
+				1.075,
+				0
+			],
+			"rotation": {
+				"angle": 0,
+				"axis": "y",
+				"origin": [
+					8,
+					1.575,
+					-8
+				]
+			},
+			"faces": {
+				"up": {
+					"uv": [
+						2,
+						2,
+						0,
+						0
+					],
+					"texture": "#1",
+					"tintindex": 0
+				},
+				"down": {
+					"uv": [
+						2,
+						2,
+						0,
+						4
+					],
+					"texture": "#1",
+					"tintindex": 0
+				}
+			},
+			"shade": false
+		},
+		{
+			"name": "transporter_front_glow",
+			"from": [
+				2,
+				4,
+				-0.025
+			],
+			"to": [
+				14,
+				30,
+				-0.025
+			],
+			"rotation": {
+				"angle": 0,
+				"axis": "y",
+				"origin": [
+					1,
+					1,
+					-2.025
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						2.25,
+						0,
+						3.75,
+						3.25
+					],
+					"texture": "#1",
+					"tintindex": 0
+				},
+				"south": {
+					"uv": [
+						3.75,
+						0,
+						5.25,
+						3.25
+					],
+					"texture": "#1",
+					"tintindex": 0
+				}
+			},
+			"shade": false
+		}
+	]
+}

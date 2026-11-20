@@ -12,6 +12,7 @@ import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipe;
 import com.resourceful_refinement.content.forge_mould.recipe.MechanicalForgeMouldRecipe;
 import com.resourceful_refinement.content.fracking_pump.recipe.FrackingPumpRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
+import com.resourceful_refinement.content.tesla_coil.recipe.TeslaCoilRecipe;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -117,6 +118,12 @@ public class ModRecipeTypes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CyclotronForgeRecipe>> CYCLOTRON_FORGE_SERIALIZER =
             RECIPE_SERIALIZERS.register("cyclotron_forge", CyclotronForgeRecipe.Serializer::new);
 
+    public static final DeferredHolder<RecipeType<?>, RecipeType<TeslaCoilRecipe>> TESLA_COIL_TYPE =
+            RECIPE_TYPES.register("tesla_coil", () -> RecipeType.simple(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "tesla_coil")));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<TeslaCoilRecipe>> TESLA_COIL_SERIALIZER =
+            RECIPE_SERIALIZERS.register("tesla_coil", TeslaCoilRecipe.Serializer::new);
+
     public record RefinementRecipeTypeInfo(ResourceLocation id,
                                          Supplier<RecipeSerializer<?>> serializer,
                                          Supplier<RecipeType<?>> type) implements IRecipeTypeInfo {
@@ -189,6 +196,12 @@ public class ModRecipeTypes {
             ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "drill_pylon"),
             DRILL_PYLON_SERIALIZER::get,
             DRILL_PYLON_TYPE::get
+    );
+
+    public static final IRecipeTypeInfo TESLA_COIL_TYPE_INFO = new RefinementRecipeTypeInfo(
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "tesla_coil"),
+            TESLA_COIL_SERIALIZER::get,
+            TESLA_COIL_TYPE::get
     );
 
     public static final IRecipeTypeInfo CYCLOTRON_FORGE_TYPE_INFO = new RefinementRecipeTypeInfo(

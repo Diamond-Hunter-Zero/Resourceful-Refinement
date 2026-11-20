@@ -89,7 +89,7 @@ import java.util.UUID;
 
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15.9f, 8f, 90f));
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15.9f, 13.5f, 90f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);

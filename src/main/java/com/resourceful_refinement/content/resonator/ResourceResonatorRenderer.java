@@ -9,7 +9,9 @@ import com.resourceful_refinement.registry.ModPartialModels;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
@@ -34,6 +36,24 @@ public class ResourceResonatorRenderer extends SafeBlockEntityRenderer<ResourceR
         return 256;
     }
 
+    /** Cell model height is 10px; at this scale it fills the core cavity between the pillars (block px 4..10). */
+    private static final float CELL_SCALE = 0.6F;
+    private static final float CAVITY_FLOOR = 4F / 16F;
+
+    /** Draws the installed Prism Cell's own item model upright in the core cavity, seated like a battery. */
+    private static void renderInstalledCell(ResourceResonatorBlockEntity be, PoseStack ms, MultiBufferSource buffer,
+                                            int light, int overlay) {
+        var cell = be.getPrismCell();
+        if (cell == null) return;
+        ms.pushPose();
+        // ItemDisplayContext.NONE centres the 16px model on the origin, so lift by half the scaled block.
+        ms.translate(0.5F, CAVITY_FLOOR + 0.5F * CELL_SCALE, 0.5F);
+        ms.scale(CELL_SCALE, CELL_SCALE, CELL_SCALE);
+        Minecraft.getInstance().getItemRenderer().renderStatic(cell.toItemStack(), ItemDisplayContext.NONE,
+                light, overlay, ms, buffer, be.getLevel(), (int) be.getBlockPos().asLong());
+        ms.popPose();
+    }
+
     @Override
     public void renderSafe(ResourceResonatorBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
                            int light, int overlay) {
@@ -50,6 +70,8 @@ public class ResourceResonatorRenderer extends SafeBlockEntityRenderer<ResourceR
         // --- Render Block Model ---
         model.render(ms, casingBuffer, light, overlay);
         ms.popPose();
+
+        renderInstalledCell(be, ms, buffer, light, overlay);
 
     }
 }

@@ -24,6 +24,7 @@ import com.resourceful_refinement.content.gel_splatter.GelSplatterBlock;
 import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishBlock;
 import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlock;
 import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverBlock;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilBlock;
 import com.resourceful_refinement.content.glare.GlareNodeBlock;
 import com.resourceful_refinement.content.glare.relay.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.ResonanceCrystalBlock;
@@ -279,6 +280,13 @@ public class ModBlocks {
             () -> new GlareKineticReceiverBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f)
                     .sound(SoundType.COPPER)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()));
+
+    public static final DeferredBlock<TeslaCoilBlock> TESLA_COIL = BLOCKS.register("tesla_coil",
+            () -> new TeslaCoilBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .sound(SoundType.NETHERITE_BLOCK)
                     .requiresCorrectToolForDrops()
                     .noOcclusion()));
 

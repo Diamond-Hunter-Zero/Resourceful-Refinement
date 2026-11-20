@@ -23,6 +23,7 @@
     "resourceful_refinement:heavy_plate_shielding",
     "resourceful_refinement:cyclotron_controller",
     "resourceful_refinement:cyclotron_proxy",
-    "resourceful_refinement:cyclotron_kinetic_proxy"
+    "resourceful_refinement:cyclotron_kinetic_proxy",
+    "resourceful_refinement:tesla_coil"
   ]
 }

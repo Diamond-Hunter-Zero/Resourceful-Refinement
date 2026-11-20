@@ -34,6 +34,9 @@ public enum CommonSqrButtonTextures implements ScreenElement, TextureSheetSegmen
     GREY_SLATE_BUTTON("grey_slate_button", 8),
     GREY_SLATE_BUTTON_HIGHLIGHTED("grey_slate_button_highlighted", 8),
     GREY_SLATE_BUTTON_TOGGLED("grey_slate_button_toggled", 8),
+    DURASTEEL_BUTTON("durasteel_button", 8),
+    DURASTEEL_BUTTON_HIGHLIGHTED("durasteel_button_highlighted", 8),
+    DURASTEEL_BUTTON_TOGGLED("durasteel_button_toggled", 8),
 
     // White 16x16 icons
     HOME_ICON("home_icon", 16),
@@ -155,6 +158,7 @@ public enum CommonSqrButtonTextures implements ScreenElement, TextureSheetSegmen
         /** Borderless grey buttons; toggled state is "sunk" into the dark panel, so nothing is drawn. */
         public static final ButtonStyle GREY_BORDERLESS = new ButtonStyle(GREY_BORDERLESS_BUTTON, GREY_BORDERLESS_BUTTON_HIGHLIGHTED, null);
         public static final ButtonStyle GREY_SLATE = new ButtonStyle(GREY_SLATE_BUTTON, GREY_SLATE_BUTTON_HIGHLIGHTED, GREY_SLATE_BUTTON_TOGGLED);
+        public static final ButtonStyle DURASTEEL = new ButtonStyle(DURASTEEL_BUTTON, DURASTEEL_BUTTON_HIGHLIGHTED, DURASTEEL_BUTTON_TOGGLED);
 
         public CommonSqrButtonTextures forState(boolean toggled, boolean highlighted) {
             if (toggled) return this.toggled;

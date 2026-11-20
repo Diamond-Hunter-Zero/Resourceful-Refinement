@@ -51,8 +51,8 @@ public class CyclotronForgeRenderer implements BlockEntityRenderer<CyclotronCont
     @Override
     public void render(CyclotronControllerBlockEntity be, float partialTick, PoseStack poseStack,
             MultiBufferSource bufferSource, int light, int overlay) {
+        // Unassembled controller is drawn by its baked block model (RenderShape.MODEL)
         if (!be.isAssembled()) {
-            renderBlock(ModBlocks.CYCLOTRON_CONTROLLER.get().defaultBlockState(), poseStack, bufferSource, light, 0, 0, 0);
             return;
         }
 

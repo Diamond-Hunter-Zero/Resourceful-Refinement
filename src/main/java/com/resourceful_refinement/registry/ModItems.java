@@ -29,6 +29,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -114,6 +115,9 @@ public class ModItems {
     public static final DeferredItem<GlareNodeBlockItem> GLARE_KINETIC_RECEIVER = ITEMS.register("glare_kinetic_receiver",
             () -> new GlareNodeBlockItem(ModBlocks.GLARE_KINETIC_RECEIVER.get(), new Item.Properties()));
 
+    public static final DeferredItem<TeslaCoilItem> TESLA_COIL = ITEMS.register("tesla_coil",
+            () -> new TeslaCoilItem(ModBlocks.TESLA_COIL.get(), new Item.Properties()));
+
     public static final DeferredItem<GlareNodeBlockItem> GLARE_CHROMATIC_TRANSCEIVER = ITEMS.register("glare_chromatic_transceiver",
             () -> new GlareNodeBlockItem(ModBlocks.GLARE_CHROMATIC_TRANSCEIVER.get(), new Item.Properties()));
 
@@ -192,6 +196,16 @@ public class ModItems {
     public static final DeferredItem<Item> GRAPHITE = ITEMS.registerItem("graphite", Item::new, new Item.Properties());
     public static final DeferredItem<Item> GRAPHENE_MESH = ITEMS.registerItem("graphene_mesh", Item::new, new Item.Properties());
     public static final DeferredItem<Item> INCOMPLETE_GRAPHENE_MESH = ITEMS.registerItem("incomplete_graphene_mesh", SequencedAssemblyItem::new, new Item.Properties());
+    public static final DeferredItem<Item> ANTENNA_MODULE = ITEMS.registerItem("antenna_module", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> ARITHMETIC_DEVICE = ITEMS.registerItem("arithmetic_device", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> LENS = ITEMS.registerItem("lens", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CHORUS_CRYSTAL_SHARD = ITEMS.registerItem("chorus_crystal_shard", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> TERRAN_CRYSTAL_SHARD = ITEMS.registerItem("terran_crystal_shard", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CHORUS_SLATE = ITEMS.registerItem("chorus_slate", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CIRCUIT_BOARD = ITEMS.registerItem("circuit_board", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> DISPLAY_SCREEN = ITEMS.registerItem("display_screen", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> MAGNETIC_PAD = ITEMS.registerItem("magnetic_pad", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> INCOMPLETE_ARITHMETIC_DEVICE = ITEMS.registerItem("incomplete_arithmetic_device", SequencedAssemblyItem::new, new Item.Properties());
 
 
     // -------------------------------------------------------------------------

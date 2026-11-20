@@ -1,5 +1,14 @@
 package com.resourceful_refinement.content.resonator;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.resourceful_refinement.ResourcefulRefinementMain;
+import com.resourceful_refinement.client.gui.PanelText;
+import com.resourceful_refinement.client.gui.ScaledContainerScreen;
+import com.resourceful_refinement.client.gui.widget.ThreeStateButton;
+import com.resourceful_refinement.client.gui.widget.VerticalScrollBar;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures;
+import com.resourceful_refinement.content.gui.CommonSqrButtonTextures.ButtonStyle;
+import com.resourceful_refinement.content.gui.SqrHoverButton;
 import com.resourceful_refinement.content.prism_cell.PrismCellTier;
 import com.resourceful_refinement.content.resonator.scan.ResonatorTarget;
 import com.resourceful_refinement.content.resonator.scan.ScannedPoi;
@@ -10,14 +19,13 @@ import com.resourceful_refinement.network.SetResonatorFilterPayload;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -26,73 +34,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Radar-style GUI for the Resource Resonator. The left panel is a top-down radar centred on the Resonator; the
- * right panel holds per-type filter toggles, a zoom slider and the Scan button; the bottom-left panel reads out
- * the coordinates of the hovered pin. Pin positions arrive from the server via {@link ScannedPoi} and are drawn
- * relative to the Resonator's world position.
+ * Radar-style GUI for the Resource Resonator, laid out 1:1 on {@code resource_resonator_gui.png} and scaled to the
+ * window by {@link ScaledContainerScreen}.
+ * <p>
+ * Left: a top-down radar centred on the Resonator (grid baked into the art) with a details readout beneath it.
+ * Right: the installed Prism Cell readout, a scrolling list of per-type filter toggles, and the zoom slider.
+ * Bottom centre: the Scan button. Pin positions arrive from the server via {@link ScannedPoi}.
  */
-public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceResonatorMenu> {
+public class ResourceResonatorScreen extends ScaledContainerScreen<ResourceResonatorMenu> {
+    private static final ResourceLocation BACKGROUND =
+            ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "textures/gui/resource_resonator_gui.png");
+    private static final int PANEL_WIDTH = 243;
+    private static final int PANEL_HEIGHT = 222;
+    private static final int SHEET_SIZE = 256;
+
+    // --- Regions of the panel art, {x, y, width, height} ---
+    private static final int[] RADAR = {12, 25, 116, 116};
+    private static final int RADAR_CX = 70, RADAR_CY = 82, RADAR_RADIUS = 57;
+    private static final int[] READOUT = {12, 162, 116, 18};
+    private static final int[] CELL_LABEL = {141, 28, 61, 12};
+    private static final int[] CELL_VALUE = {204, 30, 31, 8};
+    private static final int[] CELL_BAR = {141, 42, 94, 3};
+    private static final int[] FILTER_LIST = {146, 60, 76, 80};
+    private static final int[] FILTER_SCROLL = {228, 57, 5, 87};
+    private static final int[] ZOOM_LABEL = {145, 161, 54, 14};
+    private static final int[] ZOOM_VALUE = {200, 162, 29, 8};
+    private static final int SLIDER_X = 145, SLIDER_W = 86, SLIDER_TRACK_Y = 176;
+    private static final int KNOB_W = 6, KNOB_H = 9;
+    private static final int[] SCAN_BUTTON = {101, 202, 40, 16};
+    private static final int CLOSE_X = 219, CLOSE_Y = 4;
+
+    // Filter rows
+    private static final int FILTER_ROW_H = 20;
+    private static final int VISIBLE_FILTER_ROWS = FILTER_LIST[3] / FILTER_ROW_H;
+    private static final int CHECK_SIZE = 11;
+    private static final int ROW_ICON_X = 2, ROW_LABEL_X = 20;
+    private static final int ROW_LABEL_W = FILTER_LIST[2] - ROW_LABEL_X - CHECK_SIZE - 4;
+
+    private static final int PIN_SIZE = 12;
+    private static final double ZOOM_STEP = 0.08D;
 
     // --- Palette (ARGB) ---
-    private static final int COLOR_PANEL_DARK = 0xFF1E1E1E;
-    private static final int COLOR_PANEL_FRAME = 0xFFE0A526;
-    private static final int COLOR_RADAR_BG = 0xFF0C1A0C;
-    private static final int COLOR_RADAR_GRID = 0xFF1F5E1F;
-    private static final int COLOR_RADAR_GRID_BRIGHT = 0xFF2E7D2E;
-    private static final int COLOR_READOUT_BG = 0xFF0C1A0C;
     private static final int COLOR_READOUT_TEXT = 0xFF53C653;
+    private static final int COLOR_HINT_TEXT = 0xFF2E7D2E;
     private static final int COLOR_ERROR_TEXT = 0xFFE05A3C;
     private static final int COLOR_LABEL = 0xFFBFBFBF;
-    private static final int COLOR_CHECK = 0xFFBFBFBF;
-    private static final int COLOR_SLIDER_TRACK = 0xFF555555;
-    private static final int COLOR_LOADING_TRACK = 0xFF0C1A0C;
+    private static final int COLOR_DIM = 0xFF777777;
+    private static final int COLOR_ROW_HOVER = 0xFF262626;
+    private static final int COLOR_CELL_BAR = 0xFF3CC8E6;
+    private static final int COLOR_CELL_EMPTY = 0xFF8A8A8A;
     private static final int LOADING_RGB = 0x53C653; // green, combined with an animated alpha
-
-    // --- Layout (relative to leftPos/topPos) ---
-    private static final int RADAR_X = 8;
-    private static final int RADAR_Y = 8;
-    private static final int RADAR_SIZE = 192;
-    private static final int PANEL_X = 212;
-    private static final int PANEL_W = 100;
-    private static final int FILTER_Y = 8;
-    private static final int FILTER_ROW_H = 22;
-    private static final int CELL_Y = 126;
-    private static final int CELL_H = 16;
-    private static final int ZOOM_Y = 162;
-    private static final int SCAN_Y = 196;
-    private static final int READOUT_Y = 208;
-    private static final int READOUT_H = 24;
-    private static final int LOADING_Y = 242;
-    private static final int LOADING_H = 6;
-
-    // Zoom slider geometry.
-    private static final int SLIDER_X = PANEL_X;
-    private static final int SLIDER_Y = ZOOM_Y;
-    private static final int SLIDER_W = PANEL_W;
-    private static final int SLIDER_H = 14;
-    private static final int KNOB_W = 8;
-    private static final double ZOOM_STEP = 0.08D;
 
     /** Block-radius the radar shows when fully zoomed in. The zoomed-out extent is the configured scan radius. */
     private static final int MIN_VIEW_BLOCKS = 64;
-
     /** Safety net: if no scan response arrives within this window, re-enable the UI anyway. */
     private static final long SCAN_TIMEOUT_MS = 10_000L;
-
     /** Duration and depth of the shrink-grow "button press" pulse when a pin is clicked. */
     private static final long PULSE_MS = 180L;
     private static final double PULSE_DEPTH = 0.3D;
-
     /** How long a ping status message (success or failure) lingers in the details panel. */
     private static final long PING_STATUS_MS = 3_250L;
 
-    // Installed Prism Cell colours.
-    private static final int COLOR_CELL_BAR = 0xFF3CC8E6;
-    private static final int COLOR_CELL_BAR_BG = 0xFF0C1A0C;
-    private static final int COLOR_CELL_EMPTY = 0xFF8A8A8A;
-
     private final boolean[] filter;
-    private List<ScannedPoi> results = new ArrayList<>();
+    private List<ScannedPoi> results;
 
     // Installed-cell state, synced from the menu on open and refreshed by ping results.
     private boolean cellPresent;
@@ -113,13 +117,15 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     private int pingStatusColor;
     private long pingStatusExpiryMillis;
 
-    private Button scanButton;
+    private ThreeStateButton scanButton;
+    private VerticalScrollBar filterScroll;
+    private int filterOffset;
     private ScannedPoi hovered;
 
     public ResourceResonatorScreen(ResourceResonatorMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = 320;
-        this.imageHeight = 252;
+        super(menu, inventory, title, PANEL_WIDTH, PANEL_HEIGHT);
+        this.inventoryLabelY = 1000;
+        this.titleLabelY = 1000;
         this.filter = menu.getInitialFilter().clone();
         this.results = new ArrayList<>(menu.getInitialResults());
         this.cellPresent = menu.isCellPresent();
@@ -140,13 +146,13 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     @Override
     protected void init() {
         super.init();
-        this.leftPos = (this.width - this.imageWidth) / 2;
-        this.topPos = (this.height - this.imageHeight) / 2;
-
-        this.scanButton = addRenderableWidget(Button.builder(
-                        Component.translatable("gui.resourceful_refinement.resonator.scan"), b -> requestScan())
-                .bounds(leftPos + PANEL_X, topPos + SCAN_Y, PANEL_W, 20)
-                .build());
+        scanButton = addRenderableWidget(new ThreeStateButton(SCAN_BUTTON[0], SCAN_BUTTON[1], SCAN_BUTTON[2], SCAN_BUTTON[3],
+                Component.translatable("gui.resourceful_refinement.resonator.scan"), ButtonStyle.GREY_SLATE, this::requestScan)
+                .label(1f, false));
+        filterScroll = addRenderableWidget(new VerticalScrollBar(FILTER_SCROLL[0], FILTER_SCROLL[1], FILTER_SCROLL[2], FILTER_SCROLL[3],
+                ResonatorTarget.count(), VISIBLE_FILTER_ROWS, filterOffset, offset -> filterOffset = offset)
+                .withStyle(false, 0xFF8E8E8E, 0xFFC4C4C4, 1));
+        addRenderableWidget(new SqrHoverButton(CLOSE_X, CLOSE_Y, CommonSqrButtonTextures.HOVER_CLOSE, this::onClose));
     }
 
     private void requestScan() {
@@ -171,14 +177,14 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     // --- Interaction ----------------------------------------------------------------------------------------
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Filter checkbox rows.
-        for (ResonatorTarget target : ResonatorTarget.values()) {
-            if (isInFilterRow(target, mouseX, mouseY)) {
-                filter[target.ordinal()] = !filter[target.ordinal()];
-                sendFilter();
-                return true;
-            }
+    protected boolean panelMouseClicked(double mouseX, double mouseY, int button) {
+        // Filter rows (whole row toggles).
+        ResonatorTarget row = filterRowAt(mouseX, mouseY);
+        if (button == 0 && row != null) {
+            filter[row.ordinal()] = !filter[row.ordinal()];
+            sendFilter();
+            playPingSound(SoundEvents.UI_BUTTON_CLICK.value(), 1.0F);
+            return true;
         }
         // Zoom slider: begin dragging and jump to the clicked value.
         if (button == 0 && isInSlider(mouseX, mouseY)) {
@@ -191,7 +197,7 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
             deployPing(hovered);
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.panelMouseClicked(mouseX, mouseY, button);
     }
 
     private void deployPing(ScannedPoi poi) {
@@ -247,63 +253,77 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    protected boolean panelMouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (draggingZoom && button == 0) {
             setZoomFromMouse(mouseX);
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        if (filterScroll != null && filterScroll.isDraggingThumb()
+                && filterScroll.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
+        return super.panelMouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    protected boolean panelMouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0) {
             draggingZoom = false;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        if (filterScroll != null && filterScroll.isDraggingThumb() && filterScroll.mouseReleased(mouseX, mouseY, button)) {
+            return true;
+        }
+        return super.panelMouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    protected boolean panelMouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         // Scroll over the radar (or the slider) to zoom; wheel up = zoom in.
         if (isInRadar(mouseX, mouseY) || isInSlider(mouseX, mouseY)) {
             zoom = Mth.clamp(zoom + scrollY * ZOOM_STEP, 0.0D, 1.0D);
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        boolean overFilters = mouseX >= FILTER_LIST[0] && mouseX < FILTER_SCROLL[0] + FILTER_SCROLL[2]
+                && mouseY >= FILTER_SCROLL[1] && mouseY < FILTER_SCROLL[1] + FILTER_SCROLL[3];
+        if (overFilters && filterScroll != null && filterScroll.scrollBy(-(int) Math.signum(scrollY))) {
+            return true;
+        }
+        return super.panelMouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private void setZoomFromMouse(double mouseX) {
         double usable = SLIDER_W - KNOB_W;
-        double rel = (mouseX - (leftPos + SLIDER_X) - KNOB_W / 2.0D) / usable;
+        double rel = (mouseX - SLIDER_X - KNOB_W / 2.0D) / usable;
         zoom = Mth.clamp(rel, 0.0D, 1.0D);
     }
 
-    private boolean isInFilterRow(ResonatorTarget target, double mouseX, double mouseY) {
-        int rowX = leftPos + PANEL_X;
-        int rowY = topPos + FILTER_Y + target.ordinal() * FILTER_ROW_H;
-        return mouseX >= rowX && mouseX <= rowX + PANEL_W && mouseY >= rowY && mouseY <= rowY + FILTER_ROW_H - 2;
+    /** The filter target whose (visible) row is under the cursor, or null. */
+    private ResonatorTarget filterRowAt(double mouseX, double mouseY) {
+        if (mouseX < FILTER_LIST[0] || mouseX >= FILTER_LIST[0] + FILTER_LIST[2]
+                || mouseY < FILTER_LIST[1] || mouseY >= FILTER_LIST[1] + VISIBLE_FILTER_ROWS * FILTER_ROW_H) {
+            return null;
+        }
+        int index = filterOffset + (int) (mouseY - FILTER_LIST[1]) / FILTER_ROW_H;
+        ResonatorTarget[] targets = ResonatorTarget.values();
+        return index < targets.length ? targets[index] : null;
     }
 
     private boolean isInSlider(double mouseX, double mouseY) {
-        int sx = leftPos + SLIDER_X;
-        int sy = topPos + SLIDER_Y;
-        return mouseX >= sx && mouseX <= sx + SLIDER_W && mouseY >= sy && mouseY <= sy + SLIDER_H;
+        return mouseX >= SLIDER_X && mouseX <= SLIDER_X + SLIDER_W
+                && mouseY >= SLIDER_TRACK_Y - KNOB_H / 2.0 - 1 && mouseY <= SLIDER_TRACK_Y + KNOB_H / 2.0 + 2;
     }
 
     private boolean isInRadar(double mouseX, double mouseY) {
-        int cx = leftPos + RADAR_X + RADAR_SIZE / 2;
-        int cy = topPos + RADAR_Y + RADAR_SIZE / 2;
-        int radius = RADAR_SIZE / 2 - 4;
-        double dx = mouseX - cx;
-        double dy = mouseY - cy;
-        return dx * dx + dy * dy <= (double) radius * radius;
+        double dx = mouseX - RADAR_CX;
+        double dy = mouseY - RADAR_CY;
+        return dx * dx + dy * dy <= (double) RADAR_RADIUS * RADAR_RADIUS;
     }
 
     // --- Rendering ------------------------------------------------------------------------------------------
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void containerTick() {
+        super.containerTick();
         // Auto-recover if a response never arrives, and keep the scan button disabled while scanning.
         if (scanning && Util.getMillis() - scanStartMillis > SCAN_TIMEOUT_MS) {
             scanning = false;
@@ -311,120 +331,86 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         if (scanButton != null) {
             scanButton.active = !scanning;
         }
-
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        int left = leftPos;
-        int top = topPos;
+        RenderSystem.enableBlend();
+        graphics.blit(BACKGROUND, 0, 0, 0, 0, PANEL_WIDTH, PANEL_HEIGHT, SHEET_SIZE, SHEET_SIZE);
+        RenderSystem.disableBlend();
+    }
 
-        // Radar frame + background.
-        framedPanel(graphics, left + RADAR_X - 4, top + RADAR_Y - 4, RADAR_SIZE + 8, RADAR_SIZE + 8);
-        graphics.fill(left + RADAR_X, top + RADAR_Y, left + RADAR_X + RADAR_SIZE, top + RADAR_Y + RADAR_SIZE, COLOR_RADAR_BG);
-
-        int cx = left + RADAR_X + RADAR_SIZE / 2;
-        int cy = top + RADAR_Y + RADAR_SIZE / 2;
-        int radius = RADAR_SIZE / 2 - 4;
-        drawRadarGrid(graphics, cx, cy, radius);
-
-        // Filter panel.
-        framedPanel(graphics, left + PANEL_X - 4, top + FILTER_Y - 4,
-                PANEL_W + 8, ResonatorTarget.count() * FILTER_ROW_H + 8);
+    @Override
+    protected void renderPanelForeground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.hovered = null;
-        renderFilterRows(graphics, left, top, mouseX, mouseY);
-
-        // Pins.
-        renderPins(graphics, cx, cy, radius, mouseX, mouseY);
-
-        // Installed Prism Cell readout.
-        renderCellReadout(graphics, left, top);
-
-        // Zoom label + slider.
-        renderZoom(graphics, left, top);
-
-        // Coordinate readout.
-        renderReadout(graphics, left, top);
-
-        // Loading bar (only while awaiting a scan response).
+        renderPins(graphics, mouseX, mouseY);
+        renderFilterRows(graphics, mouseX, mouseY);
+        renderCellReadout(graphics);
+        renderZoom(graphics, mouseX, mouseY);
+        renderReadout(graphics);
         if (scanning) {
-            renderLoadingBar(graphics, left, top);
+            renderLoadingBar(graphics);
         }
     }
 
-    private void renderFilterRows(GuiGraphics graphics, int left, int top, int mouseX, int mouseY) {
-        for (ResonatorTarget target : ResonatorTarget.values()) {
-            int rowX = left + PANEL_X;
-            int rowY = top + FILTER_Y + target.ordinal() * FILTER_ROW_H;
-            boolean hover = isInFilterRow(target, mouseX, mouseY);
-            graphics.fill(rowX, rowY, rowX + PANEL_W, rowY + FILTER_ROW_H - 2, hover ? 0xFF3A3A3A : 0xFF2A2A2A);
+    private void renderFilterRows(GuiGraphics graphics, int mouseX, int mouseY) {
+        ResonatorTarget[] targets = ResonatorTarget.values();
+        ResonatorTarget hoveredRow = filterRowAt(mouseX, mouseY);
+        float maxScale = PanelText.snap(graphics, 0.75F);
+        for (int row = 0; row < VISIBLE_FILTER_ROWS && filterOffset + row < targets.length; row++) {
+            ResonatorTarget target = targets[filterOffset + row];
+            int rowX = FILTER_LIST[0];
+            int rowY = FILTER_LIST[1] + row * FILTER_ROW_H;
+            boolean hover = target == hoveredRow;
+            if (hover) graphics.fill(rowX, rowY, rowX + FILTER_LIST[2], rowY + FILTER_ROW_H, COLOR_ROW_HOVER);
 
-            drawIcon(graphics, ResonatorPinIcons.generic(target), rowX + 2, rowY + 2);
+            drawIcon(graphics, ResonatorPinIcons.generic(target), rowX + ROW_ICON_X, rowY + (FILTER_ROW_H - 16) / 2, 16);
 
-            graphics.drawString(this.font, targetLabel(target), rowX + 22, rowY + 3, COLOR_LABEL, false);
-            String tail = target.hasWorldgen() ? "" : "—";
-            if (!tail.isEmpty()) {
-                graphics.drawString(this.font, tail, rowX + 22, rowY + 12, 0xFF777777, false);
-            }
+            // Label wraps onto up to two lines, shrinking further if it still doesn't fit.
+            int labelColour = target.hasWorldgen() ? COLOR_LABEL : COLOR_DIM;
+            drawFitted(graphics, Component.literal(targetLabel(target)), rowX + ROW_LABEL_X, rowY + 1,
+                    ROW_LABEL_W, FILTER_ROW_H - 2, labelColour, maxScale, 2);
 
-            // Checkbox at right.
-            int boxX = rowX + PANEL_W - 18;
-            int boxY = rowY + 2;
-            graphics.fill(boxX, boxY, boxX + 16, boxY + 16, 0xFF111111);
-            frame(graphics, boxX, boxY, 16, 16, COLOR_CHECK);
-            if (filter[target.ordinal()]) {
-                drawCheck(graphics, boxX, boxY);
-            }
+            int boxX = rowX + FILTER_LIST[2] - CHECK_SIZE - 2;
+            int boxY = rowY + (FILTER_ROW_H - CHECK_SIZE) / 2;
+            drawCheckbox(graphics, boxX, boxY, filter[target.ordinal()], hover);
         }
     }
 
-    /** Small panel in the right column showing the installed Prism Cell's grade and remaining charge (or "No Cell"). */
-    private void renderCellReadout(GuiGraphics graphics, int left, int top) {
-        int px = left + PANEL_X;
-        int py = top + CELL_Y;
-        framedPanel(graphics, px - 4, py - 4, PANEL_W + 8, CELL_H + 8);
-
+    /** Installed Prism Cell's grade and remaining charge (or "No Cell"), in the box above the filter list. */
+    private void renderCellReadout(GuiGraphics graphics) {
+        float small = PanelText.snap(graphics, 0.75F);
         if (!cellPresent) {
-            String none = Component.translatable("gui.resourceful_refinement.resonator.cell_none").getString();
-            graphics.drawString(this.font, none, px, py + 4, COLOR_CELL_EMPTY, false);
+            Component none = Component.translatable("gui.resourceful_refinement.resonator.cell_none");
+            drawFitted(graphics, none, CELL_LABEL[0] + 1, CELL_LABEL[1], CELL_LABEL[2] - 2, CELL_LABEL[3], COLOR_CELL_EMPTY, small, 1);
             return;
         }
 
         PrismCellTier tier = PrismCellTier.byIndex(cellTier);
-        String name = Component.translatable("gui.resourceful_refinement.resonator.cell_" + tier.id()).getString();
-        graphics.drawString(this.font, name, px, py, COLOR_LABEL, false);
+        Component name = Component.translatable("gui.resourceful_refinement.resonator.cell_" + tier.id());
+        drawFitted(graphics, name, CELL_LABEL[0] + 1, CELL_LABEL[1], CELL_LABEL[2] - 2, CELL_LABEL[3], COLOR_LABEL, small, 1);
 
-        String charge = tier.isCreative() ? "∞" : Integer.toString(cellCharge);
-        graphics.drawString(this.font, charge, px + PANEL_W - this.font.width(charge), py, COLOR_CELL_BAR, false);
+        Component charge = Component.literal(tier.isCreative() ? "∞" : Integer.toString(cellCharge));
+        drawCentredInBox(graphics, charge, CELL_VALUE, COLOR_CELL_BAR, small);
 
-        int barY = py + 11;
-        int barW = PANEL_W;
-        graphics.fill(px, barY, px + barW, barY + 3, COLOR_CELL_BAR_BG);
         float frac = tier.isCreative() ? 1.0F : (cellMaxCharge > 0 ? (float) cellCharge / cellMaxCharge : 0.0F);
-        int fillW = Math.round(barW * Mth.clamp(frac, 0.0F, 1.0F));
-        graphics.fill(px, barY, px + fillW, barY + 3, COLOR_CELL_BAR);
+        int fillW = Math.round(CELL_BAR[2] * Mth.clamp(frac, 0.0F, 1.0F));
+        graphics.fill(CELL_BAR[0], CELL_BAR[1], CELL_BAR[0] + fillW, CELL_BAR[1] + CELL_BAR[3], COLOR_CELL_BAR);
     }
 
-    private void renderZoom(GuiGraphics graphics, int left, int top) {
-        graphics.drawString(this.font, Component.translatable("gui.resourceful_refinement.resonator.zoom"),
-                left + PANEL_X, top + ZOOM_Y - 10, COLOR_LABEL, false);
+    private void renderZoom(GuiGraphics graphics, int mouseX, int mouseY) {
+        float small = PanelText.snap(graphics, 0.75F);
+        drawFitted(graphics, Component.translatable("gui.resourceful_refinement.resonator.zoom"),
+                ZOOM_LABEL[0] + 2, ZOOM_LABEL[1], ZOOM_LABEL[2] - 4, ZOOM_LABEL[3], COLOR_LABEL, small, 1);
+        drawCentredInBox(graphics, Component.literal((int) Math.round(viewBlocks()) + "m"), ZOOM_VALUE, COLOR_LABEL, small);
 
-        // View-distance readout, right-aligned above the slider.
-        String dist = (int) Math.round(viewBlocks()) + "m";
-        graphics.drawString(this.font, dist, left + PANEL_X + PANEL_W - this.font.width(dist), top + ZOOM_Y - 10,
-                COLOR_LABEL, false);
-
-        int sx = left + SLIDER_X;
-        int sy = top + SLIDER_Y;
-        int trackY = sy + SLIDER_H / 2;
-        graphics.fill(sx, trackY - 1, sx + SLIDER_W, trackY + 1, COLOR_SLIDER_TRACK);
-
-        int knobX = sx + (int) Math.round(zoom * (SLIDER_W - KNOB_W));
-        graphics.fill(knobX, sy + 1, knobX + KNOB_W, sy + SLIDER_H - 1, COLOR_PANEL_FRAME);
-        frame(graphics, knobX, sy + 1, KNOB_W, SLIDER_H - 2, 0xFF000000);
+        int knobX = SLIDER_X + (int) Math.round(zoom * (SLIDER_W - KNOB_W));
+        int knobY = SLIDER_TRACK_Y + 1 - KNOB_H / 2;
+        boolean hot = draggingZoom || (mouseX >= knobX && mouseX < knobX + KNOB_W && mouseY >= knobY && mouseY < knobY + KNOB_H);
+        RenderSystem.enableBlend();
+        (hot ? CommonSqrButtonTextures.BRASS_BUTTON_HIGHLIGHTED : CommonSqrButtonTextures.BRASS_BUTTON)
+                .renderNineSlice(graphics, knobX, knobY, KNOB_W, KNOB_H);
+        RenderSystem.disableBlend();
     }
 
     /** Furthest the radar can zoom out: the full configured scan radius (chunks → blocks). */
@@ -441,13 +427,14 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         return Mth.lerp(zoom, maxViewBlocks(), minViewBlocks());
     }
 
-    private void renderPins(GuiGraphics graphics, int cx, int cy, int radius, int mouseX, int mouseY) {
+    private void renderPins(GuiGraphics graphics, int mouseX, int mouseY) {
         int resX = menu.getBlockPos().getX();
         int resZ = menu.getBlockPos().getZ();
         double viewBlocks = viewBlocks();
+        int half = PIN_SIZE / 2;
 
-        // Clip pins to the circular radar.
-        graphics.enableScissor(cx - radius, cy - radius, cx + radius, cy + radius);
+        // Clip pins to the radar screen.
+        enablePanelScissor(graphics, RADAR[0], RADAR[1], RADAR[0] + RADAR[2], RADAR[1] + RADAR[3]);
         ScannedPoi newHover = null;
         for (ScannedPoi poi : results) {
             if (!filter[poi.target().ordinal()]) {
@@ -455,128 +442,120 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
             }
             double dx = poi.x() - resX;
             double dz = poi.z() - resZ;
-            double distBlocks = Math.sqrt(dx * dx + dz * dz);
-            if (distBlocks > viewBlocks) {
+            if (Math.sqrt(dx * dx + dz * dz) > viewBlocks) {
                 continue;
             }
-            int px = cx + (int) Math.round(dx / viewBlocks * radius);
-            int py = cy + (int) Math.round(dz / viewBlocks * radius);
+            int px = RADAR_CX + (int) Math.round(dx / viewBlocks * RADAR_RADIUS);
+            int py = RADAR_CY + (int) Math.round(dz / viewBlocks * RADAR_RADIUS);
             drawPin(graphics, ResonatorPinIcons.iconFor(poi), px, py, poi);
-            if (mouseX >= px - 8 && mouseX <= px + 8 && mouseY >= py - 8 && mouseY <= py + 8) {
+            if (mouseX >= px - half && mouseX <= px + half && mouseY >= py - half && mouseY <= py + half) {
                 newHover = poi;
             }
         }
         graphics.disableScissor();
 
-        // Centre marker (the Resonator itself).
-        graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFFFFFF);
-
-        if (newHover != null) {
-            this.hovered = newHover;
-        }
+        this.hovered = newHover;
     }
 
-    private void renderReadout(GuiGraphics graphics, int left, int top) {
-        int rx = left + RADAR_X - 4;
-        int ry = top + READOUT_Y;
-        framedPanel(graphics, rx, ry, RADAR_SIZE + 8, READOUT_H + 8);
-        graphics.fill(rx + 4, ry + 4, rx + RADAR_SIZE + 4, ry + READOUT_H + 4, COLOR_READOUT_BG);
-
+    private void renderReadout(GuiGraphics graphics) {
+        float small = PanelText.snap(graphics, 0.75F);
+        int x = READOUT[0] + 3;
+        int w = READOUT[2] - 6;
         if (pingStatusActive()) {
-            graphics.drawString(this.font, pingStatus, rx + 10, ry + 14, pingStatusColor, false);
+            drawFitted(graphics, Component.literal(pingStatus), x, READOUT[1] + 2, w, READOUT[3] - 3, pingStatusColor, small, 2);
         } else if (hovered != null) {
-            drawIcon(graphics, ResonatorPinIcons.iconFor(hovered), rx + 8, ry + 8);
-            String coords = "X: " + hovered.x() + "      Z: " + hovered.z();
-            graphics.drawString(this.font, coords, rx + 32, ry + 8, COLOR_READOUT_TEXT, false);
+            drawIcon(graphics, ResonatorPinIcons.iconFor(hovered), READOUT[0] + 1, READOUT[1] + 1, 16);
+            int textX = READOUT[0] + 19;
+            int textW = READOUT[0] + READOUT[2] - 2 - textX;
             String typeLine = hovered.hasVariant() ? prettify(hovered.variant()) : targetLabel(hovered.target());
-            graphics.drawString(this.font, typeLine, rx + 32, ry + 20, COLOR_READOUT_TEXT, false);
+            drawFitted(graphics, Component.literal("X: " + hovered.x() + "   Z: " + hovered.z()),
+                    textX, READOUT[1] + 2, textW, 7, COLOR_READOUT_TEXT, small, 1);
+            drawFitted(graphics, Component.literal(typeLine), textX, READOUT[1] + 10, textW, 7, COLOR_READOUT_TEXT, small, 1);
         } else {
-            String hint = results.isEmpty()
-                    ? Component.translatable("gui.resourceful_refinement.resonator.press_scan").getString()
-                    : Component.translatable("gui.resourceful_refinement.resonator.hover_hint").getString();
-            graphics.drawString(this.font, hint, rx + 10, ry + 14, 0xFF2E7D2E, false);
+            Component hint = Component.translatable(results.isEmpty()
+                    ? "gui.resourceful_refinement.resonator.press_scan"
+                    : "gui.resourceful_refinement.resonator.hover_hint");
+            drawFitted(graphics, hint, x, READOUT[1] + 2, w, READOUT[3] - 3, COLOR_HINT_TEXT, small, 2);
         }
     }
 
     /**
-     * Thin indeterminate progress bar: a soft green segment sweeps left-to-right and pulses in brightness
-     * (Windows-explorer style), shown only while a scan is in flight.
+     * Thin indeterminate progress bar along the bottom edge of the readout: a soft green segment sweeps
+     * left-to-right and pulses in brightness, shown only while a scan is in flight.
      */
-    private void renderLoadingBar(GuiGraphics graphics, int left, int top) {
-        int barX = left + RADAR_X - 4;
-        int barW = (PANEL_X + PANEL_W + 4) - (RADAR_X - 4);
-        int barY = top + LOADING_Y;
-
-        graphics.fill(barX, barY, barX + barW, barY + LOADING_H, COLOR_LOADING_TRACK);
+    private void renderLoadingBar(GuiGraphics graphics) {
+        int barX = READOUT[0];
+        int barW = READOUT[2];
+        int barY = READOUT[1] + READOUT[3] - 1;
 
         long t = Util.getMillis();
-        double phase = (t % 1300L) / 1300.0D;          // sweep position 0..1
-        float pulse = 0.65f + 0.35f * (float) Math.sin(t / 170.0D); // brightness pulse
-
+        double phase = (t % 1300L) / 1300.0D;
+        float pulse = 0.65f + 0.35f * (float) Math.sin(t / 170.0D);
         int segW = Math.max(16, barW / 3);
-        int travel = barW + segW;
-        int segStart = barX - segW + (int) Math.round(phase * travel);
-
+        int segStart = barX - segW + (int) Math.round(phase * (barW + segW));
         for (int i = 0; i < segW; i++) {
             int x = segStart + i;
             if (x < barX || x >= barX + barW) {
                 continue;
             }
-            double falloff = Math.sin((double) i / segW * Math.PI); // 0 at edges, 1 at centre
+            double falloff = Math.sin((double) i / segW * Math.PI);
             int alpha = (int) (Mth.clamp(falloff * pulse, 0.0D, 1.0D) * 255.0D);
-            graphics.fill(x, barY, x + 1, barY + LOADING_H, (alpha << 24) | LOADING_RGB);
+            graphics.fill(x, barY, x + 1, barY + 1, (alpha << 24) | LOADING_RGB);
         }
-    }
-
-    @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Title drawn via the radar frame; suppress the default inventory label.
     }
 
     // --- Drawing helpers ------------------------------------------------------------------------------------
 
-    private void framedPanel(GuiGraphics graphics, int x, int y, int w, int h) {
-        graphics.fill(x, y, x + w, y + h, COLOR_PANEL_FRAME);
-        graphics.fill(x + 3, y + 3, x + w - 3, y + h - 3, COLOR_PANEL_DARK);
-    }
-
-    private void frame(GuiGraphics graphics, int x, int y, int w, int h, int color) {
-        graphics.fill(x, y, x + w, y + 1, color);
-        graphics.fill(x, y + h - 1, x + w, y + h, color);
-        graphics.fill(x, y, x + 1, y + h, color);
-        graphics.fill(x + w - 1, y, x + w, y + h, color);
-    }
-
-    private void drawCheck(GuiGraphics graphics, int x, int y) {
-        // Simple tick mark.
-        for (int i = 0; i < 4; i++) {
-            graphics.fill(x + 3 + i, y + 7 + i, x + 4 + i, y + 9 + i, COLOR_CHECK);
+    /**
+     * Draws text inside a box: word-wrapped onto at most {@code maxLines} lines at {@code maxScale}, shrinking until
+     * it fits both the width and height. Vertically centred in the box.
+     */
+    private void drawFitted(GuiGraphics graphics, Component text, int x, int y, int width, int height, int colour,
+                            float maxScale, int maxLines) {
+        float scale = maxScale;
+        List<FormattedCharSequence> lines = List.of();
+        for (int attempt = 0; attempt < 8; attempt++) {
+            lines = font.split(text, Math.max(1, (int) (width / scale)));
+            boolean fitsLines = lines.size() <= maxLines;
+            final float trial = scale;
+            boolean fitsWidth = lines.stream().allMatch(l -> font.width(l) * trial <= width);
+            float lineStep = Math.max(1, Math.round(font.lineHeight * scale));
+            boolean fitsHeight = (lines.size() - 1) * lineStep + 7 * scale <= height;
+            if (fitsLines && fitsWidth && fitsHeight) break;
+            scale = PanelText.snapDown(graphics, scale * 0.85F);
         }
-        for (int i = 0; i < 6; i++) {
-            graphics.fill(x + 6 + i, y + 10 - i, x + 7 + i, y + 12 - i, COLOR_CHECK);
+        int lineStep = Math.max(1, Math.round(font.lineHeight * scale));
+        int shown = Math.min(lines.size(), maxLines);
+        float blockHeight = (shown - 1) * lineStep + 7 * scale;
+        int top = Math.round(y + (height - blockHeight) / 2f);
+        for (int i = 0; i < shown; i++) {
+            PanelText.draw(graphics, font, lines.get(i), x, top + i * lineStep, colour, false, scale);
         }
     }
 
-    private void drawRadarGrid(GuiGraphics graphics, int cx, int cy, int radius) {
-        // Crosshair.
-        graphics.fill(cx - radius, cy, cx + radius, cy + 1, COLOR_RADAR_GRID_BRIGHT);
-        graphics.fill(cx, cy - radius, cx + 1, cy + radius, COLOR_RADAR_GRID_BRIGHT);
-        // Concentric rings.
-        drawCircle(graphics, cx, cy, radius, COLOR_RADAR_GRID_BRIGHT);
-        drawCircle(graphics, cx, cy, radius * 2 / 3, COLOR_RADAR_GRID);
-        drawCircle(graphics, cx, cy, radius / 3, COLOR_RADAR_GRID);
+    private void drawCentredInBox(GuiGraphics graphics, Component text, int[] box, int colour, float maxScale) {
+        float scale = font.width(text) * maxScale > box[2] - 2
+                ? PanelText.snapDown(graphics, (box[2] - 2f) / font.width(text)) : maxScale;
+        PanelText.drawCentered(graphics, font, text, box[0] + box[2] / 2f,
+                Math.round(box[1] + box[3] / 2f - 7 * scale / 2f), colour, false, scale);
     }
 
-    private void drawCircle(GuiGraphics graphics, int cx, int cy, int r, int color) {
-        if (r <= 0) {
-            return;
-        }
-        int segments = Math.max(48, r * 3);
-        for (int i = 0; i < segments; i++) {
-            double a = (Math.PI * 2 * i) / segments;
-            int px = cx + (int) Math.round(Math.cos(a) * r);
-            int py = cy + (int) Math.round(Math.sin(a) * r);
-            graphics.fill(px, py, px + 1, py + 1, color);
+    private void drawCheckbox(GuiGraphics graphics, int x, int y, boolean checked, boolean hover) {
+        RenderSystem.enableBlend();
+        CommonSqrButtonTextures frame = hover ? CommonSqrButtonTextures.GREY_SLATE_BUTTON_HIGHLIGHTED
+                : checked ? CommonSqrButtonTextures.GREY_SLATE_BUTTON : CommonSqrButtonTextures.GREY_SLATE_BUTTON_TOGGLED;
+        frame.renderNineSlice(graphics, x, y, CHECK_SIZE, CHECK_SIZE);
+        RenderSystem.disableBlend();
+        if (checked) {
+            // Pixel tick mark sized for an 11px box.
+            int c = 0xFFFFFFFF;
+            graphics.fill(x + 2, y + 5, x + 3, y + 7, c);
+            graphics.fill(x + 3, y + 6, x + 4, y + 8, c);
+            graphics.fill(x + 4, y + 7, x + 5, y + 9, c);
+            graphics.fill(x + 5, y + 6, x + 6, y + 8, c);
+            graphics.fill(x + 6, y + 5, x + 7, y + 7, c);
+            graphics.fill(x + 7, y + 4, x + 8, y + 6, c);
+            graphics.fill(x + 8, y + 3, x + 9, y + 5, c);
         }
     }
 
@@ -599,9 +578,11 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
         return sb.toString();
     }
 
-    /** Draws a 16×16 radar-pin texture at the given top-left position. */
-    private void drawIcon(GuiGraphics graphics, ResourceLocation texture, int x, int y) {
-        graphics.blit(texture, x, y, 0, 0.0F, 0.0F, 16, 16, 16, 16);
+    /** Draws a 16×16 radar-pin texture at the given top-left position, scaled to {@code size}. */
+    private void drawIcon(GuiGraphics graphics, ResourceLocation texture, int x, int y, int size) {
+        RenderSystem.enableBlend();
+        graphics.blit(texture, x, y, size, size, 0.0F, 0.0F, 16, 16, 16, 16);
+        RenderSystem.disableBlend();
     }
 
     /** Draws a pin centred at (px, py), applying the shrink-grow press pulse if this pin was just clicked. */
@@ -616,15 +597,11 @@ public class ResourceResonatorScreen extends AbstractContainerScreen<ResourceRes
                 scale = (float) (1.0D - PULSE_DEPTH * Math.sin(progress * Math.PI));
             }
         }
-        if (scale == 1.0F) {
-            drawIcon(graphics, texture, px - 8, py - 8);
-            return;
-        }
+        int half = PIN_SIZE / 2;
         graphics.pose().pushPose();
         graphics.pose().translate(px, py, 0.0F);
         graphics.pose().scale(scale, scale, 1.0F);
-        graphics.pose().translate(-px, -py, 0.0F);
-        drawIcon(graphics, texture, px - 8, py - 8);
+        drawIcon(graphics, texture, -half, -half, PIN_SIZE);
         graphics.pose().popPose();
     }
 }

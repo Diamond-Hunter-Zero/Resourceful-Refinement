@@ -588,8 +588,8 @@ public class CyclotronControllerBlockEntity extends SmartBlockEntity implements 
     }
 
     private CyclotronProxyRole roleForOutputCap(int x, int y) {
-        if (y == 0 && x == -1) return CyclotronProxyRole.ITEM_OUTPUT;
-        if (y == 0 && x == 1) return CyclotronProxyRole.FLUID_OUTPUT;
+        if (y == 0 && x == -1) return CyclotronProxyRole.FLUID_OUTPUT;
+        if (y == 0 && x == 1) return CyclotronProxyRole.ITEM_OUTPUT;
         if ((Math.abs(x) == 1 && y == 0) || (x == 0 && Math.abs(y) == 1)) return CyclotronProxyRole.LUX_SOCKET;
         return CyclotronProxyRole.STRUCTURE;
     }

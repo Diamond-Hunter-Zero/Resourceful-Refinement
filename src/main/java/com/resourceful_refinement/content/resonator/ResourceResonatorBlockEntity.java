@@ -68,6 +68,24 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
     @Override
     public void onPrismCellChanged() {
         setChanged();
+        syncToClients();
+    }
+
+    /** Clients render the installed cell inside the core, so cell changes must reach them. */
+    private void syncToClients() {
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), net.minecraft.world.level.block.Block.UPDATE_CLIENTS);
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 
     /**
@@ -81,6 +99,7 @@ public class ResourceResonatorBlockEntity extends BlockEntity implements MenuPro
         prismCell.drainCellCharge(cost, true);
         if (prismCell.isDepleted()) {
             prismCell = null;
+            syncToClients();
         }
         setChanged();
     }

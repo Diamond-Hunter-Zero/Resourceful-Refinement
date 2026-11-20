@@ -39,6 +39,7 @@ public class ModClientEvents {
     public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
         // This loads client extensions or renderers
         PonderIndex.addPlugin(new ModPonders());
+        com.resourceful_refinement.client.item.BlockEntityModelItemRenderer.register(event);
     }
 
     @SubscribeEvent

@@ -16,6 +16,8 @@ import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -51,7 +53,7 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
 
     @Override public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
         super.addBehaviours(behaviours);
-        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 8f, 15.9f, 0f));
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 10f, 15.9f, 0f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);
@@ -72,6 +74,7 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
 
         boolean canRun = RemoteEntanglementUtil.isOperational(server, getGlareNodePos())
                 && RemoteEntanglementUtil.isChilled(server, worldPosition);
+        updateOfflineState(!canRun || !getRemoteAddress().isComplete());
         if (machineState == RemoteMachineState.COOLDOWN) {
             if (canRun && ++stateTicks >= COOLDOWN_TICKS) setMachineState(RemoteMachineState.IDLE);
             return;
@@ -88,6 +91,18 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
             attemptTransfer(server);
             setMachineState(RemoteMachineState.COOLDOWN);
         }
+    }
+
+    private void updateOfflineState(boolean offline) {
+        BlockState state = getBlockState();
+        if (state.getValue(RemoteEntanglerDepotBlock.OFFLINE) != offline) {
+            level.setBlock(worldPosition, state.setValue(RemoteEntanglerDepotBlock.OFFLINE, offline), Block.UPDATE_CLIENTS);
+        }
+    }
+
+    private void playSendFailure(ServerLevel server) {
+        server.sendParticles(ParticleTypes.SMOKE, worldPosition.getX() + 0.5, worldPosition.getY() + 0.9,
+                worldPosition.getZ() + 0.5, 6, 0.2, 0.05, 0.2, 0.01);
     }
 
     private void attemptTransfer(ServerLevel server) {
@@ -111,6 +126,7 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
         }
         lastFailure = "No loaded, empty receiving depot matches this address";
         notifyUpdate();
+        playSendFailure(server);
     }
 
     public void onModeChanged() {
@@ -175,6 +191,17 @@ public class RemoteEntanglerDepotBlockEntity extends DepotBlockEntity implements
         catch (IllegalArgumentException ignored) { machineState = RemoteMachineState.IDLE; }
         stateTicks = Math.max(0, tag.getInt("StateTicks"));
         lastFailure = tag.getString("LastFailure");
+        // Clients show the scanning ring for exactly as long as the synced state says we're charging.
+        if (clientPacket && level != null && level.isClientSide) {
+            RemoteEntanglerDepotClientFx.setScanning(level, worldPosition, machineState == RemoteMachineState.CHARGING);
+        }
+    }
+
+    /** SmartBlockEntity's hook for both removal and chunk unload (setRemoved is final there). */
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        if (level != null && level.isClientSide) RemoteEntanglerDepotClientFx.setScanning(level, worldPosition, false);
     }
 
     @Override public boolean addToGoggleTooltip(List<Component> tooltip, boolean sneaking) {

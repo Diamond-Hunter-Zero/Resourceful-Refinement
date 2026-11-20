@@ -31,9 +31,16 @@ public class ModPartialModels {
     public static final PartialModel GLARE_COG_SHAFT = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/shafts/glare_cog_shaft"));
     public static final PartialModel GLARE_PRISM_SMALL = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/glare/glare_prism_small"));
 
+    // Assembled Launchpad (whole 3x3 pad, drawn by the controller's renderer; centred on the pad's middle block)
+    public static final PartialModel LAUNCH_PAD_SEND = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/launchpad/launch_pad_send"));
+    public static final PartialModel LAUNCH_PAD_RECEIVE = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/launchpad/launch_pad_receive"));
+
     // Combustion Chamber
     public static final PartialModel COMBUSTION_FAN_NORTH = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/combustion_chamber/combustion_chamber_fan_casing_north"));
     public static final PartialModel COMBUSTION_FAN_EAST = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/combustion_chamber/combustion_chamber_fan_casing_east"));
     public static final PartialModel COMBUSTION_FAN_SOUTH = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/combustion_chamber/combustion_chamber_fan_casing_south"));
     public static final PartialModel COMBUSTION_FAN_WEST = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/combustion_chamber/combustion_chamber_fan_casing_west"));
+
+    // Remote Entanglement Transporter (glow overlay, tinted and pulsed per frame by the block entity renderer)
+    public static final PartialModel REMOTE_TRANSPORTER_GLOW = PartialModel.of(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "block/remote_entanglement_transporter_glow"));
 }

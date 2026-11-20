@@ -1,3 +1,141 @@
 {
-  "parent": "resourceful_refinement:block/launchpad_controller"
+	"parent": "resourceful_refinement:block/launchpad/launch_pad_send",
+	"display": {
+		"gui": {
+			"rotation": [
+				30,
+				225,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				0.20833333333333331,
+				0.20833333333333331,
+				0.20833333333333331
+			]
+		},
+		"ground": {
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				3,
+				0
+			],
+			"scale": [
+				0.08333333333333333,
+				0.08333333333333333,
+				0.08333333333333333
+			]
+		},
+		"fixed": {
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				0.16666666666666666,
+				0.16666666666666666,
+				0.16666666666666666
+			]
+		},
+		"head": {
+			"rotation": [
+				0,
+				0,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				0.3333333333333333,
+				0.3333333333333333,
+				0.3333333333333333
+			]
+		},
+		"thirdperson_righthand": {
+			"rotation": [
+				75,
+				45,
+				0
+			],
+			"translation": [
+				0,
+				2.5,
+				0
+			],
+			"scale": [
+				0.125,
+				0.125,
+				0.125
+			]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [
+				75,
+				45,
+				0
+			],
+			"translation": [
+				0,
+				2.5,
+				0
+			],
+			"scale": [
+				0.125,
+				0.125,
+				0.125
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				0,
+				45,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				0.13333333333333333,
+				0.13333333333333333,
+				0.13333333333333333
+			]
+		},
+		"firstperson_lefthand": {
+			"rotation": [
+				0,
+				225,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				0.13333333333333333,
+				0.13333333333333333,
+				0.13333333333333333
+			]
+		}
+	}
 }

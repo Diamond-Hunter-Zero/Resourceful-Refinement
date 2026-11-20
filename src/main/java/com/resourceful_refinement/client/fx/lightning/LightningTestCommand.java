@@ -25,7 +25,7 @@ import java.util.Map;
  *   <li>{@code /rr_lightning strike [ticks]} — one-shot bolt from your hand to whatever you're looking at;</li>
  *   <li>{@code /rr_lightning between <from> <to> [ticks]} — bolt between two block centres (default 100 ticks);</li>
  *   <li>{@code /rr_lightning hold} — toggle a continuous beam that follows your hand and crosshair (weapon preview);</li>
- *   <li>{@code /rr_lightning style <electric|arc|railgun|crimson|joint>} — switch the style used by the above;</li>
+ *   <li>{@code /rr_lightning style <electric|arc|railgun|tesla_charge|crimson|joint>} — switch the style used by the above;</li>
  *   <li>{@code /rr_lightning clear} — remove all beams.</li>
  * </ul>
  */
@@ -36,6 +36,7 @@ public final class LightningTestCommand {
             "electric", LightningStyle.ELECTRIC,
             "arc", LightningStyle.ARC,
             "railgun", LightningStyle.RAILGUN_ARC,
+            "tesla_charge", LightningStyle.PROCESSING_ARC,
             "crimson", LightningStyle.CRIMSON,
             "joint", LightningStyle.JOINT);
 

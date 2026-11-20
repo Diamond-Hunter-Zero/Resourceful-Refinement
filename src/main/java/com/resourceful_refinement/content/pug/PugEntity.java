@@ -6,18 +6,19 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -40,6 +41,28 @@ public class PugEntity extends Entity {
     public static final double CRASH_DESCENT_SPEED = 1.25D;
     private static final EntityDataAccessor<Integer> FLIGHT_STATE = SynchedEntityData.defineId(PugEntity.class,
             EntityDataSerializers.INT);
+    /** Remaining hit points of a crashed wreck. */
+    private static final EntityDataAccessor<Float> WRECK_HEALTH = SynchedEntityData.defineId(PugEntity.class,
+            EntityDataSerializers.FLOAT);
+    /** Ticks of hit-reaction remaining; drives the renderer's shake and red flash. */
+    /** Whether a crashed PUG has hit the ground; synced so the client renders the wreck (tilt, shake). */
+    private static final EntityDataAccessor<Boolean> CRASH_LANDED = SynchedEntityData.defineId(PugEntity.class,
+            EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> HIT_TICKS = SynchedEntityData.defineId(PugEntity.class,
+            EntityDataSerializers.INT);
+
+    public static final float WRECK_MAX_HEALTH = 25.0F;
+    public static final int HIT_REACTION_TICKS = 10;
+    /** Horizontal shove a hit gives a wreck, before friction. */
+    private static final double WRECK_KNOCKBACK = 0.12D;
+    /** Vanilla item/minecart-style gravity, so a wreck drops like a heavy object. */
+    private static final double WRECK_GRAVITY = 0.08D;
+
+    /** Height of the undercarriage thruster nozzle above the entity origin. */
+    private static final double THRUSTER_HEIGHT = 0.35D;
+    /** Below this clearance the exhaust hits the ground and fans out sideways instead of streaming down. */
+    private static final double EXHAUST_SPREAD_CLEARANCE = 2.5D;
+    private static final int EXHAUST_PROBE_DEPTH = 8;
 
     public final ItemStackHandler cargo = new ItemStackHandler(LaunchpadControllerBlockEntity.CARGO_SLOTS);
     private LaunchpadEndpoint source;
@@ -136,9 +159,11 @@ public class PugEntity extends Entity {
 
     private void beginCrash(BlockPos landingPos, double spawnY) {
         crashLandingPos = landingPos.immutable();
-        crashLanded = false;
+        setCrashLanded(false);
         verticalVelocity = -CRASH_DESCENT_SPEED;
         setFlightState(PugFlightState.CRASHED);
+        // A crash comes in at whatever heading it happens to have.
+        setYRot(random.nextFloat() * 360.0F);
         setPos(landingPos.getX() + 0.5D, Math.max(spawnY, landingPos.getY()), landingPos.getZ() + 0.5D);
         setDeltaMovement(0, verticalVelocity, 0);
     }
@@ -156,7 +181,12 @@ public class PugEntity extends Entity {
     }
 
     public boolean hasCrashLanded() {
-        return crashLanded;
+        return level().isClientSide ? entityData.get(CRASH_LANDED) : crashLanded;
+    }
+
+    private void setCrashLanded(boolean landed) {
+        crashLanded = landed;
+        entityData.set(CRASH_LANDED, landed);
     }
 
     public double getVerticalVelocity() {
@@ -207,15 +237,18 @@ public class PugEntity extends Entity {
         super.tick();
         if (level().isClientSide) {
             tickClientInterpolation();
+            tickExhaust();
             return;
         }
         if (!(level() instanceof ServerLevel level)) return;
+        int hitTicks = entityData.get(HIT_TICKS);
+        if (hitTicks > 0) entityData.set(HIT_TICKS, hitTicks - 1);
         switch (getFlightState()) {
             case DOCKED -> tickDocked(level);
             case ASCENDING -> tickAscending(level);
             case DESCENDING -> tickDescending(level);
             case UNLOADING -> tickUnloading(level);
-            case CRASHED -> tickCrashed();
+            case CRASHED -> tickCrashed(level);
             case IN_TRANSIT, QUEUED -> discard();
         }
     }
@@ -284,6 +317,8 @@ public class PugEntity extends Entity {
             return;
         }
         Vec3 landing = PugFlightService.padCenter(controller);
+        // Face the destination pad's front, matching how a docked PUG sits on a sending pad.
+        setYRot(controller.getBlockState().getValue(LaunchpadControllerBlock.FACING).toYRot());
         switch (descentStage) {
             case APPROACH -> tickDescentApproach(landing);
             case HOVER -> tickDescentHover(controller, level, landing);
@@ -380,28 +415,100 @@ public class PugEntity extends Entity {
         }
     }
 
-    private void tickCrashed() {
-        if (!hasCargo()) {
-            discard();
-            return;
-        }
+    /**
+     * A crashed PUG plummets to its crash site, explodes on impact (effects only; no block damage), then lies there
+     * as a wreck: it obeys gravity, can be shoved slightly, and stays until it is destroyed (see {@link #hurt}).
+     */
+    private void tickCrashed(ServerLevel level) {
         if (crashLandingPos == null) {
             crashLandingPos = blockPosition();
-            crashLanded = true;
+            setCrashLanded(true);
         }
         if (crashLanded) {
-            noPhysics = false;
-            setDeltaMovement(Vec3.ZERO);
+            tickWreckPhysics();
             return;
         }
         double nextY = Math.max(crashLandingPos.getY(), getY() - CRASH_DESCENT_SPEED);
         setPos(crashLandingPos.getX() + 0.5D, nextY, crashLandingPos.getZ() + 0.5D);
         setDeltaMovement(0, -CRASH_DESCENT_SPEED, 0);
         if (nextY <= crashLandingPos.getY()) {
-            crashLanded = true;
+            setCrashLanded(true);
             noPhysics = false;
             setDeltaMovement(Vec3.ZERO);
+            playCrashImpact(level);
         }
+    }
+
+    private void tickWreckPhysics() {
+        noPhysics = false;
+        Vec3 motion = getDeltaMovement();
+        motion = new Vec3(motion.x, onGround() ? 0 : motion.y - WRECK_GRAVITY, motion.z);
+        move(MoverType.SELF, motion);
+        double friction = onGround() ? 0.6D : 0.91D;
+        setDeltaMovement(getDeltaMovement().multiply(friction, 0.98D, friction));
+    }
+
+    private void playCrashImpact(ServerLevel level) {
+        double x = getX(), y = getY() + 0.6D, z = getZ();
+        level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 4.0F,
+                0.8F + level.random.nextFloat() * 0.2F);
+        level.playSound(null, x, y, z, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0F, 0.6F);
+        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, x, y, z, 1, 0, 0, 0, 0);
+        level.sendParticles(ParticleTypes.EXPLOSION, x, y, z, 8, 1.2D, 0.6D, 1.2D, 0);
+        level.sendParticles(ParticleTypes.CLOUD, x, getY() + 0.2D, z, 60, 1.6D, 0.2D, 1.6D, 0.12D);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 40, 1.0D, 0.8D, 1.0D, 0.05D);
+        level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 6, 0.6D, 0.4D, 0.6D, 0.02D);
+    }
+
+    public float getWreckHealth() {
+        return entityData.get(WRECK_HEALTH);
+    }
+
+    /** Hit-reaction ticks remaining (client-synced), for the renderer's shake and flash. */
+    public int getHitTicks() {
+        return entityData.get(HIT_TICKS);
+    }
+
+    /** Thruster exhaust while the PUG is under power: a downward plume, fanning out across the pad near the ground. */
+    private void tickExhaust() {
+        PugFlightState state = getFlightState();
+        boolean thrusting = state == PugFlightState.ASCENDING || state == PugFlightState.DESCENDING;
+        if (!thrusting) return;
+
+        double nozzleY = getY() + THRUSTER_HEIGHT;
+        double groundY = findGroundBelow(nozzleY);
+        double clearance = nozzleY - groundY;
+        var random = level().random;
+
+        // Core plume, straight down out of the nozzle.
+        for (int i = 0; i < 2; i++) {
+            level().addParticle(ParticleTypes.CLOUD,
+                    getX() + (random.nextDouble() - 0.5D) * 0.3D, nozzleY, getZ() + (random.nextDouble() - 0.5D) * 0.3D,
+                    (random.nextDouble() - 0.5D) * 0.03D, -0.25D - random.nextDouble() * 0.15D, (random.nextDouble() - 0.5D) * 0.03D);
+        }
+        // Near the pad the plume can't go down any further, so it spreads out sideways along the surface.
+        if (clearance < EXHAUST_SPREAD_CLEARANCE) {
+            double strength = 1.0D - clearance / EXHAUST_SPREAD_CLEARANCE;
+            int count = 2 + (int) Math.round(strength * 5);
+            for (int i = 0; i < count; i++) {
+                double angle = random.nextDouble() * Math.PI * 2.0D;
+                double speed = 0.18D + random.nextDouble() * 0.17D * (0.5D + strength);
+                level().addParticle(ParticleTypes.CLOUD,
+                        getX() + Math.cos(angle) * 0.4D, groundY + 0.15D, getZ() + Math.sin(angle) * 0.4D,
+                        Math.cos(angle) * speed, 0.01D + random.nextDouble() * 0.02D, Math.sin(angle) * speed);
+            }
+        }
+    }
+
+    /** Top of the first solid block within a few blocks below {@code fromY}, or far below if none. */
+    private double findGroundBelow(double fromY) {
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos(getX(), fromY, getZ());
+        for (int i = 0; i <= EXHAUST_PROBE_DEPTH; i++) {
+            var shape = level().getBlockState(cursor).getCollisionShape(level(), cursor);
+            if (!shape.isEmpty()) return cursor.getY() + shape.max(Direction.Axis.Y);
+            cursor.move(Direction.DOWN);
+        }
+        return fromY - 64;
     }
 
     private static LaunchpadControllerBlockEntity getController(ServerLevel level, LaunchpadEndpoint endpoint) {
@@ -413,6 +520,9 @@ public class PugEntity extends Entity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(FLIGHT_STATE, PugFlightState.DOCKED.ordinal());
+        builder.define(WRECK_HEALTH, WRECK_MAX_HEALTH);
+        builder.define(HIT_TICKS, 0);
+        builder.define(CRASH_LANDED, false);
     }
 
     @Override
@@ -438,7 +548,9 @@ public class PugEntity extends Entity {
         landedTicks = Math.clamp(tag.getInt("LandedTicks"), 0, MINIMUM_LANDED_TICKS);
         crashLandingPos = tag.contains("CrashLandingPos")
                 ? NbtUtils.readBlockPos(tag, "CrashLandingPos").orElse(null) : null;
-        crashLanded = tag.getBoolean("CrashLanded");
+        setCrashLanded(tag.getBoolean("CrashLanded"));
+        entityData.set(WRECK_HEALTH, tag.contains("WreckHealth")
+                ? Mth.clamp(tag.getFloat("WreckHealth"), 0, WRECK_MAX_HEALTH) : WRECK_MAX_HEALTH);
         if (getFlightState() == PugFlightState.CRASHED) {
             noPhysics = !crashLanded;
             setNoGravity(true);
@@ -459,41 +571,53 @@ public class PugEntity extends Entity {
         tag.putInt("LandedTicks", landedTicks);
         if (crashLandingPos != null) tag.put("CrashLandingPos", NbtUtils.writeBlockPos(crashLandingPos));
         tag.putBoolean("CrashLanded", crashLanded);
+        tag.putFloat("WreckHealth", getWreckHealth());
         tag.put("Cargo", cargo.serializeNBT(level().registryAccess()));
     }
 
-    @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
-        if (getFlightState() != PugFlightState.CRASHED) return InteractionResult.PASS;
-        if (level().isClientSide) return InteractionResult.SUCCESS;
-        boolean movedAny = false;
-        for (int slot = 0; slot < cargo.getSlots(); slot++) {
-            ItemStack stored = cargo.getStackInSlot(slot);
-            if (stored.isEmpty()) continue;
-            ItemStack remainder = stored.copy();
-            int before = remainder.getCount();
-            player.getInventory().add(remainder);
-            movedAny |= remainder.getCount() < before;
-            cargo.setStackInSlot(slot, remainder);
-        }
-        if (!hasCargo()) discard();
-        return movedAny ? InteractionResult.CONSUME : InteractionResult.PASS;
-    }
-
+    /**
+     * Wrecks take damage, flinch (shake + red flash), get shoved slightly away from the attacker, and are destroyed
+     * after {@link #WRECK_MAX_HEALTH} damage, dropping all remaining cargo. Only a landed wreck can be damaged.
+     */
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (getFlightState() != PugFlightState.CRASHED || isRemoved() || isInvulnerableTo(source)) return false;
-        if (!level().isClientSide) {
-            for (int slot = 0; slot < cargo.getSlots(); slot++) {
-                ItemStack stack = cargo.getStackInSlot(slot);
-                if (!stack.isEmpty()) {
-                    Containers.dropItemStack(level(), getX(), getY(), getZ(), stack.copy());
-                    cargo.setStackInSlot(slot, ItemStack.EMPTY);
-                }
-            }
-            discard();
+        if (getFlightState() != PugFlightState.CRASHED || !crashLanded || isRemoved() || isInvulnerableTo(source)) {
+            return false;
         }
+        if (!(level() instanceof ServerLevel level)) return true;
+        float health = getWreckHealth() - amount;
+        entityData.set(WRECK_HEALTH, Math.max(0, health));
+        entityData.set(HIT_TICKS, HIT_REACTION_TICKS);
+
+        Entity attacker = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
+        if (attacker != null) {
+            Vec3 away = new Vec3(getX() - attacker.getX(), 0, getZ() - attacker.getZ());
+            if (away.lengthSqr() > 1.0E-4D) {
+                away = away.normalize().scale(WRECK_KNOCKBACK);
+                setDeltaMovement(getDeltaMovement().add(away.x, 0, away.z));
+            }
+        }
+        level.playSound(null, getX(), getY() + 0.8D, getZ(), SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.NEUTRAL,
+                0.6F, 0.8F + level.random.nextFloat() * 0.3F);
+        level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 1.0D, getZ(), 6, 0.5D, 0.4D, 0.5D, 0.02D);
+
+        if (health <= 0) destroyWreck(level);
         return true;
+    }
+
+    private void destroyWreck(ServerLevel level) {
+        for (int slot = 0; slot < cargo.getSlots(); slot++) {
+            ItemStack stack = cargo.getStackInSlot(slot);
+            if (!stack.isEmpty()) {
+                Containers.dropItemStack(level, getX(), getY() + 0.5D, getZ(), stack.copy());
+                cargo.setStackInSlot(slot, ItemStack.EMPTY);
+            }
+        }
+        level.playSound(null, getX(), getY() + 0.8D, getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.NEUTRAL,
+                1.5F, 1.2F);
+        level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.8D, getZ(), 3, 0.6D, 0.4D, 0.6D, 0);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.8D, getZ(), 20, 0.8D, 0.6D, 0.8D, 0.03D);
+        discard();
     }
 
     @Override

@@ -1,7 +1,11 @@
 package com.resourceful_refinement.mixin;
 
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlockEntity;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
+import com.simibubi.create.content.kinetics.belt.BeltHelper;
+import com.simibubi.create.content.kinetics.belt.behaviour.BeltProcessingBehaviour;
+import net.minecraft.core.BlockPos;
 import com.simibubi.create.content.kinetics.belt.transport.BeltInventory;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -23,6 +27,16 @@ public abstract class BeltInventoryMixin {
         Boolean result = BrewersTapBlockEntity.handleBeltProcessing(belt, transported, nextOffset, blocking);
         if (result != null) {
             cir.setReturnValue(result);
+        }
+    }
+
+    /** Tesla Coil pairs flank the space above the belt rather than sitting two blocks above it, so route to them. */
+    @Inject(method = "getBeltProcessingAtSegment", at = @At("HEAD"), cancellable = true)
+    private void resourceful_refinement$teslaCoilProcessing(int segment, CallbackInfoReturnable<BeltProcessingBehaviour> cir) {
+        BlockPos space = BeltHelper.getPositionForOffset(belt, segment).above();
+        BeltProcessingBehaviour tesla = TeslaCoilBlockEntity.findChargingBehaviour(belt.getLevel(), space);
+        if (tesla != null) {
+            cir.setReturnValue(tesla);
         }
     }
 }

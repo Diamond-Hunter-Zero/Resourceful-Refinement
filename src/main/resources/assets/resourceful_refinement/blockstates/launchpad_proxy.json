@@ -1,5 +1,7 @@
 {
-  "variants": {
-    "": { "model": "resourceful_refinement:block/launchpad_proxy" }
-  }
+	"variants": {
+		"": {
+			"model": "resourceful_refinement:block/launchpad/launchpad_empty"
+		}
+	}
 }

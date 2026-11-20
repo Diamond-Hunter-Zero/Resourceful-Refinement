@@ -23,6 +23,8 @@ import com.resourceful_refinement.content.refinery.recipe.FluidRefineryRecipeCat
 import com.resourceful_refinement.content.refinery.rendering.RefineryBaseModel;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipe;
 import com.resourceful_refinement.content.sieve.recipe.MechanicalSieveRecipeCategory;
+import com.resourceful_refinement.content.tesla_coil.recipe.TeslaCoilRecipe;
+import com.resourceful_refinement.content.tesla_coil.recipe.TeslaCoilRecipeCategory;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
@@ -56,6 +58,7 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCategories(new BrewersTapRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new DrillPylonRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
         registration.addRecipeCategories(new CyclotronForgeRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        registration.addRecipeCategories(new TeslaCoilRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
@@ -145,6 +148,14 @@ public class ModJeiPlugin implements IModPlugin {
                 .toList();
 
         registration.addRecipes(CyclotronForgeRecipeCategory.TYPE, cyclotronRecipes);
+
+        // Tesla Coil
+        List<TeslaCoilRecipe> teslaCoilRecipes = rm.getAllRecipesFor(ModRecipeTypes.TESLA_COIL_TYPE.get())
+                .stream()
+                .map(RecipeHolder::value)
+                .toList();
+
+        registration.addRecipes(TeslaCoilRecipeCategory.TYPE, teslaCoilRecipes);
     }
 
     @Override
@@ -165,5 +176,6 @@ public class ModJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.DRILL_PYLON_HEAD.get()), DrillPylonRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.CRYSTAL_FISSURE_BUD.get()), DrillPylonRecipeCategory.TYPE);
         registration.addRecipeCatalyst(new ItemStack(ModBlocks.CYCLOTRON_CONTROLLER.get()), CyclotronForgeRecipeCategory.TYPE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.TESLA_COIL.get()), TeslaCoilRecipeCategory.TYPE);
     }
 }

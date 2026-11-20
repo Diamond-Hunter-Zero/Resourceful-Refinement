@@ -1,0 +1,6 @@
+{
+  "type": "resourceful_refinement:tesla_coil",
+  "ingredient": { "item": "resourceful_refinement:durasteel_sheet", "count": 1 },
+  "charges": 3,
+  "result": { "id": "resourceful_refinement:low_grade_prism_cell", "count": 1 }
+}

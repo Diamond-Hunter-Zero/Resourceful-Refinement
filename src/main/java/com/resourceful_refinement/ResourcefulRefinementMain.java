@@ -35,6 +35,9 @@ import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishModel;
 import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishRenderer;
 import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverModel;
 import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverRenderer;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilHeadModel;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilRenderer;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilRingModel;
 import com.resourceful_refinement.content.glare.lux.GlareLuxTransceiverModel;
 import com.resourceful_refinement.content.glare.relay.GlareRelayModel;
 import com.resourceful_refinement.content.glare.relay.GlareRelayRenderer;
@@ -302,13 +305,7 @@ public class ResourcefulRefinementMain {
                             com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlock.FACING);
                     return side == facing.getOpposite() ? be.getTank() : null;
                 });
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_PROXY_BE.get(),
-                (be, side) -> {
-                    if (!be.getBlockState().is(ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get()) || side != Direction.UP) return null;
-                    com.resourceful_refinement.content.glare.remote.RemoteEntanglementTransporterBlockEntity controller =
-                            be.getController(be.getLevel());
-                    return controller == null ? null : controller.getTank();
-                });
+        // Liquid Chorus is accepted only through the back face of the controller; the tank proxy's top face is a Lux Socket.
 
         // --- PUG Launchpad proxies ---
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.LAUNCHPAD_PROXY_BE.get(),
@@ -528,6 +525,7 @@ public class ResourcefulRefinementMain {
             event.registerBlockEntityRenderer(ModBlockEntities.RESOURCE_RESONATOR_BE.get(), ResourceResonatorRenderer::new);
 
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_KINETIC_RECEIVER_BE.get(), GlareKineticReceiverRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.TESLA_COIL_BE.get(), TeslaCoilRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_EMITTER_DISH_BE.get(), GlareEmitterDishRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.GLARE_CHROMATIC_TRANSCEIVER_BE.get(), GlareChromaticTransceiverRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.LUX_TRANSCEIVER_BE.get(), LuxTransceiverRenderer::new);
@@ -589,6 +587,8 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_Z_HALF_MIRROR.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.SHAFT_VERTICAL_HALF_MIRROR.modelLocation(), "standalone"));
 
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.LAUNCH_PAD_SEND.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.LAUNCH_PAD_RECEIVE.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.NETHERRACK_GEYSER_CASING.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.INDUSTRIAL_HEATER_STAND.modelLocation(), "standalone"));
@@ -598,6 +598,7 @@ public class ResourcefulRefinementMain {
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_EAST.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_SOUTH.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.COMBUSTION_FAN_WEST.modelLocation(), "standalone"));
+            event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.REMOTE_TRANSPORTER_GLOW.modelLocation(), "standalone"));
 
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GLARE_COG_SHAFT.modelLocation(), "standalone"));
             event.register(new net.minecraft.client.resources.model.ModelResourceLocation(ModPartialModels.GLARE_PRISM_SMALL.modelLocation(), "standalone"));
@@ -651,6 +652,8 @@ public class ResourcefulRefinementMain {
             event.registerLayerDefinition(CyclotronBackModel.LAYER_LOCATION, CyclotronBackModel::createBodyLayer);
 
             event.registerLayerDefinition(GlareKineticReceiverModel.LAYER_LOCATION, GlareKineticReceiverModel::createBodyLayer);
+            event.registerLayerDefinition(TeslaCoilHeadModel.LAYER_LOCATION, TeslaCoilHeadModel::createBodyLayer);
+            event.registerLayerDefinition(TeslaCoilRingModel.LAYER_LOCATION, TeslaCoilRingModel::createBodyLayer);
             event.registerLayerDefinition(GlareEmitterDishModel.LAYER_LOCATION, GlareEmitterDishModel::createBodyLayer);
             event.registerLayerDefinition(GlareChromaticTransceiverModel.LAYER_LOCATION, GlareChromaticTransceiverModel::createBodyLayer);
             event.registerLayerDefinition(GlareLuxTransceiverModel.LAYER_LOCATION, GlareLuxTransceiverModel::createBodyLayer);

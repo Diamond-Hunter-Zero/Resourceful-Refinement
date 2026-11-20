@@ -1,13 +1,13 @@
 {
   "variants": {
     "axis=x": {
-      "model": "minecraft:block/air"
+      "model": "resourceful_refinement:block/cyclotron_proxy"
     },
     "axis=y": {
-      "model": "minecraft:block/air"
+      "model": "resourceful_refinement:block/cyclotron_proxy"
     },
     "axis=z": {
-      "model": "minecraft:block/air"
+      "model": "resourceful_refinement:block/cyclotron_proxy"
     }
   }
 }

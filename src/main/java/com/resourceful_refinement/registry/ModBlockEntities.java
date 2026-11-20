@@ -33,6 +33,7 @@ import com.resourceful_refinement.content.geyser.GeyserBlockEntity;
 import com.resourceful_refinement.content.glare.emitter.GlareEmitterDishBlockEntity;
 import com.resourceful_refinement.content.glare.chromatic_transceiver.GlareChromaticTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.kinetic_receiver.GlareKineticReceiverBlockEntity;
+import com.resourceful_refinement.content.tesla_coil.TeslaCoilBlockEntity;
 import com.resourceful_refinement.content.glare.relay.GlareRelayBlockEntity;
 import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.content.glare.terminal.TelemetryTerminalBlockEntity;
@@ -159,6 +160,10 @@ public class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<GlareKineticReceiverBlockEntity>> GLARE_KINETIC_RECEIVER_BE = BLOCK_ENTITIES.register("glare_kinetic_receiver",
             () -> BlockEntityType.Builder.of(GlareKineticReceiverBlockEntity::new, ModBlocks.GLARE_KINETIC_RECEIVER.get()).build(null));
+
+    public static final Supplier<BlockEntityType<TeslaCoilBlockEntity>> TESLA_COIL_BE = BLOCK_ENTITIES.register("tesla_coil",
+            () -> BlockEntityType.Builder.of((pos, state) -> new TeslaCoilBlockEntity(ModBlockEntities.TESLA_COIL_BE.get(), pos, state),
+                    ModBlocks.TESLA_COIL.get()).build(null));
 
     public static final Supplier<BlockEntityType<ResourceResonatorBlockEntity>> RESOURCE_RESONATOR_BE = BLOCK_ENTITIES.register(
             "resource_resonator", () -> BlockEntityType.Builder.of(

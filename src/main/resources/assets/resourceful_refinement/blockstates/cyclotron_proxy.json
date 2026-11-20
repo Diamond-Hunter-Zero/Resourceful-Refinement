@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "minecraft:block/air"
+      "model": "resourceful_refinement:block/cyclotron_proxy"
     }
   }
 }

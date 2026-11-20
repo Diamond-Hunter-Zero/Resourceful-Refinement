@@ -14,6 +14,7 @@ public final class ModDamageTypes {
 
     public static final ResourceKey<DamageType> MOLTEN_GEL_DAMAGE = key("molten_gel_damage");
     public static final ResourceKey<DamageType> RAILGUN = key("railgun");
+    public static final ResourceKey<DamageType> TESLA_COIL = key("tesla_coil");
 
     private ModDamageTypes() {}
 
@@ -36,5 +37,10 @@ public final class ModDamageTypes {
     /** A railgun beam fired by {@code shooter}; attributes the kill to them. */
     public static DamageSource railgun(Level level, Entity shooter) {
         return level.damageSources().source(RAILGUN, shooter);
+    }
+
+    /** An arc between two Tesla Coils. */
+    public static DamageSource teslaCoil(Level level) {
+        return level.damageSources().source(TESLA_COIL);
     }
 }

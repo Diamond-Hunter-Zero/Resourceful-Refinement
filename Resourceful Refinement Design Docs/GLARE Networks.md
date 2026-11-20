@@ -132,7 +132,7 @@ Nodes that only accept SOCKET links (see below) return `allowsManualGlareLinks()
 
 Beyond ordinary node-to-node links, GLARE supports a second, special **SOCKET** link kind used by machine controllers that want to consume Lux without being a targetable network node. A [[GLARE  Lux Transceiver|Lux Transceiver]] binds its back face to a `LuxSocket` interface exposed on an adjacent BlockEntity (or its controller) and forms a SOCKET link to that BE's GLARE node.
 
-SOCKET links differ from normal links in three ways: they **do not count toward link limits**, they **do not require or participate in line-of-sight checks**, and they **are not rendered** as beams. The socket target itself is not a targetable node and cannot be picked up by the connection tools. This is how the [[Cyclotron Forge]] and [[Drill Pylon]] controllers join a network — via a Lux Transceiver against a socket face — see [[GLARE  Lux Transceiver]].
+SOCKET links differ from normal links in three ways: they **do not count toward link limits**, they **do not require or participate in line-of-sight checks**, and they **are not rendered** as beams. The socket target itself is not a targetable node and cannot be picked up by the connection tools. This is how the [[Cyclotron Forge]], [[Drill Pylon]] and [[Remote Entanglement|Remote Entanglement Transporter]] controllers join a network — via a Lux Transceiver against a socket face — see [[GLARE  Lux Transceiver]].
 
 > [!note] Implementation
 > `GlareSavedData.LinkKind` has exactly two values: `NORMAL(countsTowardLimit=true, requiresLineOfSight=true, renders=true)` and `SOCKET(false, false, false)`. `GlareService.trySocketLink` → `GlareSavedData.tryAddSocketLink` bypasses the limit and manual-link checks and always marks validity `VALID`. Link validity itself is tracked separately as `LinkValidity { UNKNOWN, VALID, BLOCKED }`.
@@ -198,7 +198,7 @@ Telemetry Terminals let players use GLARE networks for communication. Each termi
 
 ### Remote Entangler Depot & Transporter
 
-The Remote Entangler Depot teleports item stacks between addressed depots on the same GLARE network; the Remote Entanglement Transporter teleports players between addressed transporters. Both require an operational network, Lux allocation, and a *chilled* heat source. See [[Remote Entanglement]] for the full specification.
+The Remote Entangler Depot teleports item stacks between addressed depots on the same GLARE network; the Remote Entanglement Transporter teleports players between addressed transporters. Both require an operational network, Lux allocation, and a *chilled* heat source. The Depot is linked directly, as a normal node. The Transporter can't be linked directly: it connects through a Lux Transceiver on the Lux Socket on top of its tank. See [[Remote Entanglement]] for the full specification.
 
 ## Implementation
 

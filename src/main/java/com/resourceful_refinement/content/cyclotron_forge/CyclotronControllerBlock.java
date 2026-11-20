@@ -62,7 +62,8 @@ public class CyclotronControllerBlock extends HorizontalDirectionalBlock impleme
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.INVISIBLE;
+        // Unassembled: plain baked block model. Assembled: drawn by CyclotronForgeRenderer.
+        return state.getValue(ASSEMBLED) ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override

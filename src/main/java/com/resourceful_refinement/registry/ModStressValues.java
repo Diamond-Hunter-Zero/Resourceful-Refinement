@@ -16,6 +16,7 @@ public class ModStressValues {
     public static final double MILKING_STATION_STRESS = 4;
     public static final double BUCKET_EXCAVATOR_STRESS = 16;
     public static final double CYCLOTRON_STRESS = 32;
+    public static final double TESLA_COIL_STRESS = 4;
 
 
     public static void register() {
@@ -31,6 +32,7 @@ public class ModStressValues {
         // An assembled pylon has two stressed kinetic inputs (the centre link proxy applies none), so each takes half
         registerImpact(ModBlocks.DRILL_PYLON_KINETIC_PROXY.get(), () -> ServerConfig.DRILL_PYLON_STRESS.getAsInt() / 2.0);
         registerImpact(ModBlocks.CYCLOTRON_KINETIC_PROXY.get(), () -> CYCLOTRON_STRESS);
+        registerImpact(ModBlocks.TESLA_COIL.get(), () -> TESLA_COIL_STRESS);
 
         // Register generation capacities
         registerCapacity(ModBlocks.COMBUSTION_CHAMBER.get(), () -> 10);

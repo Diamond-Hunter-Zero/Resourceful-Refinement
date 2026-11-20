@@ -1,0 +1,6 @@
+{
+	"parent": "resourceful_refinement:block/remote_entangler_depot",
+	"textures": {
+		"0": "resourceful_refinement:block/glare/remote_entanglement_depot_offline"
+	}
+}

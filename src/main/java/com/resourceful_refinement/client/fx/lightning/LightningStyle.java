@@ -86,6 +86,23 @@ public record LightningStyle(
             .endpointGlow(0.1F)
             .build();
 
+    /** Short, twitchy, yellow arc for Tesla recipe processing. */
+    public static final LightningStyle PROCESSING_ARC = builder()
+            .layer(0.12F, 0x3Cffcb5f, 0.0F)
+            .layer(0.04F, 0x9Affe873, 0.0F)
+            .layer(0.014F, 0xFFf8ffc0, 0.6F)
+            .segmentLength(0.12F)
+            .jaggedness(0.5F)
+            .maxOffset(0.35F)
+            .branchDensity(0.8F)
+            .branchLength(0.45F)
+            .maxBranchLength(0.8F)
+            .maxBranchDepth(1)
+            .restrikeInterval(0.75F)
+            .flicker(0.5F)
+            .endpointGlow(0.12F)
+            .build();
+
     /** Calm, low-segment green beam: few gentle kicks, for simple joint/link visuals. */
     public static final LightningStyle JOINT = builder()
             .layer(0.12F, 0x403BD66B, 0.0F)

@@ -8,12 +8,15 @@ import com.resourceful_refinement.content.glare.IGlareReceiver;
 import com.resourceful_refinement.content.glare.common.TrioAddressSlot;
 import com.resourceful_refinement.content.glare.terminal.TelemetryAddressBehaviour;
 import com.resourceful_refinement.content.glare.common.Trio;
+import com.resourceful_refinement.content.glare.lux.LuxTransceiverBlockEntity;
 import com.resourceful_refinement.registry.ModBlocks;
 import com.resourceful_refinement.registry.ModEffects;
 import com.resourceful_refinement.registry.ModFluids;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/** Controller and server authority for the 1x2x2 transporter assembly. */
+/**
+ * Controller and server authority for the 1x2x2 transporter assembly. The controller is still the GLARE node that
+ * registers Lux consumption, but it cannot be linked directly: it joins a network only through a Lux Transceiver seated
+ * on the Lux Socket exposed by the top face of the tank proxy.
+ */
 public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBlockEntity
         implements IGlareReceiver, IRemoteEntanglementEndpoint {
     public static final int REQUIRED_LUX = 8;
@@ -62,13 +69,16 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
     private boolean disassembling;
     private UUID chargingPlayer;
     private String lastFailure = "";
+    /** No fuel, not chilled, or not on a healthy network. Synced to drive the dark-grey glow tint. */
+    private boolean offline = true;
 
     public RemoteEntanglementTransporterBlockEntity(BlockPos pos, BlockState state) {
         super(com.resourceful_refinement.registry.ModBlockEntities.REMOTE_ENTANGLEMENT_TRANSPORTER_BE.get(), pos, state, 1);
     }
 
     @Override public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 12f, 15.9f, 0f));
+        // Front face of the controller (local +Z under Create's south-default rotation), on the socket band near its top edge.
+        List<TrioAddressSlot> transforms = Trio.makeSlots((index)-> new TrioAddressSlot(index, 15f, 16.05f, 0f));
         addressSlots = new ArrayList<>(3);
         for (int slot = 0; slot < 3; slot++) {
             TelemetryAddressBehaviour behaviour = new TelemetryAddressBehaviour(this, transforms.get(slot), slot);
@@ -83,6 +93,7 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         if (level instanceof ServerLevel server) {
             assembled = validateAssembly();
             pushGlareState();
+            refreshAdjacentLuxTransceiver();
         }
     }
 
@@ -90,21 +101,22 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         super.tick();
         if (!(level instanceof ServerLevel server)) return;
         if (!assembled || !validateAssembly()) {
-            if (assembled) {
-                assembled = false;
-                pushGlareState();
-            }
+            if (assembled) setAssembled(false);
+            setOffline(true);
             resetCharge();
             return;
         }
 
         boolean poweredAndChilled = RemoteEntanglementUtil.isOperational(server, getGlareNodePos())
                 && RemoteEntanglementUtil.isChilled(server, worldPosition, tankPos());
+        setOffline(!poweredAndChilled || tank.getFluidAmount() < CHORUS_COST);
         if (machineState == RemoteMachineState.COOLDOWN) {
             if (poweredAndChilled && ++stateTicks >= COOLDOWN_TICKS) setMachineState(RemoteMachineState.IDLE);
             return;
         }
-        if (!getRemoteMode().canSend()) {
+        // Charging may only start, and only continue, while fuelled, chilled and on a healthy network. Losing any
+        // requirement mid-charge drops back to IDLE rather than leaving the chamber stuck charging.
+        if (!getRemoteMode().canSend() || offline) {
             resetCharge();
             return;
         }
@@ -128,6 +140,7 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
                 succeeded = attemptTeleport(server, player);
             }
             if (succeeded) tank.drain(CHORUS_COST, IFluidHandler.FluidAction.EXECUTE);
+            else playTeleportFailure(server);
             setMachineState(RemoteMachineState.COOLDOWN);
             chargingPlayer = null;
         }
@@ -149,7 +162,9 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
             AABB movedBounds = player.getBoundingBox().move(target.subtract(player.position()));
             if (!destinationLevel.noCollision(player, movedBounds)) continue;
 
+            playTeleportStrike(sourceLevel);
             player.teleportTo(destinationLevel, target.x, target.y, target.z, player.getYRot(), player.getXRot());
+            destination.playTeleportStrike(destinationLevel);
             player.addEffect(new MobEffectInstance(ModEffects.TELEPORT_SICKNESS, SICKNESS_TICKS, 0, false, false, false));
             lastFailure = "";
             sendData();
@@ -158,6 +173,17 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         lastFailure = "No safe receiving transporter matches this address";
         sendData();
         return false;
+    }
+
+    /** Fires a block event that tracking clients turn into a vertical lightning strike through the chamber. */
+    private void playTeleportStrike(ServerLevel server) {
+        server.blockEvent(worldPosition, getBlockState().getBlock(), RemoteEntanglementTransporterBlock.EVENT_TELEPORTED, 0);
+    }
+
+    private void playTeleportFailure(ServerLevel server) {
+        Vec3 centre = Vec3.atBottomCenterOf(chamberPos());
+        server.sendParticles(ParticleTypes.SMOKE, centre.x, centre.y + 0.4, centre.z, 12, 0.25, 0.3, 0.25, 0.01);
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, centre.x, centre.y + 0.2, centre.z, 4, 0.2, 0.1, 0.2, 0.01);
     }
 
     private ServerPlayer findEligiblePlayer(ServerLevel server) {
@@ -179,8 +205,7 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         placeProxy(tankPos(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get().defaultBlockState());
         placeProxy(chamberPos(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get().defaultBlockState());
         placeProxy(chamberPos().above(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get().defaultBlockState());
-        assembled = validateAssembly();
-        pushGlareState();
+        setAssembled(validateAssembly());
         return assembled;
     }
 
@@ -196,10 +221,43 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
             removeOwnedProxy(tankPos(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_TANK.get());
             removeOwnedProxy(chamberPos(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get());
             removeOwnedProxy(chamberPos().above(), ModBlocks.REMOTE_ENTANGLEMENT_TRANSPORTER_CASING.get());
+            // Only called while the controller itself is being removed, so leave its blockstate alone.
             assembled = false;
+            refreshAdjacentLuxTransceiver();
         } finally {
             disassembling = false;
         }
+    }
+
+    private void setAssembled(boolean value) {
+        assembled = value;
+        BlockState state = getBlockState();
+        if (state.getValue(RemoteEntanglementTransporterBlock.ASSEMBLED) != value) {
+            level.setBlock(worldPosition, state.setValue(RemoteEntanglementTransporterBlock.ASSEMBLED, value), Block.UPDATE_ALL);
+        }
+        pushGlareState();
+        refreshAdjacentLuxTransceiver();
+        setChanged();
+        sendData();
+    }
+
+    private void setOffline(boolean value) {
+        if (offline == value) return;
+        offline = value;
+        sendData();
+    }
+
+    /** Lux Socket: the top face of the tank proxy, only while the assembly is complete. */
+    public boolean isLuxSocket(RemoteTransporterProxyBlockEntity proxy, Direction side) {
+        return assembled && side == Direction.UP && proxy.getBlockPos().equals(tankPos());
+    }
+
+    /** Nudges a Lux Transceiver seated on the socket to (re)form or drop its link after assembly changes. */
+    private void refreshAdjacentLuxTransceiver() {
+        if (!(level instanceof ServerLevel server)) return;
+        BlockPos transceiverPos = tankPos().above();
+        if (!server.isLoaded(transceiverPos)) return;
+        if (server.getBlockEntity(transceiverPos) instanceof LuxTransceiverBlockEntity transceiver) transceiver.refreshSocketLink();
     }
 
     private void removeOwnedProxy(BlockPos pos, Block expectedBlock) {
@@ -224,7 +282,10 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
     public boolean isDisassembling() { return disassembling; }
     public FluidTank getTank() { return tank; }
 
-    private BlockPos tankPos() { return worldPosition.above(); }
+    public boolean isOffline() { return offline; }
+    public boolean isCharging() { return machineState == RemoteMachineState.CHARGING; }
+
+    public BlockPos tankPos() { return worldPosition.above(); }
     private BlockPos chamberPos() { return worldPosition.relative(getBlockState().getValue(RemoteEntanglementTransporterBlock.FACING)); }
     private AABB chamberBounds() {
         BlockPos chamber = chamberPos();
@@ -246,7 +307,10 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         sendData();
     }
 
-    @Override public int getAllocatedLux() { return REQUIRED_LUX; }
+    // Direct GLARE links are disabled; a Lux Transceiver on the tank's Lux Socket bridges the controller instead.
+    @Override public boolean allowsManualGlareLinks() { return false; }
+    @Override public Vec3 getGlareLinkEndpoint() { return Vec3.atCenterOf(tankPos()); }
+    @Override public int getAllocatedLux() { return assembled ? REQUIRED_LUX : 0; }
     @Override public GlareOperationStatus getGlareOperationStatus() { return operationStatus; }
     @Override public void setGlareOperationStatus(GlareOperationStatus status) { operationStatus = status; pushGlareState(); sendData(); }
     @Override public void applyGlareOperationStatusFromNetwork(GlareOperationStatus status) { operationStatus = status; }
@@ -269,6 +333,7 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         tag.putInt("StateTicks", stateTicks);
         if (chargingPlayer != null) tag.putUUID("ChargingPlayer", chargingPlayer);
         tag.putString("LastFailure", lastFailure);
+        tag.putBoolean("Offline", offline);
     }
 
     @Override protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
@@ -282,10 +347,24 @@ public class RemoteEntanglementTransporterBlockEntity extends GlareSmartNodeBloc
         stateTicks = Math.max(0, tag.getInt("StateTicks"));
         chargingPlayer = tag.hasUUID("ChargingPlayer") ? tag.getUUID("ChargingPlayer") : null;
         lastFailure = tag.getString("LastFailure");
+        offline = !tag.contains("Offline") || tag.getBoolean("Offline");
+        // Clients show the scanning rings for exactly as long as the synced state says the chamber is charging.
+        if (clientPacket && level != null && level.isClientSide) {
+            RemoteEntanglementTransporterClientFx.setScanning(level, worldPosition,
+                    getBlockState().getValue(RemoteEntanglementTransporterBlock.FACING), machineState == RemoteMachineState.CHARGING);
+        }
+    }
+
+    /** SmartBlockEntity's hook for both removal and chunk unload (setRemoved is final there). */
+    @Override public void invalidate() {
+        super.invalidate();
+        if (level != null && level.isClientSide) {
+            RemoteEntanglementTransporterClientFx.setScanning(level, worldPosition, Direction.NORTH, false);
+        }
     }
 
     @Override public boolean addToGoggleTooltip(List<Component> tooltip, boolean sneaking) {
-        super.addToGoggleTooltip(tooltip, sneaking);
+        tooltip.add(Component.literal("     Remote Entanglement Transporter"));
         tooltip.add(Component.literal("Mode: " + getBlockState().getValue(RemoteEntanglementTransporterBlock.MODE).getSerializedName()));
         tooltip.add(Component.literal("Liquid Chorus: " + tank.getFluidAmount() + "/" + TANK_CAPACITY + " mB"));
         tooltip.add(Component.literal(assembled ? "Assembly: Complete" : "Assembly: Incomplete"));

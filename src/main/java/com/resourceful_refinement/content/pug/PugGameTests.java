@@ -786,10 +786,12 @@ public final class PugGameTests {
         crashed.tick();
         require(crashed.hasCrashLanded(), "crashed PUG should finish descending at its persisted offset");
 
-        var player = helper.makeMockPlayer(GameType.SURVIVAL);
-        crashed.interact(player, InteractionHand.MAIN_HAND);
-        require(crashed.isRemoved() && player.getInventory().countItem(Items.EMERALD) == 9,
-                "interacting with a landed crash should recover cargo into the player inventory");
+        // A landed wreck persists (it no longer self-removes) and shrugs off a single light hit.
+        for (int i = 0; i < 40; i++) crashed.tick();
+        require(!crashed.isRemoved(), "a landed wreck should persist until destroyed");
+        require(crashed.hurt(helper.getLevel().damageSources().generic(), 1.0F) && !crashed.isRemoved()
+                        && crashed.getWreckHealth() == PugEntity.WRECK_MAX_HEALTH - 1.0F,
+                "a single light hit should damage, not destroy, a wreck");
 
         UUID destroyedId = UUID.randomUUID();
         PugFlightRecord destroyedFlight = new PugFlightRecord(destroyedId,
@@ -801,8 +803,10 @@ public final class PugGameTests {
         destroyed.beginCrash(destroyedFlight, destroyedLanding, destroyedLanding.getY());
         helper.getLevel().addFreshEntity(destroyed);
         destroyed.tick();
-        require(destroyed.hurt(helper.getLevel().damageSources().generic(), 1.0F) && destroyed.isRemoved(),
-                "crashed PUGs should be destructible");
+        require(destroyed.hurt(helper.getLevel().damageSources().generic(), 20.0F) && !destroyed.isRemoved(),
+                "a wreck should survive damage below its health");
+        require(destroyed.hurt(helper.getLevel().damageSources().generic(), PugEntity.WRECK_MAX_HEALTH) && destroyed.isRemoved(),
+                "crashed PUGs should be destroyed once their health is spent");
         int drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class,
                         new AABB(destroyedLanding).inflate(3))
                 .stream().filter(item -> item.getItem().is(Items.DIAMOND))

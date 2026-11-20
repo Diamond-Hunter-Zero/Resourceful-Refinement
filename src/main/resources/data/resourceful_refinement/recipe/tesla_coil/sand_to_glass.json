@@ -1,0 +1,6 @@
+{
+  "type": "resourceful_refinement:tesla_coil",
+  "ingredient": { "item": "minecraft:sand", "count": 1 },
+  "charges": 1,
+  "result": { "id": "minecraft:glass", "count": 2 }
+}

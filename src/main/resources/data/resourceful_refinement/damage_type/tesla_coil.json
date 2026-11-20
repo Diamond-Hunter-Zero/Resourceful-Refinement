@@ -1,0 +1,6 @@
+{
+  "message_id": "tesla_coil",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "effects": "hurt"
+}

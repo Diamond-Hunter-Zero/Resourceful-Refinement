@@ -278,11 +278,11 @@ public class ServerConfig {
         RAILGUN_RANGE = CONFIG_BUILDER
                 .comment("Maximum beam length in blocks. A shot that hits no block within this distance ends at it",
                         "(Value between 4 and 256)")
-                .defineInRange("range", 48.0, 4.0, 256.0);
+                .defineInRange("range", 32.0, 4.0, 256.0);
         RAILGUN_DAMAGE = CONFIG_BUILDER
                 .comment("Damage dealt to each living entity on the beam, per pulse. The beam pulses on firing and",
                         "every 0.25s after, for 1s (Value between 0 and 1000)")
-                .defineInRange("damage", 4.0, 0.0, 1000.0);
+                .defineInRange("damage", 3.0, 0.0, 1000.0);
         CONFIG_BUILDER.pop();
 
 

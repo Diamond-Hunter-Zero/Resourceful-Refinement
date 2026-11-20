@@ -19,6 +19,7 @@
     "CreateSimpleRegistryMixin",
     "EncasedFanBlockMixin",
     "BeltInventoryMixin",
+    "DepotBehaviourMixin",
     "FluidNetworkMixin",
     "HosePulleyFluidHandlerMixin",
     "OpenEndedPipeFluidHandlerMixin"

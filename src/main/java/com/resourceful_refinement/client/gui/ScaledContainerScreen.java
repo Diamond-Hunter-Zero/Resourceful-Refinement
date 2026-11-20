@@ -44,6 +44,15 @@ public abstract class ScaledContainerScreen<T extends AbstractContainerMenu> ext
     @Override public int getXSize() { return Mth.ceil(imageWidth * scaler.scale()); }
     @Override public int getYSize() { return Mth.ceil(imageHeight * scaler.scale()); }
 
+    /**
+     * Scissor in panel coordinates. {@code GuiGraphics.enableScissor} ignores the pose transform, so panel-space
+     * rectangles must be converted to GUI space first. Pair with {@code graphics.disableScissor()}.
+     */
+    protected void enablePanelScissor(GuiGraphics graphics, int x0, int y0, int x1, int y1) {
+        graphics.enableScissor(Mth.floor(scaler.toGuiX(x0)), Mth.floor(scaler.toGuiY(y0)),
+                Mth.ceil(scaler.toGuiX(x1)), Mth.ceil(scaler.toGuiY(y1)));
+    }
+
     protected int panelMouseX(double guiX) { return Mth.floor(scaler.toPanelX(guiX)); }
     protected int panelMouseY(double guiY) { return Mth.floor(scaler.toPanelY(guiY)); }
 

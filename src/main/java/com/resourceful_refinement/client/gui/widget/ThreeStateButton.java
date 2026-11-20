@@ -37,6 +37,7 @@ public class ThreeStateButton extends AbstractButton {
     private int toggledIconColour = 0xFFFFFFFF;
     private boolean toggled;
     private boolean snapLabelDown;
+    private int labelOffsetY;
 
     public ThreeStateButton(int x, int y, int width, int height, Component label, ButtonStyle style, Runnable onPress) {
         super(x, y, width, height, label);
@@ -77,6 +78,12 @@ public class ThreeStateButton extends AbstractButton {
     /** Snap the label scale downwards (never larger than requested), e.g. for labels sized to fit exactly. */
     public ThreeStateButton snapLabelDown() {
         this.snapLabelDown = true;
+        return this;
+    }
+
+    /** Nudges the label vertically (in units) from its computed centre, for fine alignment against panel art. */
+    public ThreeStateButton labelOffset(int dy) {
+        this.labelOffsetY = dy;
         return this;
     }
 
@@ -125,6 +132,7 @@ public class ThreeStateButton extends AbstractButton {
 
         float centreX = getX() + width / 2f;
         float centreY = getY() + height / 2f;
+        float labelCentreY = centreY + labelOffsetY;
         float textWidth = hasLabel ? font.width(label) * textScale : 0;
         // Cap height of the default font is 7px, so centre on that rather than the 9px line height.
         float textHeight = 7 * textScale;
@@ -143,14 +151,14 @@ public class ThreeStateButton extends AbstractButton {
                 float total = textWidth + (icon != null ? gap + iconSize : 0);
                 float left = Math.round(centreX - total / 2f);
                 // Bias up half a unit: the frames' 1px dark bottom edge makes true centre read low.
-                if (hasLabel) PanelText.draw(graphics, font, label, left, (float) Math.floor(centreY - textHeight / 2f - 0.5f),
+                if (hasLabel) PanelText.draw(graphics, font, label, left, (float) Math.floor(labelCentreY - textHeight / 2f - 0.5f),
                         textColour, labelShadow, textScale);
                 if (icon != null) drawIcon(graphics, left + textWidth + gap, Math.round(centreY - iconSize / 2f), tint);
             }
             default -> {
                 if (icon != null) drawIcon(graphics, Math.round(centreX - iconSize / 2f), Math.round(centreY - iconSize / 2f), tint);
                 if (hasLabel) PanelText.draw(graphics, font, label, Math.round(centreX - textWidth / 2f),
-                        Math.round(centreY - textHeight / 2f), textColour, labelShadow, textScale);
+                        Math.round(labelCentreY - textHeight / 2f), textColour, labelShadow, textScale);
             }
         }
         RenderSystem.disableBlend();

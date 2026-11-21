@@ -1,0 +1,46 @@
+{
+  "type": "resourceful_refinement:mineral_deposit",
+  "biomes": "#resourceful_refinement:has_structure/mineral_deposit_rocky_peaks",
+  "step": "underground_decoration",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "deposit_type": "minecraft:andesite",
+  "filler_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:stone"
+      },
+      "weight": 1
+    },
+    {
+      "block": {
+        "Name": "minecraft:andesite"
+      },
+      "weight": 2
+    }
+  ],
+  "decor_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:andesite_slab",
+        "Properties": {
+          "type": "bottom"
+        }
+      },
+      "weight": 2
+    },
+    {
+      "block": {
+        "Name": "minecraft:stone_button",
+        "Properties": {
+          "face": "floor"
+        }
+      },
+      "weight": 1
+    }
+  ],
+  "decor_count_min": 3,
+  "decor_count_max": 5,
+  "anchor": "surface",
+  "resonator_variant": "andesite_deposit"
+}

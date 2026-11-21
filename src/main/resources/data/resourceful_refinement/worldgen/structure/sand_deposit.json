@@ -1,0 +1,34 @@
+{
+  "type": "resourceful_refinement:mineral_deposit",
+  "biomes": "#resourceful_refinement:has_structure/mineral_deposit_desert",
+  "step": "underground_decoration",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "deposit_type": "minecraft:sand",
+  "filler_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:sand"
+      },
+      "weight": 3
+    },
+    {
+      "block": {
+        "Name": "minecraft:sandstone"
+      },
+      "weight": 2
+    }
+  ],
+  "decor_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:dead_bush"
+      },
+      "weight": 1
+    }
+  ],
+  "decor_count_min": 0,
+  "decor_count_max": 2,
+  "anchor": "surface",
+  "resonator_variant": "sand_deposit"
+}

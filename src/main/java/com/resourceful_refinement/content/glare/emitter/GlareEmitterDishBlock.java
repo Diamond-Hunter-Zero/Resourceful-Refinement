@@ -9,6 +9,7 @@ import com.resourceful_refinement.content.gui.GlarePowerTerminalOpener;
 import com.resourceful_refinement.registry.ModBlockEntities;
 import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -28,12 +29,65 @@ import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE<GlareEmitterDishBlockEntity> {
     public static final MapCodec<GlareEmitterDishBlock> CODEC = simpleCodec(GlareEmitterDishBlock::new);
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
 
+    private static final Map<Direction, VoxelShape> SHAPES = Util.make(new EnumMap<>(Direction.class), map -> {
+        map.put(Direction.NORTH, Shapes.or(
+                Block.box(0, 0, 3, 16, 2, 13),
+                Block.box(0, 2, 11, 16, 16, 15),
+                Block.box(1, 2, 1, 15, 15, 11),
+                Block.box(14, -8, 14, 16, 2, 16),
+                Block.box(14, -8, 0, 16, 2, 2),
+                Block.box(0, -8, 0, 2, 2, 2),
+                Block.box(0, -8, 14, 2, 2, 16),
+                Block.box(0, 0, 13, 2, 2, 14),
+                Block.box(0, 0, 2, 2, 2, 3),
+                Block.box(14, 0, 2, 16, 2, 3),
+                Block.box(14, 0, 13, 16, 2, 14)));
+        map.put(Direction.EAST, Shapes.or(
+                Block.box(3, 0, 0, 13, 2, 16),
+                Block.box(1, 2, 0, 5, 16, 16),
+                Block.box(5, 2, 1, 15, 15, 15),
+                Block.box(0, -8, 14, 2, 2, 16),
+                Block.box(14, -8, 14, 16, 2, 16),
+                Block.box(14, -8, 0, 16, 2, 2),
+                Block.box(0, -8, 0, 2, 2, 2),
+                Block.box(2, 0, 0, 3, 2, 2),
+                Block.box(13, 0, 0, 14, 2, 2),
+                Block.box(13, 0, 14, 14, 2, 16),
+                Block.box(2, 0, 14, 3, 2, 16)));
+        map.put(Direction.SOUTH, Shapes.or(
+                Block.box(0, 0, 3, 16, 2, 13),
+                Block.box(0, 2, 1, 16, 16, 5),
+                Block.box(1, 2, 5, 15, 15, 15),
+                Block.box(0, -8, 0, 2, 2, 2),
+                Block.box(0, -8, 14, 2, 2, 16),
+                Block.box(14, -8, 14, 16, 2, 16),
+                Block.box(14, -8, 0, 16, 2, 2),
+                Block.box(14, 0, 2, 16, 2, 3),
+                Block.box(14, 0, 13, 16, 2, 14),
+                Block.box(0, 0, 13, 2, 2, 14),
+                Block.box(0, 0, 2, 2, 2, 3)));
+        map.put(Direction.WEST, Shapes.or(
+                Block.box(3, 0, 0, 13, 2, 16),
+                Block.box(11, 2, 0, 15, 16, 16),
+                Block.box(1, 2, 1, 11, 15, 15),
+                Block.box(14, -8, 0, 16, 2, 2),
+                Block.box(0, -8, 0, 2, 2, 2),
+                Block.box(0, -8, 14, 2, 2, 16),
+                Block.box(14, -8, 14, 16, 2, 16),
+                Block.box(13, 0, 14, 14, 2, 16),
+                Block.box(2, 0, 14, 3, 2, 16),
+                Block.box(2, 0, 0, 3, 2, 2),
+                Block.box(13, 0, 0, 14, 2, 2)));
+    });
     public GlareEmitterDishBlock(Properties properties) {
         super(properties);
     }
@@ -55,7 +109,7 @@ public class GlareEmitterDishBlock extends HorizontalKineticBlock implements IBE
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        return SHAPES.get(state.getValue(HORIZONTAL_FACING));
     }
 
     @Override

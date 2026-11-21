@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:excavation",
+  "mined_block": "resourceful_refinement:mineral_deposit",
+  "mineral_deposit_type": "minecraft:andesite",
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:crushed_andesite",
+      "amount": 1
+    }
+  ]
+}

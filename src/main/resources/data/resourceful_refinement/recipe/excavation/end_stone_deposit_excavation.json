@@ -1,0 +1,13 @@
+{
+  "type": "resourceful_refinement:excavation",
+  "mined_block": "resourceful_refinement:mineral_deposit",
+  "mineral_deposit_type": "minecraft:end_stone",
+  "ingredients": [
+  ],
+  "results": [
+    {
+      "id": "resourceful_refinement:regolith",
+      "amount": 1
+    }
+  ]
+}

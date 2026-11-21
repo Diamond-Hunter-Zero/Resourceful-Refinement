@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:coal_ore_deposit",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 21,
+    "separation": 8,
+    "spread_type": "linear",
+    "salt": 62120983,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 3
+    }
+  }
+}

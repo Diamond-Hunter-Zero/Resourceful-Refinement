@@ -4,6 +4,7 @@
     "minecraft:end_highlands",
     "minecraft:end_midlands",
     "minecraft:end_barrens",
-    "minecraft:small_end_islands"
+    "minecraft:small_end_islands",
+    "resourceful_refinement:choral_clusters"
   ]
 }

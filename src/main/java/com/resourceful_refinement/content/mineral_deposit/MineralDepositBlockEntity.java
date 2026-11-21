@@ -30,6 +30,13 @@ public class MineralDepositBlockEntity extends BlockEntity {
         syncData();
     }
 
+    /** Worldgen-safe setter: no block update (the entity has no level yet during structure placement). */
+    public void setAssociatedBlockOnGenerate(Block newBlock) {
+        if (newBlock == null || newBlock == Blocks.AIR) return;
+        this.associatedBlock = newBlock;
+        setChanged();
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

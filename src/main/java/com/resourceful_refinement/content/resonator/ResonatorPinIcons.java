@@ -102,16 +102,23 @@ public final class ResonatorPinIcons {
         variant(ResonatorTarget.CAVE_GEYSER, "scorchia_geyser_basalt_small", "scorchia_geyser");
         variant(ResonatorTarget.CAVE_GEYSER, "scorchia_geyser_basalt_tall", "scorchia_geyser");
 
-        // --- Future sub-types (no worldgen yet; keyed on the texture name so they light up once their
-        // variants are produced by a scan). Harmless until then — no POIs carry these variants. ---
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "andesite_deposit", "andesite_deposit");
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "coal_deposit", "coal_deposit");
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "granite_deposit", "granite_deposit");
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "sand_deposit", "sand_deposit");
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "stone_deposit", "stone_deposit");
-        variant(ResonatorTarget.MINERAL_DEPOSIT, "endstone_deposit", "endstone_deposit");
+        // --- Crystal fissure sub-types ---
         variant(ResonatorTarget.CRYSTAL_FISSURE, "chorus_crystal", "chorus_crystal");
         variant(ResonatorTarget.CRYSTAL_FISSURE, "terran_crystal", "terran_crystal");
         variant(ResonatorTarget.CRYSTAL_FISSURE, "quartz", "quartz");
+
+        // --- Mineral deposit types (variant = the structure's "resonator_variant") ---
+        // The deepslate variants borrow their overworld counterparts' icons (and red sand the sand icon) until they
+        // get their own.
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "stone_deposit", "stone_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "coal_deposit", "coal_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "andesite_deposit", "andesite_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "granite_deposit", "granite_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "diorite_deposit", "diorite_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "end_stone_deposit", "endstone_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "sand_deposit", "sand_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "red_sand_deposit", "sand_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "deepslate_deposit", "stone_deposit");
+        variant(ResonatorTarget.MINERAL_DEPOSIT, "deepslate_coal_deposit", "coal_deposit");
     }
 }

@@ -5,6 +5,7 @@ import com.resourceful_refinement.content.advanced_pump.AdvancedPumpBlock;
 import com.resourceful_refinement.content.brewers_tap.BrewersTapBlock;
 import com.resourceful_refinement.content.bucket_excavator.BucketExcavatorBlock;
 import com.resourceful_refinement.content.casting_depot.CastingDepotBlock;
+import com.resourceful_refinement.content.choral_cluster.ChoralSproutsBlock;
 import com.resourceful_refinement.content.choral_cluster.ChorusCrystalBlock;
 import com.resourceful_refinement.content.resonator.ResourceResonatorBlock;
 import com.resourceful_refinement.content.combustion_chamber.CombustionChamberBlock;
@@ -397,8 +398,8 @@ public class ModBlocks {
                         .noCollission()
         ));
 
-    public static final DeferredBlock<Block> CHORAL_SPROUTS = BLOCKS.register("choral_sprouts",
-            () -> new Block(
+    public static final DeferredBlock<ChoralSproutsBlock> CHORAL_SPROUTS = BLOCKS.register("choral_sprouts",
+            () -> new ChoralSproutsBlock(
                     BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)
                             .noCollission()
                             .offsetType(BlockBehaviour.OffsetType.XZ)

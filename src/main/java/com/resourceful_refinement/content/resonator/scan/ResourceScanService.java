@@ -1,5 +1,7 @@
 package com.resourceful_refinement.content.resonator.scan;
 
+import com.resourceful_refinement.worldgen.mineraldeposit.MineralDepositConfig;
+import com.resourceful_refinement.worldgen.mineraldeposit.MineralDepositStructure;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
@@ -25,11 +27,12 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 
 /**
- * Seed-based prediction of where {@code minecraft:random_spread} world-generation structures (geysers, and later
- * mineral deposits / crystal fissures) will generate, without loading or generating any chunks.
+ * Seed-based prediction of where {@code minecraft:random_spread} world-generation structures (geysers, mineral
+ * deposits, crystal fissures, resonance crystals) will generate, without loading or generating any chunks.
  *
  * <p>The placement of a {@code random_spread} structure set is fully deterministic from the world seed via
  * {@link RandomSpreadStructurePlacement#getPotentialStructureChunk(long, int, int)} — the same math vanilla uses
@@ -129,6 +132,18 @@ public final class ResourceScanService {
                             continue;
                         }
 
+                        if (target == ResonatorTarget.MINERAL_DEPOSIT) {
+                            ScannedPoi poi = predictMineralDeposit(dimensionStructures, generator, level,
+                                    randomState, biomeSource, sampler, seed, candidate);
+                            if (poi != null) {
+                                results.add(poi);
+                                if (results.size() >= MAX_RESULTS) {
+                                    return results;
+                                }
+                            }
+                            continue;
+                        }
+
                         int blockX = candidate.getMiddleBlockX();
                         int blockZ = candidate.getMiddleBlockZ();
 
@@ -190,5 +205,38 @@ public final class ResourceScanService {
         }
 
         return results;
+    }
+
+    /**
+     * Mineral deposits resolve their placement Y with {@link MineralDepositStructure#findAnchorY} — the same call
+     * their {@code findGenerationPoint} makes — so a pin appears exactly where generation succeeds (surface sites
+     * that are dry, cave sites that have a floor). Vanilla then validates the biome at that position, which for
+     * cave deposits is the underground biome, so we sample there too.
+     */
+    private static ScannedPoi predictMineralDeposit(List<Holder<Structure>> structures, ChunkGenerator generator,
+            ServerLevel level, RandomState randomState, BiomeSource biomeSource, Climate.Sampler sampler, long seed,
+            ChunkPos candidate) {
+        int blockX = candidate.getMiddleBlockX();
+        int blockZ = candidate.getMiddleBlockZ();
+        for (Holder<Structure> structureHolder : structures) {
+            if (!(structureHolder.value() instanceof MineralDepositStructure deposit)) {
+                continue;
+            }
+            OptionalInt anchorY = deposit.findAnchorY(generator, level, randomState, seed, candidate.x, candidate.z);
+            if (anchorY.isEmpty()) {
+                continue;
+            }
+            int y = anchorY.getAsInt();
+            Holder<Biome> biome = biomeSource.getNoiseBiome(
+                    QuartPos.fromBlock(blockX), QuartPos.fromBlock(y), QuartPos.fromBlock(blockZ), sampler);
+            if (!deposit.biomes().contains(biome)) {
+                continue;
+            }
+            MineralDepositConfig config = deposit.config();
+            // Cave floors can still be reshaped by carvers after the noise pass, so their Y is flagged approximate.
+            return new ScannedPoi(blockX, y, blockZ, config.isCave(), ResonatorTarget.MINERAL_DEPOSIT,
+                    config.resonatorVariant().orElse(null));
+        }
+        return null;
     }
 }

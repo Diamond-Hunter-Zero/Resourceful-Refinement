@@ -1,0 +1,32 @@
+{
+  "type": "resourceful_refinement:mineral_deposit",
+  "biomes": "#resourceful_refinement:has_structure/mineral_deposit_cave",
+  "step": "underground_decoration",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "deposit_type": "minecraft:deepslate",
+  "filler_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:deepslate"
+      },
+      "weight": 4
+    },
+    {
+      "block": {
+        "Name": "minecraft:tuff"
+      },
+      "weight": 2
+    },
+    {
+      "block": {
+        "Name": "minecraft:basalt"
+      },
+      "weight": 1
+    }
+  ],
+  "anchor": "cave",
+  "cave_min_y": -58,
+  "cave_max_y": -1,
+  "resonator_variant": "deepslate_deposit"
+}

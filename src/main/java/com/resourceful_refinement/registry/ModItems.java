@@ -206,6 +206,16 @@ public class ModItems {
     public static final DeferredItem<Item> DISPLAY_SCREEN = ITEMS.registerItem("display_screen", Item::new, new Item.Properties());
     public static final DeferredItem<Item> MAGNETIC_PAD = ITEMS.registerItem("magnetic_pad", Item::new, new Item.Properties());
     public static final DeferredItem<Item> INCOMPLETE_ARITHMETIC_DEVICE = ITEMS.registerItem("incomplete_arithmetic_device", SequencedAssemblyItem::new, new Item.Properties());
+    public static final DeferredItem<Item> INCOMPLETE_CIRCUIT_BOARD = ITEMS.registerItem("incomplete_circuit_board", SequencedAssemblyItem::new, new Item.Properties());
+    public static final DeferredItem<Item> INCOMPLETE_PLATE_SHIELDING = ITEMS.registerItem("incomplete_plate_shielding", SequencedAssemblyItem::new, new Item.Properties());
+
+    // Mineral Deposit drops
+    public static final DeferredItem<Item> CRUSHED_ANDESITE = ITEMS.registerItem("crushed_andesite", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_DIORITE = ITEMS.registerItem("crushed_diorite", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CRUSHED_GRANITE = ITEMS.registerItem("crushed_granite", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> REGOLITH = ITEMS.registerItem("regolith", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> SILICA = ITEMS.registerItem("silica", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> CARBON_DUST = ITEMS.registerItem("carbon_dust", Item::new, new Item.Properties());
 
 
     // -------------------------------------------------------------------------

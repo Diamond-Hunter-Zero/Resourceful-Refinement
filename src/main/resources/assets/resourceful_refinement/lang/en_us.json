@@ -328,6 +328,15 @@
   "item.resourceful_refinement.magnetic_pad": "Magnetic Pad",
   "item.resourceful_refinement.terran_crystal_shard": "Terran Crystal Shard",
   "item.resourceful_refinement.incomplete_arithmetic_device": "Incomplete Arithmetic Device",
+  "item.resourceful_refinement.incomplete_circuit_board": "Incomplete Circuit Board",
+  "item.resourceful_refinement.incomplete_plate_shielding": "Incomplete Plate Shielding",
+
+  "item.resourceful_refinement.crushed_andesite": "Crushed Andesite",
+  "item.resourceful_refinement.crushed_diorite": "Crushed Diorite",
+  "item.resourceful_refinement.crushed_granite": "Crushed Granite",
+  "item.resourceful_refinement.regolith": "Regolith",
+  "item.resourceful_refinement.silica": "Silica",
+  "item.resourceful_refinement.carbon_dust": "Carbon Dust",
 
   "item.resourceful_refinement.drinks_glass": "Drinks Glass",
   "item.resourceful_refinement.hot_chocolate_mug": "Hot Chocolate Mug",

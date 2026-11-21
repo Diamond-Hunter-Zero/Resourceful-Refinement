@@ -31,6 +31,7 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
     private final ModelPart Hollow_Ring;
     private final ModelPart Hollow_Ring2;
     private final ModelPart Hollow_Ring3;
+    private final ModelPart cage_frame;
 
 
     public GlareEmitterDishModel(ModelPart root) {
@@ -41,6 +42,7 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
         this.Hollow_Ring = root.getChild("Hollow_Ring");
         this.Hollow_Ring2 = root.getChild("Hollow_Ring2");
         this.Hollow_Ring3 = root.getChild("Hollow_Ring3");
+        this.cage_frame = root.getChild("cage_frame");
     }
 
     @Override
@@ -58,9 +60,7 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
                 .texOffs(83, 43).mirror().addBox(6.0F, -2.0F, -8.0F, 2.0F, 2.0F, 16.0F, new CubeDeformation(0.0F)).mirror(false)
                 .texOffs(88, 78).addBox(-6.0F, -2.0F, -5.0F, 12.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(88, 78).addBox(-6.0F, -2.0F, 3.0F, 12.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
-                .texOffs(54, 91).addBox(-8.0F, -16.0F, -7.05F, 16.0F, 16.0F, 0.0F, new CubeDeformation(0.0F))
-                .texOffs(47, 0).addBox(-8.0F, -16.0F, -8.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
-                .texOffs(47, 0).mirror().addBox(6.0F, -16.0F, -8.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(0.0F, 0.0F, 0.0F));
+                .texOffs(54, 91).addBox(-8.0F, -16.0F, -7.05F, 16.0F, 14.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
         PartDefinition upper_leg_strut_r1 = base_frame.addOrReplaceChild("upper_leg_strut_r1", CubeListBuilder.create().texOffs(108, 62).addBox(0.0F, -1.0F, -1.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-7.0F, 0.0F, -7.0F, -1.5708F, 0.0F, 1.5708F));
 
@@ -103,7 +103,6 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
 
         PartDefinition rim_r16 = Hollow_Ring.addOrReplaceChild("rim_r16", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.85F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.8F, 0.0F, 0.0F, 0.3927F));
 
-
         PartDefinition Hollow_Ring2 = partdefinition.addOrReplaceChild("Hollow_Ring2", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 28.0F, 0.0F, -1.5708F, 0.0F, 3.1416F));
 
         PartDefinition rim_r17 = Hollow_Ring2.addOrReplaceChild("rim_r17", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.95F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.899F, 0.0F, 0.0F, -1.1781F));
@@ -122,7 +121,6 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
 
         PartDefinition rim_r24 = Hollow_Ring2.addOrReplaceChild("rim_r24", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.85F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.8F, 0.0F, 0.0F, 0.3927F));
 
-
         PartDefinition Hollow_Ring3 = partdefinition.addOrReplaceChild("Hollow_Ring3", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, 31.0F, 0.0F, -1.5708F, 0.0F, 3.1416F));
 
         PartDefinition rim_r25 = Hollow_Ring3.addOrReplaceChild("rim_r25", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.95F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.899F, 0.0F, 0.0F, -1.1781F));
@@ -140,6 +138,20 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
         PartDefinition rim_r31 = Hollow_Ring3.addOrReplaceChild("rim_r31", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.95F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.899F, 0.0F, 0.0F, 1.1781F));
 
         PartDefinition rim_r32 = Hollow_Ring3.addOrReplaceChild("rim_r32", CubeListBuilder.create().texOffs(82, 19).addBox(-3.0F, 5.1F, -4.85F, 6.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.1F, 2.8F, 0.0F, 0.0F, 0.3927F));
+
+        PartDefinition cage_frame = partdefinition.addOrReplaceChild("cage_frame", CubeListBuilder.create().texOffs(5, 52).addBox(6.0F, -15.0F, -7.0F, 1.0F, 1.0F, 9.0F, new CubeDeformation(0.0F))
+                .texOffs(5, 52).addBox(-7.0F, -15.0F, -7.0F, 1.0F, 1.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+
+        PartDefinition connecting_pillar_r1 = cage_frame.addOrReplaceChild("connecting_pillar_r1", CubeListBuilder.create().texOffs(89, 88).addBox(-4.0F, -0.5F, -0.5F, 7.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-6.5F, -11.75F, 4.5F, 0.0F, -0.7854F, 1.5708F));
+
+        PartDefinition bottom_pillar_r1 = cage_frame.addOrReplaceChild("bottom_pillar_r1", CubeListBuilder.create().texOffs(37, 64).addBox(-0.5F, -0.5F, -4.5F, 1.0F, 1.0F, 8.0F, new CubeDeformation(0.0F))
+                .texOffs(37, 64).addBox(12.5F, -0.5F, -4.5F, 1.0F, 1.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-6.5F, -6.5F, 6.5F, 1.5708F, 0.0F, 0.0F));
+
+        PartDefinition connecting_pillar_r2 = cage_frame.addOrReplaceChild("connecting_pillar_r2", CubeListBuilder.create().texOffs(89, 88).addBox(-4.0F, -0.5F, -0.5F, 7.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(6.5F, -11.75F, 4.5F, 0.0F, -0.7854F, 1.5708F));
+
+        PartDefinition bridging_pillar_r1 = cage_frame.addOrReplaceChild("bridging_pillar_r1", CubeListBuilder.create().texOffs(65, 12).addBox(-11.5F, -0.5F, 2.5F, 12.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.5F, -11.5F, 0.5F, 1.5708F, 0.0F, 0.0F));
+
+        PartDefinition bridging_pillar_r2 = cage_frame.addOrReplaceChild("bridging_pillar_r2", CubeListBuilder.create().texOffs(65, 12).addBox(-11.5F, -0.5F, 2.5F, 12.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.5F, -5.5F, 6.5F, 1.5708F, 0.0F, 0.0F));
 
 
         return LayerDefinition.create(meshdefinition, 128, 128);
@@ -177,6 +189,7 @@ public class GlareEmitterDishModel extends HierarchicalModel<Entity> {
         Hollow_Ring.render(poseStack, vertexConsumer, packedLight, packedOverlay);
         Hollow_Ring2.render(poseStack, vertexConsumer, packedLight, packedOverlay);
         Hollow_Ring3.render(poseStack, vertexConsumer, packedLight, packedOverlay);
+        cage_frame.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 
 }

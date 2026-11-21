@@ -1,0 +1,47 @@
+{
+  "type": "resourceful_refinement:mineral_deposit",
+  "biomes": "#resourceful_refinement:has_structure/mineral_deposit_rocky",
+  "step": "underground_decoration",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "deposit_type": "minecraft:granite",
+  "filler_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:stone"
+      },
+      "weight": 1
+    },
+    {
+      "block": {
+        "Name": "minecraft:granite"
+      },
+      "weight": 2
+    }
+  ],
+  "decor_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:granite_slab",
+        "Properties": {
+          "type": "bottom"
+        }
+      },
+      "weight": 2
+    },
+    {
+      "block": {
+        "Name": "minecraft:pointed_dripstone",
+        "Properties": {
+          "vertical_direction": "up",
+          "thickness": "tip"
+        }
+      },
+      "weight": 1
+    }
+  ],
+  "decor_count_min": 3,
+  "decor_count_max": 5,
+  "anchor": "surface",
+  "resonator_variant": "granite_deposit"
+}

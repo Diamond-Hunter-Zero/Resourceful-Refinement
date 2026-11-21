@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.worldgen.choral.ChoralClusterMountainStructure;
 import com.resourceful_refinement.worldgen.crystalnode.CrystalNodeStructure;
+import com.resourceful_refinement.worldgen.mineraldeposit.MineralDepositStructure;
 import com.resourceful_refinement.worldgen.sinkhole.OverworldSinkholeStructure;
 import com.resourceful_refinement.worldgen.structure.NetherSurfaceJigsawStructure;
 import net.minecraft.core.registries.Registries;
@@ -25,4 +26,7 @@ public class ModStructureTypes {
 
     public static final DeferredHolder<StructureType<?>, StructureType<OverworldSinkholeStructure>> OVERWORLD_SINKHOLE =
             STRUCTURE_TYPES.register("overworld_sinkhole", () -> () -> OverworldSinkholeStructure.CODEC);
+
+    public static final DeferredHolder<StructureType<?>, StructureType<MineralDepositStructure>> MINERAL_DEPOSIT =
+            STRUCTURE_TYPES.register("mineral_deposit", () -> () -> MineralDepositStructure.CODEC);
 }

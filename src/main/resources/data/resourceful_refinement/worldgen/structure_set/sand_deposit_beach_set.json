@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:sand_deposit_beach",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 40,
+    "separation": 10,
+    "spread_type": "linear",
+    "salt": 43273623
+  }
+}

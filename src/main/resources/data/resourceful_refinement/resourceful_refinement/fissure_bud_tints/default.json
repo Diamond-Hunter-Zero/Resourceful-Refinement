@@ -1,5 +1,5 @@
 {
-  "colors": ["#d546ff", "#ff5fae", "#6c59ff", "#874cff"],
+  "colors": ["#ff2415", "#ff7e14", "#e2ff19", "#22ff1a", "#00ffcf", "#08bdff", "#261cff", "#df16ff"],
   "seconds_per_color": 4.0,
   "fallback": true
 }

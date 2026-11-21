@@ -1,0 +1,19 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:stone_deposit",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 21,
+    "separation": 8,
+    "spread_type": "linear",
+    "salt": 23472382,
+    "exclusion_zone": {
+      "other_set": "minecraft:villages",
+      "chunk_count": 3
+    }
+  }
+}

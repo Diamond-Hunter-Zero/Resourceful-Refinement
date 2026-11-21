@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/polished_deepslate"
+    "all": "resourceful_refinement:block/plate_shielding",
+    "particle": "resourceful_refinement:block/particles/plate_shielding_particle"
   }
 }

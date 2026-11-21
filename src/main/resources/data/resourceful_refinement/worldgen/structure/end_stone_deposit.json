@@ -1,0 +1,34 @@
+{
+  "type": "resourceful_refinement:mineral_deposit",
+  "biomes": "#resourceful_refinement:has_structure/mineral_deposit_end",
+  "step": "underground_decoration",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "deposit_type": "minecraft:end_stone",
+  "filler_blocks": [
+    {
+      "block": {
+        "Name": "minecraft:end_stone"
+      },
+      "weight": 1
+    }
+  ],
+  "decor_blocks": [
+    {
+      "block": {
+        "Name": "resourceful_refinement:chorus_crystal_growth"
+      },
+      "weight": 1
+    },
+    {
+      "block": {
+        "Name": "resourceful_refinement:choral_sprouts"
+      },
+      "weight": 3
+    }
+  ],
+  "decor_count_min": 4,
+  "decor_count_max": 8,
+  "anchor": "surface",
+  "resonator_variant": "end_stone_deposit"
+}

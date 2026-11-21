@@ -135,6 +135,9 @@ public class ResourcefulRefinementMain {
 
         // Initialise content
         ModRegistries.init(modEventBus);
+        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+            com.resourceful_refinement.client.ct.ModSpriteShifts.init();
+        }
         com.resourceful_refinement.worldgen.GeyserOffsetManager.init();
 
         modEventBus.addListener(this::commonSetup);

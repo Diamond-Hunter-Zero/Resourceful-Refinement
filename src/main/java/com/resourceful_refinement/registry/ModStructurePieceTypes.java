@@ -3,6 +3,7 @@ package com.resourceful_refinement.registry;
 import com.resourceful_refinement.ResourcefulRefinementMain;
 import com.resourceful_refinement.worldgen.choral.ChoralClusterMountainPiece;
 import com.resourceful_refinement.worldgen.crystalnode.CrystalNodePiece;
+import com.resourceful_refinement.worldgen.mineraldeposit.MineralDepositPiece;
 import com.resourceful_refinement.worldgen.sinkhole.OverworldSinkholePiece;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -21,4 +22,7 @@ public class ModStructurePieceTypes {
 
     public static final DeferredHolder<StructurePieceType, StructurePieceType> OVERWORLD_SINKHOLE_PIECE =
             STRUCTURE_PIECE_TYPES.register("overworld_sinkhole_piece", () -> OverworldSinkholePiece::new);
+
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> MINERAL_DEPOSIT_PIECE =
+            STRUCTURE_PIECE_TYPES.register("mineral_deposit_piece", () -> MineralDepositPiece::new);
 }

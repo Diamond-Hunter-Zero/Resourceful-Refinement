@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "resourceful_refinement:deepslate_coal_ore_deposit",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 21,
+    "separation": 8,
+    "spread_type": "linear",
+    "salt": 62652334
+  }
+}

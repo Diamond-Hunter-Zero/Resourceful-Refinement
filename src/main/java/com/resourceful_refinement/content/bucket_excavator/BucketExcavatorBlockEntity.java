@@ -53,7 +53,7 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
     public static final int EXCAVATION_REGION_WIDTH = 1;
 
     public static final int MIN_SPEED_THRESHOLD = 128;
-    public static final int PROCESSING_CYCLE_DURATION = 300;
+    public static final int PROCESSING_CYCLE_DURATION = 600;
     public static final int DESTRUCTION_CYCLE_DURATION = 60;
 
     private static final int INVENTORY_SLOT_COUNT = 4;
@@ -64,7 +64,7 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
     public static TagKey<Block> EXCAVATOR_INDESTRUCTIBLE = BlockTags.create(ResourceLocation.fromNamespaceAndPath(ResourcefulRefinementMain.MOD_ID, "excavator_indestructible"));
 
     protected ScrollOptionBehaviour<ExcavationMode> excavationMode;
-    public int timer;
+    public float timer;
     public boolean isExcavatorClear = true;    // True if this excavator's region does not overlap with any other
     public ExcavatorRegionSavedData.ExcavatorRecord excavationData;
 
@@ -124,9 +124,10 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
         }
 
         // Do something...
-        if (isExcavatorClear && Math.abs(getSpeed()) >= MIN_SPEED_THRESHOLD)
+        float speed = Math.abs(getSpeed());
+        if (isExcavatorClear && speed >= MIN_SPEED_THRESHOLD)
         {
-            timer++;
+            timer += (float) (speed/MIN_SPEED_THRESHOLD);
             spawnWorkingParticles((ServerLevel) level);
 
             if (excavationMode.get() == ExcavationMode.EXTRACTION && timer >= PROCESSING_CYCLE_DURATION)
@@ -349,12 +350,16 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
 
         if (!isExcavatorClear)
             tooltip.add(Component.literal("     §cExcavator overlaps another excavator!"));
+        else if (Math.abs(getSpeed()) < MIN_SPEED_THRESHOLD)
+        {
+            tooltip.add(Component.literal("     §cExcavator speed is too slow!"));
+        }
         else
         {
             if (excavationMode.get() == ExcavationMode.EXTRACTION)
-                tooltip.add(Component.literal("     §8" + GoggleUtilities.BuildTextProgressBar(timer, PROCESSING_CYCLE_DURATION)));
+                tooltip.add(Component.literal("     §8" + GoggleUtilities.BuildTextProgressBar((int) timer, PROCESSING_CYCLE_DURATION)));
             else
-                tooltip.add(Component.literal("     §8" + GoggleUtilities.BuildTextProgressBar(timer, DESTRUCTION_CYCLE_DURATION)));
+                tooltip.add(Component.literal("     §8" + GoggleUtilities.BuildTextProgressBar((int) timer, DESTRUCTION_CYCLE_DURATION)));
         }
 
         for (int i = 0; i < INVENTORY_SLOT_COUNT; i++)
@@ -410,7 +415,7 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
 
-        tag.putInt("Timer", timer);
+        tag.putFloat("Timer", timer);
         tag.putBoolean("IsExcavatorClear", isExcavatorClear);
         tag.put("OutputInv", outputInv.serializeNBT(registries));
     }
@@ -419,7 +424,7 @@ public class BucketExcavatorBlockEntity extends KineticBlockEntity {
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
 
-        timer = tag.getInt("Timer");
+        timer = tag.getFloat("Timer");
         isExcavatorClear = tag.getBoolean("IsExcavatorClear");
 
         if (tag.contains("OutputInv")) {

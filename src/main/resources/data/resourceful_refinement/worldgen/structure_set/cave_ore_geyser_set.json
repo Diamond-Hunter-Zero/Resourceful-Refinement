@@ -7,7 +7,7 @@
   ],
   "placement": {
     "type": "minecraft:random_spread",
-    "spacing": 6,
+    "spacing": 9,
     "separation": 3,
     "spread_type": "linear",
     "salt": 918273645

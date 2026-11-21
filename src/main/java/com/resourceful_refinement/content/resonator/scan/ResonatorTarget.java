@@ -11,7 +11,7 @@ import java.util.List;
  * <p>Each target maps to the {@code minecraft:random_spread} structure sets that produce it. The scan service
  * ({@link ResourceScanService}) resolves these ids against the live {@code STRUCTURE_SET} registry and predicts
  * their placement directly from the world seed, so a target with no (shipped) structure sets simply yields no
- * pins — which is the intended state for Mineral Deposit and Crystal Fissure until their worldgen exists.</p>
+ * pins.</p>
  *
  * <p>The ordinal order here is the wire order used by the menu/payload sync and the filter bit-set, so append
  * new targets to the end rather than reordering.</p>
@@ -25,8 +25,18 @@ public enum ResonatorTarget {
             rr("cave_ore_geyser_set"),
             rr("nether_scorchia_geyser_set"),
             rr("nether_scorchia_basalt_geyser_set")),
-    // Worldgen not yet implemented — present in the filter UI but currently produces no pins.
-    MINERAL_DEPOSIT("mineral_deposit"),
+    MINERAL_DEPOSIT("mineral_deposit",
+            rr("stone_deposit_set"),
+            rr("coal_ore_deposit_set"),
+            rr("andesite_deposit_set"),
+            rr("granite_deposit_set"),
+            rr("diorite_deposit_set"),
+            rr("end_stone_deposit_set"),
+            rr("sand_deposit_set"),
+            rr("sand_deposit_beach_set"),
+            rr("red_sand_deposit_set"),
+            rr("deepslate_deposit_set"),
+            rr("deepslate_coal_ore_deposit_set")),
     CRYSTAL_FISSURE("crystal_fissure",
             rr("crystal_fissure_end_set"),
             rr("crystal_fissure_nether_set"),
